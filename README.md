@@ -1,8 +1,8 @@
 # jellyfin-plugin-listenbrainz
 
-This plugin is a reimplementation of the LastFM plugin (the scrobbling function) which can be found [here](https://github.com/jesseward/jellyfin-plugin-lastfm). I removed all functionality which does not apply to Listenbrainz and appropriately renamed files/variables/methods.
+This plugin is a reimplementation of the [LastFM plugin](https://github.com/jesseward/jellyfin-plugin-lastfm) (the scrobbling function) for Listenbrainz. I removed all functionality which does not apply to Listenbrainz and appropriately renamed files/variables/methods.
 
-As the LastFM plugin was migrated by [Jesse Ward](https://github.com/jesseward) from the original Emby repository and adapted by them to function within the Jellyfin ecosystem, this plugin *cannot* be distributed with Jellyfin due to a missing compatible license.
+As the LastFM plugin was migrated by [Jesse Ward](https://github.com/jesseward) from the original Emby repository, this plugin *cannot* be distributed with Jellyfin due to a missing compatible license.
 
 ## About Listenbrainz
 
