@@ -1,0 +1,223 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Listenbrainz Configuration</title>
+</head>
+
+<body>
+    <div id="ListenbrainzConfigurationPage" data-role="page" class="page type-interior pluginConfigurationPage"
+        data-require="emby-input,emby-button,emby-select,emby-checkbox">
+
+        <div data-role="content">
+            <div class="content-primary">
+                <form id="ListenbrainzConfigurationForm">
+                    <div class="selectContainer">
+                        <select is="emby-select" id="user" name="user" label="Configure Listenbrainz for:"></select>
+                    </div>
+                    <div class="inputContainer">
+                        <input is="emby-input" id="token" name="token" type="text" label="API token:" />
+                    </div>
+                    <div class="checkboxContainer">
+                        <label>
+                            <input is="emby-checkbox" type="checkbox" id="listenSubmitEnabled"
+                                name="listenSubmitEnabled" />
+                            <span>Enable</span>
+                        </label>
+                    </div>
+                    <div>
+                        <button is="emby-button" type="submit" class="raised button-submit block emby-button">
+                            <span>Save</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script type="text/javascript">var ListenbrainzConfigurationPage = {
+                _pluginUniqueId: "59B20823-AAFE-454C-A393-17427F518631",
+                _users: [],
+                _config: [],
+
+                _currentUserId: '',
+                _currentUserConfig: null,
+
+                configDefaults: {
+                    Token: '',
+                    MediaBrowserUserId: '',
+                    Options: {
+                        ListenSubmitEnabled: false,
+                    }
+                },
+
+                $el: null,
+
+                init: function ($ctx) {
+                    Dashboard.showLoadingMsg();
+
+                    this.$el = $ctx;
+
+                    this.$el.find('#ListenbrainzConfigurationForm').on('submit', this, this.onSubmit);
+                    this.$el.find('#user').on('change', this, $.proxy(this.onUserChange, this));
+
+                    var loadConfig = this.loadConfiguration();
+                    var loadUsers = this.loadUsers().then($.proxy(this.buildUserList, this));
+
+                    //When we load everything, set the current user
+                    $.when(loadConfig, loadUsers).then($.proxy(function () {
+                        Dashboard.hideLoadingMsg();
+
+                        //Populate the inputs with the default selected user
+                        this.onUserChange();
+                    }, this));
+                },
+
+                loadConfiguration: function () {
+                    return ApiClient.getPluginConfiguration(this._pluginUniqueId).then($.proxy(function (config) {
+                        this._config = config;
+                    }, this));
+                },
+
+                loadUsers: function () {
+                    return ApiClient.getUsers().then($.proxy(function (users) {
+                        this._users = users;
+                    }, this));
+                },
+
+                saveConfiguration: function () {
+                    return ApiClient.updatePluginConfiguration(this._pluginUniqueId, this._config);
+                },
+
+                buildUserList: function () {
+                    var html = '';
+                    $.each(this._users, function (i, user) {
+                        html += "<option value='" + user.Id + "'>" + user.Name + "</option>";
+                    });
+
+                    document.getElementById('user').innerHTML = html;
+
+                },
+
+                populateInputs: function (userData) {
+                    var data = $.extend({}, this.configDefaults, userData);
+
+                    this.$el.find('#token').val(data.Token);
+                    this.$el.find('#listenSubmitEnabled').prop('checked', data.Options.ListenSubmitEnabled);
+
+                    //Dont forget to call checkboxradio('refresh') otherwise the UI wont update
+                },
+
+                save: function (token) {
+                    var userConfig = this.getCurrentSelectedUser();
+
+                    //If the conig for the user doesnt exist, create one
+                    if (!userConfig) {
+                        userConfig = $.extend({}, this.configDefaults, { MediaBrowserUserId: this.getCurrentSelectedUserId() });
+
+                        this._config.LbUsers.push(userConfig);
+                    }
+
+                    userConfig.Token = this.$el.find('#token').val();
+                    userConfig.Options = this.getUIOptionsValues();
+
+                    Dashboard.showLoadingMsg();
+
+                    // Verify provided token
+                    ApiClient.VerifyListenbrainzToken(token).then($.proxy(function (data) {
+                        if (data && data.Valid) {
+                            this.doSave();
+                            return;
+                        }
+
+                        Dashboard.alert(data.Message || "Something went wrong");
+                        console.log(data.Message);
+                    }, this));
+
+                    Dashboard.hideLoadingMsg();
+                },
+
+                doSave: function () {
+                    return this.saveConfiguration().then($.proxy(function (result) {
+                        Dashboard.processPluginConfigurationUpdateResult(result);
+
+                        this.onUserChange();
+                    }, this));
+                },
+
+                getCurrentSelectedUserId: function () {
+                    return this.$el.find('#user').val();
+                },
+
+                getCurrentSelectedUser: function () {
+                    //Get the current user
+                    var currentUserId = this.getCurrentSelectedUserId();
+
+                    var currentUser = this._config.LbUsers.filter(function (user) {
+                        return user.MediaBrowserUserId == currentUserId;
+                    })[0];
+
+                    return currentUser;
+                },
+
+                getSelectedMBUser: function () {
+                    //Get the current user
+                    var currentUserId = this.getCurrentSelectedUserId();
+
+                    var currentUser = this._users.filter(function (user) {
+                        return user.Id == currentUserId;
+                    })[0];
+
+                    return currentUser;
+                },
+
+                //Will return an options object with the current UI settings
+
+                getUIOptionsValues: function () {
+                    var options = $.extend({}, this.configDefaults.Options);
+
+                    options.ListenSubmitEnabled = this.$el.find('#listenSubmitEnabled').prop('checked');
+                    return options;
+                },
+
+                onUserChange: function () {
+                    var currentUser = this.getCurrentSelectedUser();
+
+                    this.populateInputs(currentUser);
+                },
+
+                onSubmit: function (e) {
+                    e.preventDefault();
+
+                    var self = e.data;
+                    var token = $(this).find("#token").val();
+
+                    //Load the config again in case another user has updated their settings
+                    self.loadConfiguration().then(function () {
+                        self.save(token);
+                    });
+                },
+
+            };
+
+            $('#ListenbrainzConfigurationPage').on('pageshow', function () {
+                ListenbrainzConfigurationPage.init($(this));
+            });
+
+            ApiClient.VerifyListenbrainzToken = function (token) {
+                if (!token) throw new Error("API token is missing");
+                var url = this.getUrl("Listenbrainz/ValidateToken");
+
+                return this.ajax({
+                    type: "POST",
+                    url: url,
+                    data: JSON.stringify(token),
+                    contentType: "application/json",
+                    dataType: 'json'
+                });
+            };
+
+        </script>
+    </div>
+</body>
+
+</html>

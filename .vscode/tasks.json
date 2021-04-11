@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/Jellyfin.Plugin.Lastfm/Jellyfin.Plugin.Lastfm.csproj",
+                "${workspaceFolder}/Jellyfin.Plugin.Listenbrainz/Jellyfin.Plugin.Listenbrainz.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -19,7 +19,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/Jellyfin.Plugin.Lastfm/Jellyfin.Plugin.Lastfm.csproj",
+                "${workspaceFolder}/Jellyfin.Plugin.Listenbrainz/Jellyfin.Plugin.Listenbrainz.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -32,7 +32,7 @@
             "args": [
                 "watch",
                 "run",
-                "${workspaceFolder}/Jellyfin.Plugin.Lastfm/Jellyfin.Plugin.Lastfm.csproj",
+                "${workspaceFolder}/Jellyfin.Plugin.Listenbrainz/Jellyfin.Plugin.Listenbrainz.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
