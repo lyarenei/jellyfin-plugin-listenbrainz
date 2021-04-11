@@ -17,8 +17,8 @@ ListenBrainz is operated by the MetaBrainz Foundation which has a long-standing 
 # Repo Install
 
 Jellyfin 10.6.0 introduces 3rd party plugin repositories (see: [announcement](https://jellyfin.org/posts/plugin-updates/)), configure the following to follow stable builds for this plugin
-* Repo name: TBD
-* Repo URL: TBD
+* Repo name: Listenbrainz
+* Repo URL: `https://raw.githubusercontent.com/lyarenei/jellyfin-plugin-listenbrainz/master/manifest.json`
 
 # Build
 

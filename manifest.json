@@ -1,0 +1,20 @@
+[
+    {
+        "guid": "59B20823-AAFE-454C-A393-17427F518631",
+        "name": "Listenbrainz",
+        "description": "A plugin that submits your Jellyfin music listening activity to Listenbrainz.",
+        "overview": "Track your music habits with Listenbrainz.",
+        "owner": "lyarenei",
+        "category": "Music",
+        "versions": [
+            {
+                "version": "1.0.0.0",
+                "changelog": "Initial implementation.",
+                "targetAbi": "10.7.0.0",
+                "sourceUrl": "https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases/download/1.0.0.0/listenbrainz_1.0.0.0.zip",
+                "checksum": "067dbbdf749acec85c6778c14d278caf",
+                "timestamp": "2021-04-11"
+            }
+        ]
+    }
+]
