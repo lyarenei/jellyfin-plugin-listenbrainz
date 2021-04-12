@@ -19,10 +19,4 @@
     <EmbeddedResource Include="Configuration\configPage.html" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Models\" />
-    <Folder Include="Resources\" />
-    <Folder Include="Models\Requests\" />
-    <Folder Include="Models\Responses\" />
-  </ItemGroup>
 </Project>
