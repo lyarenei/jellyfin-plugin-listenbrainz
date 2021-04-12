@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Jellyfin.Controller" Version="10.7.1" />
-    <PackageReference Include="Jellyfin.Model" Version="10.7.1" />
+    <PackageReference Include="Jellyfin.Controller" Version="10.7.2" />
+    <PackageReference Include="Jellyfin.Model" Version="10.7.2" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="5.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
   </ItemGroup>
