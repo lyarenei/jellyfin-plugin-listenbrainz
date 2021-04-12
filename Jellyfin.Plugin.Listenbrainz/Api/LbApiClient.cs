@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.Listenbrainz.Models;
-using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
+using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses;
 using Jellyfin.Plugin.Listenbrainz.Utils;
 using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Model.Serialization;
@@ -14,11 +14,17 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
 {
     public class LbApiClient : BaseLbApiClient
     {
+        private readonly MbClient _mbClient;
         private readonly ILogger _logger;
-
 
         public LbApiClient(IHttpClientFactory httpClientFactory, IJsonSerializer jsonSerializer, ILogger logger) : base(httpClientFactory, jsonSerializer, logger)
         {
+            _logger = logger;
+        }
+
+        public LbApiClient(IHttpClientFactory httpClientFactory, IJsonSerializer jsonSerializer, MbClient mbClient, ILogger logger) : base(httpClientFactory, jsonSerializer, logger)
+        {
+            _mbClient = mbClient;
             _logger = logger;
         }
 
@@ -76,7 +82,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
         /// <param name="item">Audio item containing data.</param>
         /// <param name="includeTimestamp">If timestamp should be included. Defaults to true.</param>
         /// <returns>ListenRequest instace with data.</returns>
-        private static ListenRequest BuildListenRequest(Audio item, bool includeTimestamp = true)
+        private ListenRequest BuildListenRequest(Audio item, bool includeTimestamp = true)
         {
             var listenRequest = new ListenRequest();
 
@@ -99,6 +105,11 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
 
             if (item.ProviderIds.ContainsKey("MusicBrainzRecording"))
                 listenRequest.RecordingMbId = item.ProviderIds["MusicBrainzRecording"];
+            else if (!string.IsNullOrEmpty(listenRequest.TrackMbId))
+            {
+                var recordingId = _mbClient?.GetRecordingId(listenRequest.TrackMbId).Result.GetData();
+                listenRequest.RecordingMbId = recordingId;
+            }
 
             if (!string.IsNullOrEmpty(item.Artists[0]))
                 listenRequest.Artist = item.Artists[0];
