@@ -7,8 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediaBrowser.Model.Serialization;
 using Microsoft.Extensions.Logging;
-using Jellyfin.Plugin.Listenbrainz.Models.Requests;
-using Jellyfin.Plugin.Listenbrainz.Models.Responses;
+using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses;
+using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
 
 namespace Jellyfin.Plugin.Listenbrainz.Api
 {

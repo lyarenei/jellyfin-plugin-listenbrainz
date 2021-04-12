@@ -1,9 +1,10 @@
+using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using static Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
 
-namespace Jellyfin.Plugin.Listenbrainz.Models.Requests
+namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests
 {
     [DataContract]
     public class ListenRequest : BaseRequest

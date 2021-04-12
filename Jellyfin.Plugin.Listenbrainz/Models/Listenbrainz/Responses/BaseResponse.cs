@@ -1,6 +1,6 @@
 using System.Runtime.Serialization;
 
-namespace Jellyfin.Plugin.Listenbrainz.Models.Responses
+namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses
 {
     [DataContract]
     public class BaseResponse

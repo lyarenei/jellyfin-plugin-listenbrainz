@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Jellyfin.Plugin.Listenbrainz.Models.Requests
+namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests
 {
     public class BaseRequest
     {
