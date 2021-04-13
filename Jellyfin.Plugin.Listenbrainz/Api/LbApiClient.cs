@@ -106,10 +106,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
             if (item.ProviderIds.ContainsKey("MusicBrainzRecording"))
                 listenRequest.RecordingMbId = item.ProviderIds["MusicBrainzRecording"];
             else if (!string.IsNullOrEmpty(listenRequest.TrackMbId))
-            {
-                var recordingId = _mbClient?.GetRecordingId(listenRequest.TrackMbId).Result.GetData();
-                listenRequest.RecordingMbId = recordingId;
-            }
+                listenRequest.RecordingMbId = GetRecordingId(item.Name, item.ProviderIds["MusicBrainzTrack"]);
 
             if (!string.IsNullOrEmpty(item.Artists[0]))
                 listenRequest.Artist = item.Artists[0];
@@ -121,6 +118,30 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
                 listenRequest.Track = item.Name;
 
             return listenRequest;
+        }
+
+        /// <summary>
+        /// Retrieve Recording MBID by Track MBID
+        /// </summary>
+        /// <param name="trackName">Name of the track</param>
+        /// <param name="trackMbId">MBID of the track</param>
+        /// <returns>Recording MBID</returns>
+        private string GetRecordingId(string trackName, string trackMbId)
+        {
+            _logger.LogDebug($"Getting Recording ID for Track ID: {trackMbId}");
+            var response = _mbClient?.GetRecordingId(trackMbId).Result;
+            if (!string.IsNullOrEmpty(response?.Error))
+                _logger.LogError($"Failed to retrieve Recording ID for '{trackName}'");
+            else
+            {
+                var recordingId = response.GetData();
+                if (!string.IsNullOrEmpty(recordingId))
+                    _logger.LogError($"Recording ID for track '{trackName}' not found.");
+                else
+                    return recordingId;
+            }
+
+            return null;
         }
     }
 }
