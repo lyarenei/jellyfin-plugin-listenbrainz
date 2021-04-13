@@ -50,7 +50,7 @@ namespace Jellyfin.Plugin.Listenbrainz
 
             _sessionManager = sessionManager;
             _userDataManager = userDataManager;
-            var mbClient = new MbClient(httpClientFactory, _logger);
+            var mbClient = new MbClient(httpClientFactory, jsonSerializer, _logger);
             _apiClient = new LbApiClient(httpClientFactory, jsonSerializer, mbClient, _logger);
             Instance = this;
         }

@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using System.Xml.Linq;
 using Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz.Requests;
 using Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz.Responses;
 using Jellyfin.Plugin.Listenbrainz.Resources;
+using MediaBrowser.Model.Serialization;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.Listenbrainz.Api
@@ -15,10 +17,12 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
     {
         private const string Version = "2";
         private readonly HttpClient _httpClient;
+        private readonly IJsonSerializer _jsonSerializer;
         private readonly ILogger _logger;
-        public BaseMbClient(IHttpClientFactory httpClientFactory, ILogger logger)
+        public BaseMbClient(IHttpClientFactory httpClientFactory, IJsonSerializer jsonSerializer, ILogger logger)
         {
             _httpClient = httpClientFactory.CreateClient();
+            _jsonSerializer = jsonSerializer;
             _logger = logger;
         }
 
@@ -50,6 +54,11 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
             using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
             try
             {
+                StreamReader reader = new(stream);
+                var text = reader.ReadToEnd();
+                _logger.LogDebug($"Raw response: {text}");
+
+                stream.Seek(0, SeekOrigin.Begin);
                 return new BaseResponse(XElement.Load(stream)) as TResponse;
             }
             catch (Exception e)
@@ -57,7 +66,8 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
                 _logger.LogDebug(e.Message);
             }
 
-            return null;
+            stream.Seek(0, SeekOrigin.Begin);
+            return _jsonSerializer.DeserializeFromStream<TResponse>(stream);
         }
 
         private static string BuildRequestUrl(string endpoint) => $"https://{Musicbrainz.BaseUrl}/ws/{Version}/{endpoint}";
