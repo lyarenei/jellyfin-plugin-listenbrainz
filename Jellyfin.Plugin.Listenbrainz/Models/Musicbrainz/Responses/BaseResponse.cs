@@ -1,5 +1,4 @@
 using System.Runtime.Serialization;
-using System.Xml.Linq;
 
 namespace Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz.Responses
 {
@@ -8,17 +7,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz.Responses
         [DataMember(Name = "error")]
         public string Error { get; set; }
 
-        public XElement XmlData { get; set; }
-
-        public BaseResponse(XElement xmlData)
-        {
-            XmlData = xmlData;
-        }
-
-        public BaseResponse(string error)
-        {
-            Error = error;
-        }
+        public virtual bool IsError() => !string.IsNullOrEmpty(Error);
 
         public virtual string GetData() => "";
     }

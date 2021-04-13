@@ -5,7 +5,6 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
-using System.Xml.Linq;
 using Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz.Requests;
 using Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz.Responses;
 using Jellyfin.Plugin.Listenbrainz.Resources;
@@ -29,9 +28,11 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
             var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
             var productValue = new ProductInfoHeaderValue("JellyfinListenbrainzPlugin", version);
             var commentValue = new ProductInfoHeaderValue("(+https://github.com/lyarenei/jellyfin-plugin-listenbrainz)");
+            var acceptHeader = new MediaTypeWithQualityHeaderValue("application/json");
 
             _httpClient.DefaultRequestHeaders.UserAgent.Add(productValue);
             _httpClient.DefaultRequestHeaders.UserAgent.Add(commentValue);
+            _httpClient.DefaultRequestHeaders.Accept.Add(acceptHeader);
         }
 
         public async Task<TResponse> Get<TRequest, TResponse>(TRequest request) where TRequest : BaseRequest where TResponse : BaseResponse
@@ -60,22 +61,28 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
 
             using var response = await _httpClient.SendAsync(requestMessage, CancellationToken.None);
             using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-            try
             {
-                StreamReader reader = new(stream);
-                var text = reader.ReadToEnd();
-                _logger.LogDebug($"Raw response: {text}");
+                try
+                {
+                    var result = _jsonSerializer.DeserializeFromStream<TResponse>(stream);
+                    if (result.IsError())
+                    {
+                        stream.Seek(0, SeekOrigin.Begin);
+                        var reader = new StreamReader(stream);
+                        var text = reader.ReadToEnd();
+                        _logger.LogDebug($"Raw response: {text}");
+                        _logger.LogError(result.Error);
+                    }
 
-                stream.Seek(0, SeekOrigin.Begin);
-                return new BaseResponse(XElement.Load(stream)) as TResponse;
-            }
-            catch (Exception e)
-            {
-                _logger.LogDebug(e.Message);
+                    return result;
+                }
+                catch (Exception e)
+                {
+                    _logger.LogDebug(e.Message);
+                }
             }
 
-            stream.Seek(0, SeekOrigin.Begin);
-            return _jsonSerializer.DeserializeFromStream<TResponse>(stream);
+            return null;
         }
 
         private static string BuildRequestUrl(string endpoint) => $"https://{Musicbrainz.BaseUrl}/ws/{Version}/{endpoint}";

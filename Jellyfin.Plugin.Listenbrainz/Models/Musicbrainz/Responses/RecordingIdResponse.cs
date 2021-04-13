@@ -1,22 +1,14 @@
-using System.Linq;
-using System.Xml.Linq;
+using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz.Responses
 {
+    [DataContract]
     public class RecordingIdResponse : BaseResponse
     {
-        public RecordingIdResponse(XElement xmlData) : base(xmlData) { }
+        [DataMember(Name = "recordings")]
+        public List<Recording> Recordings { get; set; }
 
-        public override string GetData()
-        {
-            try
-            {
-                return (string)XmlData.Descendants("recording").First().Attribute("id");
-            }
-            catch (System.Exception)
-            {
-                return base.GetData();
-            }
-        }
+        public override string GetData() => Recordings[0].Id;
     }
 }
