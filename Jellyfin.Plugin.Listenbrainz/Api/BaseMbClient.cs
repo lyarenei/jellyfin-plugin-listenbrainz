@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -24,6 +25,13 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
             _httpClient = httpClientFactory.CreateClient();
             _jsonSerializer = jsonSerializer;
             _logger = logger;
+
+            var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            var productValue = new ProductInfoHeaderValue("JellyfinListenbrainzPlugin", version);
+            var commentValue = new ProductInfoHeaderValue("(+https://github.com/lyarenei/jellyfin-plugin-listenbrainz)");
+
+            _httpClient.DefaultRequestHeaders.UserAgent.Add(productValue);
+            _httpClient.DefaultRequestHeaders.UserAgent.Add(commentValue);
         }
 
         public async Task<TResponse> Get<TRequest, TResponse>(TRequest request) where TRequest : BaseRequest where TResponse : BaseResponse
