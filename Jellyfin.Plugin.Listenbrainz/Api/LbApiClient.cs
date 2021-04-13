@@ -105,8 +105,13 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
 
             if (item.ProviderIds.ContainsKey("MusicBrainzRecording"))
                 listenRequest.RecordingMbId = item.ProviderIds["MusicBrainzRecording"];
+
             else if (!string.IsNullOrEmpty(listenRequest.TrackMbId))
-                listenRequest.RecordingMbId = GetRecordingId(item.Name, item.ProviderIds["MusicBrainzTrack"]);
+            {
+                var recordingId = GetRecordingId(item.Name, listenRequest.TrackMbId);
+                if (recordingId != null)
+                    listenRequest.RecordingMbId = recordingId;
+            }
 
             if (!string.IsNullOrEmpty(item.Artists[0]))
                 listenRequest.Artist = item.Artists[0];
@@ -128,20 +133,21 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
         /// <returns>Recording MBID</returns>
         private string GetRecordingId(string trackName, string trackMbId)
         {
-            _logger.LogDebug($"Getting Recording ID for Track ID: {trackMbId}");
-            var response = _mbClient?.GetRecordingId(trackMbId).Result;
-            if (!string.IsNullOrEmpty(response?.Error))
-                _logger.LogError($"Failed to retrieve Recording ID for '{trackName}'");
-            else
+            _logger.LogInformation($"Getting Recording ID for Track ID: {trackMbId}");
+            var response = _mbClient.GetRecordingId(trackMbId)?.Result;
+            if (response == null || response.IsError())
             {
-                var recordingId = response.GetData();
-                if (!string.IsNullOrEmpty(recordingId))
-                    _logger.LogError($"Recording ID for track '{trackName}' not found.");
-                else
-                    return recordingId;
+                _logger.LogError($"Failed to retrieve Recording ID for '{trackName}'");
+                return null;
             }
 
-            return null;
+            if (string.IsNullOrEmpty(response.GetData()))
+            {
+                _logger.LogError($"Recording ID for track '{trackName}' not found.");
+                return null;
+            }
+
+            return response.GetData();
         }
     }
 }
