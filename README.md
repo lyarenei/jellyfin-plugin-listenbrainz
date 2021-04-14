@@ -21,9 +21,6 @@ Jellyfin 10.6.0 introduces 3rd party plugin repositories (see: [announcement](ht
 * Repo URL: `https://raw.githubusercontent.com/lyarenei/jellyfin-plugin-listenbrainz/master/manifest.json`
 
 
-## Known limitations
-- Tracks in the Listenbrainz activity are not paired with their MBIDs due to Listenbrainz requiring recording ID, rather than track ID directly. As Jellyfin does not provide recording ID in the metadata, there is no way to send required ID for pairing.
-
 # Build
 
 .NET core 5.0 is required to build the Listenbrainz plugin. To install the .NET SDK on Linux or macOS, see the download page at https://dotnet.microsoft.com/download . Native package manager instructions can be found for Debian, RHEL, Ubuntu, Fedora, SLES, and CentOS.
