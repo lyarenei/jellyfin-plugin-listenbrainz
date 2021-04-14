@@ -5,10 +5,10 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
+using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses;
 using MediaBrowser.Model.Serialization;
 using Microsoft.Extensions.Logging;
-using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses;
-using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
 
 namespace Jellyfin.Plugin.Listenbrainz.Api
 {
