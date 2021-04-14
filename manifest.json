@@ -10,7 +10,7 @@
             {
                 "version": "1.0.0.0",
                 "changelog": "Initial implementation.",
-                "targetAbi": "10.7.0.0",
+                "targetAbi": "10.7.1.0",
                 "sourceUrl": "https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases/download/1.0.0.0/listenbrainz_1.0.0.0.zip",
                 "checksum": "067dbbdf749acec85c6778c14d278caf",
                 "timestamp": "2021-04-11"
