@@ -141,13 +141,14 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
                 return null;
             }
 
-            if (string.IsNullOrEmpty(response.GetData()))
+            var recordingId = response.GetData();
+            if (string.IsNullOrEmpty(recordingId))
             {
                 _logger.LogError($"Recording ID for track '{trackName}' not found.");
                 return null;
             }
 
-            return response.GetData();
+            return recordingId;
         }
     }
 }
