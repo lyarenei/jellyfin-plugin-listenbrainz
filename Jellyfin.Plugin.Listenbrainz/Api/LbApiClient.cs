@@ -111,6 +111,8 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
                 var recordingId = GetRecordingId(item.Name, listenRequest.TrackMbId);
                 if (recordingId != null)
                     listenRequest.RecordingMbId = recordingId;
+                else
+                    listenRequest.TrackMbId = null;
             }
 
             if (!string.IsNullOrEmpty(item.Artists[0]))
