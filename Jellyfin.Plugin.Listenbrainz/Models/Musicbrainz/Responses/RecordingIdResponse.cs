@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
@@ -9,6 +10,16 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz.Responses
         [DataMember(Name = "recordings")]
         public List<Recording> Recordings { get; set; }
 
-        public override string GetData() => Recordings[0].Id;
+        public override string GetData()
+        {
+            try
+            {
+                return Recordings[0].Id;
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                return null;
+            }
+        }
     }
 }
