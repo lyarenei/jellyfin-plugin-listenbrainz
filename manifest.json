@@ -8,6 +8,14 @@
         "category": "Music",
         "versions": [
             {
+                "version": "1.1.1.0",
+                "changelog": "Handle invalid track MBIDs",
+                "targetAbi": "10.7.0.0",
+                "sourceUrl": "https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases/download/1.1.1.0/listenbrainz_1.1.1.0.zip",
+                "checksum": "aca83edd4b4d6a01b2fe9d48e084798c",
+                "timestamp": "2021-06-02"
+            },
+            {
                 "version": "1.1.0.0",
                 "changelog": "Fetch Recording ID from MusicBrainz.",
                 "targetAbi": "10.7.0.0",
