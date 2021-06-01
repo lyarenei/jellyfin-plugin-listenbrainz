@@ -133,7 +133,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
         /// <returns>Recording MBID</returns>
         private string GetRecordingId(string trackName, string trackMbId)
         {
-            _logger.LogInformation($"Getting Recording ID for Track ID: {trackMbId}");
+            _logger.LogInformation($"Getting Recording ID for Track ID: {trackMbId} ({trackName})");
             var response = _mbClient.GetRecordingId(trackMbId)?.Result;
             if (response == null || response.IsError())
             {
