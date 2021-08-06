@@ -9,5 +9,11 @@ namespace Jellyfin.Plugin.Listenbrainz.Resources
             public const string SubmitListen = "submit-listens";
             public const string ValidateToken = "validate-token";
         }
+
+        public static class FeedbackEndpoints
+        {
+            private const string EndpointBase = "feedback";
+            public const string RecordingFeedback = EndpointBase + "/recording-feedback";
+        }
     }
 }
