@@ -161,6 +161,11 @@
             userConfig.Token = this.$el.find("#token").val();
             userConfig.Options = this.getUIOptionsValues();
 
+            if (!token) {
+              this.doSave();
+              return;
+            }
+
             Dashboard.showLoadingMsg();
 
             // Verify provided token
