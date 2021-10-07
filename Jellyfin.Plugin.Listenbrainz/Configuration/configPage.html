@@ -39,7 +39,18 @@
                   id="listenSubmitEnabled"
                   name="listenSubmitEnabled"
                 />
-                <span>Enable</span>
+                <span>Enable listen submitting</span>
+              </label>
+            </div>
+            <div class="checkboxContainer">
+              <label>
+                <input
+                  is="emby-checkbox"
+                  type="checkbox"
+                  id="syncFavoritesEnabled"
+                  name="syncFavoritesEnabled"
+                />
+                <span>Enable favorites sync</span>
               </label>
             </div>
             <div>
@@ -69,6 +80,7 @@
             MediaBrowserUserId: "",
             Options: {
               ListenSubmitEnabled: false,
+              SyncFavoritesEnabled: false,
             },
           },
 
@@ -142,8 +154,9 @@
             this.$el
               .find("#listenSubmitEnabled")
               .prop("checked", data.Options.ListenSubmitEnabled);
-
-            //Dont forget to call checkboxradio('refresh') otherwise the UI wont update
+            this.$el
+              .find("#syncFavoritesEnabled")
+              .prop("checked", data.Options.SyncFavoritesEnabled);
           },
 
           save: function (token) {
@@ -227,6 +240,10 @@
 
             options.ListenSubmitEnabled = this.$el
               .find("#listenSubmitEnabled")
+              .prop("checked");
+
+            options.SyncFavoritesEnabled = this.$el
+              .find("#syncFavoritesEnabled")
               .prop("checked");
             return options;
           },
