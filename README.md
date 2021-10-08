@@ -23,7 +23,7 @@ Jellyfin 10.6.0 introduces 3rd party plugin repositories (see: [announcement](ht
 
 # Build
 
-.NET core 5.0 is required to build the Listenbrainz plugin. To install the .NET SDK on Linux or macOS, see the download page at https://dotnet.microsoft.com/download . Native package manager instructions can be found for Debian, RHEL, Ubuntu, Fedora, SLES, and CentOS.
+.NET core 5.0 is required to build the Listenbrainz plugin. To install the .NET SDK on Linux or macOS, see the download page at https://dotnet.microsoft.com/download. Native package manager instructions can be found for Debian, RHEL, Ubuntu, Fedora, SLES, and CentOS.
 
 Once the SDK is installed, run the following.
 
@@ -33,11 +33,12 @@ cd jellyfin-plugin-listenbrainz
 dotnet build
 ```
 
-# Manual Install
+If the build is successful, the compiler will report the path to your Plugin dll (`Jellyfin.Plugin.Listenbrainz/bin/Debug/net5.0/Jellyfin.Plugin.Listenbrainz.dll`)
 
-If the build is successful, the tool will report the path to your Plugin dll (`Jellyfin.Plugin.Listenbrainz/bin/Debug/net5.0/Jellyfin.Plugin.Listenbrainz.dll`)
+## Manual Installation
 
-The plugin should then be copied into your Jellyfin ${CONFIG_DIR}/plugins directory.
+Copy the plugin DLL file into your Jellyfin ${CONFIG_DIR}/plugins/Listenbrainz_{VERSION} directory.
+Create the Listenbrainz directory if it does not exist, and make sure Jellyfin can access it.
 
 # Running Jellyfin server
 
