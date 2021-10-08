@@ -105,6 +105,33 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
             }
         }
 
+        public async Task SubmitFeedback(Audio item, LbUser lbUser, string msid, bool isLiked)
+        {
+            var feedbackRequest = new FeedbackRequest()
+            {
+                // No option for -1 as Jellyfin does not have a concept of dislikes
+                Score = isLiked ? 1 : 0,
+                RecordingMsid = msid,
+                ApiToken = lbUser.Token
+            };
+
+            try
+            {
+                var response = await Post<FeedbackRequest, BaseResponse>(feedbackRequest);
+                if (response != null && !response.IsError())
+                {
+                    _logger.LogInformation($"Submitting user ({lbUser.Name}) feedback for '{item.Name}'");
+                    return;
+                }
+
+                _logger.LogError($"Failed to submit user ({lbUser.Name}) feedback: {response.Error}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to submit feedback - exception={ex}, name={lbUser.Name}, track={item.Name}");
+            }
+        }
+
         public async Task<ValidateTokenResponse> ValidateToken(string token)
         {
             _logger.LogInformation($"Validating token '{token}'");
