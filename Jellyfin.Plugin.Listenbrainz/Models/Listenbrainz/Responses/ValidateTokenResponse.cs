@@ -10,6 +10,6 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses
         [DataMember(Name = "valid")]
         public bool Valid { get; set; }
 
-        public override bool IsError() => Valid || Code == 400;
+        public override bool IsError() => !Valid || Code == 400;
     }
 }
