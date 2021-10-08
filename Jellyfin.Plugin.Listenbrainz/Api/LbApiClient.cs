@@ -99,7 +99,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
 
             try
             {
-                var response = await Post<UserListensRequest, UserListensResponse>(request);
+                var response = await Get<UserListensRequest, UserListensResponse>(request);
                 if (response == null)
                 {
                     _logger.LogError($"Failed to get listens for user {user.Name}: no response available from server");
