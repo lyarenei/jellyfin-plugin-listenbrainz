@@ -89,7 +89,6 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
                 if (response.IsError())
                 {
                     _logger.LogError($"Validation of token '{token}' failed: {response.Message}");
-                    return null;
                 }
 
                 return response;
