@@ -74,7 +74,32 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
             }
         }
 
-        public async Task<ValidateTokenResponse> ValidateToken(string token) => await Get<ValidateTokenRequest, ValidateTokenResponse>(new ValidateTokenRequest(token));
+        public async Task<ValidateTokenResponse> ValidateToken(string token)
+        {
+            _logger.LogInformation($"Validating token '{token}'");
+            try
+            {
+                var response = await Get<ValidateTokenRequest, ValidateTokenResponse>(new ValidateTokenRequest(token));
+                if (response == null)
+                {
+                    _logger.LogError($"Validation of token '{token}' failed: no response available from server");
+                    return null;
+                }
+
+                if (response.IsError())
+                {
+                    _logger.LogError($"Validation of token '{token}' failed: {response.Message}");
+                    return null;
+                }
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Token validation failed - exception={ex.StackTrace}, token={token}");
+                return null;
+            }
+        }
 
         /// <summary>
         /// Pull data from item and create ListenRequest instance with them.
