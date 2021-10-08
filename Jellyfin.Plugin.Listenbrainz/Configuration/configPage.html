@@ -162,7 +162,7 @@
           save: function (token) {
             var userConfig = this.getCurrentSelectedUser();
 
-            //If the conig for the user doesnt exist, create one
+            // Create user config not exists
             if (!userConfig) {
               userConfig = $.extend({}, this.configDefaults, {
                 MediaBrowserUserId: this.getCurrentSelectedUserId(),
