@@ -74,6 +74,37 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
             }
         }
 
+        public async Task<UserListensPayload> GetUserListens(LbUser user)
+        {
+            var request = new UserListensRequest(user.Name)
+            {
+                ApiToken = user.Token
+            };
+
+            try
+            {
+                var response = await Post<UserListensRequest, UserListensResponse>(request);
+                if (response == null)
+                {
+                    _logger.LogError($"Failed to get listens for user {user.Name}: no response available from server");
+                    return null;
+                }
+
+                if (response.IsError())
+                {
+                    _logger.LogError($"Failed to get listens for user {user.Name}: {response.Error}");
+
+                }
+
+                return response.Payload;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed get listens for user - exception={ex.StackTrace}, name={user.Name}");
+                return null;
+            }
+        }
+
         public async Task<ValidateTokenResponse> ValidateToken(string token)
         {
             _logger.LogInformation($"Validating token '{token}'");
