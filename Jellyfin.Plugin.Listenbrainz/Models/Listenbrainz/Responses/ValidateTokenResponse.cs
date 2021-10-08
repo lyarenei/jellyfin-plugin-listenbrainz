@@ -5,7 +5,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses
     public class ValidateTokenResponse : BaseResponse
     {
         [DataMember(Name = "user_name")]
-        public string User { get; set; }
+        public string Name { get; set; }
 
         [DataMember(Name = "valid")]
         public bool Valid { get; set; }
