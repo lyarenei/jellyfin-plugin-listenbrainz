@@ -108,14 +108,26 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
             try
             {
                 var result = _jsonSerializer.DeserializeFromStream<TResponse>(stream);
-                if (result.IsError())
-                    _logger.LogError(result.Message);
+
+                stream.Seek(0, SeekOrigin.Begin);
+                StreamReader reader = new(stream);
+                var text = reader.ReadToEnd();
+
+                _logger.LogDebug($"Raw response: {text}");
+                _logger.LogDebug(result.Code.ToString());
+                _logger.LogDebug(result.Message);
+                _logger.LogDebug(result.Error);
 
                 return result;
             }
             catch (Exception e)
             {
                 _logger.LogDebug(e.Message);
+                stream.Seek(0, SeekOrigin.Begin);
+                StreamReader reader = new(stream);
+                var text = reader.ReadToEnd();
+                _logger.LogDebug($"Request to URL '{url}'");
+                _logger.LogDebug($"Raw response: {text}");
             }
 
             return null;
