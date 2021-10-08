@@ -185,6 +185,7 @@
             ApiClient.VerifyListenbrainzToken(token).then(
               $.proxy(function (data) {
                 if (data && data.Valid) {
+                  userConfig.Name = data.Name;
                   this.doSave();
                   return;
                 }
