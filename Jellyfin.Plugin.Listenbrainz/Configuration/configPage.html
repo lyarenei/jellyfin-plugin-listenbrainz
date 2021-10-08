@@ -184,14 +184,28 @@
             // Verify provided token
             ApiClient.VerifyListenbrainzToken(token).then(
               $.proxy(function (data) {
-                if (data && data.Valid) {
+                let msg =
+                  "Unexpected error, see Jellyfin logs for more details.";
+                if (data == null) {
+                  Dashboard.alert(msg);
+                  console.log(msg);
+                  return;
+                }
+
+                if (data.Valid) {
                   userConfig.Name = data.Name;
                   this.doSave();
                   return;
                 }
 
-                Dashboard.alert(data.Message || "Something went wrong");
-                console.log(data.Message);
+                if (data.Message) {
+                  Dashboard.alert(data.Message);
+                  console.log(data.Message);
+                  return;
+                }
+
+                Dashboard.alert(msg);
+                console.log(msg);
               }, this)
             );
 
