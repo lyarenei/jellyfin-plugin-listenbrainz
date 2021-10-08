@@ -7,12 +7,14 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests
     {
         private readonly string UserName;
 
+        public int Count { get; set; } = 5;
+
         public UserListensRequest(string userName)
         {
             UserName = userName;
         }
 
-        public override Dictionary<string, dynamic> ToRequestForm() => new() { };
+        public override Dictionary<string, dynamic> ToRequestForm() => new() { { "count", Count } };
 
         public override string GetEndpoint() => string.Format(UserEndpoints.ListensEndpoint, UserName);
     }
