@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.Listenbrainz.Api;
+using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses;
 using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
@@ -120,7 +121,8 @@ namespace Jellyfin.Plugin.Listenbrainz
 
             // TODO jellyfin user name for logs
             // lbUser.Name = user.Username;
-            await _apiClient.SubmitListen(item, lbUser).ConfigureAwait(false);
+            var listenRequest = new ListenRequest(item);
+            await _apiClient.SubmitListen(item, lbUser, listenRequest).ConfigureAwait(false);
 
             if (lbUser.Options.SyncFavoritesEnabled)
             {
@@ -131,15 +133,11 @@ namespace Jellyfin.Plugin.Listenbrainz
                     return;
                 }
 
-                var listen = userListens.Listens[0];
-
-                // TODO compare using timestamps
-                if (listen.TrackMetadata.TrackName == item.Name)
-                {
-                    _logger.LogDebug($"Match found for track ({item.Name})");
-                }
-
-                await _apiClient.SubmitFeedback(item, lbUser, listen.RecordingMsid, item.IsFavoriteOrLiked(user));
+                var listen = userListens.Listens.FirstOrDefault(listen => listen.ListenedAt == listenRequest.ListenedAt);
+                if (listen != null && listen.ListenedAt == listenRequest.ListenedAt)
+                    await _apiClient.SubmitFeedback(item, lbUser, listen.RecordingMsid, item.IsFavoriteOrLiked(user));
+                else
+                    _logger.LogError($"Could not sync favorite for track ({item.Name}), no match on recent listen.");
             }
         }
 
