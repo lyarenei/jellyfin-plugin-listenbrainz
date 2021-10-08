@@ -135,7 +135,7 @@ namespace Jellyfin.Plugin.Listenbrainz
                 UserListensPayload userListens = await _apiClient.GetUserListens(lbUser);
                 if (userListens == null || userListens.Count == 0)
                 {
-                    _logger.LogError($"Cannot sync favorite for track ({item.Name}), no listens retrieved");
+                    _logger.LogError($"Cannot sync favorite for track ({item.Name}), no listens received");
                     return;
                 }
 
