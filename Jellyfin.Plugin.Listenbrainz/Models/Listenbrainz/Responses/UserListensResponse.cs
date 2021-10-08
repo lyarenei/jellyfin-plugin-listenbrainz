@@ -16,7 +16,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses
         [DataMember(Name = "count")]
         public int Count { get; set; }
 
-        [DataMember(Name = "last_listen_ts")]
+        [DataMember(Name = "latest_listen_ts")]
         public int LastListenTs { get; set; }
 
         [DataMember(Name = "listens")]
