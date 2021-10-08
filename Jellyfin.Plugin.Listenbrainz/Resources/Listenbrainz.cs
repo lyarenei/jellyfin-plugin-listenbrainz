@@ -15,5 +15,11 @@ namespace Jellyfin.Plugin.Listenbrainz.Resources
             private const string EndpointBase = "feedback";
             public const string RecordingFeedback = EndpointBase + "/recording-feedback";
         }
+
+        public static class UserEndpoints
+        {
+            private const string EndpointBase = "user";
+            public const string ListensEndpoint = EndpointBase + "/{0}/listens";
+        }
     }
 }
