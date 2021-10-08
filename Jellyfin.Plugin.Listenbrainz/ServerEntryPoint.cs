@@ -116,8 +116,8 @@ namespace Jellyfin.Plugin.Listenbrainz
                 _logger.LogError($"Item {item.Path} has invalid metadata - artist ({item.Artists[0]}, album ({item.Album}), track name ({item.Name})");
                 return;
             }
-
-            lbUser.Name = user.Username;
+            // TODO jellyfin user name for logs
+            // lbUser.Name = user.Username;
             await _apiClient.SubmitListen(item, lbUser).ConfigureAwait(false);
         }
 
@@ -157,7 +157,8 @@ namespace Jellyfin.Plugin.Listenbrainz
                 return;
             }
 
-            lbUser.Name = user.Username;
+            // TODO jellyfin user name for logs
+            // lbUser.Name = user.Username;
             await _apiClient.NowPlaying(item, lbUser).ConfigureAwait(false);
         }
 
