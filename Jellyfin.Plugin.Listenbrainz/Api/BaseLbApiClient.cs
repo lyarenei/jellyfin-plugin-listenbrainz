@@ -102,6 +102,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
                 RequestUri = new Uri(url)
             };
 
+            _logger.LogDebug($"Request to URL: '{url}'");
             using var response = await _httpClient.SendAsync(requestMessage, CancellationToken.None);
             using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
             try
