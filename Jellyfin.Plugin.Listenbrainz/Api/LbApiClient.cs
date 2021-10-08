@@ -47,7 +47,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Failed to submit listen - exception={ex}, name={user.Name}, track={item.Name}");
+                _logger.LogError($"Failed to submit listen - exception={ex.StackTrace}, name={user.Name}, track={item.Name}");
             }
         }
 
@@ -70,7 +70,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Failed to submit now listening - exception={ex}, name={user.Name}, track={item.Name}");
+                _logger.LogError($"Failed to submit now listening - exception={ex.StackTrace}, name={user.Name}, track={item.Name}");
             }
         }
 
