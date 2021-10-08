@@ -20,10 +20,10 @@ jobs:
           dotnet-version: "5.0.x" # SDK Version to use; x will use the latest version of the 5.0 channel
 
       - name: Build release via dotnet build...
-        run: dotnet build Jellyfin.Plugin.Listenbrainz
+        run: dotnet build Jellyfin.Plugin.Listenbrainz -c release
 
       - name: Create ZIP archive of plugin release.
-        run: pushd /home/runner/work/jellyfin-plugin-listenbrainz/jellyfin-plugin-listenbrainz/Jellyfin.Plugin.Listenbrainz/bin/Debug/net5.0 && zip "/home/runner/work/listenbrainz_${GIT_TAG_NAME}.zip" Jellyfin.Plugin.Listenbrainz.dll && popd
+        run: pushd /home/runner/work/jellyfin-plugin-listenbrainz/jellyfin-plugin-listenbrainz/Jellyfin.Plugin.Listenbrainz/bin/Release/net5.0 && zip "/home/runner/work/listenbrainz_${GIT_TAG_NAME}.zip" Jellyfin.Plugin.Listenbrainz.dll && popd
 
       - name: Create github release and upload binaries.
         uses: svenstaro/upload-release-action@v2
