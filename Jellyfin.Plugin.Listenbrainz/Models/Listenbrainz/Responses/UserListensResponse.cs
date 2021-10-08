@@ -1,25 +1,25 @@
 using System.Collections.Generic;
-using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses
 {
-    [DataContract]
     public class UserListensResponse : BaseResponse
     {
-        [DataMember(Name = "payload")]
+        [JsonPropertyName("payload")]
         public UserListensPayload Payload { get; set; }
+
+        public override bool IsError() => Error != null;
     }
 
-    [DataContract]
     public class UserListensPayload
     {
-        [DataMember(Name = "count")]
+        [JsonPropertyName("count")]
         public int Count { get; set; }
 
-        [DataMember(Name = "latest_listen_ts")]
+        [JsonPropertyName("latest_listen_ts")]
         public int LastListenTs { get; set; }
 
-        [DataMember(Name = "listens")]
+        [JsonPropertyName("listens")]
         public List<Listen> Listens { get; set; }
     }
 }

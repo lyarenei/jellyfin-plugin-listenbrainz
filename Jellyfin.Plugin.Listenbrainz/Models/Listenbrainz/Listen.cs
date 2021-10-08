@@ -1,22 +1,22 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Jellyfin.Plugin.Listenbrainz.Models
 {
-    [DataContract]
     public class Listen
     {
-        [DataMember(Name = "listened_at")]
+        [JsonPropertyName("listened_at")]
         public int ListenedAt { get; set; }
 
-        [DataMember(Name = "recording_msid")]
+        [JsonPropertyName("recording_msid")]
         public string RecordingMsid { get; set; }
 
-        [DataMember(Name = "user_name")]
+        [JsonPropertyName("user_name")]
         public string UserName { get; set; }
 
-        [DataMember(Name = "track_metadata")]
+        [JsonPropertyName("track_metadata")]
         public TrackMetadata TrackMetadata { get; set; }
 
         public Dictionary<string, dynamic> ToRequestForm()
@@ -32,16 +32,16 @@ namespace Jellyfin.Plugin.Listenbrainz.Models
     [DataContract]
     public class TrackMetadata
     {
-        [DataMember(Name = "artist_name")]
+        [JsonPropertyName("artist_name")]
         public string ArtistName { get; set; }
 
-        [DataMember(Name = "release_name")]
+        [JsonPropertyName("release_name")]
         public string ReleaseName { get; set; }
 
-        [DataMember(Name = "track_name")]
+        [JsonPropertyName("track_name")]
         public string TrackName { get; set; }
 
-        [DataMember(Name = "additional_info")]
+        [JsonPropertyName("additional_info")]
         public AdditionalInfo AdditionalInfo { get; set; }
 
         public Dictionary<string, dynamic> ToRequestForm()
@@ -58,28 +58,28 @@ namespace Jellyfin.Plugin.Listenbrainz.Models
     [DataContract]
     public class AdditionalInfo
     {
-        [DataMember(Name = "listening_from")]
+        [JsonPropertyName("listening_from")]
         public const string ListeningFrom = "jellyfin";
 
-        [DataMember(Name = "artist_mbids")]
+        [JsonPropertyName("artist_mbids")]
         public List<string> ArtistMbIds { get; set; }
 
-        [DataMember(Name = "artist_msid")]
+        [JsonPropertyName("artist_msid")]
         public string ArtistMsId { get; set; }
 
-        [DataMember(Name = "recording_mbid")]
+        [JsonPropertyName("recording_mbid")]
         public string RecordingMbId { get; set; }
 
-        [DataMember(Name = "recording_msid")]
+        [JsonPropertyName("recording_msid")]
         public string RecordingMsid { get; set; }
 
-        [DataMember(Name = "release_mbid")]
+        [JsonPropertyName("release_mbid")]
         public string ReleaseMbId { get; set; }
 
-        [DataMember(Name = "release_msid")]
+        [JsonPropertyName("release_msid")]
         public string ReleaseMsid { get; set; }
 
-        [DataMember(Name = "track_mbid")]
+        [JsonPropertyName("track_mbid")]
         public string TrackMbId { get; set; }
 
         public Dictionary<string, dynamic> ToRequestForm()
