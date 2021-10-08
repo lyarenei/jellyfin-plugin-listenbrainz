@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.Listenbrainz.Api;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
@@ -123,6 +124,11 @@ namespace Jellyfin.Plugin.Listenbrainz
             // lbUser.Name = user.Username;
             var listenRequest = new ListenRequest(item);
             await _apiClient.SubmitListen(item, lbUser, listenRequest).ConfigureAwait(false);
+
+            // Give Server a bit of time to process new listen submission
+            // This is more of a safeguard, rather than a necessity.
+            _logger.LogDebug("Waiting 5s before favorite syncing");
+            Thread.Sleep(5000);
 
             if (lbUser.Options.SyncFavoritesEnabled)
             {
