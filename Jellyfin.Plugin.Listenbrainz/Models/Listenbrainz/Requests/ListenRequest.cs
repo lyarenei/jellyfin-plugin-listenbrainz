@@ -1,7 +1,8 @@
-using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using Jellyfin.Plugin.Listenbrainz.Utils;
+using MediaBrowser.Controller.Entities.Audio;
 using static Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
 
 namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests
@@ -22,6 +23,40 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests
         public string TrackMbId { get; set; }
         public string RecordingMbId { get; set; }
 
+        public ListenRequest() { }
+
+        public ListenRequest(Audio item, bool includeTimestamp = true)
+        {
+            if (includeTimestamp)
+                ListenedAt = Helpers.GetCurrentTimestamp();
+
+            if (item.ProviderIds.ContainsKey("MusicBrainzArtist"))
+            {
+                var artistIds = item.ProviderIds["MusicBrainzArtist"].Split(';');
+                ArtistMbIds = new List<string>(artistIds);
+            }
+            else
+                ArtistMbIds = new List<string>();
+
+            if (item.ProviderIds.ContainsKey("MusicBrainzAlbum"))
+                AlbumMbId = item.ProviderIds["MusicBrainzAlbum"];
+
+            if (item.ProviderIds.ContainsKey("MusicBrainzTrack"))
+                TrackMbId = item.ProviderIds["MusicBrainzTrack"];
+
+            // Note: Jellyfin does not store Recording MbId, only TrackMbId
+            if (item.ProviderIds.ContainsKey("MusicBrainzRecording"))
+                RecordingMbId = item.ProviderIds["MusicBrainzRecording"];
+
+            if (!string.IsNullOrEmpty(item.Artists[0]))
+                Artist = item.Artists[0];
+
+            if (!string.IsNullOrEmpty(item.Album))
+                Album = item.Album;
+
+            if (!string.IsNullOrEmpty(item.Name))
+                Track = item.Name;
+        }
 
         public override Dictionary<string, dynamic> ToRequestForm()
         {

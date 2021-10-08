@@ -1,11 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.Listenbrainz.Models;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses;
-using Jellyfin.Plugin.Listenbrainz.Utils;
 using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Model.Serialization;
 using Microsoft.Extensions.Logging;
@@ -28,11 +26,19 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
             _logger = logger;
         }
 
-        public async Task SubmitListen(Audio item, LbUser user)
+        public async Task SubmitListen(Audio item, LbUser user, ListenRequest request = null)
         {
-            var listenRequest = BuildListenRequest(item);
+            var listenRequest = request ?? new ListenRequest(item);
             listenRequest.ApiToken = user.Token;
             listenRequest.ListenType = "single";
+
+            // Workaround for Jellyfin not storing recording ID
+            if (string.IsNullOrEmpty(listenRequest.RecordingMbId))
+            {
+                var recordingId = GetRecordingId(item.Name, listenRequest.TrackMbId);
+                if (recordingId != null) listenRequest.RecordingMbId = recordingId;
+                else listenRequest.TrackMbId = null;
+            }
 
             try
             {
@@ -53,9 +59,19 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
 
         public async Task NowPlaying(Audio item, LbUser user)
         {
-            var listenRequest = BuildListenRequest(item, includeTimestamp: false);
-            listenRequest.ApiToken = user.Token;
-            listenRequest.ListenType = "playing_now";
+            var listenRequest = new ListenRequest(item, includeTimestamp: false)
+            {
+                ApiToken = user.Token,
+                ListenType = "playing_now"
+            };
+
+            // Workaround for Jellyfin not storing recording ID
+            if (string.IsNullOrEmpty(listenRequest.RecordingMbId))
+            {
+                var recordingId = GetRecordingId(item.Name, listenRequest.TrackMbId);
+                if (recordingId != null) listenRequest.RecordingMbId = recordingId;
+                else listenRequest.TrackMbId = null;
+            }
 
             try
             {
@@ -156,57 +172,6 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
                 _logger.LogError($"Token validation failed - exception={ex.StackTrace}, token={token}");
                 return null;
             }
-        }
-
-        /// <summary>
-        /// Pull data from item and create ListenRequest instance with them.
-        /// </summary>
-        /// <param name="item">Audio item containing data.</param>
-        /// <param name="includeTimestamp">If timestamp should be included. Defaults to true.</param>
-        /// <returns>ListenRequest instace with data.</returns>
-        private ListenRequest BuildListenRequest(Audio item, bool includeTimestamp = true)
-        {
-            var listenRequest = new ListenRequest();
-
-            if (includeTimestamp)
-                listenRequest.ListenedAt = Helpers.GetCurrentTimestamp();
-
-            if (item.ProviderIds.ContainsKey("MusicBrainzArtist"))
-            {
-                var artistIds = item.ProviderIds["MusicBrainzArtist"].Split(';');
-                listenRequest.ArtistMbIds = new List<string>(artistIds);
-            }
-            else
-                listenRequest.ArtistMbIds = new List<string>();
-
-            if (item.ProviderIds.ContainsKey("MusicBrainzAlbum"))
-                listenRequest.AlbumMbId = item.ProviderIds["MusicBrainzAlbum"];
-
-            if (item.ProviderIds.ContainsKey("MusicBrainzTrack"))
-                listenRequest.TrackMbId = item.ProviderIds["MusicBrainzTrack"];
-
-            if (item.ProviderIds.ContainsKey("MusicBrainzRecording"))
-                listenRequest.RecordingMbId = item.ProviderIds["MusicBrainzRecording"];
-
-            else if (!string.IsNullOrEmpty(listenRequest.TrackMbId))
-            {
-                var recordingId = GetRecordingId(item.Name, listenRequest.TrackMbId);
-                if (recordingId != null)
-                    listenRequest.RecordingMbId = recordingId;
-                else
-                    listenRequest.TrackMbId = null;
-            }
-
-            if (!string.IsNullOrEmpty(item.Artists[0]))
-                listenRequest.Artist = item.Artists[0];
-
-            if (!string.IsNullOrEmpty(item.Album))
-                listenRequest.Album = item.Album;
-
-            if (!string.IsNullOrEmpty(item.Name))
-                listenRequest.Track = item.Name;
-
-            return listenRequest;
         }
 
         /// <summary>
