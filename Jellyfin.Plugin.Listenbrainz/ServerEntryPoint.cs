@@ -143,10 +143,13 @@ namespace Jellyfin.Plugin.Listenbrainz
                 _logger.LogDebug($"Received last listen timestamp: {userListens.LastListenTs}");
 
                 var listen = userListens.Listens.FirstOrDefault(listen => listen.ListenedAt == listenRequest.ListenedAt);
-                if (listen != null && listen.ListenedAt == listenRequest.ListenedAt)
-                    await _apiClient.SubmitFeedback(item, lbUser, listen.RecordingMsid, item.IsFavoriteOrLiked(user));
-                else
-                    _logger.LogError($"Could not sync favorite for track ({item.Name}), no match on recent listen.");
+                if (listen == null)
+                {
+                    _logger.LogError($"Could not sync favorite for track ({item.Name}), no timestamp match.");
+                    return;
+                }
+
+                await _apiClient.SubmitFeedback(item, lbUser, listen.RecordingMsid, item.IsFavoriteOrLiked(user));
             }
         }
 
