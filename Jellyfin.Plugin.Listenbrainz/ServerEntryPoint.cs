@@ -139,6 +139,9 @@ namespace Jellyfin.Plugin.Listenbrainz
                     return;
                 }
 
+                _logger.LogDebug($"Expected listen timestamp for favorite sync: {listenRequest.ListenedAt}");
+                _logger.LogDebug($"Received last listen timestamp: {userListens.LastListenTs}");
+
                 var listen = userListens.Listens.FirstOrDefault(listen => listen.ListenedAt == listenRequest.ListenedAt);
                 if (listen != null && listen.ListenedAt == listenRequest.ListenedAt)
                     await _apiClient.SubmitFeedback(item, lbUser, listen.RecordingMsid, item.IsFavoriteOrLiked(user));
