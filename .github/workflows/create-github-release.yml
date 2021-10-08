@@ -3,34 +3,34 @@ name: Publish
 on:
   push:
     tags:
-      - '*'
+      - "*"
 jobs:
   build:
     name: Publish binaries
     runs-on: ubuntu-latest
 
     steps:
-    - uses: little-core-labs/get-git-tag@v3.0.1
-      id: tagName
+      - uses: little-core-labs/get-git-tag@v3.0.1
+        id: tagName
 
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '5.0.x' # SDK Version to use; x will use the latest version of the 5.0 channel
-    
-    - name: Build release via dotnet build...
-      run: dotnet build Jellyfin.Plugin.Listenbrainz
-  
-    - name: Create ZIP archive of plugin release.
-      run: pushd /home/runner/work/jellyfin-plugin-listenbrainz/jellyfin-plugin-listenbrainz/Jellyfin.Plugin.Listenbrainz/bin/Debug/net5.0 && zip "/home/runner/work/listenbrainz_${GIT_TAG_NAME}.zip" Jellyfin.Plugin.Listenbrainz.dll && popd
-    
-    - name: Create github release and upload binaries.
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: "/home/runner/work/listenbrainz_${{ steps.tagName.outputs.tag }}.zip"
-        asset_name: "listenbrainz_${{ steps.tagName.outputs.tag }}.zip"
-        tag: ${{ github.ref }}
-        overwrite: true
-        body: "Jellyfin listenbrainz plugin release v${{ steps.tagName.outputs.tag }}"
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: "5.0.x" # SDK Version to use; x will use the latest version of the 5.0 channel
+
+      - name: Build release via dotnet build...
+        run: dotnet build Jellyfin.Plugin.Listenbrainz
+
+      - name: Create ZIP archive of plugin release.
+        run: pushd /home/runner/work/jellyfin-plugin-listenbrainz/jellyfin-plugin-listenbrainz/Jellyfin.Plugin.Listenbrainz/bin/Debug/net5.0 && zip "/home/runner/work/listenbrainz_${GIT_TAG_NAME}.zip" Jellyfin.Plugin.Listenbrainz.dll && popd
+
+      - name: Create github release and upload binaries.
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: "/home/runner/work/listenbrainz_${{ steps.tagName.outputs.tag }}.zip"
+          asset_name: "listenbrainz_${{ steps.tagName.outputs.tag }}.zip"
+          tag: ${{ github.ref }}
+          overwrite: true
+          body: "Jellyfin listenbrainz plugin release v${{ steps.tagName.outputs.tag }}"
