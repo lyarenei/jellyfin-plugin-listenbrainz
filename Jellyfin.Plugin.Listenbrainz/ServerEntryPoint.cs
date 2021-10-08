@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.Listenbrainz.Api;
+using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses;
 using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Plugins;
@@ -116,9 +117,30 @@ namespace Jellyfin.Plugin.Listenbrainz
                 _logger.LogError($"Item {item.Path} has invalid metadata - artist ({item.Artists[0]}, album ({item.Album}), track name ({item.Name})");
                 return;
             }
+
             // TODO jellyfin user name for logs
             // lbUser.Name = user.Username;
             await _apiClient.SubmitListen(item, lbUser).ConfigureAwait(false);
+
+            if (lbUser.Options.SyncFavoritesEnabled)
+            {
+                UserListensPayload userListens = await _apiClient.GetUserListens(lbUser);
+                if (userListens == null || userListens.Count == 0)
+                {
+                    _logger.LogError($"Cannot sync favorite for track ({item.Name}), no listens retrieved");
+                    return;
+                }
+
+                var listen = userListens.Listens[0];
+
+                // TODO compare using timestamps
+                if (listen.TrackMetadata.TrackName == item.Name)
+                {
+                    _logger.LogDebug($"Match found for track ({item.Name})");
+                }
+
+                await _apiClient.SubmitFeedback(item, lbUser, listen.RecordingMsid, item.IsFavoriteOrLiked(user));
+            }
         }
 
         /// <summary>
