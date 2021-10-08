@@ -109,7 +109,6 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
                 if (response.IsError())
                 {
                     _logger.LogError($"Failed to get listens for user {user.Name}: {response.Error}");
-
                 }
 
                 return response.Payload;
