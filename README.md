@@ -50,3 +50,8 @@ Create the Listenbrainz directory if it does not exist, and make sure Jellyfin c
 # Running Jellyfin server
 
 See instructions on the [offical website](https://jellyfin.org/downloads/).
+
+# License
+This plugin is directly based on an implementation of LastFM plugin, which was adapted to Jellyfin by [Jesse Ward](https://github.com/jesseward).
+As they explain in the plugin README, the original Emby plugin didn't have a (compatible) license and so this plugin cannot have one either.
+Due to a missing license, this plugin cannot be distributed with Jellyfin.
