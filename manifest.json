@@ -1,36 +1,36 @@
 [
-    {
-        "guid": "59B20823-AAFE-454C-A393-17427F518631",
-        "name": "Listenbrainz",
-        "description": "A plugin that submits your Jellyfin music listening activity to Listenbrainz.",
-        "overview": "Track your music habits with Listenbrainz.",
-        "owner": "lyarenei",
-        "category": "Music",
-        "versions": [
-            {
-                "version": "1.1.1.0",
-                "changelog": "Handle invalid track MBIDs",
-                "targetAbi": "10.7.0.0",
-                "sourceUrl": "https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases/download/1.1.1.0/listenbrainz_1.1.1.0.zip",
-                "checksum": "aca83edd4b4d6a01b2fe9d48e084798c",
-                "timestamp": "2021-06-02"
-            },
-            {
-                "version": "1.1.0.0",
-                "changelog": "Fetch Recording ID from MusicBrainz.",
-                "targetAbi": "10.7.0.0",
-                "sourceUrl": "https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases/download/1.1.0.0/listenbrainz_1.1.0.0.zip",
-                "checksum": "8f28d432fd9876f2432454c5a6791ff5",
-                "timestamp": "2021-04-14"
-            },
-            {
-                "version": "1.0.0.0",
-                "changelog": "Initial implementation.",
-                "targetAbi": "10.7.1.0",
-                "sourceUrl": "https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases/download/1.0.0.0/listenbrainz_1.0.0.0.zip",
-                "checksum": "067dbbdf749acec85c6778c14d278caf",
-                "timestamp": "2021-04-11"
-            }
-        ]
-    }
+  {
+    "guid": "59B20823-AAFE-454C-A393-17427F518631",
+    "name": "Listenbrainz",
+    "description": "A plugin that submits your Jellyfin music listening activity to Listenbrainz.",
+    "overview": "Track your music habits with Listenbrainz.",
+    "owner": "lyarenei",
+    "category": "Music",
+    "versions": [
+      {
+        "version": "1.1.1.0",
+        "changelog": "Handle invalid track MBIDs",
+        "targetAbi": "10.7.0.0",
+        "sourceUrl": "https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases/download/1.1.1.0/listenbrainz_1.1.1.0.zip",
+        "checksum": "aca83edd4b4d6a01b2fe9d48e084798c",
+        "timestamp": "2021-06-02"
+      },
+      {
+        "version": "1.1.0.0",
+        "changelog": "Fetch Recording ID from MusicBrainz.",
+        "targetAbi": "10.7.0.0",
+        "sourceUrl": "https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases/download/1.1.0.0/listenbrainz_1.1.0.0.zip",
+        "checksum": "8f28d432fd9876f2432454c5a6791ff5",
+        "timestamp": "2021-04-14"
+      },
+      {
+        "version": "1.0.0.0",
+        "changelog": "Initial implementation.",
+        "targetAbi": "10.7.1.0",
+        "sourceUrl": "https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases/download/1.0.0.0/listenbrainz_1.0.0.0.zip",
+        "checksum": "067dbbdf749acec85c6778c14d278caf",
+        "timestamp": "2021-04-11"
+      }
+    ]
+  }
 ]
