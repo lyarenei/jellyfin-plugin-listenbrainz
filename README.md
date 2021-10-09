@@ -4,6 +4,13 @@ This plugin is a reimplementation of the [LastFM plugin](https://github.com/jess
 
 As the LastFM plugin was migrated by [Jesse Ward](https://github.com/jesseward) from the original Emby repository, this plugin *cannot* be distributed with Jellyfin due to a missing compatible license.
 
+## Features
+- Track your listening history as you play the music
+- Push 'Now Playing' updates when you play something new
+- Support for optional MusicBrainz metadata
+  - This obviously requires relevant tags in the files
+  - Recording ID is fetched externally (from v1.1.x)
+
 ## About Listenbrainz
 
 ListenBrainz keeps tracks of what music you listen to and provides you with insights into your listening habits. Listenbrainz is completely open-source and publish their data as open data.
