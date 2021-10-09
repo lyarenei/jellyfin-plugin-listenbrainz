@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.Listenbrainz.Api;
+using Jellyfin.Plugin.Listenbrainz.Models;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses;
 using MediaBrowser.Controller.Entities.Audio;
@@ -125,27 +126,22 @@ namespace Jellyfin.Plugin.Listenbrainz
             var listenRequest = new ListenRequest(item);
             await _apiClient.SubmitListen(item, lbUser, listenRequest).ConfigureAwait(false);
 
-            // Give Server a bit of time to process new listen submission
-            // This is more of a safeguard, rather than a necessity.
-            _logger.LogDebug("Waiting 5s before favorite syncing");
-            Thread.Sleep(5000);
-
             if (lbUser.Options.SyncFavoritesEnabled)
             {
-                UserListensPayload userListens = await _apiClient.GetUserListens(lbUser);
-                if (userListens == null || userListens.Count == 0)
+                Listen listen = null;
+                const int retries = 3;
+                for (int i = 0; i < retries; i++)
                 {
-                    _logger.LogError($"Cannot sync favorite for track ({item.Name}), no listens received");
-                    return;
+                    listen = await GetListenMatchingRequest(listenRequest, lbUser);
+                    if (listen != null) break;
+
+                    _logger.LogInformation("Waiting 3s before trying again...");
+                    Thread.Sleep(3000);
                 }
 
-                _logger.LogDebug($"Expected listen timestamp for favorite sync: {listenRequest.ListenedAt}");
-                _logger.LogDebug($"Received last listen timestamp: {userListens.LastListenTs}");
-
-                var listen = userListens.Listens.FirstOrDefault(listen => listen.ListenedAt == listenRequest.ListenedAt);
                 if (listen == null)
                 {
-                    _logger.LogError($"Could not sync favorite for track ({item.Name}), no timestamp match.");
+                    _logger.LogError($"Could not sync favorite for track ({item.Name}), no timestamp match or no tracks received.");
                     return;
                 }
 
@@ -206,6 +202,21 @@ namespace Jellyfin.Plugin.Listenbrainz
             // Clean up
             _apiClient = null;
 
+        }
+
+        private async Task<Listen> GetListenMatchingRequest(ListenRequest request, LbUser user)
+        {
+            UserListensPayload userListens = await _apiClient.GetUserListens(user);
+            if (userListens == null || userListens.Count == 0)
+            {
+                _logger.LogError($"No listens received for user {user.Name}");
+                return null;
+            }
+
+            _logger.LogDebug($"Expected listen timestamp for favorite sync: {request.ListenedAt}");
+            _logger.LogDebug($"Received last listen timestamp: {userListens.LastListenTs}");
+
+            return userListens.Listens.FirstOrDefault(listen => listen.ListenedAt == request.ListenedAt);
         }
     }
 }
