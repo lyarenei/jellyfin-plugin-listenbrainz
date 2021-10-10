@@ -13,7 +13,6 @@ namespace Jellyfin.Plugin.Listenbrainz.Models
     public class LbUserOptions
     {
         public bool ListenSubmitEnabled { get; set; }
-
         public bool SyncFavoritesEnabled { get; set; }
     }
 }
