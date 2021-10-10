@@ -8,6 +8,14 @@
     "category": "General",
     "versions": [
       {
+        "version": "1.2.0",
+        "changelog": "Sync favorite tracks in Jellyfin as loved in Listenbrainz.",
+        "targetAbi": "10.7.0.0",
+        "sourceUrl": "https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases/download/1.2.0/listenbrainz_1.2.0.zip",
+        "checksum": "e589b6522badd2af0a34b3fb669d97ec",
+        "timestamp": "2021-10-10"
+      },
+      {
         "version": "1.1.1.0",
         "changelog": "Handle invalid track MBIDs.",
         "targetAbi": "10.7.0.0",
