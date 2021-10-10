@@ -39,7 +39,18 @@
                   id="listenSubmitEnabled"
                   name="listenSubmitEnabled"
                 />
-                <span>Enable</span>
+                <span>Enable listen submitting</span>
+              </label>
+            </div>
+            <div class="checkboxContainer">
+              <label>
+                <input
+                  is="emby-checkbox"
+                  type="checkbox"
+                  id="syncFavoritesEnabled"
+                  name="syncFavoritesEnabled"
+                />
+                <span>Enable favorites sync</span>
               </label>
             </div>
             <div>
@@ -69,6 +80,7 @@
             MediaBrowserUserId: "",
             Options: {
               ListenSubmitEnabled: false,
+              SyncFavoritesEnabled: false,
             },
           },
 
@@ -142,14 +154,15 @@
             this.$el
               .find("#listenSubmitEnabled")
               .prop("checked", data.Options.ListenSubmitEnabled);
-
-            //Dont forget to call checkboxradio('refresh') otherwise the UI wont update
+            this.$el
+              .find("#syncFavoritesEnabled")
+              .prop("checked", data.Options.SyncFavoritesEnabled);
           },
 
           save: function (token) {
             var userConfig = this.getCurrentSelectedUser();
 
-            //If the conig for the user doesnt exist, create one
+            // Create user config if not exists
             if (!userConfig) {
               userConfig = $.extend({}, this.configDefaults, {
                 MediaBrowserUserId: this.getCurrentSelectedUserId(),
@@ -171,13 +184,28 @@
             // Verify provided token
             ApiClient.VerifyListenbrainzToken(token).then(
               $.proxy(function (data) {
-                if (data && data.Valid) {
+                let msg =
+                  "Unexpected error, see Jellyfin logs for more details.";
+                if (data == null) {
+                  Dashboard.alert(msg);
+                  console.log(msg);
+                  return;
+                }
+
+                if (data.valid) {
+                  userConfig.Name = data.user_name;
                   this.doSave();
                   return;
                 }
 
-                Dashboard.alert(data.Message || "Something went wrong");
-                console.log(data.Message);
+                if (data.message) {
+                  Dashboard.alert(data.message);
+                  console.log(data.message);
+                  return;
+                }
+
+                Dashboard.alert(msg);
+                console.log(msg);
               }, this)
             );
 
@@ -227,6 +255,10 @@
 
             options.ListenSubmitEnabled = this.$el
               .find("#listenSubmitEnabled")
+              .prop("checked");
+
+            options.SyncFavoritesEnabled = this.$el
+              .find("#syncFavoritesEnabled")
               .prop("checked");
             return options;
           },

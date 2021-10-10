@@ -1,8 +1,12 @@
 using System;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.Listenbrainz.Api;
+using Jellyfin.Plugin.Listenbrainz.Models;
+using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
+using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses;
 using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Plugins;
@@ -117,8 +121,31 @@ namespace Jellyfin.Plugin.Listenbrainz
                 return;
             }
 
-            lbUser.Name = user.Username;
-            await _apiClient.SubmitListen(item, lbUser).ConfigureAwait(false);
+            var listenRequest = new ListenRequest(item);
+            await _apiClient.SubmitListen(item, lbUser, user, listenRequest).ConfigureAwait(false);
+
+            if (lbUser.Options.SyncFavoritesEnabled)
+            {
+                Listen listen = null;
+                const int retries = 3;
+                for (int i = 0; i < retries; i++)
+                {
+                    listen = await GetListenMatchingRequest(listenRequest, lbUser);
+                    if (listen != null) break;
+
+                    _logger.LogWarning($"No listens matched for timestamp '{listenRequest.ListenedAt}' ({user.Username} ({lbUser.Name}))");
+                    _logger.LogInformation("Waiting 3s before trying again...");
+                    Thread.Sleep(3000);
+                }
+
+                if (listen == null)
+                {
+                    _logger.LogError($"Could not sync favorite for track ({item.Name}), no timestamp match or no tracks received.");
+                    return;
+                }
+
+                await _apiClient.SubmitFeedback(item, lbUser, user, listen.RecordingMsid, item.IsFavoriteOrLiked(user));
+            }
         }
 
         /// <summary>
@@ -157,8 +184,7 @@ namespace Jellyfin.Plugin.Listenbrainz
                 return;
             }
 
-            lbUser.Name = user.Username;
-            await _apiClient.NowPlaying(item, lbUser).ConfigureAwait(false);
+            await _apiClient.NowPlaying(item, lbUser, user).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -173,6 +199,21 @@ namespace Jellyfin.Plugin.Listenbrainz
             // Clean up
             _apiClient = null;
 
+        }
+
+        private async Task<Listen> GetListenMatchingRequest(ListenRequest request, LbUser user)
+        {
+            UserListensPayload userListens = await _apiClient.GetUserListens(user);
+            if (userListens == null || userListens.Count == 0)
+            {
+                _logger.LogError($"No listens received for user {user.Name}");
+                return null;
+            }
+
+            _logger.LogDebug($"Expected listen timestamp for favorite sync: {request.ListenedAt}");
+            _logger.LogDebug($"Received last listen timestamp: {userListens.LastListenTs}");
+
+            return userListens.Listens.FirstOrDefault(listen => listen.ListenedAt == request.ListenedAt);
         }
     }
 }

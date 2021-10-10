@@ -1,15 +1,15 @@
-using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses
 {
     public class ValidateTokenResponse : BaseResponse
     {
-        [DataMember(Name = "user")]
-        public string User { get; set; }
+        [JsonPropertyName("user_name")]
+        public string Name { get; set; }
 
-        [DataMember(Name = "valid")]
+        [JsonPropertyName("valid")]
         public bool Valid { get; set; }
 
-        public override bool IsError() => Valid || Code == 400;
+        public override bool IsError() => !Valid || Code == 400;
     }
 }

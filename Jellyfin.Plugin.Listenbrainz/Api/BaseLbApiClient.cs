@@ -3,6 +3,7 @@ using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
@@ -58,7 +59,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
                     if (result.IsError())
                     {
                         stream.Seek(0, SeekOrigin.Begin);
-                        StreamReader reader = new StreamReader(stream);
+                        var reader = new StreamReader(stream);
                         var text = reader.ReadToEnd();
                         _logger.LogDebug($"Raw response: {text}");
 
@@ -102,19 +103,27 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
                 RequestUri = new Uri(url)
             };
 
+            _logger.LogDebug($"Request to URL: '{url}'");
             using var response = await _httpClient.SendAsync(requestMessage, CancellationToken.None);
             using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            var reader = new StreamReader(stream);
+            var text = reader.ReadToEnd();
+
             try
             {
-                var result = _jsonSerializer.DeserializeFromStream<TResponse>(stream);
-                if (result.IsError())
-                    _logger.LogError(result.Message);
+                var result = JsonSerializer.Deserialize<TResponse>(text);
+
+                _logger.LogDebug($"Raw response: {text}");
+                _logger.LogDebug($"Response code (not HTTP status code): {result.Code}");
+                _logger.LogDebug($"Response message: {result.Message}");
+                _logger.LogDebug($"Response error: {result.Error}");
 
                 return result;
             }
             catch (Exception e)
             {
                 _logger.LogDebug(e.Message);
+                _logger.LogDebug($"Raw response: {text}");
             }
 
             return null;

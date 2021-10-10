@@ -10,6 +10,9 @@ This repository was originally a fork of the LastFM plugin, but I chose to detac
 - Support for optional MusicBrainz metadata
   - This obviously requires relevant tags in the files
   - Recording ID is fetched externally (from v1.1.x)
+- Sync Jellyfin favorites (from v1.2.x)
+  - The sync is only one way for now - from Jellyfin to Listenbrainz
+  - The sync is performed immediately after listen submission
 
 ## About Listenbrainz
 

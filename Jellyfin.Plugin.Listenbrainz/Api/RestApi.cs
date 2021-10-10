@@ -22,7 +22,6 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
         [Consumes("application/json")]
         public object VerifyToken([FromBody] string token)
         {
-            _logger.LogInformation($"Verifying token '{token}'");
             return _apiClient.ValidateToken(token).Result;
         }
     }
