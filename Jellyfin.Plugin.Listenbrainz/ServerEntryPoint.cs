@@ -135,6 +135,7 @@ namespace Jellyfin.Plugin.Listenbrainz
                     listen = await GetListenMatchingRequest(listenRequest, lbUser);
                     if (listen != null) break;
 
+                    _logger.LogWarning($"No listens matched for timestamp '{listenRequest.ListenedAt}' (user {lbUser.Name}/{user.Username})");
                     _logger.LogInformation("Waiting 3s before trying again...");
                     Thread.Sleep(3000);
                 }
