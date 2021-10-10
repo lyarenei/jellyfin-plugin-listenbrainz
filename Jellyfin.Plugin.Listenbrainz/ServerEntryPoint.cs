@@ -121,10 +121,8 @@ namespace Jellyfin.Plugin.Listenbrainz
                 return;
             }
 
-            // TODO jellyfin user name for logs
-            // lbUser.Name = user.Username;
             var listenRequest = new ListenRequest(item);
-            await _apiClient.SubmitListen(item, lbUser, listenRequest).ConfigureAwait(false);
+            await _apiClient.SubmitListen(item, lbUser, user, listenRequest).ConfigureAwait(false);
 
             if (lbUser.Options.SyncFavoritesEnabled)
             {
@@ -135,7 +133,7 @@ namespace Jellyfin.Plugin.Listenbrainz
                     listen = await GetListenMatchingRequest(listenRequest, lbUser);
                     if (listen != null) break;
 
-                    _logger.LogWarning($"No listens matched for timestamp '{listenRequest.ListenedAt}' (user {lbUser.Name}/{user.Username})");
+                    _logger.LogWarning($"No listens matched for timestamp '{listenRequest.ListenedAt}' ({user.Username} ({lbUser.Name}))");
                     _logger.LogInformation("Waiting 3s before trying again...");
                     Thread.Sleep(3000);
                 }
@@ -146,7 +144,7 @@ namespace Jellyfin.Plugin.Listenbrainz
                     return;
                 }
 
-                await _apiClient.SubmitFeedback(item, lbUser, listen.RecordingMsid, item.IsFavoriteOrLiked(user));
+                await _apiClient.SubmitFeedback(item, lbUser, user, listen.RecordingMsid, item.IsFavoriteOrLiked(user));
             }
         }
 
@@ -186,9 +184,7 @@ namespace Jellyfin.Plugin.Listenbrainz
                 return;
             }
 
-            // TODO jellyfin user name for logs
-            // lbUser.Name = user.Username;
-            await _apiClient.NowPlaying(item, lbUser).ConfigureAwait(false);
+            await _apiClient.NowPlaying(item, lbUser, user).ConfigureAwait(false);
         }
 
         /// <summary>

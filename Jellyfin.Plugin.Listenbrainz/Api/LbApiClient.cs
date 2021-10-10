@@ -1,6 +1,7 @@
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Jellyfin.Data.Entities;
 using Jellyfin.Plugin.Listenbrainz.Models;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses;
@@ -26,8 +27,9 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
             _logger = logger;
         }
 
-        public async Task SubmitListen(Audio item, LbUser user, ListenRequest request = null)
+        public async Task SubmitListen(Audio item, LbUser user, User jfUser, ListenRequest request = null)
         {
+            var logUsername = $"{jfUser.Username} ({user.Name})";
             var listenRequest = request ?? new ListenRequest(item);
             listenRequest.ApiToken = user.Token;
             listenRequest.ListenType = "single";
@@ -45,20 +47,21 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
                 var response = await Post<ListenRequest, BaseResponse>(listenRequest);
                 if (response != null && !response.IsError())
                 {
-                    _logger.LogInformation($"{user.Name} listened to '{item.Name}' from album '{item.Album}' by '{item.Artists[0]}'");
+                    _logger.LogInformation($"{logUsername} listened to '{item.Name}' from album '{item.Album}' by '{item.Artists[0]}'");
                     return;
                 }
 
-                _logger.LogError($"Failed to sumbit listen for user {user.Name}: {response.Error}");
+                _logger.LogError($"Failed to sumbit listen for user {logUsername}: {response.Error}");
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Failed to submit listen - exception={ex.StackTrace}, name={user.Name}, track={item.Name}");
+                _logger.LogError($"Failed to submit listen - exception={ex.StackTrace}, name={logUsername}, track={item.Name}");
             }
         }
 
-        public async Task NowPlaying(Audio item, LbUser user)
+        public async Task NowPlaying(Audio item, LbUser user, User jfUser)
         {
+            var logUsername = $"{jfUser.Username} ({user.Name})";
             var listenRequest = new ListenRequest(item, includeTimestamp: false)
             {
                 ApiToken = user.Token,
@@ -78,15 +81,15 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
                 var response = await Post<ListenRequest, BaseResponse>(listenRequest);
                 if (response != null && !response.IsError())
                 {
-                    _logger.LogInformation($"{user.Name} is now listening to '{item.Name}' from album '{item.Album}' by '{item.Artists[0]}'");
+                    _logger.LogInformation($"{logUsername} is now listening to '{item.Name}' from album '{item.Album}' by '{item.Artists[0]}'");
                     return;
                 }
 
-                _logger.LogError($"Failed to submit now listening for user {user.Name}: {response.Error}");
+                _logger.LogError($"Failed to submit now listening for user {logUsername}: {response.Error}");
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Failed to submit now listening - exception={ex.StackTrace}, name={user.Name}, track={item.Name}");
+                _logger.LogError($"Failed to submit now listening - exception={ex.StackTrace}, name={logUsername}, track={item.Name}");
             }
         }
 
@@ -120,14 +123,15 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
             }
         }
 
-        public async Task SubmitFeedback(Audio item, LbUser lbUser, string msid, bool isLiked)
+        public async Task SubmitFeedback(Audio item, LbUser user, User jfUser, string msid, bool isLiked)
         {
+            var logUsername = $"{jfUser.Username} ({user.Name})";
             var feedbackRequest = new FeedbackRequest()
             {
                 // No option for -1 as Jellyfin does not have a concept of dislikes
                 Score = isLiked ? 1 : 0,
                 RecordingMsid = msid,
-                ApiToken = lbUser.Token
+                ApiToken = user.Token
             };
 
             try
@@ -135,15 +139,15 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
                 var response = await Post<FeedbackRequest, BaseResponse>(feedbackRequest);
                 if (response != null && !response.IsError())
                 {
-                    _logger.LogInformation($"Submitting user ({lbUser.Name}) feedback for '{item.Name}'");
+                    _logger.LogInformation($"Submitting user's feedback ({logUsername}) for '{item.Name}'");
                     return;
                 }
 
-                _logger.LogError($"Failed to submit user ({lbUser.Name}) feedback: {response.Error}");
+                _logger.LogError($"Failed to submit user ({logUsername}) feedback: {response.Error}");
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Failed to submit feedback - exception={ex}, name={lbUser.Name}, track={item.Name}");
+                _logger.LogError($"Failed to submit feedback - exception={ex}, name={logUsername}, track={item.Name}");
             }
         }
 
