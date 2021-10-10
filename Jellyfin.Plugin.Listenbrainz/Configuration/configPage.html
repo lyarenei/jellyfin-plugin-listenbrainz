@@ -192,15 +192,15 @@
                   return;
                 }
 
-                if (data.Valid) {
-                  userConfig.Name = data.Name;
+                if (data.valid) {
+                  userConfig.Name = data.user_name;
                   this.doSave();
                   return;
                 }
 
-                if (data.Message) {
-                  Dashboard.alert(data.Message);
-                  console.log(data.Message);
+                if (data.message) {
+                  Dashboard.alert(data.message);
+                  console.log(data.message);
                   return;
                 }
 
