@@ -2,6 +2,8 @@ namespace Jellyfin.Plugin.Listenbrainz.Resources
 {
     public static class Listenbrainz
     {
+        public const string ApiVersion = "1";
+
         public const string BaseUrl = "api.listenbrainz.org";
 
         public static class Endpoints

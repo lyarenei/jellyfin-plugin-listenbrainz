@@ -27,10 +27,18 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
             _logger = logger;
         }
 
-        public async Task SubmitListen(Audio item, LbUser user, User jfUser, ListenRequest request = null)
+        /// <summary>
+        /// Submit a listen to Listenbrainz.
+        /// </summary>
+        /// <param name="item">An audio item which will be submitted. Only necessary if request parameter is null.</param>
+        /// <param name="user">Listenbrainz user.</param>
+        /// <param name="jfUser">Jellyfin user. Used for logging.</param>
+        /// <param name="request">Listen request to submit. Defaults to null. If null, a listen request will be built from audio item.</param>
+        /// <returns></returns>
+        public async Task SubmitListen(Audio item, LbUser user, User jfUser, SubmitListenRequest request = null)
         {
             var logUsername = $"{jfUser.Username} ({user.Name})";
-            var listenRequest = request ?? new ListenRequest(item);
+            var listenRequest = request ?? new SubmitListenRequest(item);
             listenRequest.ApiToken = user.Token;
             listenRequest.ListenType = "single";
 
@@ -38,13 +46,15 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
             if (string.IsNullOrEmpty(listenRequest.RecordingMbId))
             {
                 var recordingId = GetRecordingId(item.Name, listenRequest.TrackMbId);
-                if (recordingId != null) listenRequest.RecordingMbId = recordingId;
-                else listenRequest.TrackMbId = null;
+                if (recordingId != null)
+                    listenRequest.RecordingMbId = recordingId;
+                else
+                    listenRequest.TrackMbId = null;
             }
 
             try
             {
-                var response = await Post<ListenRequest, BaseResponse>(listenRequest);
+                var response = await Post<SubmitListenRequest, SubmitListenResponse>(listenRequest);
                 if (response != null && !response.IsError())
                 {
                     _logger.LogInformation($"{logUsername} listened to '{item.Name}' from album '{item.Album}' by '{item.Artists[0]}'");
@@ -59,10 +69,17 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
             }
         }
 
+        /// <summary>
+        /// Submit a now playing listen to Listenbrainz.
+        /// </summary>
+        /// <param name="item">Audio item which will be submitted.</param>
+        /// <param name="user">Listenbrainz user.</param>
+        /// <param name="jfUser">Jellyfin user. Only used for logging.</param>
+        /// <returns></returns>
         public async Task NowPlaying(Audio item, LbUser user, User jfUser)
         {
             var logUsername = $"{jfUser.Username} ({user.Name})";
-            var listenRequest = new ListenRequest(item, includeTimestamp: false)
+            var listenRequest = new SubmitListenRequest(item, includeTimestamp: false)
             {
                 ApiToken = user.Token,
                 ListenType = "playing_now"
@@ -72,13 +89,15 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
             if (string.IsNullOrEmpty(listenRequest.RecordingMbId))
             {
                 var recordingId = GetRecordingId(item.Name, listenRequest.TrackMbId);
-                if (recordingId != null) listenRequest.RecordingMbId = recordingId;
-                else listenRequest.TrackMbId = null;
+                if (recordingId != null)
+                    listenRequest.RecordingMbId = recordingId;
+                else
+                    listenRequest.TrackMbId = null;
             }
 
             try
             {
-                var response = await Post<ListenRequest, BaseResponse>(listenRequest);
+                var response = await Post<SubmitListenRequest, SubmitListenResponse>(listenRequest);
                 if (response != null && !response.IsError())
                 {
                     _logger.LogInformation($"{logUsername} is now listening to '{item.Name}' from album '{item.Album}' by '{item.Artists[0]}'");
@@ -93,6 +112,11 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
             }
         }
 
+        /// <summary>
+        /// Get listens fo a provided user.
+        /// </summary>
+        /// <param name="user">Listenbrainz user.</param>
+        /// <returns>Listens of a provided user, wrapped in a payload response. Null if error.</returns>
         public async Task<UserListensPayload> GetUserListens(LbUser user)
         {
             var request = new UserListensRequest(user.Name)
@@ -110,9 +134,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
                 }
 
                 if (response.IsError())
-                {
                     _logger.LogError($"Failed to get listens for user {user.Name}: {response.Error}");
-                }
 
                 return response.Payload;
             }
@@ -123,6 +145,15 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
             }
         }
 
+        /// <summary>
+        /// Submit a feedback for provided MessyBrainz ID.
+        /// </summary>
+        /// <param name="item">Audio item. Only used for logging.</param>
+        /// <param name="user">Listenbrainz user.</param>
+        /// <param name="jfUser">Jellyfin user. Only used for logging.</param>
+        /// <param name="msid">MessyBrainz ID of an item.</param>
+        /// <param name="isLiked">Audio item is liked.</param>
+        /// <returns></returns>
         public async Task SubmitFeedback(Audio item, LbUser user, User jfUser, string msid, bool isLiked)
         {
             var logUsername = $"{jfUser.Username} ({user.Name})";
@@ -151,6 +182,11 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
             }
         }
 
+        /// <summary>
+        /// Validate provided token.
+        /// </summary>
+        /// <param name="token">Token to validate.</param>
+        /// <returns>Response from API.</returns>
         public async Task<ValidateTokenResponse> ValidateToken(string token)
         {
             _logger.LogInformation($"Validating token '{token}'");
@@ -178,11 +214,11 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
         }
 
         /// <summary>
-        /// Retrieve Recording MBID by Track MBID
+        /// Retrieve recording MBID by specified track MBID
         /// </summary>
-        /// <param name="trackName">Name of the track</param>
-        /// <param name="trackMbId">MBID of the track</param>
-        /// <returns>Recording MBID</returns>
+        /// <param name="trackName">Name of the track. Used only for logging.</param>
+        /// <param name="trackMbId">MBID of the track.</param>
+        /// <returns>Recording MBID.</returns>
         private string GetRecordingId(string trackName, string trackMbId)
         {
             _logger.LogInformation($"Getting Recording ID for Track ID: {trackMbId} ({trackName})");

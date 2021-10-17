@@ -8,7 +8,7 @@ using static Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
 namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests
 {
     [DataContract]
-    public class ListenRequest : BaseRequest
+    public class SubmitListenRequest : BaseRequest
     {
         public string ListenType { get; set; }
         public long? ListenedAt { get; set; }
@@ -23,9 +23,9 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests
         public string TrackMbId { get; set; }
         public string RecordingMbId { get; set; }
 
-        public ListenRequest() { }
+        public SubmitListenRequest() { }
 
-        public ListenRequest(Audio item, bool includeTimestamp = true)
+        public SubmitListenRequest(Audio item, bool includeTimestamp = true)
         {
             if (includeTimestamp)
                 ListenedAt = Helpers.GetCurrentTimestamp();

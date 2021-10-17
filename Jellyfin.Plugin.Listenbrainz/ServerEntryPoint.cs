@@ -76,7 +76,7 @@ namespace Jellyfin.Plugin.Listenbrainz
         /// </summary>
         private async void PlaybackStopped(object sender, PlaybackStopEventArgs e)
         {
-            if (!(e.Item is Audio)) return;
+            if (e.Item is not Audio) return;
 
             var item = e.Item as Audio;
             if (e.PlaybackPositionTicks == null)
@@ -121,7 +121,7 @@ namespace Jellyfin.Plugin.Listenbrainz
                 return;
             }
 
-            var listenRequest = new ListenRequest(item);
+            var listenRequest = new SubmitListenRequest(item);
             await _apiClient.SubmitListen(item, lbUser, user, listenRequest).ConfigureAwait(false);
 
             if (lbUser.Options.SyncFavoritesEnabled)
@@ -153,7 +153,7 @@ namespace Jellyfin.Plugin.Listenbrainz
         /// </summary>
         private async void PlaybackStart(object sender, PlaybackProgressEventArgs e)
         {
-            if (!(e.Item is Audio)) return;
+            if (e.Item is not Audio) return;
 
             var user = e.Users.FirstOrDefault();
             if (user == null) return;
@@ -198,10 +198,9 @@ namespace Jellyfin.Plugin.Listenbrainz
 
             // Clean up
             _apiClient = null;
-
         }
 
-        private async Task<Listen> GetListenMatchingRequest(ListenRequest request, LbUser user)
+        private async Task<Listen> GetListenMatchingRequest(SubmitListenRequest request, LbUser user)
         {
             UserListensPayload userListens = await _apiClient.GetUserListens(user);
             if (userListens == null || userListens.Count == 0)

@@ -15,8 +15,6 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
 {
     public class BaseLbApiClient
     {
-        private const string ApiVersion = "1";
-
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IJsonSerializer _jsonSerializer;
         private readonly HttpClient _httpClient;
@@ -129,6 +127,6 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
             return null;
         }
 
-        private static string BuildRequestUrl(string endpoint) => $"https://{Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz.BaseUrl}/{ApiVersion}/{endpoint}";
+        private static string BuildRequestUrl(string endpoint) => $"https://{Resources.Listenbrainz.BaseUrl}/{Resources.Listenbrainz.ApiVersion}/{endpoint}";
     }
 }

@@ -6,7 +6,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests
     {
         public string ApiToken { get; set; }
 
-        public virtual Dictionary<string, dynamic> ToRequestForm() => new Dictionary<string, dynamic>();
+        public virtual Dictionary<string, dynamic> ToRequestForm() => new();
 
         public virtual string GetEndpoint() => "";
     }
