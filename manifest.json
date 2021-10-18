@@ -6,6 +6,7 @@
     "overview": "Track your music habits with Listenbrainz.",
     "owner": "lyarenei",
     "category": "General",
+    "imageUrl": "https://raw.githubusercontent.com/lyarenei/jellyfin-plugin-listenbrainz/master/res/listenbrainz/ListenBrainz_logo.svg",
     "versions": [
       {
         "version": "1.2.0",
