@@ -1,5 +1,7 @@
 # jellyfin-plugin-listenbrainz
 
+![ListenBrainz logo for Jellyfin plugin](res/listenbrainz/ListenBrainz_logo.svg "ListenBrainz logo for Jellyfin plugin")
+
 This plugin is a reimplementation of the [LastFM plugin](https://github.com/jesseward/jellyfin-plugin-lastfm) for Listenbrainz. I removed all functionality which does not apply to Listenbrainz and appropriately renamed files/variables/methods.
 
 This repository was originally a fork of the LastFM plugin, but I chose to detach it, since this plugin will go in a different (incompatible) way - naturally, as it's for a different service.
