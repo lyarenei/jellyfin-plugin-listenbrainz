@@ -1,14 +1,13 @@
-using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz
 {
-    [DataContract]
     public class Recording
     {
-        [DataMember(Name = "id")]
+        [JsonPropertyName("id")]
         public string Id { get; set; }
 
-        [DataMember(Name = "score")]
+        [JsonPropertyName("score")]
         public int Score { get; set; }
     }
 }

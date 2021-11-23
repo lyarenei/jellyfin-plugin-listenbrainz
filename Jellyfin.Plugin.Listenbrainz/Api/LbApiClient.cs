@@ -6,7 +6,6 @@ using Jellyfin.Plugin.Listenbrainz.Models;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses;
 using MediaBrowser.Controller.Entities.Audio;
-using MediaBrowser.Model.Serialization;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.Listenbrainz.Api
@@ -16,12 +15,12 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
         private readonly MbClient _mbClient;
         private readonly ILogger _logger;
 
-        public LbApiClient(IHttpClientFactory httpClientFactory, IJsonSerializer jsonSerializer, ILogger logger) : base(httpClientFactory, jsonSerializer, logger)
+        public LbApiClient(IHttpClientFactory httpClientFactory, ILogger logger) : base(httpClientFactory, logger)
         {
             _logger = logger;
         }
 
-        public LbApiClient(IHttpClientFactory httpClientFactory, IJsonSerializer jsonSerializer, MbClient mbClient, ILogger logger) : base(httpClientFactory, jsonSerializer, logger)
+        public LbApiClient(IHttpClientFactory httpClientFactory, MbClient mbClient, ILogger logger) : base(httpClientFactory, logger)
         {
             _mbClient = mbClient;
             _logger = logger;

@@ -1,5 +1,4 @@
 using System.Net.Http;
-using MediaBrowser.Model.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -12,10 +11,10 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
         private readonly LbApiClient _apiClient;
         private readonly ILogger<RestApi> _logger;
 
-        public RestApi(IJsonSerializer jsonSerializer, IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory)
+        public RestApi(IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory)
         {
             _logger = loggerFactory.CreateLogger<RestApi>();
-            _apiClient = new LbApiClient(httpClientFactory, jsonSerializer, _logger);
+            _apiClient = new LbApiClient(httpClientFactory, _logger);
         }
 
         [HttpPost]

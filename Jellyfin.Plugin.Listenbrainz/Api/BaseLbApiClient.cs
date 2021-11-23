@@ -6,11 +6,11 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses;
-using MediaBrowser.Model.Serialization;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.Listenbrainz.Api
@@ -18,9 +18,10 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
     public class BaseLbApiClient
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly IJsonSerializer _jsonSerializer;
         private readonly HttpClient _httpClient;
         private readonly ILogger _logger;
+        private readonly JsonSerializerOptions _serOpts;
+
         private readonly List<HttpStatusCode> _retryStatuses = new()
         {
             HttpStatusCode.InternalServerError,
@@ -33,12 +34,16 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
         private const int RetryBackoffSeconds = 3;
         private const int RetryCount = 6;
 
-        public BaseLbApiClient(IHttpClientFactory httpClientFactory, IJsonSerializer jsonSerializer, ILogger logger)
+
+        public BaseLbApiClient(IHttpClientFactory httpClientFactory, ILogger logger)
         {
             _httpClientFactory = httpClientFactory;
             _httpClient = _httpClientFactory.CreateClient();
-            _jsonSerializer = jsonSerializer;
             _logger = logger;
+            _serOpts = new JsonSerializerOptions
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            };
         }
 
         /// <summary>
@@ -50,7 +55,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
         /// <returns>A response with type TResponse</returns>
         public async Task<TResponse> Post<TRequest, TResponse>(TRequest request) where TRequest : BaseRequest where TResponse : BaseResponse
         {
-            var jsonData = _jsonSerializer.SerializeToString(request.ToRequestForm());
+            var jsonData = JsonSerializer.Serialize(request.ToRequestForm(), _serOpts);
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token", request.ApiToken);
             HttpResponseMessage response = null;
             var retrySecs = 1;
@@ -94,7 +99,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
             {
                 try
                 {
-                    var result = _jsonSerializer.DeserializeFromStream<TResponse>(stream);
+                    var result = JsonSerializer.Deserialize<TResponse>(stream);
                     if (result.IsError())
                     {
                         stream.Seek(0, SeekOrigin.Begin);

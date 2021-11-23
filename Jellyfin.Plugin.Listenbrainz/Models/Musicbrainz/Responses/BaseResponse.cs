@@ -1,10 +1,10 @@
-using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz.Responses
 {
     public class BaseResponse
     {
-        [DataMember(Name = "error")]
+        [JsonPropertyName("error")]
         public string Error { get; set; }
 
         public virtual bool IsError() => !string.IsNullOrEmpty(Error);
