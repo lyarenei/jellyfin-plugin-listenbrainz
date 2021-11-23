@@ -68,7 +68,7 @@ cd jellyfin-plugin-listenbrainz
 dotnet publish -c Release
 ```
 
-If the build is successful, the compiler will report the path to your Plugin dll (`Jellyfin.Plugin.Listenbrainz/bin/Release/net5.0/Jellyfin.Plugin.Listenbrainz.dll`)
+If the build is successful, the compiler will report the path to your Plugin dll (`Jellyfin.Plugin.Listenbrainz/bin/Release/net6.0/Jellyfin.Plugin.Listenbrainz.dll`)
 
 Copy the plugin DLL file into your Jellyfin ${CONFIG_DIR}/plugins/Listenbrainz_{VERSION} directory.
 Create the Listenbrainz directory if it does not exist, and make sure Jellyfin can access it.
