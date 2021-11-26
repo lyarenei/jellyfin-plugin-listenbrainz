@@ -7,6 +7,7 @@ This plugin is a reimplementation of the [LastFM plugin](https://github.com/jess
 This repository was originally a fork of the LastFM plugin, but I chose to detach it, since this plugin will go in a different (incompatible) way - naturally, as it's for a different service.
 
 ## Features
+
 - Track your listening history as you play the music
 - Push 'Now Playing' updates when you play something new
 - Support for optional MusicBrainz metadata
@@ -25,13 +26,12 @@ ListenBrainz is operated by the MetaBrainz Foundation which has a long-standing 
 
 (from [listenbrainz.org](https://listenbrainz.org) (modified))
 
-
 # Repo Install
 
 Jellyfin 10.6.0 introduces 3rd party plugin repositories (see: [announcement](https://jellyfin.org/posts/plugin-updates/)), configure the following to follow stable builds for this plugin
-* Repo name: Listenbrainz
-* Repo URL: `https://raw.githubusercontent.com/lyarenei/jellyfin-plugin-listenbrainz/master/manifest.json`
 
+- Repo name: Listenbrainz
+- Repo URL: `https://raw.githubusercontent.com/lyarenei/jellyfin-plugin-listenbrainz/master/manifest.json`
 
 # Build
 
@@ -57,6 +57,7 @@ Create the Listenbrainz directory if it does not exist, and make sure Jellyfin c
 See instructions on the [offical website](https://jellyfin.org/downloads/).
 
 # License
+
 This plugin is directly based on an implementation of LastFM plugin, which was adapted to Jellyfin by [Jesse Ward](https://github.com/jesseward).
 As they explain in the plugin README, the original Emby plugin didn't have a (compatible) license and so this plugin cannot have one either.
 Due to a missing license, this plugin cannot be distributed with Jellyfin.
