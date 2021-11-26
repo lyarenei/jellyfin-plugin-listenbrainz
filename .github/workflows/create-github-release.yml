@@ -17,7 +17,7 @@ jobs:
 
       - uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: "5.0.x" # SDK Version to use; x will use the latest version of the 5.0 channel
+          dotnet-version: "6.0.x" # SDK Version to use
 
       - name: Build release via dotnet build...
         run: dotnet publish -c Release
