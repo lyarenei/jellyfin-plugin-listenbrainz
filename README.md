@@ -42,7 +42,7 @@ Once the SDK is installed, run the following.
 ```
 git clone https://github.com/lyarenei/jellyfin-plugin-listenbrainz
 cd jellyfin-plugin-listenbrainz
-dotnet build -c release
+dotnet publish -c Release
 ```
 
 If the build is successful, the compiler will report the path to your Plugin dll (`Jellyfin.Plugin.Listenbrainz/bin/Release/net5.0/Jellyfin.Plugin.Listenbrainz.dll`)
