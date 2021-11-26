@@ -9,6 +9,14 @@
     "imageUrl": "https://raw.githubusercontent.com/lyarenei/jellyfin-plugin-listenbrainz/master/res/listenbrainz/ListenBrainz_logo.svg",
     "versions": [
       {
+        "version": "2.0.0.0",
+        "changelog": "Compatibility update for JF 10.8.x.",
+        "targetAbi": "10.8.0.0",
+        "sourceUrl": "https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases/download/2.0.0.0-alpha/listenbrainz_2.0.0.0-alpha.zip",
+        "checksum": "d8a5f511c7f0a52f91d377131a5f2dd6",
+        "timestamp": "2021-11-27"
+      },
+      {
         "version": "1.2.1.0",
         "changelog": "Retry on HTTP 5xx errors; improve request logging.",
         "targetAbi": "10.7.0.0",
