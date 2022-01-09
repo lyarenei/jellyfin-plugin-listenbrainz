@@ -48,10 +48,13 @@ That means, the admin inevitably has an access to the Listenbrainz API keys of a
 To configure a user:
 
 1. Open plugin settings
-2. Select user you want to configure
+2. Select the user you want to configure
 3. Paste the Listenbrainz user token to the API token field (you can get it from [here](https://listenbrainz.org/profile/))
 4. Check `Enable listen submitting`
 5. Click on save
+
+The API token is verified before saving.
+The settings will NOT be saved, if the provided token is not valid.
 
 # Manual build and installation
 
