@@ -38,6 +38,21 @@ Jellyfin 10.6.0 introduces 3rd party plugin repositories (see: [announcement](ht
 After you add the repository, you should be able to see a Listenbrainz plugin in the catalog.
 Install your preferred version and restart the server as asked.
 
+# Configuration
+
+After the plugin installation, you need to configure it for your users.
+Unfortunately, the server admin must configure the plugin for users,
+since there's no way to make user-configurable plugin (or at least I'm not aware of it).
+That means, the admin inevitably has an access to the Listenbrainz API keys of all users on their server.
+
+To configure a user:
+
+1. Open plugin settings
+2. Select user you want to configure
+3. Paste the Listenbrainz user token to the API token field (you can get it from [here](https://listenbrainz.org/profile/))
+4. Check `Enable listen submitting`
+5. Click on save
+
 # Build
 
 .NET core 5.0 is required to build the Listenbrainz plugin. To install the .NET SDK on Linux or macOS, see the download page at https://dotnet.microsoft.com/download. Native package manager instructions can be found for Debian, RHEL, Ubuntu, Fedora, SLES, and CentOS.
