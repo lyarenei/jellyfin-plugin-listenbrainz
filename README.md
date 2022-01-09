@@ -26,7 +26,7 @@ ListenBrainz is operated by the MetaBrainz Foundation which has a long-standing 
 
 # Installation
 
-The plugin can be installed either via repository or [manually](#manual-installation)
+The plugin can be installed either via repository or [manually](#manual-build-and-installation)
 
 ## Repo Install
 
@@ -53,7 +53,7 @@ To configure a user:
 4. Check `Enable listen submitting`
 5. Click on save
 
-# Build
+# Manual build and installation
 
 .NET core 5.0 is required to build the Listenbrainz plugin. To install the .NET SDK on Linux or macOS, see the download page at https://dotnet.microsoft.com/download. Native package manager instructions can be found for Debian, RHEL, Ubuntu, Fedora, SLES, and CentOS.
 
@@ -66,8 +66,6 @@ dotnet publish -c Release
 ```
 
 If the build is successful, the compiler will report the path to your Plugin dll (`Jellyfin.Plugin.Listenbrainz/bin/Release/net5.0/Jellyfin.Plugin.Listenbrainz.dll`)
-
-## Manual Installation
 
 Copy the plugin DLL file into your Jellyfin ${CONFIG_DIR}/plugins/Listenbrainz_{VERSION} directory.
 Create the Listenbrainz directory if it does not exist, and make sure Jellyfin can access it.
