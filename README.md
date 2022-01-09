@@ -38,7 +38,7 @@ Jellyfin 10.6.0 introduces 3rd party plugin repositories (see: [announcement](ht
 After you add the repository, you should be able to see a Listenbrainz plugin in the catalog.
 Install your preferred version and restart the server as asked.
 
-# Configuration
+## Configuration
 
 After the plugin installation, you need to configure it for your users.
 Unfortunately, the server admin must configure the plugin for users,
