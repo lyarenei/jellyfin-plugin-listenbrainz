@@ -8,7 +8,7 @@ This plugin is a reimplementation of the [LastFM plugin](https://github.com/jess
 
 - Track your listening history as you play the music
 - Push 'Now Playing' updates when you play something new
-- Support for optional MusicBrainz metadata
+- Support for submitting optional MusicBrainz metadata
   - This obviously requires relevant tags in the files
   - Recording ID is fetched externally (from v1.1.x)
 - Sync Jellyfin favorites (from v1.2.x)
