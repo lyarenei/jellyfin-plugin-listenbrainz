@@ -46,8 +46,8 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
                 Content = new StringContent(jsonData, Encoding.UTF8, "application/json")
             };
 
-
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token", request.ApiToken);
+            LogRequest(requestMessage);
             using var response = await _httpClient.SendAsync(requestMessage, CancellationToken.None);
             using (var stream = await response.Content.ReadAsStreamAsync())
             {
@@ -101,7 +101,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
                 RequestUri = new Uri(url)
             };
 
-            _logger.LogDebug($"Request to URL: '{url}'");
+            LogRequest(requestMessage);
             using var response = await _httpClient.SendAsync(requestMessage, CancellationToken.None);
             using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
             var reader = new StreamReader(stream);
@@ -128,5 +128,16 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
         }
 
         private static string BuildRequestUrl(string endpoint) => $"https://{Resources.Listenbrainz.BaseUrl}/{Resources.Listenbrainz.ApiVersion}/{endpoint}";
+
+        private void LogRequest(HttpRequestMessage requestMessage)
+        {
+            var requestData = requestMessage.Content?.ReadAsStringAsync();
+            _logger.LogDebug("Sending request:");
+            _logger.LogDebug("URI: {Uri}", requestMessage.RequestUri);
+            _logger.LogDebug("Method: {Method}", requestMessage.Method);
+            _logger.LogDebug("Authorization: {Auth}", _httpClient.DefaultRequestHeaders.Authorization);
+            _logger.LogDebug("Additional headers: {Headers}", requestMessage.Headers);
+            _logger.LogDebug("Data: {Data}", requestData?.Result);
+        }
     }
 }
