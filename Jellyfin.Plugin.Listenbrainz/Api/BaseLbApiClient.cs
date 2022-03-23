@@ -135,14 +135,41 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
                     url += '&';
             }
 
-            var requestMessage = new HttpRequestMessage
+            HttpResponseMessage response = null;
+            var retrySecs = 1;
+            for (var retryCount = 0; retryCount < RetryCount; retryCount++)
             {
-                Method = HttpMethod.Get,
-                RequestUri = new Uri(url)
-            };
+                var requestMessage = new HttpRequestMessage
+                {
+                    Method = HttpMethod.Get,
+                    RequestUri = new Uri(url)
+                };
 
-            LogRequest(requestMessage);
-            using var response = await _httpClient.SendAsync(requestMessage, CancellationToken.None);
+                LogRequest(requestMessage);
+                response = await _httpClient.SendAsync(requestMessage, CancellationToken.None);
+                if (!_retryStatuses.Contains(response.StatusCode))
+                {
+                    _logger.LogDebug("Response status is {Status}, will not retry", response.StatusCode);
+                    break;
+                }
+
+                if (retryCount + 1 == RetryCount)
+                {
+                    _logger.LogInformation("Retry count limit reached, giving up");
+                    break;
+                }
+
+                retrySecs *= RetryBackoffSeconds;
+                _logger.LogWarning("Request failed, will retry after {Num} seconds", retrySecs);
+                Thread.Sleep(retrySecs * 1000);
+            }
+            
+            if (response == null)
+            {
+                _logger.LogError("Should not reach here - response is null");
+                return null;
+            }
+
             using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
             var reader = new StreamReader(stream);
             var text = reader.ReadToEnd();
