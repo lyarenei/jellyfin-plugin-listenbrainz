@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -19,7 +21,17 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
         private readonly IJsonSerializer _jsonSerializer;
         private readonly HttpClient _httpClient;
         private readonly ILogger _logger;
+        private readonly List<HttpStatusCode> _retryStatuses = new()
+        {
+            HttpStatusCode.InternalServerError,
+            HttpStatusCode.BadGateway,
+            HttpStatusCode.ServiceUnavailable,
+            HttpStatusCode.GatewayTimeout,
+            HttpStatusCode.InsufficientStorage
+        };
 
+        private const int RetryBackoffSeconds = 3;
+        private const int RetryCount = 6;
 
         public BaseLbApiClient(IHttpClientFactory httpClientFactory, IJsonSerializer jsonSerializer, ILogger logger)
         {
@@ -39,16 +51,44 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
         public async Task<TResponse> Post<TRequest, TResponse>(TRequest request) where TRequest : BaseRequest where TResponse : BaseResponse
         {
             var jsonData = _jsonSerializer.SerializeToString(request.ToRequestForm());
-            var requestMessage = new HttpRequestMessage
-            {
-                Method = HttpMethod.Post,
-                RequestUri = new Uri(BuildRequestUrl(request.GetEndpoint())),
-                Content = new StringContent(jsonData, Encoding.UTF8, "application/json")
-            };
-
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token", request.ApiToken);
-            LogRequest(requestMessage);
-            using var response = await _httpClient.SendAsync(requestMessage, CancellationToken.None);
+            HttpResponseMessage response = null;
+            var retrySecs = 1;
+
+            for (var retryCount = 0; retryCount < RetryCount; retryCount++)
+            {
+                var requestMessage = new HttpRequestMessage
+                {
+                    Method = HttpMethod.Post,
+                    RequestUri = new Uri(BuildRequestUrl(request.GetEndpoint())),
+                    Content = new StringContent(jsonData, Encoding.UTF8, "application/json")
+                };
+
+                LogRequest(requestMessage);
+                response = await _httpClient.SendAsync(requestMessage, CancellationToken.None);
+                if (!_retryStatuses.Contains(response.StatusCode))
+                {
+                    _logger.LogDebug("Response status is {Status}, will not retry", response.StatusCode);
+                    break;
+                }
+
+                if (retryCount + 1 == RetryCount)
+                {
+                    _logger.LogInformation("Retry count limit reached, giving up");
+                    break;
+                }
+
+                retrySecs *= RetryBackoffSeconds;
+                _logger.LogWarning("Request failed, will retry after {Num} seconds", retrySecs);
+                Thread.Sleep(retrySecs * 1000);
+            }
+
+            if (response == null)
+            {
+                _logger.LogError("Should not reach here - response is null");
+                return null;
+            }
+
             using (var stream = await response.Content.ReadAsStreamAsync())
             {
                 try
