@@ -201,10 +201,12 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
         private void LogRequest(HttpRequestMessage requestMessage)
         {
             var requestData = requestMessage.Content?.ReadAsStringAsync();
+            var token = _httpClient.DefaultRequestHeaders.Authorization?.Parameter;
+            var obfuscatedToken = $"***{token?[^4..]}";
             _logger.LogDebug("Sending request:");
             _logger.LogDebug("URI: {Uri}", requestMessage.RequestUri);
             _logger.LogDebug("Method: {Method}", requestMessage.Method);
-            _logger.LogDebug("Authorization: {Auth}", _httpClient.DefaultRequestHeaders.Authorization);
+            _logger.LogDebug("Authorization: {Auth}", obfuscatedToken);
             _logger.LogDebug("Additional headers: {Headers}", requestMessage.Headers);
             _logger.LogDebug("Data: {Data}", requestData?.Result);
         }
