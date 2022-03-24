@@ -89,6 +89,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
                 return null;
             }
 
+            LogResponse(response);
             using (var stream = await response.Content.ReadAsStreamAsync())
             {
                 try
@@ -170,6 +171,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
                 return null;
             }
 
+            LogResponse(response);
             using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
             var reader = new StreamReader(stream);
             var text = reader.ReadToEnd();
@@ -205,6 +207,14 @@ namespace Jellyfin.Plugin.Listenbrainz.Api
             _logger.LogDebug("Authorization: {Auth}", _httpClient.DefaultRequestHeaders.Authorization);
             _logger.LogDebug("Additional headers: {Headers}", requestMessage.Headers);
             _logger.LogDebug("Data: {Data}", requestData?.Result);
+        }
+
+        private void LogResponse(HttpResponseMessage responseMessage)
+        {
+            var responseData = responseMessage.Content.ReadAsStringAsync();
+            _logger.LogDebug("Got response:");
+            _logger.LogDebug("Status: {Status}", responseMessage.StatusCode);
+            _logger.LogDebug("Data: {Date}", responseData.Result);
         }
     }
 }
