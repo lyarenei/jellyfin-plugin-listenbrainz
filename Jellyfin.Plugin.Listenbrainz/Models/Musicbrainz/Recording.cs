@@ -1,13 +1,25 @@
-using System.Text.Json.Serialization;
+namespace Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz;
 
-namespace Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz
+/// <summary>
+/// Recording model.
+/// </summary>
+public class Recording
 {
-    public class Recording
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Recording"/> class.
+    /// </summary>
+    public Recording()
     {
-        [JsonPropertyName("id")]
-        public string Id { get; set; }
-
-        [JsonPropertyName("score")]
-        public int Score { get; set; }
+        Id = string.Empty;
     }
+
+    /// <summary>
+    /// Gets or sets recording MBID.
+    /// </summary>
+    public string Id { get; set; }
+
+    /// <summary>
+    /// Gets or sets recording match score.
+    /// </summary>
+    public int Score { get; set; }
 }

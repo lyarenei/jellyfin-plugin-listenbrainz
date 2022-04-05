@@ -1,27 +1,59 @@
-namespace Jellyfin.Plugin.Listenbrainz.Resources
+namespace Jellyfin.Plugin.Listenbrainz.Resources;
+
+/// <summary>
+/// Listenbrainz API resources.
+/// </summary>
+public static class Listenbrainz
 {
-    public static class Listenbrainz
+    /// <summary>
+    /// API version.
+    /// </summary>
+    public const string ApiVersion = "1";
+
+    /// <summary>
+    /// API base URL.
+    /// </summary>
+    public const string BaseUrl = "api.listenbrainz.org";
+
+    /// <summary>
+    /// Basic API endpoints.
+    /// </summary>
+    public static class Endpoints
     {
-        public const string ApiVersion = "1";
+        /// <summary>
+        /// Endpoint for submitting listens.
+        /// </summary>
+        public const string SubmitListen = "submit-listens";
 
-        public const string BaseUrl = "api.listenbrainz.org";
+        /// <summary>
+        /// Endpoint for token validation.
+        /// </summary>
+        public const string ValidateToken = "validate-token";
+    }
 
-        public static class Endpoints
-        {
-            public const string SubmitListen = "submit-listens";
-            public const string ValidateToken = "validate-token";
-        }
+    /// <summary>
+    /// Feedback API endpoints.
+    /// </summary>
+    public static class FeedbackEndpoints
+    {
+        private const string EndpointBase = "feedback";
 
-        public static class FeedbackEndpoints
-        {
-            private const string EndpointBase = "feedback";
-            public const string RecordingFeedback = EndpointBase + "/recording-feedback";
-        }
+        /// <summary>
+        /// Endpoint for user feedback.
+        /// </summary>
+        public const string RecordingFeedback = EndpointBase + "/recording-feedback";
+    }
 
-        public static class UserEndpoints
-        {
-            private const string EndpointBase = "user";
-            public const string ListensEndpoint = EndpointBase + "/{0}/listens";
-        }
+    /// <summary>
+    /// User API endpoints.
+    /// </summary>
+    public static class UserEndpoints
+    {
+        private const string EndpointBase = "user";
+
+        /// <summary>
+        /// Endpoint for user listens.
+        /// </summary>
+        public const string ListensEndpoint = EndpointBase + "/{0}/listens";
     }
 }
