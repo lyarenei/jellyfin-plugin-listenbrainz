@@ -1,102 +1,201 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
+using System.Collections.ObjectModel;
 using System.Text.Json.Serialization;
+using MediaBrowser.Controller.Entities.Audio;
 
-namespace Jellyfin.Plugin.Listenbrainz.Models
+namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz;
+
+/// <summary>
+/// Listen model.
+/// </summary>
+public class Listen
 {
-    public class Listen
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Listen"/> class.
+    /// </summary>
+    public Listen()
     {
-        [JsonPropertyName("listened_at")]
-        public int ListenedAt { get; set; }
+        Data = new TrackMetadata();
+    }
 
-        [JsonPropertyName("recording_msid")]
-        public string RecordingMsid { get; set; }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Listen"/> class.
+    /// </summary>
+    /// <param name="item">Audio item with data.</param>
+    /// <param name="listenedAt">Listened at UNIX timestamp.</param>
+    public Listen(Audio item, long? listenedAt = null)
+    {
+        ListenedAt = listenedAt;
+        Data = new TrackMetadata(item);
+    }
 
-        [JsonPropertyName("user_name")]
-        public string UserName { get; set; }
+    /// <summary>
+    /// Gets or sets unix timestamp of listen.
+    /// </summary>
+    public long? ListenedAt { get; set; }
 
-        [JsonPropertyName("track_metadata")]
-        public TrackMetadata TrackMetadata { get; set; }
+    /// <summary>
+    /// Gets or sets listen track metadata.
+    /// </summary>
+    [JsonPropertyName("track_metadata")]
+    public TrackMetadata Data { get; set; }
 
-        public Dictionary<string, dynamic> ToRequestForm()
+    /// <summary>
+    /// Gets or sets recording MSID.
+    /// </summary>
+    [JsonPropertyName("recording_msid")]
+    public string? RecordingMsid { get; set; }
+
+    /// <summary>
+    /// Gets or sets listenbrainz username.
+    /// </summary>
+    public string? UserName { get; set; }
+}
+
+/// <summary>
+/// Track metadata.
+/// </summary>
+public class TrackMetadata
+{
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TrackMetadata"/> class.
+    /// </summary>
+    public TrackMetadata()
+    {
+        ArtistName = string.Empty;
+        TrackName = string.Empty;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TrackMetadata"/> class.
+    /// </summary>
+    /// <param name="item">Audio item with source data.</param>
+    public TrackMetadata(Audio item)
+    {
+        ArtistName = item.Artists[0];
+        ReleaseName = item.Album;
+        TrackName = item.Name;
+        if (item.ProviderIds.ContainsKey("MusicBrainzArtist"))
         {
-            var dict = new Dictionary<string, dynamic>();
-            if (ListenedAt != 0) dict.Add("listened_at", ListenedAt);
-            if (!string.IsNullOrEmpty(RecordingMsid)) dict.Add("recording_msid", RecordingMsid);
-            if (TrackMetadata != null) dict.Add("track_metadata", TrackMetadata.ToRequestForm());
-            return dict;
+            Info = new AdditionalInfo(item);
         }
     }
 
-    [DataContract]
-    public class TrackMetadata
+    /// <summary>
+    /// Gets or sets artist name.
+    /// </summary>
+    public string ArtistName { get; set; }
+
+    /// <summary>
+    /// Gets or sets album name.
+    /// </summary>
+    public string? ReleaseName { get; set; }
+
+    /// <summary>
+    /// Gets or sets track name.
+    /// </summary>
+    public string TrackName { get; set; }
+
+    /// <summary>
+    /// Gets or sets additional info.
+    /// </summary>
+    [JsonPropertyName("additional_info")]
+    public AdditionalInfo? Info { get; set; }
+}
+
+/// <summary>
+/// Additional info for <see cref="TrackMetadata"/>.
+/// </summary>
+public class AdditionalInfo
+{
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AdditionalInfo"/> class.
+    /// </summary>
+    public AdditionalInfo()
     {
-        [JsonPropertyName("artist_name")]
-        public string ArtistName { get; set; }
+    }
 
-        [JsonPropertyName("release_name")]
-        public string ReleaseName { get; set; }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AdditionalInfo"/> class.
+    /// </summary>
+    /// <param name="recordingMbId">Recording MBID.</param>
+    public AdditionalInfo(string recordingMbId)
+    {
+        RecordingMbId = recordingMbId;
+    }
 
-        [JsonPropertyName("track_name")]
-        public string TrackName { get; set; }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AdditionalInfo"/> class.
+    /// </summary>
+    /// <param name="item">Audio item with source data.</param>
+    public AdditionalInfo(Audio item)
+    {
+        ListeningFrom = "jellyfin";
+        TrackNumber = item.IndexNumber;
 
-        [JsonPropertyName("additional_info")]
-        public AdditionalInfo AdditionalInfo { get; set; }
-
-        public Dictionary<string, dynamic> ToRequestForm()
+        if (item.ProviderIds.ContainsKey("MusicBrainzArtist"))
         {
-            var dict = new Dictionary<string, dynamic>();
-            if (!string.IsNullOrEmpty(ArtistName)) dict.Add("artist_name", ArtistName);
-            if (!string.IsNullOrEmpty(ReleaseName)) dict.Add("release_name", ReleaseName);
-            if (!string.IsNullOrEmpty(TrackName)) dict.Add("track_name", TrackName);
-            if (AdditionalInfo != null) dict.Add("additional_info", AdditionalInfo.ToRequestForm());
-            return dict;
+            var artistIds = item.ProviderIds["MusicBrainzArtist"].Split(';');
+            ArtistMbIds = new Collection<string>(artistIds);
+        }
+
+        if (item.ProviderIds.ContainsKey("MusicBrainzAlbum"))
+        {
+            ReleaseMbId = item.ProviderIds["MusicBrainzAlbum"];
+        }
+
+        if (item.ProviderIds.ContainsKey("MusicBrainzTrack"))
+        {
+            TrackMbId = item.ProviderIds["MusicBrainzTrack"];
+        }
+
+        // If in the future Jellyfin will store Recording MbId
+        if (item.ProviderIds.ContainsKey("MusicBrainzRecording"))
+        {
+            RecordingMbId = item.ProviderIds["MusicBrainzRecording"];
         }
     }
 
-    [DataContract]
-    public class AdditionalInfo
-    {
-        [JsonPropertyName("listening_from")]
-        public const string ListeningFrom = "jellyfin";
+    /// <summary>
+    /// Gets or sets the source of listen.
+    /// </summary>
+    public string? ListeningFrom { get; set; }
 
-        [JsonPropertyName("artist_mbids")]
-        public List<string> ArtistMbIds { get; set; }
+    /// <summary>
+    /// Gets or sets album MBID.
+    /// </summary>
+    [JsonPropertyName("release_mbid")]
+    public string? ReleaseMbId { get; set; }
 
-        [JsonPropertyName("artist_msid")]
-        public string ArtistMsId { get; set; }
+    /// <summary>
+    /// Gets or sets a collection of artist MBIDs.
+    /// </summary>
+    [JsonPropertyName("artist_mbids")]
+    public Collection<string>? ArtistMbIds { get; set; }
 
-        [JsonPropertyName("recording_mbid")]
-        public string RecordingMbId { get; set; }
+    /// <summary>
+    /// Gets or sets recording MBID.
+    /// </summary>
+    [JsonPropertyName("recording_mbid")]
+    public string? RecordingMbId { get; set; }
 
-        [JsonPropertyName("recording_msid")]
-        public string RecordingMsid { get; set; }
+    /// <summary>
+    /// Gets or sets a collection of tags.
+    /// </summary>
+    public Collection<string>? Tags { get; set; }
 
-        [JsonPropertyName("release_mbid")]
-        public string ReleaseMbId { get; set; }
+    /// <summary>
+    /// Gets or sets track MBID.
+    /// </summary>
+    [JsonPropertyName("track_mbid")]
+    public string? TrackMbId { get; set; }
 
-        [JsonPropertyName("release_msid")]
-        public string ReleaseMsid { get; set; }
+    /// <summary>
+    /// Gets or sets work MBID.
+    /// </summary>
+    public string? WorkMbId { get; set; }
 
-        [JsonPropertyName("track_mbid")]
-        public string TrackMbId { get; set; }
-
-        public Dictionary<string, dynamic> ToRequestForm()
-        {
-            var dict = new Dictionary<string, dynamic>
-        {
-          { "listening_from", ListeningFrom }
-        };
-
-            if (ArtistMbIds.Any()) dict.Add("artist", ArtistMbIds);
-            if (!string.IsNullOrEmpty(ArtistMsId)) dict.Add("artist_msid", ArtistMsId);
-            if (!string.IsNullOrEmpty(RecordingMbId)) dict.Add("recording_mbid", RecordingMbId);
-            if (!string.IsNullOrEmpty(RecordingMsid)) dict.Add("recording_msid", RecordingMsid);
-            if (!string.IsNullOrEmpty(ReleaseMbId)) dict.Add("release_mbid", ReleaseMbId);
-            if (!string.IsNullOrEmpty(ReleaseMsid)) dict.Add("release_msid", ReleaseMsid);
-            if (!string.IsNullOrEmpty(TrackMbId)) dict.Add("track_mbid", TrackMbId);
-            return dict;
-        }
-    }
+    /// <summary>
+    /// Gets or sets track number.
+    /// </summary>
+    public int? TrackNumber { get; set; }
 }

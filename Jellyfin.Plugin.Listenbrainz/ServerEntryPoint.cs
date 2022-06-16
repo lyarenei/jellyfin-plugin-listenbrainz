@@ -1,218 +1,266 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Jellyfin.Plugin.Listenbrainz.Api;
-using Jellyfin.Plugin.Listenbrainz.Models;
+using Jellyfin.Plugin.Listenbrainz.Clients;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
-using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses;
+using Jellyfin.Plugin.Listenbrainz.Services;
+using Jellyfin.Plugin.Listenbrainz.Utils;
 using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Plugins;
 using MediaBrowser.Controller.Session;
-using MediaBrowser.Model.Serialization;
 using Microsoft.Extensions.Logging;
 
-namespace Jellyfin.Plugin.Listenbrainz
+namespace Jellyfin.Plugin.Listenbrainz;
+
+/// <summary>
+/// Plugin ServerEntryPoint.
+/// </summary>
+public class ServerEntryPoint : IServerEntryPoint
 {
+    // Rules for submitting listens: https://listenbrainz.readthedocs.io/en/production/dev/api/#post--1-submit-listens.
+    // Listens should be submitted for tracks when the user has listened to half the track or 4 minutes of the track, whichever is lower.
+    // If the user hasn't listened to 4 minutes or half the track, it doesn’t fully count as a listen and should not be submitted.
+
+    // Rule A - if a song reaches >= 4 minutes of playback
+    private const long MinimumPlayTimeToSubmitInTicks = 4 * TimeSpan.TicksPerMinute;
+
+    // Rule B - if a song reaches >= 50% played
+    private const double MinimumPlayPercentage = 50.00;
+
+    private readonly ISessionManager _sessionManager;
+    private readonly ILogger<ServerEntryPoint> _logger;
+
+    private readonly ListenbrainzClient _apiClient;
+
     /// <summary>
-    /// Class ServerEntryPoint
+    /// Initializes a new instance of the <see cref="ServerEntryPoint"/> class.
     /// </summary>
-    public class ServerEntryPoint : IServerEntryPoint
+    /// <param name="sessionManager">Jellyfin Session manager.</param>
+    /// <param name="httpClientFactory">HTTP client factory.</param>
+    /// <param name="loggerFactory">Logger factory.</param>
+    public ServerEntryPoint(
+        ISessionManager sessionManager,
+        IHttpClientFactory httpClientFactory,
+        ILoggerFactory loggerFactory)
     {
-        // Rules for submitting listens: https://listenbrainz.readthedocs.io/en/production/dev/api/#post--1-submit-listens .
-        // Listens should be submitted for tracks when the user has listened to half the track or 4 minutes of the track, whichever is lower.
-        // If the user hasn’t listened to 4 minutes or half the track, it doesn’t fully count as a listen and should not be submitted.
+        _logger = loggerFactory.CreateLogger<ServerEntryPoint>();
 
-        // Rule A - if a song reaches >= 4 minutes of playback
-        private const long MinimumPlayTimeToSubmitInTicks = 4 * TimeSpan.TicksPerMinute;
+        _sessionManager = sessionManager;
+        var mbClient = new MusicbrainzClient(httpClientFactory, _logger, new SleepService());
+        _apiClient = new ListenbrainzClient(httpClientFactory, mbClient, _logger, new SleepService());
+        Instance = this;
+    }
 
-        // Rule B - if a song reaches >= 50% played
-        private const double MinimumPlayPercentage = 50.00;
+    /// <summary>
+    /// Gets the instance.
+    /// </summary>
+    /// <value>The instance.</value>
+    public static ServerEntryPoint? Instance { get; private set; }
 
-        private readonly ISessionManager _sessionManager;
-        private readonly IUserDataManager _userDataManager;
+    /// <summary>
+    /// Runs this instance and binds the events to the methods.
+    /// </summary>
+    /// <returns>A completed <see cref="Task"/>.</returns>
+    public Task RunAsync()
+    {
+        _sessionManager.PlaybackStart += PlaybackStart;
+        _sessionManager.PlaybackStopped += PlaybackStopped;
+        return Task.CompletedTask;
+    }
 
-        private LbApiClient _apiClient;
-        private readonly ILogger<ServerEntryPoint> _logger;
-
-        /// <summary>
-        /// Gets the instance.
-        /// </summary>
-        /// <value>The instance.</value>
-        public static ServerEntryPoint Instance { get; private set; }
-
-        public ServerEntryPoint(
-            ISessionManager sessionManager,
-            IJsonSerializer jsonSerializer,
-            IHttpClientFactory httpClientFactory,
-            ILoggerFactory loggerFactory,
-            IUserDataManager userDataManager)
+    /// <summary>
+    /// Send "single" listen to Listenbrainz when playback of item has stopped.
+    /// </summary>
+    private async void PlaybackStopped(object? sender, PlaybackStopEventArgs e)
+    {
+        if (e.Item is not Audio item)
         {
-            _logger = loggerFactory.CreateLogger<ServerEntryPoint>();
-
-            _sessionManager = sessionManager;
-            _userDataManager = userDataManager;
-            var mbClient = new MbClient(httpClientFactory, jsonSerializer, _logger);
-            _apiClient = new LbApiClient(httpClientFactory, jsonSerializer, mbClient, _logger);
-            Instance = this;
+            return;
         }
 
-        /// <summary>
-        /// Runs this instance.
-        /// </summary>
-        public Task RunAsync()
+        if (e.PlaybackPositionTicks == null)
         {
-            //Bind events
-            _sessionManager.PlaybackStart += PlaybackStart;
-            _sessionManager.PlaybackStopped += PlaybackStopped;
-            return Task.CompletedTask;
+            _logger.LogDebug("Playback ticks for '{Track}' is null", item.Name);
+            return;
         }
 
-        /// <summary>
-        /// Let Listenbrainz know when a track has finished.
-        /// Playback stopped is run when a track is finished.
-        /// </summary>
-        private async void PlaybackStopped(object sender, PlaybackStopEventArgs e)
+        var playPercent = ((double)e.PlaybackPositionTicks / item.RunTimeTicks) * 100;
+        _logger.LogDebug(
+            "Playback of '{Track}' stopped: played {Percent}% ({Position} ticks), " +
+            "required {MinimumPercentage}% or {MinimumPlayTicks} ticks for submission",
+            item.Name,
+            playPercent,
+            e.PlaybackPositionTicks,
+            MinimumPlayPercentage,
+            MinimumPlayTimeToSubmitInTicks);
+
+        if (playPercent < MinimumPlayPercentage && e.PlaybackPositionTicks < MinimumPlayTimeToSubmitInTicks)
         {
-            if (e.Item is not Audio) return;
-
-            var item = e.Item as Audio;
-            if (e.PlaybackPositionTicks == null)
-            {
-                _logger.LogDebug($"Playback ticks for '{item.Name}' is null");
-                return;
-            }
-
-            var playPercent = ((double)e.PlaybackPositionTicks / item.RunTimeTicks) * 100;
-            _logger.LogDebug($"Current playback of '{item.Name}': played {playPercent}% ({e.PlaybackPositionTicks} ticks), required {MinimumPlayPercentage}% or {MinimumPlayTimeToSubmitInTicks} ticks");
-            if (playPercent < MinimumPlayPercentage && e.PlaybackPositionTicks < MinimumPlayTimeToSubmitInTicks)
-            {
-                _logger.LogDebug($"Listen to '{item.Name}' won't be submitted, played {playPercent}% ({e.PlaybackPositionTicks} ticks), required {MinimumPlayPercentage}% or {MinimumPlayTimeToSubmitInTicks} ticks");
-                return;
-            }
-
-            var user = e.Users.FirstOrDefault();
-            if (user == null) return;
-
-            var lbUser = Utils.UserHelpers.GetUser(user);
-            if (lbUser == null)
-            {
-                _logger.LogDebug($"Could not find listenbrainz configuration for user '{user.Username}'");
-                return;
-            }
-
-            if (!lbUser.Options.ListenSubmitEnabled)
-            {
-                _logger.LogInformation($"User '{user.Username} has submitting of listens turned off.", user.Username);
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(lbUser.Token))
-            {
-                _logger.LogError($"No API token present for user {user.Username}, aborting");
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(item.Artists[0]) || string.IsNullOrWhiteSpace(item.Name))
-            {
-                _logger.LogError($"Item {item.Path} has invalid metadata - artist ({item.Artists[0]}, album ({item.Album}), track name ({item.Name})");
-                return;
-            }
-
-            var listenRequest = new SubmitListenRequest(item);
-            await _apiClient.SubmitListen(item, lbUser, user, listenRequest).ConfigureAwait(false);
-
-            if (lbUser.Options.SyncFavoritesEnabled)
-            {
-                Listen listen = null;
-                const int retries = 3;
-                for (int i = 0; i < retries; i++)
-                {
-                    listen = await GetListenMatchingRequest(listenRequest, lbUser);
-                    if (listen != null) break;
-
-                    _logger.LogWarning($"No listens matched for timestamp '{listenRequest.ListenedAt}' ({user.Username} ({lbUser.Name}))");
-                    _logger.LogInformation("Waiting 3s before trying again...");
-                    Thread.Sleep(3000);
-                }
-
-                if (listen == null)
-                {
-                    _logger.LogError($"Could not sync favorite for track ({item.Name}), no timestamp match or no tracks received.");
-                    return;
-                }
-
-                await _apiClient.SubmitFeedback(item, lbUser, user, listen.RecordingMsid, item.IsFavoriteOrLiked(user));
-            }
+            _logger.LogDebug(
+                "Listen for track '{Track}' won't be submitted, " +
+                "played {Percent}% ({Position} ticks), " +
+                "required {PlayPercentage}% or {MinimumPlayTicks} ticks",
+                item.Name,
+                playPercent,
+                e.PlaybackPositionTicks,
+                MinimumPlayPercentage,
+                MinimumPlayTimeToSubmitInTicks);
+            return;
         }
 
-        /// <summary>
-        /// Let Listenbrainz know when a user has started listening to a track
-        /// </summary>
-        private async void PlaybackStart(object sender, PlaybackProgressEventArgs e)
+        var user = e.Users.FirstOrDefault();
+        if (user == null)
         {
-            if (e.Item is not Audio) return;
-
-            var user = e.Users.FirstOrDefault();
-            if (user == null) return;
-
-            var lbUser = Utils.UserHelpers.GetUser(user);
-            if (lbUser == null)
-            {
-                _logger.LogDebug("Could not find listenbrainz user");
-                return;
-            }
-
-            if (!lbUser.Options.ListenSubmitEnabled)
-            {
-                _logger.LogInformation($"User '{user.Username} has submitting of listens turned off.");
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(lbUser.Token))
-            {
-                _logger.LogError($"No API token present for user {user.Username}, aborting");
-                return;
-            }
-
-            var item = e.Item as Audio;
-            if (string.IsNullOrWhiteSpace(item.Artists[0]) || string.IsNullOrWhiteSpace(item.Name))
-            {
-                _logger.LogError($"Item {item.Path} has invalid metadata - artist ({item.Artists[0]}, album ({item.Album}), track name ({item.Name})");
-                return;
-            }
-
-            await _apiClient.NowPlaying(item, lbUser, user).ConfigureAwait(false);
+            return;
         }
 
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        public void Dispose()
+        var lbUser = UserHelpers.GetUser(user);
+        if (lbUser == null)
         {
-            // Unbind events
+            _logger.LogInformation(
+                "Listen won't be sent: " +
+                "could not find Listenbrainz configuration for user '{User}'",
+                user.Username);
+            return;
+        }
+
+        var (canSubmit, reason) = lbUser.CanSubmitListen();
+        if (!canSubmit)
+        {
+            _logger.LogInformation(
+                "Listen won't be sent for user {User}: {Reason}",
+                user.Username,
+                reason);
+            return;
+        }
+
+        if (!item.HasRequiredMetadata())
+        {
+            _logger.LogError(
+                "Listen won't be sent: " +
+                "Track ({Path}) has invalid metadata - missing artist and/or track name.",
+                item.Path);
+            return;
+        }
+
+        var now = Helpers.GetCurrentTimestamp();
+        var listenRequest = new SubmitListenRequest("single", item, now);
+        _apiClient.SubmitListen(lbUser, user, listenRequest);
+
+        if (!lbUser.Options.SyncFavoritesEnabled)
+        {
+            return;
+        }
+
+        string? listenMsId = null;
+        const int Retries = 7;
+        const int BackOff = 3;
+        var waitTime = 1;
+        for (int i = 1; i <= Retries; i++)
+        {
+            listenMsId = await _apiClient.GetMsIdByListenTimestamp(now, lbUser, user).ConfigureAwait(false);
+            if (listenMsId != null)
+            {
+                _logger.LogDebug("Found MSID for {Track} (at {Timestamp}): {MsId}", item.Name, now, listenMsId);
+                break;
+            }
+
+            _logger.LogDebug(
+                "Recording MSID for this listen not found - " +
+                "no listens matched for timestamp '{Now}' for user {User}",
+                now,
+                user.Username);
+
+            if (i + 1 > Retries)
+            {
+                _logger.LogInformation(
+                    "Favorite sync failed: " +
+                    "no recording MSID found for listen {Track} (at {Timestamp})",
+                    item.Name,
+                    now);
+                return;
+            }
+
+            waitTime *= BackOff;
+            _logger.LogDebug("Waiting {Seconds}s before trying again...", waitTime);
+            Thread.Sleep(waitTime * 1000);
+        }
+
+        Debug.Assert(listenMsId != null, nameof(listenMsId) + " != null");
+        _apiClient.SubmitFeedback(item, lbUser, user, listenMsId, item.IsFavoriteOrLiked(user));
+    }
+
+    /// <summary>
+    /// Send "playing_now" listen to Listenbrainz on playback start.
+    /// </summary>
+    private void PlaybackStart(object? sender, PlaybackProgressEventArgs e)
+    {
+        if (e.Item is not Audio item)
+        {
+            return;
+        }
+
+        var user = e.Users.FirstOrDefault();
+        if (user == null)
+        {
+            return;
+        }
+
+        var lbUser = UserHelpers.GetUser(user);
+        if (lbUser == null)
+        {
+            _logger.LogInformation(
+                "Listen won't be sent: " +
+                "could not find Listenbrainz configuration for user '{User}'",
+                user.Username);
+            return;
+        }
+
+        var (canSubmit, reason) = lbUser.CanSubmitListen();
+        if (!canSubmit)
+        {
+            _logger.LogInformation(
+                "Listen won't be sent for user {User}: {Reason}",
+                user.Username,
+                reason);
+            return;
+        }
+
+        if (!item.HasRequiredMetadata())
+        {
+            _logger.LogError(
+                "Listen won't be sent: " +
+                "Track ({Path}) has invalid metadata - missing artist and/or track name.",
+                item.Path);
+            return;
+        }
+
+        _apiClient.NowPlaying(item, lbUser, user);
+    }
+
+    /// <summary>
+    /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+    /// </summary>
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+    /// </summary>
+    /// <param name="disposing">If disposing should take place.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
             _sessionManager.PlaybackStart -= PlaybackStart;
             _sessionManager.PlaybackStopped -= PlaybackStopped;
-
-            // Clean up
-            _apiClient = null;
-        }
-
-        private async Task<Listen> GetListenMatchingRequest(SubmitListenRequest request, LbUser user)
-        {
-            UserListensPayload userListens = await _apiClient.GetUserListens(user);
-            if (userListens == null || userListens.Count == 0)
-            {
-                _logger.LogError($"No listens received for user {user.Name}");
-                return null;
-            }
-
-            _logger.LogDebug($"Expected listen timestamp for favorite sync: {request.ListenedAt}");
-            _logger.LogDebug($"Received last listen timestamp: {userListens.LastListenTs}");
-
-            return userListens.Listens.FirstOrDefault(listen => listen.ListenedAt == request.ListenedAt);
         }
     }
 }

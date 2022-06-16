@@ -1,304 +1,277 @@
 ﻿<!DOCTYPE html>
-<html>
-  <head>
-    <title>Listenbrainz Configuration</title>
-  </head>
+<html lang="en">
+<head>
+    <title>Listenbrainz Plugin configuration</title>
+</head>
 
-  <body>
-    <div
-      id="ListenbrainzConfigurationPage"
-      data-role="page"
-      class="page type-interior pluginConfigurationPage"
-      data-require="emby-input,emby-button,emby-select,emby-checkbox"
-    >
-      <div data-role="content">
+<body>
+<div
+    id="ListenbrainzConfigPage"
+    data-role="page"
+    class="page type-interior pluginConfigurationPage"
+    data-require="emby-input,emby-button,emby-select,emby-checkbox"
+>
+    <div data-role="content">
         <div class="content-primary">
-          <form id="ListenbrainzConfigurationForm">
-            <div class="selectContainer">
-              <select
-                is="emby-select"
-                id="user"
-                name="user"
-                label="Configure Listenbrainz for:"
-              ></select>
-            </div>
-            <div class="inputContainer">
-              <input
-                is="emby-input"
-                id="token"
-                name="token"
-                type="text"
-                label="API token:"
-              />
-            </div>
-            <div class="checkboxContainer">
-              <label>
-                <input
-                  is="emby-checkbox"
-                  type="checkbox"
-                  id="listenSubmitEnabled"
-                  name="listenSubmitEnabled"
-                />
-                <span>Enable listen submitting</span>
-              </label>
-            </div>
-            <div class="checkboxContainer">
-              <label>
-                <input
-                  is="emby-checkbox"
-                  type="checkbox"
-                  id="syncFavoritesEnabled"
-                  name="syncFavoritesEnabled"
-                />
-                <span>Enable favorites sync</span>
-              </label>
-            </div>
-            <div>
-              <button
-                is="emby-button"
-                type="submit"
-                class="raised button-submit block emby-button"
-              >
-                <span>Save</span>
-              </button>
-            </div>
-          </form>
+            <form id="ListenbrainzConfigForm">
+                <div class="selectContainer">
+                    <label class="selectLabel" for="User">Configure Listenbrainz for:</label>
+                    <select is="emby-select" id="User" name="User"></select>
+                </div>
+                <div>
+                    <!-- Yes, inline CSS, I know.-->
+                    <div style="
+                        display: grid;
+                        grid-template-columns: 1fr 1fr 1fr 1fr;
+                        grid-template-rows: 1fr;
+                        gap: 0 15px;
+                        grid-auto-flow: row;
+                        grid-template-areas: 'tokenInput tokenInput nameValue getName';"
+                    >
+                        <div class="inputContainer" style="grid-area: tokenInput">
+                            <label class="inputLabel inputLabelUnfocused" for="Token">API token</label>
+                            <input id="Token" name="Token" type="text" is="emby-input"/>
+                            <div class="fieldDescription">Listenbrainz API token.</div>
+                        </div>
+                        <div class="inputContainer" style="grid-area: nameValue">
+                            <label class="inputLabel inputLabelUnfocused" for="UserName">User name</label>
+                            <input id="UserName" name="UserName" type="text" is="emby-input" readonly/>
+                            <div class="fieldDescription">Listenbrainz user name.</div>
+                        </div>
+                        <div class="inputContainer" style="grid-area: getName; display:flex; flex-flow: column; justify-content: center">
+                            <div id="TokenTestButton"
+                                 class="raised button block emby-button"
+                                 style="margin: 0">
+                                <span>Get name</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="checkboxContainer">
+                    <label>
+                        <input
+                            is="emby-checkbox"
+                            type="checkbox"
+                            id="ListenSubmitEnabled"
+                            name="ListenSubmitEnabled"
+                        />
+                        <span>Enable listen submitting</span>
+                    </label>
+                </div>
+                <div class="checkboxContainer">
+                    <label>
+                        <input
+                            is="emby-checkbox"
+                            type="checkbox"
+                            id="SyncFavoritesEnabled"
+                            name="SyncFavoritesEnabled"
+                        />
+                        <span>Enable favorites sync</span>
+                    </label>
+                </div>
+                <div>
+                    <button is="emby-button" type="submit" class="raised button-submit block emby-button">
+                        <span>Save</span>
+                    </button>
+                </div>
+            </form>
         </div>
-      </div>
+    </div>
 
-      <script type="text/javascript">
-        var ListenbrainzConfigurationPage = {
-          _pluginUniqueId: "59B20823-AAFE-454C-A393-17427F518631",
-          _users: [],
-          _config: [],
+    <script type="text/javascript">
+        var ListenbrainzConfig = {
+            pluginUniqueId: "59B20823-AAFE-454C-A393-17427F518631",
 
-          _currentUserId: "",
-          _currentUserConfig: null,
-
-          configDefaults: {
-            Token: "",
-            MediaBrowserUserId: "",
-            Options: {
-              ListenSubmitEnabled: false,
-              SyncFavoritesEnabled: false,
+            configDefaults: {
+                Token: "",
+                MediaBrowserUserId: "",
+                Options: {
+                    ListenSubmitEnabled: false,
+                    SyncFavoritesEnabled: false,
+                },
             },
-          },
 
-          $el: null,
+            buildUserList: function (users) {
+                let html = "";
+                users.forEach(function (user) {
+                    html += "<option value='" + user.Id + "'>" + user.Name + "</option>";
+                })
 
-          init: function ($ctx) {
-            Dashboard.showLoadingMsg();
+                document.getElementById("User").innerHTML = html;
+            },
 
-            this.$el = $ctx;
+            getUserConfig: function (config, userId) {
+                if (config.LbUsers == null) {
+                    return ListenbrainzConfig.configDefaults;
+                }
 
-            this.$el
-              .find("#ListenbrainzConfigurationForm")
-              .on("submit", this, this.onSubmit);
-            this.$el
-              .find("#user")
-              .on("change", this, $.proxy(this.onUserChange, this));
+                let index = config.LbUsers.map(function (user) {
+                    return user.MediaBrowserUserId
+                }).indexOf(userId);
 
-            var loadConfig = this.loadConfiguration();
-            var loadUsers = this.loadUsers().then(
-              $.proxy(this.buildUserList, this)
-            );
+                if (index === -1) {
+                    return ListenbrainzConfig.configDefaults;
+                }
 
-            //When we load everything, set the current user
-            $.when(loadConfig, loadUsers).then(
-              $.proxy(function () {
-                Dashboard.hideLoadingMsg();
+                return config.LbUsers[index];
+            },
 
-                //Populate the inputs with the default selected user
-                this.onUserChange();
-              }, this)
-            );
-          },
+            populateConfig: function (userData) {
+                if (userData.Token != null) {
+                    document.querySelector("#Token")
+                        .value = userData.Token
+                }
 
-          loadConfiguration: function () {
-            return ApiClient.getPluginConfiguration(this._pluginUniqueId).then(
-              $.proxy(function (config) {
-                this._config = config;
-              }, this)
-            );
-          },
+                document.querySelector("#UserName")
+                    .value = userData.Name
 
-          loadUsers: function () {
-            return ApiClient.getUsers().then(
-              $.proxy(function (users) {
-                this._users = users;
-              }, this)
-            );
-          },
+                document.querySelector("#ListenSubmitEnabled")
+                    .checked = userData.Options.ListenSubmitEnabled
 
-          saveConfiguration: function () {
-            return ApiClient.updatePluginConfiguration(
-              this._pluginUniqueId,
-              this._config
-            );
-          },
+                document.querySelector("#SyncFavoritesEnabled")
+                    .checked = userData.Options.SyncFavoritesEnabled
+            },
 
-          buildUserList: function () {
-            var html = "";
-            $.each(this._users, function (i, user) {
-              html +=
-                "<option value='" + user.Id + "'>" + user.Name + "</option>";
-            });
+            getSelectedUserId: function () {
+                return document.querySelector("#User").value;
+            },
 
-            document.getElementById("user").innerHTML = html;
-          },
+            gatherInputValues: function () {
+                return {
+                    Token: document.querySelector("#Token").value,
+                    Name: document.querySelector("#UserName").value,
+                    MediaBrowserUserId: document.querySelector("#User").value,
+                    Options: {
+                        ListenSubmitEnabled: document.querySelector("#ListenSubmitEnabled").checked,
+                        SyncFavoritesEnabled: document.querySelector("#SyncFavoritesEnabled").checked
+                    },
+                }
+            },
 
-          populateInputs: function (userData) {
-            var data = $.extend({}, this.configDefaults, userData);
+            testApiToken: function (token) {
+                ApiClient.VerifyListenbrainzToken(token).then(function (data) {
+                    console.log(data);
 
-            this.$el.find("#token").val(data.Token);
-            this.$el
-              .find("#listenSubmitEnabled")
-              .prop("checked", data.Options.ListenSubmitEnabled);
-            this.$el
-              .find("#syncFavoritesEnabled")
-              .prop("checked", data.Options.SyncFavoritesEnabled);
-          },
+                    let msg = "Unexpected error, check Jellyfin logs.";
+                    if (data == null) {
+                        Dashboard.alert(msg);
+                        console.log(msg);
+                        return;
+                    }
 
-          save: function (token) {
-            var userConfig = this.getCurrentSelectedUser();
+                    if (data.Valid) {
+                        Dashboard.alert(data.Message);
+                        document.querySelector("#UserName").value = data.user_name
+                        Dashboard.hideLoadingMsg();
+                        return;
+                    }
 
-            // Create user config if not exists
-            if (!userConfig) {
-              userConfig = $.extend({}, this.configDefaults, {
-                MediaBrowserUserId: this.getCurrentSelectedUserId(),
-              });
+                    if (data.Message) {
+                        Dashboard.alert(data.Message);
+                        console.log(data.Message);
+                        Dashboard.hideLoadingMsg();
+                        return;
+                    }
 
-              this._config.LbUsers.push(userConfig);
+                    Dashboard.alert(msg);
+                    console.log(msg);
+                });
             }
-
-            userConfig.Token = this.$el.find("#token").val();
-            userConfig.Options = this.getUIOptionsValues();
-
-            if (!token) {
-              this.doSave();
-              return;
-            }
-
-            Dashboard.showLoadingMsg();
-
-            // Verify provided token
-            ApiClient.VerifyListenbrainzToken(token).then(
-              $.proxy(function (data) {
-                let msg =
-                  "Unexpected error, see Jellyfin logs for more details.";
-                if (data == null) {
-                  Dashboard.alert(msg);
-                  console.log(msg);
-                  return;
-                }
-
-                if (data.valid) {
-                  userConfig.Name = data.user_name;
-                  this.doSave();
-                  return;
-                }
-
-                if (data.message) {
-                  Dashboard.alert(data.message);
-                  console.log(data.message);
-                  return;
-                }
-
-                Dashboard.alert(msg);
-                console.log(msg);
-              }, this)
-            );
-
-            Dashboard.hideLoadingMsg();
-          },
-
-          doSave: function () {
-            return this.saveConfiguration().then(
-              $.proxy(function (result) {
-                Dashboard.processPluginConfigurationUpdateResult(result);
-
-                this.onUserChange();
-              }, this)
-            );
-          },
-
-          getCurrentSelectedUserId: function () {
-            return this.$el.find("#user").val();
-          },
-
-          getCurrentSelectedUser: function () {
-            //Get the current user
-            var currentUserId = this.getCurrentSelectedUserId();
-
-            var currentUser = this._config.LbUsers.filter(function (user) {
-              return user.MediaBrowserUserId == currentUserId;
-            })[0];
-
-            return currentUser;
-          },
-
-          getSelectedMBUser: function () {
-            //Get the current user
-            var currentUserId = this.getCurrentSelectedUserId();
-
-            var currentUser = this._users.filter(function (user) {
-              return user.Id == currentUserId;
-            })[0];
-
-            return currentUser;
-          },
-
-          //Will return an options object with the current UI settings
-
-          getUIOptionsValues: function () {
-            var options = $.extend({}, this.configDefaults.Options);
-
-            options.ListenSubmitEnabled = this.$el
-              .find("#listenSubmitEnabled")
-              .prop("checked");
-
-            options.SyncFavoritesEnabled = this.$el
-              .find("#syncFavoritesEnabled")
-              .prop("checked");
-            return options;
-          },
-
-          onUserChange: function () {
-            var currentUser = this.getCurrentSelectedUser();
-
-            this.populateInputs(currentUser);
-          },
-
-          onSubmit: function (e) {
-            e.preventDefault();
-
-            var self = e.data;
-            var token = $(this).find("#token").val();
-
-            //Load the config again in case another user has updated their settings
-            self.loadConfiguration().then(function () {
-              self.save(token);
-            });
-          },
         };
 
-        $("#ListenbrainzConfigurationPage").on("pageshow", function () {
-          ListenbrainzConfigurationPage.init($(this));
-        });
+        document.querySelector('#ListenbrainzConfigPage')
+            .addEventListener('pageshow', function () {
+                Dashboard.showLoadingMsg();
+                ApiClient.getUsers().then(function (users) {
+                    ListenbrainzConfig.buildUserList(users);
+                    ApiClient.getPluginConfiguration(ListenbrainzConfig.pluginUniqueId)
+                        .then(function (config) {
+                            let userConfig = ListenbrainzConfig.getUserConfig(config, users[0].Id);
+                            ListenbrainzConfig.populateConfig(userConfig);
+                            Dashboard.hideLoadingMsg();
+                        });
+                });
+            });
+
+        document.querySelector('#User')
+            .addEventListener('change', function () {
+                Dashboard.showLoadingMsg();
+                let userId = ListenbrainzConfig.getSelectedUserId();
+                ApiClient.getPluginConfiguration(ListenbrainzConfig.pluginUniqueId)
+                    .then(function (config) {
+                        let userConfig = ListenbrainzConfig.getUserConfig(config, userId);
+                        ListenbrainzConfig.populateConfig(userConfig);
+                        Dashboard.hideLoadingMsg();
+                    });
+            });
+
+        document.querySelector('#TokenTestButton')
+            .addEventListener('mouseup', function () {
+                Dashboard.showLoadingMsg();
+
+                let formData = ListenbrainzConfig.gatherInputValues();
+                if (!formData.Token) {
+                    Dashboard.alert("No token set");
+                    return;
+                } else {
+                    ListenbrainzConfig.testApiToken(formData.Token);
+                }
+
+                Dashboard.hideLoadingMsg();
+            })
+
+        document.querySelector('#ListenbrainzConfigForm')
+            .addEventListener('submit', function (e) {
+                Dashboard.showLoadingMsg();
+                ApiClient.getPluginConfiguration(ListenbrainzConfig.pluginUniqueId)
+                    .then(function (config) {
+                        if (Object.keys(config).length === 0) {
+                            config.LbUsers = [];
+                        }
+
+                        let selectedUserId = ListenbrainzConfig.getSelectedUserId();
+                        let index = config.LbUsers.map(function (user) {
+                            return user.MediaBrowserUserId
+                        }).indexOf(selectedUserId);
+
+                        let newData = ListenbrainzConfig.gatherInputValues();
+                        if (!newData.Name) {
+                            Dashboard.alert("User name is missing.")
+                            Dashboard.hideLoadingMsg();
+                            return;
+                        }
+
+                        if (index === -1) {
+                            config.LbUsers.push(newData);
+                        } else {
+                            config.LbUsers[index] = newData;
+                        }
+
+                        ApiClient.updatePluginConfiguration(ListenbrainzConfig.pluginUniqueId, config)
+                            .then(function (result) {
+                                Dashboard.processPluginConfigurationUpdateResult(result);
+                            });
+                    });
+
+                e.preventDefault();
+                return false;
+            });
 
         ApiClient.VerifyListenbrainzToken = function (token) {
-          if (!token) throw new Error("API token is missing");
-          var url = this.getUrl("Listenbrainz/ValidateToken");
+            if (!token) {
+                throw new Error("API token is missing");
+            }
 
-          return this.ajax({
-            type: "POST",
-            url: url,
-            data: JSON.stringify(token),
-            contentType: "application/json",
-            dataType: "json",
-          });
+            let url = this.getUrl("Listenbrainz/ValidateToken");
+            return this.ajax({
+                type: "POST",
+                url: url,
+                data: JSON.stringify(token),
+                contentType: "application/json",
+                dataType: "json",
+            });
         };
-      </script>
-    </div>
-  </body>
+    </script>
+</div>
+</body>
 </html>

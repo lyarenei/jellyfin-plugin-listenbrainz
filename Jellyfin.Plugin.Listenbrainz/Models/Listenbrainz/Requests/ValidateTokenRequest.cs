@@ -1,17 +1,27 @@
-using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
 using System.Collections.Generic;
 using static Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
 
-namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests
+namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
+
+/// <summary>
+/// Request model for token validation.
+/// </summary>
+public class ValidateTokenRequest : BaseRequest
 {
-    public class ValidateTokenRequest : BaseRequest
-    {
-        public string Token { get; set; }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ValidateTokenRequest"/> class.
+    /// </summary>
+    /// <param name="token">Token to validate.</param>
+    public ValidateTokenRequest(string token) => Token = token;
 
-        public ValidateTokenRequest(string token) => Token = token;
+    /// <summary>
+    /// Gets token to validate.
+    /// </summary>
+    private string Token { get; }
 
-        public override Dictionary<string, dynamic> ToRequestForm() => new() { { "token", Token } };
+    /// <inheritdoc />
+    public override object ToRequestForm() => new Dictionary<string, string> { { "token", Token } };
 
-        public override string GetEndpoint() => Endpoints.ValidateToken;
-    }
+    /// <inheritdoc />
+    public override string GetEndpoint() => Endpoints.ValidateToken;
 }

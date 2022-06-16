@@ -1,13 +1,19 @@
-﻿using System.Collections.Generic;
+﻿namespace Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz.Requests;
 
-namespace Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz.Requests
+/// <summary>
+/// Base model for Musicbrainz requests.
+/// </summary>
+public class BaseRequest
 {
-    public class BaseRequest
-    {
-        public BaseRequest() { }
+    /// <summary>
+    /// Converts request data to a form suitable for use as request data.
+    /// </summary>
+    /// <returns>Object suitable for use as request data.</returns>
+    public virtual object ToRequestForm() => this;
 
-        public virtual Dictionary<string, dynamic> ToRequestForm() => new();
-
-        public virtual string GetEndpoint() => "";
-    }
+    /// <summary>
+    /// Get endpoint name of this request.
+    /// </summary>
+    /// <returns>Endpoint name.</returns>
+    public virtual string GetEndpoint() => string.Empty;
 }
