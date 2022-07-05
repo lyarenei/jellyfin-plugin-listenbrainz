@@ -110,10 +110,7 @@ public class ListenbrainzClient : BaseListenbrainzClient
     /// <param name="jfUser">Jellyfin user. Used for logging.</param>
     public async void NowPlaying(Audio item, LbUser user, User jfUser)
     {
-        var listenRequest = new SubmitListenRequest("playing_now", item)
-        {
-            ApiToken = user.Token
-        };
+        var listenRequest = new SubmitListenRequest("playing_now", item) { ApiToken = user.Token };
 
         // Fetch Recording data
         Debug.Assert(_mbClient != null, nameof(_mbClient) + " != null");
