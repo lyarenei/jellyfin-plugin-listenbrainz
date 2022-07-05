@@ -68,7 +68,7 @@ public class ArtistCredit
     /// <summary>
     /// Gets or sets join phrase.
     /// </summary>
-    [JsonPropertyName("Joinphrase")]
+    [JsonPropertyName("joinphrase")]
     public string JoinPhrase { get; set; }
 
     /// <summary>
