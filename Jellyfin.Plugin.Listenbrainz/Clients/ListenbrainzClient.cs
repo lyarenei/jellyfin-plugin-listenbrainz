@@ -73,6 +73,9 @@ public class ListenbrainzClient : BaseListenbrainzClient
             {
                 // Set recording MBID as Jellyfin does not store it
                 request.SetRecordingMbId(recordingData.Id);
+
+                // Set correct artist credit per MusicBrainz entry.
+                request.SetArtist(recordingData.GetCreditString());
             }
         }
         else
@@ -122,6 +125,9 @@ public class ListenbrainzClient : BaseListenbrainzClient
             {
                 // Set recording MBID as Jellyfin does not store it
                 listenRequest.SetRecordingMbId(recordingData.Id);
+
+                // Set correct artist credit per MusicBrainz entry.
+                listenRequest.SetArtist(recordingData.GetCreditString());
             }
         }
         else
