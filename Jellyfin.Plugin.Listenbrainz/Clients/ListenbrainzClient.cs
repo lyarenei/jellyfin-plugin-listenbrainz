@@ -63,20 +63,21 @@ public class ListenbrainzClient : BaseListenbrainzClient
     {
         request.ApiToken = user.Token;
 
-        // Workaround for Jellyfin not storing recording MBID
-        if (!request.HasRecordingMbId())
+        // Fetch Recording data
+        Debug.Assert(_mbClient != null, nameof(_mbClient) + " != null");
+        var trackMbId = request.GetTrackMbId();
+        if (trackMbId != null)
         {
-            Debug.Assert(_mbClient != null, nameof(_mbClient) + " != null");
-            var trackMbId = request.GetTrackMbId();
-            if (trackMbId != null)
+            var recordingData = await _mbClient.GetRecordingData(trackMbId).ConfigureAwait(true);
+            if (recordingData != null)
             {
-                var recordingMbId = await _mbClient.GetRecordingId(trackMbId).ConfigureAwait(false);
-                request.SetRecordingMbId(recordingMbId);
+                // Set recording MBID as Jellyfin does not store it
+                request.SetRecordingMbId(recordingData.Id);
             }
-            else
-            {
-                _logger.LogDebug("No track MBID available, cannot get recording MBID");
-            }
+        }
+        else
+        {
+            _logger.LogDebug("No track MBID available, cannot get additional recording data");
         }
 
         try
@@ -114,20 +115,21 @@ public class ListenbrainzClient : BaseListenbrainzClient
             ApiToken = user.Token
         };
 
-        // Workaround for Jellyfin not storing recording MBID
-        if (!listenRequest.HasRecordingMbId())
+        // Fetch Recording data
+        Debug.Assert(_mbClient != null, nameof(_mbClient) + " != null");
+        var trackMbId = listenRequest.GetTrackMbId();
+        if (trackMbId != null)
         {
-            Debug.Assert(_mbClient != null, nameof(_mbClient) + " != null");
-            var trackMbId = listenRequest.GetTrackMbId();
-            if (trackMbId != null)
+            var recordingData = await _mbClient.GetRecordingData(trackMbId).ConfigureAwait(true);
+            if (recordingData != null)
             {
-                var recordingMbId = await _mbClient.GetRecordingId(trackMbId).ConfigureAwait(false);
-                listenRequest.SetRecordingMbId(recordingMbId);
+                // Set recording MBID as Jellyfin does not store it
+                listenRequest.SetRecordingMbId(recordingData.Id);
             }
-            else
-            {
-                _logger.LogDebug("No track MBID available, cannot get recording MBID");
-            }
+        }
+        else
+        {
+            _logger.LogDebug("No track MBID available, cannot get additional recording data");
         }
 
         try
