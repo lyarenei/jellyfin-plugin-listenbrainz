@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -64,18 +63,24 @@ public class ListenbrainzClient : BaseListenbrainzClient
         request.ApiToken = user.Token;
 
         // Fetch Recording data
-        Debug.Assert(_mbClient != null, nameof(_mbClient) + " != null");
         var trackMbId = request.GetTrackMbId();
         if (trackMbId != null)
         {
-            var recordingData = await _mbClient.GetRecordingData(trackMbId).ConfigureAwait(true);
-            if (recordingData != null)
+            if (_mbClient != null)
             {
-                // Set recording MBID as Jellyfin does not store it
-                request.SetRecordingMbId(recordingData.Id);
+                var recordingData = await _mbClient.GetRecordingData(trackMbId).ConfigureAwait(true);
+                if (recordingData != null)
+                {
+                    // Set recording MBID as Jellyfin does not store it
+                    request.SetRecordingMbId(recordingData.Id);
 
-                // Set correct artist credit per MusicBrainz entry.
-                request.SetArtist(recordingData.GetCreditString());
+                    // Set correct artist credit per MusicBrainz entry.
+                    request.SetArtist(recordingData.GetCreditString());
+                }
+            }
+            else
+            {
+                _logger.LogDebug("MusicBrainz client not initialized, cannot make requests");
             }
         }
         else
@@ -116,18 +121,24 @@ public class ListenbrainzClient : BaseListenbrainzClient
         var listenRequest = new SubmitListenRequest("playing_now", item) { ApiToken = user.Token };
 
         // Fetch Recording data
-        Debug.Assert(_mbClient != null, nameof(_mbClient) + " != null");
         var trackMbId = listenRequest.GetTrackMbId();
         if (trackMbId != null)
         {
-            var recordingData = await _mbClient.GetRecordingData(trackMbId).ConfigureAwait(true);
-            if (recordingData != null)
+            if (_mbClient != null)
             {
-                // Set recording MBID as Jellyfin does not store it
-                listenRequest.SetRecordingMbId(recordingData.Id);
+                var recordingData = await _mbClient.GetRecordingData(trackMbId).ConfigureAwait(true);
+                if (recordingData != null)
+                {
+                    // Set recording MBID as Jellyfin does not store it
+                    listenRequest.SetRecordingMbId(recordingData.Id);
 
-                // Set correct artist credit per MusicBrainz entry.
-                listenRequest.SetArtist(recordingData.GetCreditString());
+                    // Set correct artist credit per MusicBrainz entry.
+                    listenRequest.SetArtist(recordingData.GetCreditString());
+                }
+            }
+            else
+            {
+                _logger.LogDebug("MusicBrainz client not initialized, cannot make requests");
             }
         }
         else
