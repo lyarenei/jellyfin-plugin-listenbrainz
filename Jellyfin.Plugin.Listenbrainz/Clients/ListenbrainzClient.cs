@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -63,20 +62,30 @@ public class ListenbrainzClient : BaseListenbrainzClient
     {
         request.ApiToken = user.Token;
 
-        // Workaround for Jellyfin not storing recording MBID
-        if (!request.HasRecordingMbId())
+        // Fetch Recording data
+        var trackMbId = request.GetTrackMbId();
+        if (trackMbId != null)
         {
-            Debug.Assert(_mbClient != null, nameof(_mbClient) + " != null");
-            var trackMbId = request.GetTrackMbId();
-            if (trackMbId != null)
+            if (_mbClient != null)
             {
-                var recordingMbId = await _mbClient.GetRecordingId(trackMbId).ConfigureAwait(false);
-                request.SetRecordingMbId(recordingMbId);
+                var recordingData = await _mbClient.GetRecordingData(trackMbId).ConfigureAwait(true);
+                if (recordingData != null)
+                {
+                    // Set recording MBID as Jellyfin does not store it
+                    request.SetRecordingMbId(recordingData.Id);
+
+                    // Set correct artist credit per MusicBrainz entry.
+                    request.SetArtist(recordingData.GetCreditString());
+                }
             }
             else
             {
-                _logger.LogDebug("No track MBID available, cannot get recording MBID");
+                _logger.LogDebug("MusicBrainz client not initialized, cannot make requests");
             }
+        }
+        else
+        {
+            _logger.LogDebug("No track MBID available, cannot get recording data");
         }
 
         try
@@ -109,25 +118,32 @@ public class ListenbrainzClient : BaseListenbrainzClient
     /// <param name="jfUser">Jellyfin user. Used for logging.</param>
     public async void NowPlaying(Audio item, LbUser user, User jfUser)
     {
-        var listenRequest = new SubmitListenRequest("playing_now", item)
-        {
-            ApiToken = user.Token
-        };
+        var listenRequest = new SubmitListenRequest("playing_now", item) { ApiToken = user.Token };
 
-        // Workaround for Jellyfin not storing recording MBID
-        if (!listenRequest.HasRecordingMbId())
+        // Fetch Recording data
+        var trackMbId = listenRequest.GetTrackMbId();
+        if (trackMbId != null)
         {
-            Debug.Assert(_mbClient != null, nameof(_mbClient) + " != null");
-            var trackMbId = listenRequest.GetTrackMbId();
-            if (trackMbId != null)
+            if (_mbClient != null)
             {
-                var recordingMbId = await _mbClient.GetRecordingId(trackMbId).ConfigureAwait(false);
-                listenRequest.SetRecordingMbId(recordingMbId);
+                var recordingData = await _mbClient.GetRecordingData(trackMbId).ConfigureAwait(true);
+                if (recordingData != null)
+                {
+                    // Set recording MBID as Jellyfin does not store it
+                    listenRequest.SetRecordingMbId(recordingData.Id);
+
+                    // Set correct artist credit per MusicBrainz entry.
+                    listenRequest.SetArtist(recordingData.GetCreditString());
+                }
             }
             else
             {
-                _logger.LogDebug("No track MBID available, cannot get recording MBID");
+                _logger.LogDebug("MusicBrainz client not initialized, cannot make requests");
             }
+        }
+        else
+        {
+            _logger.LogDebug("No track MBID available, cannot get recording data");
         }
 
         try

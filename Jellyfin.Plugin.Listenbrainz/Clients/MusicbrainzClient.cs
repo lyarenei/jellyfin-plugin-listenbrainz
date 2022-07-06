@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz;
 using Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz.Requests;
 using Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz.Responses;
 using Jellyfin.Plugin.Listenbrainz.Services;
@@ -30,27 +31,27 @@ public class MusicbrainzClient : BaseMusicbrainzClient
     }
 
     /// <summary>
-    /// Get recording MBID by track MBID.
+    /// Get recording data by track MBID.
     /// </summary>
     /// <param name="trackId">ID of the track.</param>
-    /// <returns>Recording MBID. Null if error or not found.</returns>
-    public async Task<string?> GetRecordingId(string trackId)
+    /// <returns>An instance of <see cref="Recording"/>. Null if error or not found.</returns>
+    public async Task<Recording?> GetRecordingData(string trackId)
     {
-        _logger.LogDebug("Getting Recording MBID for Track: {TrackMbId}", trackId);
-        var response = await Get<RecordingIdRequest, RecordingsResponse>(new RecordingIdRequest(trackId)).ConfigureAwait(false);
+        _logger.LogDebug("Getting Recording data for Track: {TrackMbId}", trackId);
+        var response = await Get<RecordingIdRequest, RecordingsResponse>(new RecordingIdRequest(trackId)).ConfigureAwait(true);
         if (response == null || response.IsError())
         {
-            _logger.LogInformation("Failed to retrieve Recording ID for '{TrackMbId}'", trackId);
+            _logger.LogInformation("Failed to retrieve Recording data for '{TrackMbId}'", trackId);
             return null;
         }
 
         var recording = response.Recordings.MaxBy(r => r.Score);
         if (recording != null)
         {
-            return recording.Id;
+            return recording;
         }
 
-        _logger.LogInformation("Recording ID for track '{TrackMbId}' not found", trackId);
+        _logger.LogInformation("Recording data for track '{TrackMbId}' not found", trackId);
         return null;
     }
 }

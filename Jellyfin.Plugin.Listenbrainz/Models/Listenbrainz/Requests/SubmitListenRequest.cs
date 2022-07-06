@@ -74,4 +74,13 @@ public class SubmitListenRequest : BaseRequest
     {
         return Data[0].Data.Info?.TrackMbId;
     }
+
+    /// <summary>
+    /// Set artist name.
+    /// </summary>
+    /// <param name="artistName">Artist name.</param>
+    public void SetArtist(string artistName)
+    {
+        Data[0].Data.ArtistName = artistName;
+    }
 }
