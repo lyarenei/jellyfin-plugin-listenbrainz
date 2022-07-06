@@ -9,7 +9,7 @@ description: >
   A plugin that submits your Jellyfin music listening activity to Listenbrainz
 category: "General"
 owner: "lyarenei"
-imageUrl: "https://raw.githubusercontent.com/lyarenei/jellyfin-plugin-listenbrainz/master/res/listenbrainz/ListenBrainz_logo.svg",
+imageUrl: "https://raw.githubusercontent.com/lyarenei/jellyfin-plugin-listenbrainz/master/res/listenbrainz/ListenBrainz_logo.svg"
 artifacts:
   - "Jellyfin.Plugin.Listenbrainz.dll"
 changelog: >
