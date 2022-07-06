@@ -1,53 +1,45 @@
 [
-  {
-    "guid": "59B20823-AAFE-454C-A393-17427F518631",
-    "name": "Listenbrainz",
-    "description": "A plugin that submits your Jellyfin music listening activity to Listenbrainz.",
-    "overview": "Track your music habits with Listenbrainz.",
-    "owner": "lyarenei",
-    "category": "General",
-    "imageUrl": "https://raw.githubusercontent.com/lyarenei/jellyfin-plugin-listenbrainz/master/res/listenbrainz/ListenBrainz_logo.svg",
-    "versions": [
-      {
-        "version": "1.2.1.0",
-        "changelog": "Retry on HTTP 5xx errors; improve request logging.",
-        "targetAbi": "10.7.0.0",
-        "sourceUrl": "https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases/download/1.2.1.0/listenbrainz_1.2.1.0.zip",
-        "checksum": "207d555e0347a36c3cab8328f759f6bc",
-        "timestamp": "2022-03-24"
-      },
-      {
-        "version": "1.2.0",
-        "changelog": "Sync favorite tracks in Jellyfin as loved in Listenbrainz.",
-        "targetAbi": "10.7.0.0",
-        "sourceUrl": "https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases/download/1.2.0/listenbrainz_1.2.0.zip",
-        "checksum": "e589b6522badd2af0a34b3fb669d97ec",
-        "timestamp": "2021-10-10"
-      },
-      {
-        "version": "1.1.1.0",
-        "changelog": "Handle invalid track MBIDs.",
-        "targetAbi": "10.7.0.0",
-        "sourceUrl": "https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases/download/1.1.1.0/listenbrainz_1.1.1.0.zip",
-        "checksum": "aca83edd4b4d6a01b2fe9d48e084798c",
-        "timestamp": "2021-06-02"
-      },
-      {
-        "version": "1.1.0.0",
-        "changelog": "Fetch Recording ID from MusicBrainz.",
-        "targetAbi": "10.7.0.0",
-        "sourceUrl": "https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases/download/1.1.0.0/listenbrainz_1.1.0.0.zip",
-        "checksum": "8f28d432fd9876f2432454c5a6791ff5",
-        "timestamp": "2021-04-14"
-      },
-      {
-        "version": "1.0.0.0",
-        "changelog": "Initial implementation.",
-        "targetAbi": "10.7.1.0",
-        "sourceUrl": "https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases/download/1.0.0.0/listenbrainz_1.0.0.0.zip",
-        "checksum": "067dbbdf749acec85c6778c14d278caf",
-        "timestamp": "2021-04-11"
-      }
-    ]
-  }
+    {
+        "guid": "59B20823-AAFE-454C-A393-17427F518631",
+        "name": "Listenbrainz",
+        "description": "A plugin that submits your Jellyfin music listening activity to Listenbrainz.",
+        "overview": "Track your music habits with Listenbrainz.",
+        "owner": "lyarenei",
+        "category": "General",
+        "imageUrl": "https://raw.githubusercontent.com/lyarenei/jellyfin-plugin-listenbrainz/master/res/listenbrainz/ListenBrainz_logo.svg",
+        "versions": [
+            {
+                "version": "2.1.0.1",
+                "changelog": "Send full artist credit instead of first artist",
+                "targetAbi": "10.8.0.0",
+                "sourceUrl": "https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases/download/2.1.0.1/listenbrainz_2.1.0.1.zip",
+                "checksum": "87540669dd505fbe14aa071351898f44",
+                "timestamp": "2022-07-06"
+            },
+            {
+                "version": "2.0.0.8",
+                "changelog": "Fix reported plugin version",
+                "targetAbi": "10.8.0.0",
+                "sourceUrl": "https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases/download/2.0.0.8/listenbrainz_2.0.0.8.zip",
+                "checksum": "30d14a55d806d9be85350d09554db199",
+                "timestamp": "2022-06-30"
+            },
+            {
+                "version": "2.0.0.7",
+                "changelog": "Compatibility with JF 10.8.x.",
+                "targetAbi": "10.8.0.0",
+                "sourceUrl": "https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases/download/2.0.0.7/listenbrainz_2.0.0.7.zip",
+                "checksum": "747c6185291f84a00a38735735463df8",
+                "timestamp": "2022-06-16"
+            },
+            {
+                "version": "1.2.1.0",
+                "changelog": "Retry on HTTP 5xx errors; improve request logging.",
+                "targetAbi": "10.7.0.0",
+                "sourceUrl": "https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases/download/1.2.1.0/listenbrainz_1.2.1.0.zip",
+                "checksum": "207d555e0347a36c3cab8328f759f6bc",
+                "timestamp": "2022-03-24"
+            }
+        ]
+    }
 ]

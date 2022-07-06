@@ -17,13 +17,13 @@ jobs:
 
       - uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: "5.0.x" # SDK Version to use; x will use the latest version of the 5.0 channel
+          dotnet-version: "6.0.x" # SDK Version to use
 
       - name: Build release via dotnet build...
         run: dotnet publish -c Release
 
       - name: Create ZIP archive of plugin release.
-        run: pushd /home/runner/work/jellyfin-plugin-listenbrainz/jellyfin-plugin-listenbrainz/Jellyfin.Plugin.Listenbrainz/bin/Release/net5.0 && zip "/home/runner/work/listenbrainz_${GIT_TAG_NAME}.zip" Jellyfin.Plugin.Listenbrainz.dll && popd
+        run: pushd /home/runner/work/jellyfin-plugin-listenbrainz/jellyfin-plugin-listenbrainz/Jellyfin.Plugin.Listenbrainz/bin/Release/net6.0 && zip "/home/runner/work/listenbrainz_${GIT_TAG_NAME}.zip" Jellyfin.Plugin.Listenbrainz.dll && popd
 
       - name: Create github release and upload binaries.
         uses: svenstaro/upload-release-action@v2

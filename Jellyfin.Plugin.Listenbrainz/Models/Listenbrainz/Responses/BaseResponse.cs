@@ -1,27 +1,34 @@
-using System.Runtime.Serialization;
-using System.Text.Json.Serialization;
-
 namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses
 {
-    [DataContract]
+    /// <summary>
+    /// Base response model for Listenbrainz responses.
+    /// </summary>
     public class BaseResponse
     {
-        [DataMember(Name = "message")]
-        [JsonPropertyName("message")]
-        public string Message { get; set; }
+        /// <summary>
+        /// Gets or sets message.
+        /// </summary>
+        public string? Message { get; set; }
 
-        [DataMember(Name = "error")]
-        [JsonPropertyName("error")]
-        public string Error { get; set; }
+        /// <summary>
+        /// Gets or sets response error.
+        /// </summary>
+        public string? Error { get; set; }
 
-        [DataMember(Name = "status")]
-        [JsonPropertyName("status")]
-        public string Status { get; set; }
+        /// <summary>
+        /// Gets or sets response status.
+        /// </summary>
+        public string? Status { get; set; }
 
-        [DataMember(Name = "code")]
-        [JsonPropertyName("code")]
+        /// <summary>
+        /// Gets or sets HTTP response status code.
+        /// </summary>
         public int Code { get; set; }
 
+        /// <summary>
+        /// Indicates if a response is an error response.
+        /// </summary>
+        /// <returns>Response is error.</returns>
         public virtual bool IsError() => Code > 0 || Status != "ok";
     }
 }

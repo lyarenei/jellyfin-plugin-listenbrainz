@@ -1,20 +1,40 @@
 using System;
 using System.Linq;
 using Jellyfin.Data.Entities;
-using Jellyfin.Plugin.Listenbrainz.Models;
+using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz;
 
 namespace Jellyfin.Plugin.Listenbrainz.Utils
 {
+    /// <summary>
+    /// User helpers.
+    /// </summary>
     public static class UserHelpers
     {
-        public static LbUser GetUser(Guid userId) => Plugin.Instance.Configuration.LbUsers.FirstOrDefault(u => u.MediaBrowserUserId.Equals(userId));
-
-        public static LbUser GetUser(User user)
+        /// <summary>
+        /// Get Listenbrainz user by jellyfin GUID.
+        /// </summary>
+        /// <param name="userId">Jellyfin GUID.</param>
+        /// <returns>Listenbrainz user.</returns>
+        public static LbUser? GetUser(Guid userId)
         {
-            if (user == null || Plugin.Instance.Configuration.LbUsers == null)
+            try
+            {
+                return Plugin.Instance.Configuration!.LbUsers.First(u => u.MediaBrowserUserId.Equals(userId));
+            }
+            catch (Exception)
+            {
                 return null;
+            }
+        }
 
-            return GetUser(user.Id);
+        /// <summary>
+        /// Get Listenbrainz user by jellyfin <see cref="User"/>.
+        /// </summary>
+        /// <param name="user">Jellyfin user.</param>
+        /// <returns>Listenbrainz user. Null if not found.</returns>
+        public static LbUser? GetUser(User? user)
+        {
+            return user != null ? GetUser(user.Id) : null;
         }
     }
 }
