@@ -80,7 +80,7 @@ public class ListenbrainzClient : BaseListenbrainzClient
         }
         else
         {
-            _logger.LogDebug("No track MBID available, cannot get additional recording data");
+            _logger.LogDebug("No track MBID available, cannot get recording data");
         }
 
         try
@@ -132,7 +132,7 @@ public class ListenbrainzClient : BaseListenbrainzClient
         }
         else
         {
-            _logger.LogDebug("No track MBID available, cannot get additional recording data");
+            _logger.LogDebug("No track MBID available, cannot get recording data");
         }
 
         try
