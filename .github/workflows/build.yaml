@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - master
+      - 10.7.x-compat
     paths-ignore:
       - '**/*.md'
   workflow_dispatch:
