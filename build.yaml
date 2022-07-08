@@ -13,4 +13,4 @@ imageUrl: "https://raw.githubusercontent.com/lyarenei/jellyfin-plugin-listenbrai
 artifacts:
   - "Jellyfin.Plugin.Listenbrainz.dll"
 changelog: >
-  No changes - GH actions test.
+  changelog
