@@ -1,7 +1,7 @@
 ---
 name: "Listenbrainz"
 guid: "59B20823-AAFE-454C-A393-17427F518631"
-version: "2.0.0.8"
+version: "0.0.0.0"
 targetAbi: "10.8.0.0"
 framework: "net6.0"
 overview: "Track your music habits with Listenbrainz"
@@ -13,4 +13,4 @@ imageUrl: "https://raw.githubusercontent.com/lyarenei/jellyfin-plugin-listenbrai
 artifacts:
   - "Jellyfin.Plugin.Listenbrainz.dll"
 changelog: >
-  Fix reported plugin version.
+  No changes - GH actions test.
