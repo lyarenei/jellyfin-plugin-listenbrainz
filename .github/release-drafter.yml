@@ -1,8 +1,0 @@
-_extends: jellyfin-meta-plugins
-
-template: |
-  <!-- Optional: add a release summary here -->
-
-  ## What's New
-
-  $CHANGES
