@@ -1,16 +1,17 @@
 ---
 name: "Listenbrainz"
 guid: "59B20823-AAFE-454C-A393-17427F518631"
-version: "0.0.0.0"
-targetAbi: "10.8.0.0"
+version: "untagged-1a3461768b9a454eef5e"
+targetAbi: "10.8.1.0"
 framework: "net6.0"
 overview: "Track your music habits with Listenbrainz"
 description: >
   A plugin that submits your Jellyfin music listening activity to Listenbrainz.
+
 category: "General"
 owner: "lyarenei"
 imageUrl: "https://raw.githubusercontent.com/lyarenei/jellyfin-plugin-listenbrainz/master/res/listenbrainz/ListenBrainz_logo.svg"
 artifacts:
   - "Jellyfin.Plugin.Listenbrainz.dll"
-changelog: >
-  No changes - GH actions test.
+changelog: |-
+  - Automate builds and releases (#12) @lyarenei
