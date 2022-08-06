@@ -109,7 +109,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
             var responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
             try
             {
-                var result = JsonSerializer.Deserialize<TResponse>(responseStream, _serOpts);
+                var result = await JsonSerializer.DeserializeAsync<TResponse>(responseStream, _serOpts).ConfigureAwait(true);
                 if (result == null)
                 {
                     _logger.LogDebug("Response deserialized to null");

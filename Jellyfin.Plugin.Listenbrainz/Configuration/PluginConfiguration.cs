@@ -2,23 +2,24 @@ using System.Collections.ObjectModel;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz;
 using MediaBrowser.Model.Plugins;
 
-namespace Jellyfin.Plugin.Listenbrainz.Configuration;
-
-/// <summary>
-/// Class PluginConfiguration.
-/// </summary>
-public class PluginConfiguration : BasePluginConfiguration
+namespace Jellyfin.Plugin.Listenbrainz.Configuration
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="PluginConfiguration" /> class.
+    /// Class PluginConfiguration.
     /// </summary>
-    public PluginConfiguration()
+    public class PluginConfiguration : BasePluginConfiguration
     {
-        LbUsers = new Collection<LbUser>();
-    }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PluginConfiguration" /> class.
+        /// </summary>
+        public PluginConfiguration()
+        {
+            LbUsers = new Collection<LbUser>();
+        }
 
-    /// <summary>
-    /// Gets or sets listenbrainz users.
-    /// </summary>
-    public Collection<LbUser> LbUsers { get; set; }
+        /// <summary>
+        /// Gets or sets listenbrainz users.
+        /// </summary>
+        public Collection<LbUser> LbUsers { get; set; }
+    }
 }
