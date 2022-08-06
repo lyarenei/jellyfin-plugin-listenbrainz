@@ -38,7 +38,7 @@ jobs:
       - name: Upload plugin zip for JF 10.7
         uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # tag=v3
         with:
-          name: build-artifact
+          name: jellyfin_plugin_listenbrainz_jf107
           retention-days: 14
           if-no-files-found: error
           path: "/home/runner/work/jellyfin_plugin_listenbrainz_jf107.zip"
@@ -46,7 +46,7 @@ jobs:
       - name: Upload plugin zip for JF 10.8
         uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # tag=v3
         with:
-          name: build-artifact
+          name: jellyfin_plugin_listenbrainz_jf108
           retention-days: 14
           if-no-files-found: error
           path: "/home/runner/work/jellyfin_plugin_listenbrainz_jf108.zip"
