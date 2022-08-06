@@ -1,4 +1,4 @@
-# jellyfin-plugin-listenbrainz
+# ListenBrainz plugin for Jellyfin
 
 ![ListenBrainz logo for Jellyfin plugin](res/listenbrainz/ListenBrainz_logo.svg "ListenBrainz logo for Jellyfin plugin")
 
