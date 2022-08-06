@@ -101,7 +101,7 @@ Once the SDK is installed, run the following:
 This will build both versions, for Jellyfin 10.7 and 10.8.
 The built DLL locations should be as follows:
 - For JF 10.7 plugin binary: `Jellyfin.Plugin.Listenbrainz/bin/Release/net5.0/Jellyfin.Plugin.Listenbrainz.dll`
-- For JF 10.8 plugin binary: `Jellyfin.Plugin.Listenbrainz/bin/Release/net6.0/Jellyfin.Plugin.Listenbrainz.JF108.dll`
+- For JF 10.8 plugin binary: `Jellyfin.Plugin.Listenbrainz.JF108/bin/Release/net6.0/Jellyfin.Plugin.Listenbrainz.JF108.dll`
 
 Copy the plugin DLL file into your Jellyfin `${CONFIG_DIR}/plugins/Listenbrainz` directory.
 Create the Listenbrainz directory if it does not exist, and make sure Jellyfin can access it.
