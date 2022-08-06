@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/lyarenei/jellyfin-plugin-listenbrainz/master/res/listenbrainz/ListenBrainz_logo.svg",
         "versions": [
             {
+                "version": "2.1.1.0",
+                "changelog": "Fix retry sleep duration",
+                "targetAbi": "10.8.0.0",
+                "sourceUrl": "https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases/download/2.1.1.0/listenbrainz_2.1.1.0.zip",
+                "checksum": "4dc3f84601045121a7a32a5f53d482ac",
+                "timestamp": "2022-08-06"
+            },
+            {
                 "version": "2.1.0.1",
                 "changelog": "Send full artist credit instead of first artist",
                 "targetAbi": "10.8.0.0",
