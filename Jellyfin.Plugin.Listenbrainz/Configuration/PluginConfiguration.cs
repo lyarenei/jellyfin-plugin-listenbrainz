@@ -1,5 +1,5 @@
 using System.Collections.ObjectModel;
-using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz;
+using Jellyfin.Plugin.Listenbrainz.Models;
 using MediaBrowser.Model.Plugins;
 
 namespace Jellyfin.Plugin.Listenbrainz.Configuration

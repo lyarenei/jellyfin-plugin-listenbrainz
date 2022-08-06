@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using Jellyfin.Data.Entities;
-using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz;
+using Jellyfin.Plugin.Listenbrainz.Models;
 
 namespace Jellyfin.Plugin.Listenbrainz.Utils
 {

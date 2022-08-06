@@ -55,8 +55,8 @@
     <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Json\SnakeCaseNamingPolicy.cs">
       <Link>Json\SnakeCaseNamingPolicy.cs</Link>
     </Compile>
-    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Models\Listenbrainz\LbUser.cs">
-      <Link>Models\Listenbrainz\LbUser.cs</Link>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Models\LbUser.cs">
+      <Link>LbUser.cs</Link>
     </Compile>
     <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Models\Listenbrainz\Listen.cs">
       <Link>Models\Listenbrainz\Listen.cs</Link>

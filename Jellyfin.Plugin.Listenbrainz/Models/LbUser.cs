@@ -1,6 +1,6 @@
 using System;
 
-namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz
+namespace Jellyfin.Plugin.Listenbrainz.Models
 {
     /// <summary>
     /// Listenbrainz user model.
