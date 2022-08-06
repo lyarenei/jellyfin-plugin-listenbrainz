@@ -81,7 +81,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
 
                 retrySecs *= RetryBackoffSeconds;
                 _logger.LogWarning("Request failed, will retry after {Num} seconds ({RequestID})", retrySecs, requestId);
-                _sleepService.Sleep(retrySecs * 1000);
+                _sleepService.Sleep(retrySecs);
             }
 
             if (response == null)
