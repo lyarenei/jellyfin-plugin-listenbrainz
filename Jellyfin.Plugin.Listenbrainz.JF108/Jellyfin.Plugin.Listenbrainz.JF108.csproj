@@ -43,6 +43,12 @@
     <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Controllers\PluginController.cs">
       <Link>Controllers\PluginController.cs</Link>
     </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Exceptions\InvalidResponseException.cs">
+      <Link>Exceptions\InvalidResponseException.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Exceptions\RetryException.cs">
+      <Link>Exceptions\RetryException.cs</Link>
+    </Compile>
     <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Json\KebabCaseNamingPolicy.cs">
       <Link>Json\KebabCaseNamingPolicy.cs</Link>
     </Compile>

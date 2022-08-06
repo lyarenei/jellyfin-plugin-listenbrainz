@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Jellyfin.Plugin.Listenbrainz.Exceptions;
 using Jellyfin.Plugin.Listenbrainz.Services;
 using Microsoft.Extensions.Logging;
 
@@ -147,34 +148,6 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
                 id,
                 responseMessage?.StatusCode,
                 responseData?.Result);
-        }
-    }
-
-    /// <summary>
-    /// The exception that is thrown when retry limit has been reached.
-    /// </summary>
-    public class RetryException : Exception
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RetryException"/> class.
-        /// </summary>
-        /// <param name="msg">Exception message.</param>
-        public RetryException(string msg) : base(msg)
-        {
-        }
-    }
-
-    /// <summary>
-    /// The exception that is thrown when there was an invalid response.
-    /// </summary>
-    public class InvalidResponseException : Exception
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="InvalidResponseException"/> class.
-        /// </summary>
-        /// <param name="msg">Exception message.</param>
-        public InvalidResponseException(string msg) : base(msg)
-        {
         }
     }
 }

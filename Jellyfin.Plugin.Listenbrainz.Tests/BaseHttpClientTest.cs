@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.Listenbrainz.Clients;
+using Jellyfin.Plugin.Listenbrainz.Exceptions;
 using Jellyfin.Plugin.Listenbrainz.Services;
 using Microsoft.Extensions.Logging;
 using Moq;

@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Jellyfin.Plugin.Listenbrainz.Exceptions;
 using Jellyfin.Plugin.Listenbrainz.Json;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses;
