@@ -1,0 +1,122 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <RootNamespace>Jellyfin.Plugin.Listenbrainz.JF8</RootNamespace>
+    <AssemblyVersion>2.1.1.1</AssemblyVersion>
+    <FileVersion>2.1.1.1</FileVersion>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <Nullable>enable</Nullable>
+    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+    <CodeAnalysisRuleSet>../jellyfin.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Jellyfin.Controller" Version="10.8.0" />
+    <PackageReference Include="Jellyfin.Model" Version="10.8.0" />
+    <PackageReference Include="SerilogAnalyzer" Version="0.15.0" PrivateAssets="All" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.376" PrivateAssets="All" />
+    <PackageReference Include="SmartAnalyzers.MultithreadingAnalyzer" Version="1.1.31" PrivateAssets="All" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="..\Jellyfin.Plugin.Listenbrainz\Configuration\configPage.html" />
+    <EmbeddedResource Include="..\Jellyfin.Plugin.Listenbrainz\Configuration\configPage.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Clients\BaseHttpClient.cs">
+      <Link>Clients\BaseHttpClient.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Clients\BaseListenbrainzClient.cs">
+      <Link>Clients\BaseListenbrainzClient.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Clients\BaseMusicbrainzClient.cs">
+      <Link>Clients\BaseMusicbrainzClient.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Clients\ListenbrainzClient.cs">
+      <Link>Clients\ListenbrainzClient.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Clients\MusicbrainzClient.cs">
+      <Link>Clients\MusicbrainzClient.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Configuration\PluginConfiguration.cs">
+      <Link>Configuration\PluginConfiguration.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Controllers\PluginController.cs">
+      <Link>Controllers\PluginController.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Json\KebabCaseNamingPolicy.cs">
+      <Link>Json\KebabCaseNamingPolicy.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Json\SnakeCaseNamingPolicy.cs">
+      <Link>Json\SnakeCaseNamingPolicy.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Models\Listenbrainz\LbUser.cs">
+      <Link>Models\Listenbrainz\LbUser.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Models\Listenbrainz\Listen.cs">
+      <Link>Models\Listenbrainz\Listen.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Models\Listenbrainz\Requests\BaseRequest.cs">
+      <Link>Models\Listenbrainz\Requests\BaseRequest.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Models\Listenbrainz\Requests\FeedbackRequest.cs">
+      <Link>Models\Listenbrainz\Requests\FeedbackRequest.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Models\Listenbrainz\Requests\SubmitListenRequest.cs">
+      <Link>Models\Listenbrainz\Requests\SubmitListenRequest.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Models\Listenbrainz\Requests\UserListensRequest.cs">
+      <Link>Models\Listenbrainz\Requests\UserListensRequest.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Models\Listenbrainz\Requests\ValidateTokenRequest.cs">
+      <Link>Models\Listenbrainz\Requests\ValidateTokenRequest.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Models\Listenbrainz\Responses\BaseResponse.cs">
+      <Link>Models\Listenbrainz\Responses\BaseResponse.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Models\Listenbrainz\Responses\SubmitListenResponse.cs">
+      <Link>Models\Listenbrainz\Responses\SubmitListenResponse.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Models\Listenbrainz\Responses\UserListensResponse.cs">
+      <Link>Models\Listenbrainz\Responses\UserListensResponse.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Models\Listenbrainz\Responses\ValidateTokenResponse.cs">
+      <Link>Models\Listenbrainz\Responses\ValidateTokenResponse.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Models\Musicbrainz\Recording.cs">
+      <Link>Models\Musicbrainz\Recording.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Models\Musicbrainz\Requests\BaseRequest.cs">
+      <Link>Models\Musicbrainz\Requests\BaseRequest.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Models\Musicbrainz\Requests\RecordingIdRequest.cs">
+      <Link>Models\Musicbrainz\Requests\RecordingIdRequest.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Models\Musicbrainz\Responses\BaseResponse.cs">
+      <Link>Models\Musicbrainz\Responses\BaseResponse.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Models\Musicbrainz\Responses\RecordingsResponse.cs">
+      <Link>Models\Musicbrainz\Responses\RecordingsResponse.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Plugin.cs">
+      <Link>Plugin.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Resources\Listenbrainz.cs">
+      <Link>Resources\Listenbrainz.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Resources\Musicbrainz.cs">
+      <Link>Resources\Musicbrainz.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\ServerEntryPoint.cs">
+      <Link>ServerEntryPoint.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Services\ISleepService.cs">
+      <Link>Services\ISleepService.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Utils\Helpers.cs">
+      <Link>Utils\Helpers.cs</Link>
+    </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Utils\UserHelpers.cs">
+      <Link>Utils\UserHelpers.cs</Link>
+    </Compile>
+  </ItemGroup>
+</Project>
