@@ -4,7 +4,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.Listenbrain
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.Listenbrainz.Tests", "Jellyfin.Plugin.Listenbrainz.Tests\Jellyfin.Plugin.Listenbrainz.Tests.csproj", "{1E99C43D-42EE-4178-B93D-43CDA83A41D2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.Listenbrainz.JF8", "Jellyfin.Plugin.Listenbrainz.JF8\Jellyfin.Plugin.Listenbrainz.JF8.csproj", "{42D88268-AE95-41F9-BD51-611D3910C6C1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.Listenbrainz.JF108", "Jellyfin.Plugin.Listenbrainz.JF108\Jellyfin.Plugin.Listenbrainz.JF108.csproj", "{42D88268-AE95-41F9-BD51-611D3910C6C1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

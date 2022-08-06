@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <RootNamespace>Jellyfin.Plugin.Listenbrainz.JF8</RootNamespace>
+    <RootNamespace>Jellyfin.Plugin.Listenbrainz.JF108</RootNamespace>
     <AssemblyVersion>2.1.1.1</AssemblyVersion>
     <FileVersion>2.1.1.1</FileVersion>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
