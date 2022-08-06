@@ -103,6 +103,9 @@
     <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Models\Musicbrainz\Responses\RecordingsResponse.cs">
       <Link>Models\Musicbrainz\Responses\RecordingsResponse.cs</Link>
     </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Models\UserOptions.cs">
+      <Link>UserOptions.cs</Link>
+    </Compile>
     <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Plugin.cs">
       <Link>Plugin.cs</Link>
     </Compile>
