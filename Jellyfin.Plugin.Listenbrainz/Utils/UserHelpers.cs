@@ -19,7 +19,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Utils
         {
             try
             {
-                return Plugin.Instance.Configuration!.LbUsers.First(u => u.MediaBrowserUserId.Equals(userId));
+                return Plugin.Instance?.Configuration.LbUsers.First(u => u.MediaBrowserUserId.Equals(userId));
             }
             catch (Exception)
             {
