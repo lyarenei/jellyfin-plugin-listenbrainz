@@ -30,7 +30,7 @@ jobs:
           zip "/home/runner/work/jellyfin_plugin_listenbrainz_jf107.zip" Jellyfin.Plugin.Listenbrainz.dll && \
           popd
 
-      - name: Create github release and attach plugin.
+      - name: Create github release and attach plugin
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
