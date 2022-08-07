@@ -105,8 +105,7 @@ The built DLL locations should be as follows:
 
 Copy the plugin DLL file into your Jellyfin `${CONFIG_DIR}/plugins/Listenbrainz` directory.
 Create the Listenbrainz directory if it does not exist, and make sure Jellyfin can access it.
-Additionally, if you are working with 10.8 version, remove `JF108` from the DLL file name, so it wil look the same as the 10.7 version.
-After restarting the server the plugin should be picked up by the server and should be running.
+After restarting the server, the plugin should be picked up by the server and should be running.
 
 # Jellyfin?
 
