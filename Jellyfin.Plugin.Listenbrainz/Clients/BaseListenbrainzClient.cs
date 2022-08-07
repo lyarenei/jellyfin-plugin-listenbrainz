@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Jellyfin.Plugin.Listenbrainz.Exceptions;
 using Jellyfin.Plugin.Listenbrainz.Json;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses;
@@ -109,7 +110,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
             var responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
             try
             {
-                var result = JsonSerializer.Deserialize<TResponse>(responseStream, _serOpts);
+                var result = await JsonSerializer.DeserializeAsync<TResponse>(responseStream, _serOpts).ConfigureAwait(true);
                 if (result == null)
                 {
                     _logger.LogDebug("Response deserialized to null");

@@ -1,23 +1,24 @@
-namespace Jellyfin.Plugin.Listenbrainz.Resources;
-
-/// <summary>
-/// Musicbrainz API resources.
-/// </summary>
-public static class Musicbrainz
+namespace Jellyfin.Plugin.Listenbrainz.Resources
 {
     /// <summary>
-    /// API base URL.
+    /// Musicbrainz API resources.
     /// </summary>
-    public const string BaseUrl = "musicbrainz.org";
-
-    /// <summary>
-    /// Basic API endpoints.
-    /// </summary>
-    public static class Endpoints
+    public static class Musicbrainz
     {
         /// <summary>
-        /// Recording endpoint.
+        /// API base URL.
         /// </summary>
-        public const string Recording = "recording";
+        public const string BaseUrl = "musicbrainz.org";
+
+        /// <summary>
+        /// Basic API endpoints.
+        /// </summary>
+        public static class Endpoints
+        {
+            /// <summary>
+            /// Recording endpoint.
+            /// </summary>
+            public const string Recording = "recording";
+        }
     }
 }
