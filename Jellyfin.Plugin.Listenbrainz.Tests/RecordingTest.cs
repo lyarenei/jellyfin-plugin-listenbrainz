@@ -6,18 +6,18 @@ namespace Jellyfin.Plugin.Listenbrainz.Tests;
 
 public class RecordingTest
 {
-    protected ArtistCredit _artistCredit1 = new()
+    private readonly ArtistCredit _artistCredit1 = new()
     {
         JoinPhrase = " with ",
         Name = "Artist 1"
     };
 
-    private ArtistCredit _artistCredit2 = new()
+    private readonly ArtistCredit _artistCredit2 = new()
     {
         Name = "Artist 2"
     };
 
-    public Recording _example = new()
+    private readonly Recording _example = new()
     {
         Id = "recordingId",
         Score = 99
