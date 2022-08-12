@@ -59,7 +59,7 @@
       <Link>Json\SnakeCaseNamingPolicy.cs</Link>
     </Compile>
     <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Models\LbUser.cs">
-      <Link>LbUser.cs</Link>
+      <Link>Models\LbUser.cs</Link>
     </Compile>
     <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Models\Listenbrainz\Listen.cs">
       <Link>Models\Listenbrainz\Listen.cs</Link>
@@ -107,7 +107,7 @@
       <Link>Models\Musicbrainz\Responses\RecordingsResponse.cs</Link>
     </Compile>
     <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Models\UserOptions.cs">
-      <Link>UserOptions.cs</Link>
+      <Link>Models\UserOptions.cs</Link>
     </Compile>
     <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Plugin.cs">
       <Link>Plugin.cs</Link>
