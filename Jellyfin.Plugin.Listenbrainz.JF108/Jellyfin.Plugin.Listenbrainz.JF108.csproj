@@ -49,6 +49,9 @@
     <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Exceptions\RetryException.cs">
       <Link>Exceptions\RetryException.cs</Link>
     </Compile>
+    <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Extensions\StringExtensions.cs">
+      <Link>Extensions\StringExtensions.cs</Link>
+    </Compile>
     <Compile Include="..\Jellyfin.Plugin.Listenbrainz\Json\KebabCaseNamingPolicy.cs">
       <Link>Json\KebabCaseNamingPolicy.cs</Link>
     </Compile>
