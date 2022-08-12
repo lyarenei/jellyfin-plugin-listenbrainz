@@ -10,7 +10,7 @@ using Jellyfin.Plugin.Listenbrainz.Exceptions;
 using Jellyfin.Plugin.Listenbrainz.Json;
 using Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz.Requests;
 using Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz.Responses;
-using Jellyfin.Plugin.Listenbrainz.Resources;
+using Jellyfin.Plugin.Listenbrainz.Resources.Musicbrainz;
 using Jellyfin.Plugin.Listenbrainz.Services;
 using Microsoft.Extensions.Logging;
 
@@ -110,7 +110,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
             return null;
         }
 
-        private static string BuildRequestUrl(string endpoint) => $"https://{Musicbrainz.BaseUrl}/ws/{Version}/{endpoint}";
+        private static string BuildRequestUrl(string endpoint) => $"https://{Api.BaseUrl}/ws/{Version}/{endpoint}";
 
         /// <summary>
         /// Convert dictionary to Musicbrainz query.

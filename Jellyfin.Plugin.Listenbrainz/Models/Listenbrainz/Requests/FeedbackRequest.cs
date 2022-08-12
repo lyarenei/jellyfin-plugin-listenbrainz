@@ -1,5 +1,5 @@
 using System.Text.Json.Serialization;
-using static Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
+using Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
 
 namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests
 {
@@ -28,6 +28,6 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests
         public string RecordingMsId { get; set; }
 
         /// <inheritdoc />
-        public override string GetEndpoint() => FeedbackEndpoints.RecordingFeedback;
+        public override string GetEndpoint() => Endpoints.RecordingFeedback;
     }
 }

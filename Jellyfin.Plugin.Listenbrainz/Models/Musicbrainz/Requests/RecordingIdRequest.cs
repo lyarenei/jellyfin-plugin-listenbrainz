@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using static Jellyfin.Plugin.Listenbrainz.Resources.Musicbrainz;
+using Jellyfin.Plugin.Listenbrainz.Resources.Musicbrainz;
 
 namespace Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz.Requests
 {
