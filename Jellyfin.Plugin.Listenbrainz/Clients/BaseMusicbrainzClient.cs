@@ -21,7 +21,6 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
     /// </summary>
     public class BaseMusicbrainzClient : BaseHttpClient
     {
-        private const string Version = "2";
         private readonly ILogger _logger;
         private readonly JsonSerializerOptions _serOpts;
 
@@ -110,7 +109,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
             return null;
         }
 
-        private static string BuildRequestUrl(string endpoint) => $"https://{Api.BaseUrl}/ws/{Version}/{endpoint}";
+        private static string BuildRequestUrl(string endpoint) => $"https://{Api.BaseUrl}/ws/{Api.Version}/{endpoint}";
 
         /// <summary>
         /// Convert dictionary to Musicbrainz query.
