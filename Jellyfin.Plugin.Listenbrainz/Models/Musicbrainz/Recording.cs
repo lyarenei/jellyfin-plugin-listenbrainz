@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -32,6 +33,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz
         /// Gets or sets artist credit of the recording.
         /// </summary>
         [JsonPropertyName("artist-credit")]
+        [SuppressMessage("Usage", "CA2227", Justification = "Needed for deserialization.")]
         public Collection<ArtistCredit> ArtistCredit { get; set; }
 
         /// <summary>

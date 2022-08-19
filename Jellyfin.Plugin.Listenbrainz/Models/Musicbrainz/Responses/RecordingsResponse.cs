@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz.Responses
 {
@@ -18,6 +19,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz.Responses
         /// <summary>
         /// Gets or sets a collection of recordings.
         /// </summary>
+        [SuppressMessage("Usage", "CA2227", Justification = "Needed for deserialization.")]
         public Collection<Recording> Recordings { get; set; }
     }
 }

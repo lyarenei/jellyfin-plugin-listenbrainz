@@ -28,7 +28,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses
     /// <summary>
     /// Payload of user listens response.
     /// </summary>
-    [SuppressMessage("Usage", "CA2227", MessageId = "Collection properties should be read only", Justification = "Used in deserialization.")]
+    [SuppressMessage("Usage", "CA2227", Justification = "Needed for deserialization.")]
     public class UserListensPayload
     {
         /// <summary>

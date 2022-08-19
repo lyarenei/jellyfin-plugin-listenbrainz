@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using MediaBrowser.Controller.Entities.Audio;
 
@@ -170,6 +171,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz
         /// Gets or sets a collection of artist MBIDs.
         /// </summary>
         [JsonPropertyName("artist_mbids")]
+        [SuppressMessage("Usage", "CA2227", Justification = "Needed for deserialization.")]
         public Collection<string>? ArtistMbIds { get; set; }
 
         /// <summary>
@@ -181,6 +183,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz
         /// <summary>
         /// Gets or sets a collection of tags.
         /// </summary>
+        [SuppressMessage("Usage", "CA2227", Justification = "Needed for deserialization.")]
         public Collection<string>? Tags { get; set; }
 
         /// <summary>
