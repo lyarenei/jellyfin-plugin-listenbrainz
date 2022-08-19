@@ -3,6 +3,9 @@ using System.Linq;
 
 namespace Jellyfin.Plugin.Listenbrainz.Extensions
 {
+    /// <summary>
+    /// Extensions for a string type.
+    /// </summary>
     public static class StringExtensions
     {
         /// <summary>
