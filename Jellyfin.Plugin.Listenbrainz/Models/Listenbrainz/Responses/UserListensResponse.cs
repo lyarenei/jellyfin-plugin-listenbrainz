@@ -28,7 +28,6 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses
     /// <summary>
     /// Payload of user listens response.
     /// </summary>
-    [SuppressMessage("Usage", "CA2227", Justification = "Needed for deserialization.")]
     public class UserListensPayload
     {
         /// <summary>
@@ -52,6 +51,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses
         /// <summary>
         /// Gets or sets a collection of listens in response.
         /// </summary>
+        [SuppressMessage("Usage", "CA2227", Justification = "Needed for deserialization.")]
         public Collection<Listen> Listens { get; set; }
     }
 }
