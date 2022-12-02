@@ -20,7 +20,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Configuration
         }
 
         /// <summary>
-        /// Gets or sets Listenbrainz users.
+        /// Gets or sets plugin users.
         /// </summary>
         [SuppressMessage("Usage", "CA2227", Justification = "Needed for deserialization.")]
         public Collection<LbUser> LbUsers { get; set; }
