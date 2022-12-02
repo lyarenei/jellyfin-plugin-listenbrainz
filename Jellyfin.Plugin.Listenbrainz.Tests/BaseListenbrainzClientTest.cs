@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Jellyfin.Plugin.Listenbrainz.Clients;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses;
+using Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
 using Jellyfin.Plugin.Listenbrainz.Services;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -15,7 +16,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Tests;
 
 public class TestBaseListenbrainzClient : BaseListenbrainzClient
 {
-    public TestBaseListenbrainzClient(IHttpClientFactory f, ILogger l, ISleepService s) : base(f, l, s) { }
+    public TestBaseListenbrainzClient(IHttpClientFactory f, ILogger l, ISleepService s) : base(Api.BaseUrl, f, l, s) { }
 
     public async Task<TResponse> ExposedPost<TRequest, TResponse>(TRequest request)
         where TRequest : BaseRequest

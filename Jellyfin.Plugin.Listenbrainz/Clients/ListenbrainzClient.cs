@@ -23,13 +23,15 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
         /// <summary>
         /// Initializes a new instance of the <see cref="ListenbrainzClient"/> class.
         /// </summary>
+        /// <param name="baseUrl">API base URL.</param>
         /// <param name="httpClientFactory">HTTP client factory.</param>
         /// <param name="logger">Logger instance.</param>
         /// <param name="sleepService">Sleep service.</param>
         public ListenbrainzClient(
+            string baseUrl,
             IHttpClientFactory httpClientFactory,
             ILogger logger,
-            ISleepService sleepService) : base(httpClientFactory, logger, sleepService)
+            ISleepService sleepService) : base(baseUrl, httpClientFactory, logger, sleepService)
         {
             _mbClient = null;
             _logger = logger;
@@ -38,15 +40,17 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
         /// <summary>
         /// Initializes a new instance of the <see cref="ListenbrainzClient"/> class.
         /// </summary>
+        /// <param name="baseUrl">API base URL.</param>
         /// <param name="httpClientFactory">HTTP client factory.</param>
         /// <param name="mbClient">Musicbrainz API client.</param>
         /// <param name="logger">Logger instance.</param>
         /// <param name="sleepService">Sleep service.</param>
         public ListenbrainzClient(
+            string baseUrl,
             IHttpClientFactory httpClientFactory,
             MusicbrainzClient mbClient,
             ILogger logger,
-            ISleepService sleepService) : base(httpClientFactory, logger, sleepService)
+            ISleepService sleepService) : base(baseUrl, httpClientFactory, logger, sleepService)
         {
             _mbClient = mbClient;
             _logger = logger;

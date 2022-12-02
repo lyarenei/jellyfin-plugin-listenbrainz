@@ -23,18 +23,22 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
     {
         private readonly ILogger _logger;
         private readonly JsonSerializerOptions _serOpts;
+        private readonly string _baseUrl;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseListenbrainzClient"/> class.
         /// </summary>
+        /// <param name="baseUrl">API base URL.</param>
         /// <param name="httpClientFactory">HTTP client factory.</param>
         /// <param name="logger">Logger instance.</param>
         /// <param name="sleepService">Sleep service.</param>
         public BaseListenbrainzClient(
+            string baseUrl,
             IHttpClientFactory httpClientFactory,
             ILogger logger,
             ISleepService sleepService) : base(httpClientFactory, logger, sleepService)
         {
+            _baseUrl = baseUrl;
             _logger = logger;
             _serOpts = new JsonSerializerOptions
             {
@@ -58,7 +62,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
             var requestMessage = new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
-                RequestUri = new Uri(BuildRequestUrl(Api.BaseUrl, request.GetEndpoint())),
+                RequestUri = new Uri(BuildRequestUrl(_baseUrl, request.GetEndpoint())),
                 Content = new StringContent(jsonData, Encoding.UTF8, "application/json")
             };
 
@@ -81,7 +85,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
             where TResponse : BaseResponse
         {
             var query = ToHttpGetQuery(request.ToRequestForm());
-            var url = BuildRequestUrl(Api.BaseUrl, request.GetEndpoint());
+            var url = BuildRequestUrl(_baseUrl, request.GetEndpoint());
             var requestMessage = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,

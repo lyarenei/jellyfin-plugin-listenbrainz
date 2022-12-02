@@ -1,6 +1,7 @@
 using System.Net.Http;
 using Jellyfin.Plugin.Listenbrainz.Clients;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses;
+using Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
 using Jellyfin.Plugin.Listenbrainz.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -24,7 +25,8 @@ namespace Jellyfin.Plugin.Listenbrainz.Controllers
         public PluginController(IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory)
         {
             var logger = loggerFactory.CreateLogger<PluginController>();
-            _apiClient = new ListenbrainzClient(httpClientFactory, logger, new SleepService());
+            var baseUrl = Plugin.Instance?.Configuration.BaseUrl ?? Api.BaseUrl;
+            _apiClient = new ListenbrainzClient(baseUrl, httpClientFactory, logger, new SleepService());
         }
 
         /// <summary>
