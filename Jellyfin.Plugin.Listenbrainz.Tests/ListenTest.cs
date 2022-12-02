@@ -9,18 +9,18 @@ namespace Jellyfin.Plugin.Listenbrainz.Tests;
 
 public class ListenTest
 {
-    private readonly JsonSerializerOptions options;
+    private readonly JsonSerializerOptions _options;
 
     public ListenTest()
     {
-        options = new JsonSerializerOptions
+        _options = new JsonSerializerOptions
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             PropertyNamingPolicy = SnakeCaseNamingPolicy.Instance
         };
     }
 
-    public Listen _exampleListen = new Listen
+    private readonly Listen _exampleListen = new()
     {
         ListenedAt = 1234,
         Data = new TrackMetadata
@@ -40,7 +40,7 @@ public class ListenTest
     [Fact]
     public void Listen_Encode()
     {
-        var listenJson = JsonSerializer.Serialize(_exampleListen, options);
+        var listenJson = JsonSerializer.Serialize(_exampleListen, _options);
         Assert.NotNull(listenJson);
 
         var expectedJSON = @"{""listened_at"":1234,""track_metadata"":{""artist_name"":""Foo Bar"",""release_name"":""Foobar"",""track_name"":""Foo - Bar"",""additional_info"":{""release_mbid"":""release-foo"",""artist_mbids"":[""artist-foo""],""recording_mbid"":""recording-foo""}}}";
@@ -48,10 +48,10 @@ public class ListenTest
     }
 
     [Fact]
-    public void Listen_Encode_Decode()
+    public void Listen_EncodeAndDecode()
     {
-        var listenJson = JsonSerializer.Serialize(_exampleListen, options);
-        var deserializedListen = JsonSerializer.Deserialize<Listen>(listenJson, options);
+        var listenJson = JsonSerializer.Serialize(_exampleListen, _options);
+        var deserializedListen = JsonSerializer.Deserialize<Listen>(listenJson, _options);
         Assert.NotNull(deserializedListen);
     }
 }

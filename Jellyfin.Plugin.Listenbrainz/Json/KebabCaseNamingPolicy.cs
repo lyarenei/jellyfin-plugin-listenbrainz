@@ -1,5 +1,5 @@
 using System.Text.Json;
-using Jellyfin.Plugin.Listenbrainz.Utils;
+using Jellyfin.Plugin.Listenbrainz.Extensions;
 
 namespace Jellyfin.Plugin.Listenbrainz.Json
 {

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Globalization;
-using static Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
+using Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
 
 namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests
 {
@@ -31,6 +31,6 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests
         public override Dictionary<string, string> ToRequestForm() => new() { { "count", Count.ToString(NumberFormatInfo.InvariantInfo) } };
 
         /// <inheritdoc />
-        public override string GetEndpoint() => string.Format(CultureInfo.InvariantCulture, UserEndpoints.ListensEndpoint, _userName);
+        public override string GetEndpoint() => string.Format(CultureInfo.InvariantCulture, Endpoints.ListensEndpoint, _userName);
     }
 }

@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using Jellyfin.Plugin.Listenbrainz.Models;
 using MediaBrowser.Model.Plugins;
 
@@ -20,6 +21,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Configuration
         /// <summary>
         /// Gets or sets listenbrainz users.
         /// </summary>
+        [SuppressMessage("Usage", "CA2227", Justification = "Needed for deserialization.")]
         public Collection<LbUser> LbUsers { get; set; }
     }
 }

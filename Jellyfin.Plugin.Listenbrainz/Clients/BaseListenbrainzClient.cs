@@ -10,6 +10,7 @@ using Jellyfin.Plugin.Listenbrainz.Exceptions;
 using Jellyfin.Plugin.Listenbrainz.Json;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses;
+using Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
 using Jellyfin.Plugin.Listenbrainz.Services;
 using Microsoft.Extensions.Logging;
 
@@ -127,7 +128,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
             return null;
         }
 
-        private static string BuildRequestUrl(string endpoint) => $"https://{Resources.Listenbrainz.BaseUrl}/{Resources.Listenbrainz.ApiVersion}/{endpoint}";
+        private static string BuildRequestUrl(string endpoint) => $"https://{Api.BaseUrl}/{Api.Version}/{endpoint}";
 
         /// <summary>
         /// Convert dictionary to HTTP GET query.

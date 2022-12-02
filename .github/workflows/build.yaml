@@ -22,31 +22,21 @@ jobs:
       - name: Build plugin
         run: dotnet publish -c Release
 
-      - name: Create ZIP archive for JF 10.7
+      - name: Collect plugin binaries
         run: |
+          mkdir -p /home/runner/work/plugin-binaries/10-7
+          mkdir -p /home/runner/work/plugin-binaries/10-8
           pushd /home/runner/work/jellyfin-plugin-listenbrainz/jellyfin-plugin-listenbrainz/Jellyfin.Plugin.Listenbrainz/bin/Release/net5.0 && \
-          zip "/home/runner/work/jellyfin_plugin_listenbrainz_jf107.zip" Jellyfin.Plugin.Listenbrainz.dll && \
+          cp Jellyfin.Plugin.Listenbrainz.dll /home/runner/work/plugin-binaries/10-7 && \
           popd
-
-      - name: Create ZIP archive for JF 10.8
-        run: |
           pushd /home/runner/work/jellyfin-plugin-listenbrainz/jellyfin-plugin-listenbrainz/Jellyfin.Plugin.Listenbrainz.JF108/bin/Release/net6.0 && \
-          mv Jellyfin.Plugin.Listenbrainz.JF108.dll Jellyfin.Plugin.Listenbrainz.dll && \
-          zip "/home/runner/work/jellyfin_plugin_listenbrainz_jf108.zip" Jellyfin.Plugin.Listenbrainz.dll && \
+          cp Jellyfin.Plugin.Listenbrainz.dll /home/runner/work/plugin-binaries/10-8 && \
           popd
 
-      - name: Upload plugin zip for JF 10.7
+      - name: Upload built binaries
         uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # tag=v3
         with:
-          name: jellyfin_plugin_listenbrainz_jf107
+          name: plugin_binaries
           retention-days: 14
           if-no-files-found: error
-          path: "/home/runner/work/jellyfin_plugin_listenbrainz_jf107.zip"
-
-      - name: Upload plugin zip for JF 10.8
-        uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # tag=v3
-        with:
-          name: jellyfin_plugin_listenbrainz_jf108
-          retention-days: 14
-          if-no-files-found: error
-          path: "/home/runner/work/jellyfin_plugin_listenbrainz_jf108.zip"
+          path: /home/runner/work/plugin-binaries
