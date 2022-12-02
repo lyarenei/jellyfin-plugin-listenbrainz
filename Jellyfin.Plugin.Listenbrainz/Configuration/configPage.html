@@ -15,11 +15,12 @@
         <div class="content-primary">
             <form id="ListenbrainzConfigForm">
                 <section id="ServerConfig">
-                    <h2>Server configuration</h2>
-                    <div class="inputContainer" style="">
-                        <label class="inputLabel inputLabelUnfocused" for="ApiUrl">API URL</label>
-                        <input id="ApiUrl" name="ServerUrl" type="text" is="emby-input"/>
-                        <div class="fieldDescription">Listenbrainz API URL</div>
+                    <h2>Global configuration</h2>
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="ListenbrainzApiUrl">Listenbrainz API URL</label>
+                        <input id="ListenbrainzApiUrl" name="ListenbrainzUrl" type="text" is="emby-input"/>
+                        <div class="fieldDescription">Listenbrainz API URL (leave blank to use default)</div>
+                    </div>
                     </div>
                     <div>
                         <button is="emby-button" type="submit" class="raised button-submit block emby-button">
