@@ -26,11 +26,9 @@ jobs:
         run: |
           mkdir -p /home/runner/work/plugin-dlls
           pushd /home/runner/work/jellyfin-plugin-listenbrainz/jellyfin-plugin-listenbrainz/Jellyfin.Plugin.Listenbrainz/bin/Release/net5.0 && \
-          ls -la
           cp Jellyfin.Plugin.Listenbrainz.dll /home/runner/work/plugin-dlls/ && \
           popd
           pushd /home/runner/work/jellyfin-plugin-listenbrainz/jellyfin-plugin-listenbrainz/Jellyfin.Plugin.Listenbrainz.JF108/bin/Release/net6.0 && \
-          ls -la
           cp Jellyfin.Plugin.Listenbrainz.JF108.dll /home/runner/work/plugin-dlls/ && \
           popd
 
