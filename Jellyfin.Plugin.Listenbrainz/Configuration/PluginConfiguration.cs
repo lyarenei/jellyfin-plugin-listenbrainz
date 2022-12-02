@@ -29,6 +29,6 @@ namespace Jellyfin.Plugin.Listenbrainz.Configuration
         /// Listenbrainz API base URL.
         /// </summary>
         [SuppressMessage("Usage", "CA2227", Justification = "Needed for deserialization.")]
-        public string ListenbrainzBaseUrl { get; set; }
+        public string? ListenbrainzBaseUrl { get; set; }
     }
 }
