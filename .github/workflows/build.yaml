@@ -22,21 +22,21 @@ jobs:
       - name: Build plugin
         run: dotnet publish -c Release
 
-      - name: Collect plugin files
+      - name: Collect plugin binaries
         run: |
-          mkdir -p /home/runner/work/plugin-dlls/10-7
-          mkdir -p /home/runner/work/plugin-dlls/10-8
+          mkdir -p /home/runner/work/plugin-binaries/10-7
+          mkdir -p /home/runner/work/plugin-binaries/10-8
           pushd /home/runner/work/jellyfin-plugin-listenbrainz/jellyfin-plugin-listenbrainz/Jellyfin.Plugin.Listenbrainz/bin/Release/net5.0 && \
-          cp Jellyfin.Plugin.Listenbrainz.dll /home/runner/work/plugin-dlls/10-7 && \
+          cp Jellyfin.Plugin.Listenbrainz.dll /home/runner/work/plugin-binaries/10-7 && \
           popd
           pushd /home/runner/work/jellyfin-plugin-listenbrainz/jellyfin-plugin-listenbrainz/Jellyfin.Plugin.Listenbrainz.JF108/bin/Release/net6.0 && \
-          cp Jellyfin.Plugin.Listenbrainz.dll /home/runner/work/plugin-dlls/10-8 && \
+          cp Jellyfin.Plugin.Listenbrainz.dll /home/runner/work/plugin-binaries/10-8 && \
           popd
 
-      - name: Upload built files
+      - name: Upload built binaries
         uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # tag=v3
         with:
-          name: plugin_files
+          name: plugin_binaries
           retention-days: 14
           if-no-files-found: error
-          path: /home/runner/work/plugin-dlls
+          path: /home/runner/work/plugin-binaries
