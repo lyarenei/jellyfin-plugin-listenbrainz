@@ -25,7 +25,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Controllers
         public PluginController(IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory)
         {
             var logger = loggerFactory.CreateLogger<PluginController>();
-            var baseUrl = Plugin.Instance?.Configuration.BaseUrl ?? Api.BaseUrl;
+            var baseUrl = Plugin.Instance?.Configuration.ListenbrainzBaseUrl ?? Api.BaseUrl;
             _apiClient = new ListenbrainzClient(baseUrl, httpClientFactory, logger, new SleepService());
         }
 

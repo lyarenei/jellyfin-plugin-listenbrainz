@@ -16,7 +16,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Configuration
         public PluginConfiguration()
         {
             LbUsers = new Collection<LbUser>();
-            BaseUrl = Resources.Listenbrainz.Api.BaseUrl;
+            ListenbrainzBaseUrl = Resources.Listenbrainz.Api.BaseUrl;
         }
 
         /// <summary>
@@ -29,6 +29,6 @@ namespace Jellyfin.Plugin.Listenbrainz.Configuration
         /// Listenbrainz API base URL.
         /// </summary>
         [SuppressMessage("Usage", "CA2227", Justification = "Needed for deserialization.")]
-        public string BaseUrl { get; set; }
+        public string ListenbrainzBaseUrl { get; set; }
     }
 }
