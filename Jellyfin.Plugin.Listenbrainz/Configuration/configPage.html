@@ -21,6 +21,16 @@
                         <input id="ListenbrainzApiUrl" name="ListenbrainzUrl" type="text" is="emby-input"/>
                         <div class="fieldDescription">Listenbrainz API URL (leave blank to use default)</div>
                     </div>
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="MusicbrainzApiUrl">Musicbrainz API URL</label>
+                        <input id="MusicbrainzApiUrl" name="MusicbrainzUrl" type="text" is="emby-input"/>
+                        <div class="fieldDescription">Musicbrainz API URL (leave blank to use default)</div>
+                    </div>
+                    <div class="checkboxContainer">
+                        <label>
+                            <input is="emby-checkbox" type="checkbox" id="MusicbrainzEnabled" name="MusicbrainzEnabled"/>
+                            <span>Fetch additional metadata from Musicbrainz</span>
+                        </label>
                     </div>
                     <div>
                         <button is="emby-button" type="submit" class="raised button-submit block emby-button">
