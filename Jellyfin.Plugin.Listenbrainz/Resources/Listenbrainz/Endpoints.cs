@@ -1,7 +1,7 @@
 namespace Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz
 {
     /// <summary>
-    /// ListenBrainz API endpoints.
+    /// Listenbrainz API endpoints.
     /// </summary>
     public static class Endpoints
     {
