@@ -142,7 +142,7 @@ namespace Jellyfin.Plugin.Listenbrainz
             {
                 _logger.LogError(
                     "Listen won't be sent: " +
-                    "Track ({Path}) has invalid metadata - missing artist and/or track name.",
+                    "Track ({Path}) has invalid metadata - missing artist and/or track name",
                     item.Path);
                 return;
             }
@@ -234,7 +234,7 @@ namespace Jellyfin.Plugin.Listenbrainz
             {
                 _logger.LogError(
                     "Listen won't be sent: " +
-                    "Track ({Path}) has invalid metadata - missing artist and/or track name.",
+                    "Track ({Path}) has invalid metadata - missing artist and/or track name",
                     item.Path);
                 return;
             }
