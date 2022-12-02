@@ -128,7 +128,21 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
             return null;
         }
 
-        private static string BuildRequestUrl(string endpoint) => $"https://{Api.BaseUrl}/{Api.Version}/{endpoint}";
+        private static string BuildRequestUrl(string endpoint, string? customBaseUrl = null)
+        {
+            string baseUrl = customBaseUrl ?? Api.BaseUrl;
+            string scheme;
+            try
+            {
+                scheme = new Uri(baseUrl).Scheme;
+            }
+            catch (UriFormatException)
+            {
+                scheme = "https";
+            }
+
+            return $"{scheme}://{baseUrl}/{Api.Version}/{endpoint}";
+        }
 
         /// <summary>
         /// Convert dictionary to HTTP GET query.
