@@ -110,7 +110,7 @@
         var ListenbrainzConfig = {
             pluginUniqueId: "59B20823-AAFE-454C-A393-17427F518631",
 
-            configDefaults: {
+            userConfigDefaults: {
                 Token: "",
                 MediaBrowserUserId: "",
                 Options: {
@@ -130,7 +130,7 @@
 
             getUserConfig: function (config, userId) {
                 if (config.LbUsers == null) {
-                    return ListenbrainzConfig.configDefaults;
+                    return ListenbrainzConfig.userConfigDefaults;
                 }
 
                 let index = config.LbUsers.map(function (user) {
@@ -138,7 +138,7 @@
                 }).indexOf(userId);
 
                 if (index === -1) {
-                    return ListenbrainzConfig.configDefaults;
+                    return ListenbrainzConfig.userConfigDefaults;
                 }
 
                 return config.LbUsers[index];
