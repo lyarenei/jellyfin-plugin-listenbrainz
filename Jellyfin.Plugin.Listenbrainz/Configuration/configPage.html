@@ -17,13 +17,13 @@
                 <section id="GlobalConfig">
                     <h2>Global configuration</h2>
                     <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="ListenbrainzApiUrl">Listenbrainz API URL</label>
-                        <input id="ListenbrainzApiUrl" name="ListenbrainzUrl" type="text" is="emby-input"/>
+                        <label class="inputLabel inputLabelUnfocused" for="ListenbrainzBaseUrl">Listenbrainz API URL</label>
+                        <input id="ListenbrainzBaseUrl" name="ListenbrainzBaseUrl" type="text" is="emby-input"/>
                         <div class="fieldDescription">Listenbrainz API base URL</div>
                     </div>
                     <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="MusicbrainzApiUrl">Musicbrainz API URL</label>
-                        <input id="MusicbrainzApiUrl" name="MusicbrainzUrl" type="text" is="emby-input"/>
+                        <label class="inputLabel inputLabelUnfocused" for="MusicbrainzBaseUrl">Musicbrainz API URL</label>
+                        <input id="MusicbrainzBaseUrl" name="MusicbrainzBaseUrl" type="text" is="emby-input"/>
                         <div class="fieldDescription">Musicbrainz API base URL</div>
                     </div>
                     <div class="checkboxContainer">
@@ -123,6 +123,17 @@
                 },
             },
 
+            populateGlobalConfig: function (globalData) {
+                document.querySelector("#ListenbrainzBaseUrl")
+                    .value = globalData.ListenbrainzBaseUrl
+
+                document.querySelector("#MusicbrainzBaseUrl")
+                    .value = globalData.MusicbrainzBaseUrl
+
+                document.querySelector("#MusicbrainzEnabled")
+                    .checked = globalData.EnableMusicbrainz
+            },
+
             buildUserList: function (users) {
                 let html = "";
                 users.forEach(function (user) {
@@ -214,6 +225,24 @@
         document.querySelector('#ListenbrainzConfigPage')
             .addEventListener('pageshow', function () {
                 Dashboard.showLoadingMsg();
+
+                // load global config
+                ApiClient.getPluginConfiguration(ListenbrainzConfig.pluginUniqueId)
+                    .then(function (config) {
+                        let gConfig = config?.GlobalConfig;
+                        if (gConfig?.ListenbrainzBaseUrl == null) {
+                            gConfig.ListenbrainzBaseUrl = ListenbrainzConfig.globalConfigDefaults.ListenbrainzApiUrl;
+                        }
+
+                        if (gConfig?.MusicbrainzBaseUrl == null) {
+                            gConfig.MusicbrainzBaseUrl = ListenbrainzConfig.globalConfigDefaults.MusicbrainzApiUrl;
+                            gConfig.EnableMusicbrainz = ListenbrainzConfig.globalConfigDefaults.EnableMusicbrainz;
+                        }
+
+                        ListenbrainzConfig.populateGlobalConfig(gConfig);
+                    })
+
+                // get users and load user config
                 ApiClient.getUsers().then(function (users) {
                     ListenbrainzConfig.buildUserList(users);
                     ApiClient.getPluginConfiguration(ListenbrainzConfig.pluginUniqueId)
