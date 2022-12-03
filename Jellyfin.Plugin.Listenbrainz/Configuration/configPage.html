@@ -148,7 +148,7 @@
                 return config.LbUsers[index];
             },
 
-            populateConfig: function (userData) {
+            populateUserConfig: function (userData) {
                 if (userData.Token != null) {
                     document.querySelector("#Token")
                         .value = userData.Token
@@ -219,7 +219,7 @@
                     ApiClient.getPluginConfiguration(ListenbrainzConfig.pluginUniqueId)
                         .then(function (config) {
                             let userConfig = ListenbrainzConfig.getUserConfig(config, users[0].Id);
-                            ListenbrainzConfig.populateConfig(userConfig);
+                            ListenbrainzConfig.populateUserConfig(userConfig);
                             Dashboard.hideLoadingMsg();
                         });
                 });
@@ -232,7 +232,7 @@
                 ApiClient.getPluginConfiguration(ListenbrainzConfig.pluginUniqueId)
                     .then(function (config) {
                         let userConfig = ListenbrainzConfig.getUserConfig(config, userId);
-                        ListenbrainzConfig.populateConfig(userConfig);
+                        ListenbrainzConfig.populateUserConfig(userConfig);
                         Dashboard.hideLoadingMsg();
                     });
             });
