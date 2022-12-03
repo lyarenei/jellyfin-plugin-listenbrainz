@@ -109,7 +109,11 @@
     <script type="text/javascript">
         var ListenbrainzConfig = {
             pluginUniqueId: "59B20823-AAFE-454C-A393-17427F518631",
-
+            globalConfigDefaults: {
+              ListenbrainzApiUrl: "https://api.listenbrainz.org",
+              MusicbrainzApiUrl: "https://musicbrainz.org",
+              EnableMusicbrainz: true,
+            },
             userConfigDefaults: {
                 Token: "",
                 MediaBrowserUserId: "",
