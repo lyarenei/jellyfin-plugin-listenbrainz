@@ -52,7 +52,7 @@ namespace Jellyfin.Plugin.Listenbrainz
 
             _sessionManager = sessionManager;
             var mbClient = new MusicbrainzClient(httpClientFactory, _logger, new SleepService());
-            var baseUrl = Plugin.Instance?.Configuration.ListenbrainzBaseUrl ?? Api.BaseUrl;
+            var baseUrl = Plugin.Instance?.Configuration.GlobalConfig.ListenbrainzBaseUrl ?? Api.BaseUrl;
             _apiClient = new ListenbrainzClient(baseUrl, httpClientFactory, mbClient, _logger, new SleepService());
             Instance = this;
         }
