@@ -2,8 +2,8 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>Jellyfin.Plugin.Listenbrainz</RootNamespace>
-    <AssemblyVersion>1.4.0.1</AssemblyVersion>
-    <FileVersion>1.4.0.1</FileVersion>
+    <AssemblyVersion>1.4.0.2</AssemblyVersion>
+    <FileVersion>1.4.0.2</FileVersion>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <Nullable>enable</Nullable>
