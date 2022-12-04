@@ -224,6 +224,11 @@
 
             gatherInputValues: function () {
                 return {
+                    GlobalConfig: {
+                        ListenbrainzBaseUrl: document.querySelector("#ListenbrainzBaseUrl").value,
+                        MusicbrainzBaseUrl: document.querySelector("#MusicbrainzBaseUrl").value,
+                        MusicbrainzEnabled: document.querySelector("#MusicbrainzEnabled").checked,
+                    },
                     Token: document.querySelector("#Token").value,
                     Name: document.querySelector("#UserName").value,
                     MediaBrowserUserId: document.querySelector("#User").value,
@@ -264,6 +269,10 @@
                 });
             },
 
+            updateGlobalConfig: function (config) {
+                let newValues = ListenbrainzConfig.gatherInputValues();
+                config.GlobalConfig = newValues.GlobalConfig;
+            },
 
             updateUserConfig: function (config) {
                 if (Object.keys(config).length === 0) {
@@ -354,6 +363,7 @@
                 ApiClient.getPluginConfiguration(ListenbrainzConfig.pluginUniqueId)
                     .then(function (config) {
                         try {
+                            ListenbrainzConfig.updateGlobalConfig(config);
                             ListenbrainzConfig.updateUserConfig(config);
                         } catch (e) {
                             Dashboard.alert(e);
