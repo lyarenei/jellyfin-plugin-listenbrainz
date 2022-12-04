@@ -62,7 +62,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
             var requestMessage = new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
-                RequestUri = BuildRequestUrl(_baseUrl, request.GetEndpoint()),
+                RequestUri = BuildRequestUri(_baseUrl, request.GetEndpoint()),
                 Content = new StringContent(jsonData, Encoding.UTF8, "application/json")
             };
 
@@ -85,7 +85,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
             where TResponse : BaseResponse
         {
             var query = ToHttpGetQuery(request.ToRequestForm());
-            var url = BuildRequestUrl(_baseUrl, request.GetEndpoint());
+            var url = BuildRequestUri(_baseUrl, request.GetEndpoint());
             var requestMessage = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,
@@ -132,7 +132,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
             return null;
         }
 
-        private Uri BuildRequestUrl(string baseUrl, string endpoint)
+        private Uri BuildRequestUri(string baseUrl, string endpoint)
         {
             return new Uri($"{baseUrl}/{Api.Version}/{endpoint}");
         }
