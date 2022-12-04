@@ -146,8 +146,8 @@
         var ListenbrainzConfig = {
             pluginUniqueId: "59B20823-AAFE-454C-A393-17427F518631",
             globalConfigDefaults: {
-              ListenbrainzApiUrl: "https://api.listenbrainz.org",
-              MusicbrainzApiUrl: "https://musicbrainz.org",
+              ListenbrainzBaseUrl: "https://api.listenbrainz.org",
+              MusicbrainzBaseUrl: "https://musicbrainz.org",
               MusicbrainzEnabled: true,
             },
             userConfigDefaults: {
@@ -307,11 +307,11 @@
                     .then(function (config) {
                         let gConfig = config?.GlobalConfig;
                         if (gConfig?.ListenbrainzBaseUrl == null) {
-                            gConfig.ListenbrainzBaseUrl = ListenbrainzConfig.globalConfigDefaults.ListenbrainzApiUrl;
+                            gConfig.ListenbrainzBaseUrl = ListenbrainzConfig.globalConfigDefaults.ListenbrainzBaseUrl;
                         }
 
                         if (gConfig?.MusicbrainzBaseUrl == null) {
-                            gConfig.MusicbrainzBaseUrl = ListenbrainzConfig.globalConfigDefaults.MusicbrainzApiUrl;
+                            gConfig.MusicbrainzBaseUrl = ListenbrainzConfig.globalConfigDefaults.MusicbrainzBaseUrl;
                             gConfig.EnableMusicbrainz = ListenbrainzConfig.globalConfigDefaults.MusicbrainzEnabled;
                         }
 
