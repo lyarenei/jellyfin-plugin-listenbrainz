@@ -262,6 +262,29 @@
                     Dashboard.alert(msg);
                     console.log(msg);
                 });
+            },
+
+
+            updateUserConfig: function (config) {
+                if (Object.keys(config).length === 0) {
+                    config.LbUsers = [];
+                }
+
+                let selectedUserId = ListenbrainzConfig.getSelectedUserId();
+                let index = config.LbUsers.map(function (user) {
+                    return user.MediaBrowserUserId
+                }).indexOf(selectedUserId);
+
+                let newData = ListenbrainzConfig.gatherInputValues();
+                if (!newData.Name) {
+                    throw new Error("User name is missing.");
+                }
+
+                if (index === -1) {
+                    config.LbUsers.push(newData);
+                } else {
+                    config.LbUsers[index] = newData;
+                }
             }
         };
 
@@ -330,26 +353,12 @@
                 Dashboard.showLoadingMsg();
                 ApiClient.getPluginConfiguration(ListenbrainzConfig.pluginUniqueId)
                     .then(function (config) {
-                        if (Object.keys(config).length === 0) {
-                            config.LbUsers = [];
-                        }
-
-                        let selectedUserId = ListenbrainzConfig.getSelectedUserId();
-                        let index = config.LbUsers.map(function (user) {
-                            return user.MediaBrowserUserId
-                        }).indexOf(selectedUserId);
-
-                        let newData = ListenbrainzConfig.gatherInputValues();
-                        if (!newData.Name) {
-                            Dashboard.alert("User name is missing.")
+                        try {
+                            ListenbrainzConfig.updateUserConfig(config);
+                        } catch (e) {
+                            Dashboard.alert(e);
                             Dashboard.hideLoadingMsg();
                             return;
-                        }
-
-                        if (index === -1) {
-                            config.LbUsers.push(newData);
-                        } else {
-                            config.LbUsers[index] = newData;
                         }
 
                         ApiClient.updatePluginConfiguration(ListenbrainzConfig.pluginUniqueId, config)
