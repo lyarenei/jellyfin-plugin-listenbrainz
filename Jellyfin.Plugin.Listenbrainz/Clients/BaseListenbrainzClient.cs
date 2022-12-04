@@ -62,7 +62,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
             var requestMessage = new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
-                RequestUri = new Uri(BuildRequestUrl(_baseUrl, request.GetEndpoint())),
+                RequestUri = BuildRequestUrl(_baseUrl, request.GetEndpoint()),
                 Content = new StringContent(jsonData, Encoding.UTF8, "application/json")
             };
 
@@ -132,19 +132,9 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
             return null;
         }
 
-        private static string BuildRequestUrl(string baseUrl, string endpoint)
+        private Uri BuildRequestUrl(string baseUrl, string endpoint)
         {
-            string scheme;
-            try
-            {
-                scheme = new Uri(baseUrl).Scheme;
-            }
-            catch (UriFormatException)
-            {
-                scheme = "https";
-            }
-
-            return $"{scheme}://{baseUrl}/{Api.Version}/{endpoint}";
+            return new Uri($"{baseUrl}/{Api.Version}/{endpoint}");
         }
 
         /// <summary>
