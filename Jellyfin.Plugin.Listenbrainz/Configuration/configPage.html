@@ -148,7 +148,7 @@
             globalConfigDefaults: {
               ListenbrainzApiUrl: "https://api.listenbrainz.org",
               MusicbrainzApiUrl: "https://musicbrainz.org",
-              EnableMusicbrainz: true,
+              MusicbrainzEnabled: true,
             },
             userConfigDefaults: {
                 Token: "",
@@ -174,7 +174,7 @@
                     .value = globalData.MusicbrainzBaseUrl
 
                 document.querySelector("#MusicbrainzEnabled")
-                    .checked = globalData.EnableMusicbrainz
+                    .checked = globalData.MusicbrainzEnabled
             },
 
             buildUserList: function (users) {
@@ -312,7 +312,7 @@
 
                         if (gConfig?.MusicbrainzBaseUrl == null) {
                             gConfig.MusicbrainzBaseUrl = ListenbrainzConfig.globalConfigDefaults.MusicbrainzApiUrl;
-                            gConfig.EnableMusicbrainz = ListenbrainzConfig.globalConfigDefaults.EnableMusicbrainz;
+                            gConfig.EnableMusicbrainz = ListenbrainzConfig.globalConfigDefaults.MusicbrainzEnabled;
                         }
 
                         ListenbrainzConfig.populateGlobalConfig(gConfig);

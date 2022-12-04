@@ -23,6 +23,6 @@ namespace Jellyfin.Plugin.Listenbrainz.Configuration
         /// Musicbrainz integration is enabled.
         /// </summary>
         [SuppressMessage("Usage", "CA2227", Justification = "Needed for deserialization.")]
-        public bool EnableMusicbrainz { get; set; }
+        public bool MusicbrainzEnabled { get; set; }
     }
 }
