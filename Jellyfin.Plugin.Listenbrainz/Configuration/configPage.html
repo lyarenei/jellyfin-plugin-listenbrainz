@@ -3,11 +3,6 @@
 <head>
     <title>Listenbrainz Plugin configuration</title>
 </head>
-<style>
-    .section-separator {
-        margin: 35px 0 25px 0;
-    }
-</style>
 <body>
 <div
     id="ListenbrainzConfigPage"
@@ -109,7 +104,11 @@
             </form>
         </div>
     </div>
-
+    <script type="text/css" id="configCss">
+        .section-separator {
+            margin: 35px 0 25px 0;
+        }
+    </script>
     <script type="text/javascript">
         var ListenbrainzConfig = {
             pluginUniqueId: "59B20823-AAFE-454C-A393-17427F518631",
@@ -125,6 +124,13 @@
                     ListenSubmitEnabled: false,
                     SyncFavoritesEnabled: false,
                 },
+            },
+
+            loadCss: function () {
+                let cssValue = document.getElementById("configCss").innerText;
+                let styleTag = document.createElement("style");
+                styleTag.innerText = cssValue;
+                document.getElementsByTagName("head")[0].appendChild(styleTag);
             },
 
             populateGlobalConfig: function (globalData) {
@@ -228,6 +234,7 @@
 
         document.querySelector('#ListenbrainzConfigPage')
             .addEventListener('pageshow', function () {
+                ListenbrainzConfig.loadCss();
                 Dashboard.showLoadingMsg();
 
                 // load global config
