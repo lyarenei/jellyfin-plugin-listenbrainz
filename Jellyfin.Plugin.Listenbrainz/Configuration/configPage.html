@@ -22,9 +22,7 @@
                             <div class="fieldDescription">Listenbrainz API base URL</div>
                         </div>
                         <div class="inputContainer grid-row-3-4_2 grid-row-vertical-center">
-                            <div id="ResetListenbrainzBaseUrl" class="raised button block emby-button">
-                                <span>Use default</span>
-                            </div>
+                            <div id="ResetListenbrainzBaseUrl" class="raised button block emby-button">Use default</div>
                         </div>
                     </div>
                     <div class="grid-layout-3-4">
@@ -34,9 +32,7 @@
                             <div class="fieldDescription">Musicbrainz API base URL</div>
                         </div>
                         <div class="inputContainer grid-row-3-4_2 grid-row-vertical-center">
-                            <div id="ResetMusicbrainzBaseUrl" class="raised button block emby-button">
-                                <span>Use default</span>
-                            </div>
+                            <div id="ResetMusicbrainzBaseUrl" class="raised button block emby-button">Use default</div>
                         </div>
                     </div>
                     <div class="checkboxContainer">
@@ -379,6 +375,16 @@
 
                 e.preventDefault();
                 return false;
+            });
+
+        document.querySelectorAll('#ResetListenbrainzBaseUrl, #ResetMusicbrainzBaseUrl')
+            .forEach(btn => {
+                btn.addEventListener('click', event => {
+                    let inputId = event.target.id.replace('Reset', '');
+                    console.log(inputId);
+                    document.querySelector('#' + inputId)
+                        .value = ListenbrainzConfig.globalConfigDefaults[inputId];
+                });
             });
 
         ApiClient.VerifyListenbrainzToken = function (token) {
