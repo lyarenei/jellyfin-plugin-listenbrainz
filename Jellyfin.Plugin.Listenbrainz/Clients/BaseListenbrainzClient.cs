@@ -85,11 +85,11 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
             where TResponse : BaseResponse
         {
             var query = ToHttpGetQuery(request.ToRequestForm());
-            var url = BuildRequestUri(_baseUrl, request.GetEndpoint());
+            var requestUri = BuildRequestUri(_baseUrl, request.GetEndpoint());
             var requestMessage = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,
-                RequestUri = new Uri($"{url}?{query}")
+                RequestUri = new Uri($"{requestUri}?{query}")
             };
             requestMessage.Headers.Authorization = new AuthenticationHeaderValue("token", request.ApiToken);
 
