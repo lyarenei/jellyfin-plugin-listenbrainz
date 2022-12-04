@@ -1,6 +1,8 @@
+using System;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Jellyfin.Plugin.Listenbrainz.Configuration;
 using Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz;
 using Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz.Requests;
 using Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz.Responses;
@@ -15,6 +17,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
     public class MusicbrainzClient : BaseMusicbrainzClient
     {
         private readonly ILogger _logger;
+        private readonly GlobalConfiguration _globalConfig;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MusicbrainzClient"/> class.
@@ -27,6 +30,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
             ILogger logger,
             ISleepService sleepService) : base(httpClientFactory, logger, sleepService)
         {
+            _globalConfig = Plugin.Instance?.Configuration.GlobalConfig ?? throw new InvalidOperationException("plugin configuration is NULL");
             _logger = logger;
         }
 
@@ -38,6 +42,12 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
         public async Task<Recording?> GetRecordingData(string trackId)
         {
             _logger.LogDebug("Getting Recording data for Track: {TrackMbId}", trackId);
+            if (!_globalConfig.MusicbrainzEnabled)
+            {
+                _logger.LogDebug("Nothing to do - Musicbrainz integration is disabled");
+                return null;
+            }
+
             var response = await Get<RecordingIdRequest, RecordingsResponse>(new RecordingIdRequest(trackId)).ConfigureAwait(true);
             if (response == null || response.IsError())
             {
