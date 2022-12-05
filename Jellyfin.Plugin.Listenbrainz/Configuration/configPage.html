@@ -41,11 +41,7 @@
                             <span>Fetch additional metadata from Musicbrainz</span>
                         </label>
                     </div>
-                    <div>
-                        <button is="emby-button" type="submit" class="raised button-submit block emby-button">
-                            <span>Save</span>
-                        </button>
-                    </div>
+                    <button is="emby-button" type="submit" class="raised button-submit block emby-button" id="saveGlobal">Save</button>
                 </section>
                 <hr class="section-separator"/>
                 <section id="UserConfig">
@@ -384,6 +380,13 @@
                     console.log(inputId);
                     document.querySelector('#' + inputId)
                         .value = ListenbrainzConfig.globalConfigDefaults[inputId];
+                });
+            });
+
+        document.querySelectorAll('#ListenbrainzBaseUrl, #MusicbrainzBaseUrl, #MusicbrainzEnabled')
+            .forEach(item => {
+                item.addEventListener('change', () => {
+                    document.querySelector('#saveGlobal').textContent = 'Save (requires restart to apply)'
                 });
             });
 
