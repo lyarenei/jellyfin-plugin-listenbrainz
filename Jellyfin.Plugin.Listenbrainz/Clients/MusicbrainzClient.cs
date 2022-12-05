@@ -12,9 +12,9 @@ using Microsoft.Extensions.Logging;
 namespace Jellyfin.Plugin.Listenbrainz.Clients
 {
     /// <summary>
-    /// Musicbrainz API client.
+    /// Implementation of <see cref="IMusicbrainzClientService"/>.
     /// </summary>
-    public class MusicbrainzClient : BaseMusicbrainzClient
+    public class MusicbrainzClient : BaseMusicbrainzClient, IMusicbrainzClientService
     {
         private readonly ILogger _logger;
         private readonly GlobalConfiguration _globalConfig;
@@ -34,11 +34,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
             _logger = logger;
         }
 
-        /// <summary>
-        /// Get recording data by track MBID.
-        /// </summary>
-        /// <param name="trackId">ID of the track.</param>
-        /// <returns>An instance of <see cref="Recording"/>. Null if error or not found.</returns>
+        /// <inheritdoc />
         public async Task<Recording?> GetRecordingData(string trackId)
         {
             _logger.LogDebug("Getting Recording data for Track: {TrackMbId}", trackId);

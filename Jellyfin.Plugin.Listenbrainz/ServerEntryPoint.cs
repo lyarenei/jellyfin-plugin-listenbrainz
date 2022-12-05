@@ -52,8 +52,8 @@ namespace Jellyfin.Plugin.Listenbrainz
             var config = Plugin.Instance?.Configuration.GlobalConfig;
             _globalConfig = config ?? throw new InvalidOperationException("plugin configuration is NULL");
             _logger = loggerFactory.CreateLogger<ServerEntryPoint>();
-
             _sessionManager = sessionManager;
+
             var mbClient = new MusicbrainzClient(httpClientFactory, _logger, new SleepService());
             var baseUrl = _globalConfig.ListenbrainzBaseUrl ?? Api.BaseUrl;
             _apiClient = new ListenbrainzClient(baseUrl, httpClientFactory, mbClient, _logger, new SleepService());
