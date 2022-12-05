@@ -64,7 +64,19 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
                 using var requestMessage = await Clone(request).ConfigureAwait(false);
                 LogRequest(requestMessage, requestId);
 
-                response = await httpClient.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(false);
+                try
+                {
+                    response = await httpClient
+                        .SendAsync(requestMessage, CancellationToken.None)
+                        .ConfigureAwait(false);
+                }
+                catch (HttpRequestException e)
+                {
+                    _logger.LogError("an error occured when sending a request: {Err}", e.Message);
+                    _logger.LogDebug("an exception occured: {Exc}", e.ToString());
+                    break;
+                }
+
                 if (!_retryStatuses.Contains(response.StatusCode))
                 {
                     _logger.LogDebug(
@@ -87,7 +99,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
 
             if (response == null)
             {
-                _logger.LogError("Should not reach here - response is null ({RequestId})", requestId);
+                _logger.LogError("no response available ({RequestId}), sending request failed?", requestId);
                 throw new InvalidResponseException("response is null");
             }
 
