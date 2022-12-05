@@ -55,11 +55,11 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
             where TResponse : BaseResponse
         {
             var query = ToMusicbrainzQuery(request.ToRequestForm());
-            var url = BuildRequestUrl(request.GetEndpoint());
+            var requestUri = BuildRequestUri(request.GetEndpoint());
             var requestMessage = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,
-                RequestUri = new Uri($"{url}?query={query}")
+                RequestUri = new Uri($"{requestUri}?query={query}")
             };
 
             var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString();
@@ -109,7 +109,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
             return null;
         }
 
-        private static string BuildRequestUrl(string endpoint) => $"https://{Api.BaseUrl}/ws/{Api.Version}/{endpoint}";
+        private static Uri BuildRequestUri(string endpoint) => new($"{Api.BaseUrl}/ws/{Api.Version}/{endpoint}");
 
         /// <summary>
         /// Convert dictionary to Musicbrainz query.
