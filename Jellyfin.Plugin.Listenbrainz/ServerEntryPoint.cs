@@ -54,7 +54,16 @@ namespace Jellyfin.Plugin.Listenbrainz
             _logger = loggerFactory.CreateLogger<ServerEntryPoint>();
             _sessionManager = sessionManager;
 
-            var mbClient = new MusicbrainzClient(httpClientFactory, _logger, new SleepService());
+            IMusicbrainzClientService mbClient;
+            if (_globalConfig.MusicbrainzEnabled)
+            {
+                mbClient = new MusicbrainzClient(httpClientFactory, _logger, new SleepService());
+            }
+            else
+            {
+                mbClient = new DummyMusicbrainzClient(_logger);
+            }
+
             var baseUrl = _globalConfig.ListenbrainzBaseUrl ?? Api.BaseUrl;
             _apiClient = new ListenbrainzClient(baseUrl, httpClientFactory, mbClient, _logger, new SleepService());
             Instance = this;
