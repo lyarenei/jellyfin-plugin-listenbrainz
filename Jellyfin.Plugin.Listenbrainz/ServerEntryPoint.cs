@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.Listenbrainz.Clients;
+using Jellyfin.Plugin.Listenbrainz.Configuration;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
 using Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
 using Jellyfin.Plugin.Listenbrainz.Services;
@@ -34,8 +35,8 @@ namespace Jellyfin.Plugin.Listenbrainz
 
         private readonly ISessionManager _sessionManager;
         private readonly ILogger<ServerEntryPoint> _logger;
-
         private readonly ListenbrainzClient _apiClient;
+        private readonly GlobalConfiguration _globalConfig;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ServerEntryPoint"/> class.
@@ -48,11 +49,13 @@ namespace Jellyfin.Plugin.Listenbrainz
             IHttpClientFactory httpClientFactory,
             ILoggerFactory loggerFactory)
         {
+            var config = Plugin.Instance?.Configuration.GlobalConfig;
+            _globalConfig = config ?? throw new InvalidOperationException("plugin configuration is NULL");
             _logger = loggerFactory.CreateLogger<ServerEntryPoint>();
 
             _sessionManager = sessionManager;
             var mbClient = new MusicbrainzClient(httpClientFactory, _logger, new SleepService());
-            var baseUrl = Plugin.Instance?.Configuration.GlobalConfig.ListenbrainzBaseUrl ?? Api.BaseUrl;
+            var baseUrl = _globalConfig.ListenbrainzBaseUrl ?? Api.BaseUrl;
             _apiClient = new ListenbrainzClient(baseUrl, httpClientFactory, mbClient, _logger, new SleepService());
             Instance = this;
         }
