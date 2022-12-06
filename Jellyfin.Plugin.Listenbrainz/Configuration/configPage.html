@@ -277,10 +277,6 @@
                 }).indexOf(selectedUserId);
 
                 let newData = ListenbrainzConfig.gatherInputValues();
-                if (!newData.Name) {
-                    throw new Error("User name is missing.");
-                }
-
                 if (index === -1) {
                     config.LbUsers.push(newData);
                 } else {

@@ -62,7 +62,7 @@ To configure a user:
 1. Open plugin settings
 2. Select the user you want to configure
 3. Paste the ListenBrainz user token to the API token field (you can get it from [here](https://listenbrainz.org/profile/))
-4. Click on Get name (this will verify your API token)
+4. (Optional) Click on `Get name` to verify the API token
 5. Check `Enable listen submitting`, optionally favorites sync
 6. Save configuration
 
