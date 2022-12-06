@@ -20,7 +20,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Configuration
         public string? MusicbrainzBaseUrl { get; set; }
 
         /// <summary>
-        /// Gets or sets flag indicating a Musicbrainz integration is enabled.
+        /// Gets or sets a value indicating whether a Musicbrainz integration is enabled.
         /// </summary>
         [SuppressMessage("Usage", "CA2227", Justification = "Needed for deserialization.")]
         public bool MusicbrainzEnabled { get; set; }
