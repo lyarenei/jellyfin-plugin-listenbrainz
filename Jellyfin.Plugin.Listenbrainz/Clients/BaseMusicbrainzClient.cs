@@ -23,14 +23,17 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
     {
         private readonly ILogger _logger;
         private readonly JsonSerializerOptions _serOpts;
+        private readonly string _baseUrl;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseMusicbrainzClient"/> class.
         /// </summary>
+        /// <param name="baseUrl">API base URL.</param>
         /// <param name="httpClientFactory">HTTP client factory.</param>
         /// <param name="logger">Logger instance.</param>
         /// <param name="sleepService">Sleep service.</param>
         public BaseMusicbrainzClient(
+            string baseUrl,
             IHttpClientFactory httpClientFactory,
             ILogger logger,
             ISleepService sleepService) : base(httpClientFactory, logger, sleepService)
@@ -41,6 +44,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
                 PropertyNamingPolicy = KebabCaseNamingPolicy.Instance
             };
+            _baseUrl = baseUrl;
         }
 
         /// <summary>
@@ -109,7 +113,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
             return null;
         }
 
-        private static Uri BuildRequestUri(string endpoint) => new($"{Api.BaseUrl}/ws/{Api.Version}/{endpoint}");
+        private Uri BuildRequestUri(string endpoint) => new($"{_baseUrl}/ws/{Api.Version}/{endpoint}");
 
         /// <summary>
         /// Convert dictionary to Musicbrainz query.

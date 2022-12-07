@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Jellyfin.Plugin.Listenbrainz.Clients;
 using Jellyfin.Plugin.Listenbrainz.Configuration;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
-using Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
 using Jellyfin.Plugin.Listenbrainz.Services;
 using Jellyfin.Plugin.Listenbrainz.Utils;
 using MediaBrowser.Controller.Entities.Audio;
@@ -57,15 +56,16 @@ namespace Jellyfin.Plugin.Listenbrainz
             IMusicbrainzClientService mbClient;
             if (_globalConfig.MusicbrainzEnabled)
             {
-                mbClient = new MusicbrainzClient(httpClientFactory, _logger, new SleepService());
+                var mbBaseUrl = _globalConfig.MusicbrainzBaseUrl ?? Resources.Musicbrainz.Api.BaseUrl;
+                mbClient = new MusicbrainzClient(mbBaseUrl, httpClientFactory, _logger, new SleepService());
             }
             else
             {
                 mbClient = new DummyMusicbrainzClient(_logger);
             }
 
-            var baseUrl = _globalConfig.ListenbrainzBaseUrl ?? Api.BaseUrl;
-            _apiClient = new ListenbrainzClient(baseUrl, httpClientFactory, mbClient, _logger, new SleepService());
+            var lbBaseUrl = _globalConfig.ListenbrainzBaseUrl ?? Resources.Listenbrainz.Api.BaseUrl;
+            _apiClient = new ListenbrainzClient(lbBaseUrl, httpClientFactory, mbClient, _logger, new SleepService());
             Instance = this;
         }
 

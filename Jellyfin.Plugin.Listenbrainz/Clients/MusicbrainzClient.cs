@@ -22,13 +22,15 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
         /// <summary>
         /// Initializes a new instance of the <see cref="MusicbrainzClient"/> class.
         /// </summary>
+        /// <param name="baseUrl">API base URL.</param>
         /// <param name="httpClientFactory">HTTP client factory.</param>
         /// <param name="logger">Logger instance.</param>
         /// <param name="sleepService">Sleep service.</param>
         public MusicbrainzClient(
+            string baseUrl,
             IHttpClientFactory httpClientFactory,
             ILogger logger,
-            ISleepService sleepService) : base(httpClientFactory, logger, sleepService)
+            ISleepService sleepService) : base(baseUrl, httpClientFactory, logger, sleepService)
         {
             _globalConfig = Plugin.Instance?.Configuration.GlobalConfig ?? throw new InvalidOperationException("plugin configuration is NULL");
             _logger = logger;
