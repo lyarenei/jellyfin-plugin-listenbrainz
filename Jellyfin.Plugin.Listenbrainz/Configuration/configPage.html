@@ -3,7 +3,6 @@
 <head>
     <title>Listenbrainz Plugin configuration</title>
 </head>
-
 <body>
 <div
     id="ListenbrainzConfigPage"
@@ -14,61 +13,95 @@
     <div data-role="content">
         <div class="content-primary">
             <form id="ListenbrainzConfigForm">
-                <div class="selectContainer">
-                    <label class="selectLabel" for="User">Configure Listenbrainz for:</label>
-                    <select is="emby-select" id="User" name="User"></select>
-                </div>
-                <div>
-                    <!-- Yes, inline CSS, I know.-->
-                    <div style="
+                <section id="GlobalConfig">
+                    <h2>Global configuration</h2>
+                    <div class="grid-layout-3-4">
+                        <div class="inputContainer grid-row-3-4_1">
+                            <label class="inputLabel inputLabelUnfocused" for="ListenbrainzBaseUrl">Listenbrainz API URL</label>
+                            <input id="ListenbrainzBaseUrl" name="ListenbrainzBaseUrl" type="text" is="emby-input"/>
+                            <div class="fieldDescription">Listenbrainz API base URL</div>
+                        </div>
+                        <div class="inputContainer grid-row-3-4_2 grid-row-vertical-center">
+                            <div id="ResetListenbrainzBaseUrl" class="raised button block emby-button">Use default</div>
+                        </div>
+                    </div>
+                    <div class="grid-layout-3-4">
+                        <div class="inputContainer grid-row-3-4_1">
+                            <label class="inputLabel inputLabelUnfocused" for="MusicbrainzBaseUrl">Musicbrainz API URL</label>
+                            <input id="MusicbrainzBaseUrl" name="MusicbrainzBaseUrl" type="text" is="emby-input"/>
+                            <div class="fieldDescription">Musicbrainz API base URL</div>
+                        </div>
+                        <div class="inputContainer grid-row-3-4_2 grid-row-vertical-center">
+                            <div id="ResetMusicbrainzBaseUrl" class="raised button block emby-button">Use default</div>
+                        </div>
+                    </div>
+                    <div class="checkboxContainer">
+                        <label>
+                            <input is="emby-checkbox" type="checkbox" id="MusicbrainzEnabled" name="MusicbrainzEnabled"/>
+                            <span>Fetch additional metadata from Musicbrainz</span>
+                        </label>
+                    </div>
+                    <button is="emby-button" type="submit" class="raised button-submit block emby-button" id="saveGlobal">Save</button>
+                </section>
+                <hr class="section-separator"/>
+                <section id="UserConfig">
+                    <h2>User configuration</h2>
+                    <div class="selectContainer">
+                        <label class="selectLabel" for="User">User to configure</label>
+                        <select is="emby-select" id="User" name="User"></select>
+                    </div>
+                    <div>
+                        <!-- Yes, inline CSS, I know.-->
+                        <div style="
                         display: grid;
                         grid-template-columns: 1fr 1fr 1fr 1fr;
                         grid-template-rows: 1fr;
                         gap: 0 15px;
                         grid-auto-flow: row;
                         grid-template-areas: 'tokenInput tokenInput nameValue getName';"
-                    >
-                        <div class="inputContainer" style="grid-area: tokenInput">
-                            <label class="inputLabel inputLabelUnfocused" for="Token">API token</label>
-                            <input id="Token" name="Token" type="text" is="emby-input"/>
-                            <div class="fieldDescription">Listenbrainz API token.</div>
-                        </div>
-                        <div class="inputContainer" style="grid-area: nameValue">
-                            <label class="inputLabel inputLabelUnfocused" for="UserName">User name</label>
-                            <input id="UserName" name="UserName" type="text" is="emby-input" readonly/>
-                            <div class="fieldDescription">Listenbrainz user name.</div>
-                        </div>
-                        <div class="inputContainer" style="grid-area: getName; display:flex; flex-flow: column; justify-content: center">
-                            <div id="TokenTestButton"
-                                 class="raised button block emby-button"
-                                 style="margin: 0">
-                                <span>Get name</span>
+                        >
+                            <div class="inputContainer" style="grid-area: tokenInput">
+                                <label class="inputLabel inputLabelUnfocused" for="Token">API token</label>
+                                <input id="Token" name="Token" type="text" is="emby-input"/>
+                                <div class="fieldDescription">Listenbrainz API token.</div>
+                            </div>
+                            <div class="inputContainer" style="grid-area: nameValue">
+                                <label class="inputLabel inputLabelUnfocused" for="UserName">User name</label>
+                                <input id="UserName" name="UserName" type="text" is="emby-input" readonly/>
+                                <div class="fieldDescription">Listenbrainz user name.</div>
+                            </div>
+                            <div class="inputContainer" style="grid-area: getName; display:flex; flex-flow: column; justify-content: center">
+                                <div id="TokenTestButton"
+                                     class="raised button block emby-button"
+                                     style="margin: 0">
+                                    <span>Get name</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="checkboxContainer">
-                    <label>
-                        <input
-                            is="emby-checkbox"
-                            type="checkbox"
-                            id="ListenSubmitEnabled"
-                            name="ListenSubmitEnabled"
-                        />
-                        <span>Enable listen submitting</span>
-                    </label>
-                </div>
-                <div class="checkboxContainer">
-                    <label>
-                        <input
-                            is="emby-checkbox"
-                            type="checkbox"
-                            id="SyncFavoritesEnabled"
-                            name="SyncFavoritesEnabled"
-                        />
-                        <span>Enable favorites sync</span>
-                    </label>
-                </div>
+                    <div class="checkboxContainer">
+                        <label>
+                            <input
+                                is="emby-checkbox"
+                                type="checkbox"
+                                id="ListenSubmitEnabled"
+                                name="ListenSubmitEnabled"
+                            />
+                            <span>Enable listen submitting</span>
+                        </label>
+                    </div>
+                    <div class="checkboxContainer">
+                        <label>
+                            <input
+                                is="emby-checkbox"
+                                type="checkbox"
+                                id="SyncFavoritesEnabled"
+                                name="SyncFavoritesEnabled"
+                            />
+                            <span>Enable favorites sync</span>
+                        </label>
+                    </div>
+                </section>
                 <div>
                     <button is="emby-button" type="submit" class="raised button-submit block emby-button">
                         <span>Save</span>
@@ -77,18 +110,63 @@
             </form>
         </div>
     </div>
-
+    <script type="text/css" id="configCss">
+        .section-separator {
+            margin: 35px 0 25px 0;
+        }
+        .grid-layout-3-4 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            grid-template-rows: 1fr;
+            gap: 0 15px;
+            grid-auto-flow: row;
+            grid-template-areas: 'grid-row-3-4_1 grid-row-3-4_1 grid-row-3-4_1 grid-row-3-4_2';
+        }
+        .grid-row-3-4_1 {
+            grid-area: grid-row-3-4_1;
+        }
+        .grid-row-3-4_2 {
+            grid-area: grid-row-3-4_2;
+        }
+        .grid-row-vertical-center {
+            display:flex;
+            flex-flow: column;
+            justify-content: center;
+        }
+    </script>
     <script type="text/javascript">
         var ListenbrainzConfig = {
             pluginUniqueId: "59B20823-AAFE-454C-A393-17427F518631",
-
-            configDefaults: {
+            globalConfigDefaults: {
+              ListenbrainzBaseUrl: "https://api.listenbrainz.org",
+              MusicbrainzBaseUrl: "https://musicbrainz.org",
+              MusicbrainzEnabled: true,
+            },
+            userConfigDefaults: {
                 Token: "",
                 MediaBrowserUserId: "",
                 Options: {
                     ListenSubmitEnabled: false,
                     SyncFavoritesEnabled: false,
                 },
+            },
+
+            loadCss: function () {
+                let cssValue = document.getElementById("configCss").innerText;
+                let styleTag = document.createElement("style");
+                styleTag.innerText = cssValue;
+                document.getElementsByTagName("head")[0].appendChild(styleTag);
+            },
+
+            populateGlobalConfig: function (globalData) {
+                document.querySelector("#ListenbrainzBaseUrl")
+                    .value = globalData.ListenbrainzBaseUrl
+
+                document.querySelector("#MusicbrainzBaseUrl")
+                    .value = globalData.MusicbrainzBaseUrl
+
+                document.querySelector("#MusicbrainzEnabled")
+                    .checked = globalData.MusicbrainzEnabled
             },
 
             buildUserList: function (users) {
@@ -102,7 +180,7 @@
 
             getUserConfig: function (config, userId) {
                 if (config.LbUsers == null) {
-                    return ListenbrainzConfig.configDefaults;
+                    return ListenbrainzConfig.userConfigDefaults;
                 }
 
                 let index = config.LbUsers.map(function (user) {
@@ -110,13 +188,13 @@
                 }).indexOf(userId);
 
                 if (index === -1) {
-                    return ListenbrainzConfig.configDefaults;
+                    return ListenbrainzConfig.userConfigDefaults;
                 }
 
                 return config.LbUsers[index];
             },
 
-            populateConfig: function (userData) {
+            populateUserConfig: function (userData) {
                 if (userData.Token != null) {
                     document.querySelector("#Token")
                         .value = userData.Token
@@ -138,6 +216,11 @@
 
             gatherInputValues: function () {
                 return {
+                    GlobalConfig: {
+                        ListenbrainzBaseUrl: document.querySelector("#ListenbrainzBaseUrl").value,
+                        MusicbrainzBaseUrl: document.querySelector("#MusicbrainzBaseUrl").value,
+                        MusicbrainzEnabled: document.querySelector("#MusicbrainzEnabled").checked,
+                    },
                     Token: document.querySelector("#Token").value,
                     Name: document.querySelector("#UserName").value,
                     MediaBrowserUserId: document.querySelector("#User").value,
@@ -176,18 +259,60 @@
                     Dashboard.alert(msg);
                     console.log(msg);
                 });
-            }
+            },
+
+            updateGlobalConfig: function (config) {
+                let newValues = ListenbrainzConfig.gatherInputValues();
+                config.GlobalConfig = newValues.GlobalConfig;
+            },
+
+            updateUserConfig: function (config) {
+                if (Object.keys(config).length === 0) {
+                    config.LbUsers = [];
+                }
+
+                let selectedUserId = ListenbrainzConfig.getSelectedUserId();
+                let index = config.LbUsers.map(function (user) {
+                    return user.MediaBrowserUserId
+                }).indexOf(selectedUserId);
+
+                let newData = ListenbrainzConfig.gatherInputValues();
+                if (index === -1) {
+                    config.LbUsers.push(newData);
+                } else {
+                    config.LbUsers[index] = newData;
+                }
+            },
         };
 
         document.querySelector('#ListenbrainzConfigPage')
             .addEventListener('pageshow', function () {
+                ListenbrainzConfig.loadCss();
                 Dashboard.showLoadingMsg();
+
+                // load global config
+                ApiClient.getPluginConfiguration(ListenbrainzConfig.pluginUniqueId)
+                    .then(function (config) {
+                        let gConfig = config?.GlobalConfig;
+                        if (gConfig?.ListenbrainzBaseUrl == null) {
+                            gConfig.ListenbrainzBaseUrl = ListenbrainzConfig.globalConfigDefaults.ListenbrainzBaseUrl;
+                        }
+
+                        if (gConfig?.MusicbrainzBaseUrl == null) {
+                            gConfig.MusicbrainzBaseUrl = ListenbrainzConfig.globalConfigDefaults.MusicbrainzBaseUrl;
+                            gConfig.EnableMusicbrainz = ListenbrainzConfig.globalConfigDefaults.MusicbrainzEnabled;
+                        }
+
+                        ListenbrainzConfig.populateGlobalConfig(gConfig);
+                    })
+
+                // get users and load user config
                 ApiClient.getUsers().then(function (users) {
                     ListenbrainzConfig.buildUserList(users);
                     ApiClient.getPluginConfiguration(ListenbrainzConfig.pluginUniqueId)
                         .then(function (config) {
                             let userConfig = ListenbrainzConfig.getUserConfig(config, users[0].Id);
-                            ListenbrainzConfig.populateConfig(userConfig);
+                            ListenbrainzConfig.populateUserConfig(userConfig);
                             Dashboard.hideLoadingMsg();
                         });
                 });
@@ -200,7 +325,7 @@
                 ApiClient.getPluginConfiguration(ListenbrainzConfig.pluginUniqueId)
                     .then(function (config) {
                         let userConfig = ListenbrainzConfig.getUserConfig(config, userId);
-                        ListenbrainzConfig.populateConfig(userConfig);
+                        ListenbrainzConfig.populateUserConfig(userConfig);
                         Dashboard.hideLoadingMsg();
                     });
             });
@@ -218,33 +343,20 @@
                 }
 
                 Dashboard.hideLoadingMsg();
-            })
+            });
 
         document.querySelector('#ListenbrainzConfigForm')
             .addEventListener('submit', function (e) {
                 Dashboard.showLoadingMsg();
                 ApiClient.getPluginConfiguration(ListenbrainzConfig.pluginUniqueId)
                     .then(function (config) {
-                        if (Object.keys(config).length === 0) {
-                            config.LbUsers = [];
-                        }
-
-                        let selectedUserId = ListenbrainzConfig.getSelectedUserId();
-                        let index = config.LbUsers.map(function (user) {
-                            return user.MediaBrowserUserId
-                        }).indexOf(selectedUserId);
-
-                        let newData = ListenbrainzConfig.gatherInputValues();
-                        if (!newData.Name) {
-                            Dashboard.alert("User name is missing.")
+                        try {
+                            ListenbrainzConfig.updateGlobalConfig(config);
+                            ListenbrainzConfig.updateUserConfig(config);
+                        } catch (e) {
+                            Dashboard.alert(e);
                             Dashboard.hideLoadingMsg();
                             return;
-                        }
-
-                        if (index === -1) {
-                            config.LbUsers.push(newData);
-                        } else {
-                            config.LbUsers[index] = newData;
                         }
 
                         ApiClient.updatePluginConfiguration(ListenbrainzConfig.pluginUniqueId, config)
@@ -255,6 +367,23 @@
 
                 e.preventDefault();
                 return false;
+            });
+
+        document.querySelectorAll('#ResetListenbrainzBaseUrl, #ResetMusicbrainzBaseUrl')
+            .forEach(btn => {
+                btn.addEventListener('click', event => {
+                    let inputId = event.target.id.replace('Reset', '');
+                    console.log(inputId);
+                    document.querySelector('#' + inputId)
+                        .value = ListenbrainzConfig.globalConfigDefaults[inputId];
+                });
+            });
+
+        document.querySelectorAll('#ListenbrainzBaseUrl, #MusicbrainzBaseUrl, #MusicbrainzEnabled')
+            .forEach(item => {
+                item.addEventListener('change', () => {
+                    document.querySelector('#saveGlobal').textContent = 'Save (requires restart to apply)'
+                });
             });
 
         ApiClient.VerifyListenbrainzToken = function (token) {

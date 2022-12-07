@@ -15,11 +15,18 @@ namespace Jellyfin.Plugin.Listenbrainz.Configuration
         /// </summary>
         public PluginConfiguration()
         {
+            GlobalConfig = new GlobalConfiguration();
             LbUsers = new Collection<LbUser>();
         }
 
         /// <summary>
-        /// Gets or sets listenbrainz users.
+        /// Gets or sets plugin global configuration.
+        /// </summary>
+        [SuppressMessage("Usage", "CA2227", Justification = "Needed for deserialization.")]
+        public GlobalConfiguration GlobalConfig { get; set; }
+
+        /// <summary>
+        /// Gets or sets plugin users.
         /// </summary>
         [SuppressMessage("Usage", "CA2227", Justification = "Needed for deserialization.")]
         public Collection<LbUser> LbUsers { get; set; }

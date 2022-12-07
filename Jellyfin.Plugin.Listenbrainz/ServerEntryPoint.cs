@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.Listenbrainz.Clients;
+using Jellyfin.Plugin.Listenbrainz.Configuration;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
 using Jellyfin.Plugin.Listenbrainz.Services;
 using Jellyfin.Plugin.Listenbrainz.Utils;
@@ -33,8 +34,8 @@ namespace Jellyfin.Plugin.Listenbrainz
 
         private readonly ISessionManager _sessionManager;
         private readonly ILogger<ServerEntryPoint> _logger;
-
         private readonly ListenbrainzClient _apiClient;
+        private readonly GlobalConfiguration _globalConfig;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ServerEntryPoint"/> class.
@@ -47,11 +48,24 @@ namespace Jellyfin.Plugin.Listenbrainz
             IHttpClientFactory httpClientFactory,
             ILoggerFactory loggerFactory)
         {
+            var config = Plugin.Instance?.Configuration.GlobalConfig;
+            _globalConfig = config ?? throw new InvalidOperationException("plugin configuration is NULL");
             _logger = loggerFactory.CreateLogger<ServerEntryPoint>();
-
             _sessionManager = sessionManager;
-            var mbClient = new MusicbrainzClient(httpClientFactory, _logger, new SleepService());
-            _apiClient = new ListenbrainzClient(httpClientFactory, mbClient, _logger, new SleepService());
+
+            IMusicbrainzClientService mbClient;
+            if (_globalConfig.MusicbrainzEnabled)
+            {
+                var mbBaseUrl = _globalConfig.MusicbrainzBaseUrl ?? Resources.Musicbrainz.Api.BaseUrl;
+                mbClient = new MusicbrainzClient(mbBaseUrl, httpClientFactory, _logger, new SleepService());
+            }
+            else
+            {
+                mbClient = new DummyMusicbrainzClient(_logger);
+            }
+
+            var lbBaseUrl = _globalConfig.ListenbrainzBaseUrl ?? Resources.Listenbrainz.Api.BaseUrl;
+            _apiClient = new ListenbrainzClient(lbBaseUrl, httpClientFactory, mbClient, _logger, new SleepService());
             Instance = this;
         }
 
@@ -142,7 +156,7 @@ namespace Jellyfin.Plugin.Listenbrainz
             {
                 _logger.LogError(
                     "Listen won't be sent: " +
-                    "Track ({Path}) has invalid metadata - missing artist and/or track name.",
+                    "Track ({Path}) has invalid metadata - missing artist and/or track name",
                     item.Path);
                 return;
             }
@@ -234,7 +248,7 @@ namespace Jellyfin.Plugin.Listenbrainz
             {
                 _logger.LogError(
                     "Listen won't be sent: " +
-                    "Track ({Path}) has invalid metadata - missing artist and/or track name.",
+                    "Track ({Path}) has invalid metadata - missing artist and/or track name",
                     item.Path);
                 return;
             }

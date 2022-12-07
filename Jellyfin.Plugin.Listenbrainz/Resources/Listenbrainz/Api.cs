@@ -13,6 +13,6 @@ namespace Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz
         /// <summary>
         /// API base URL.
         /// </summary>
-        public const string BaseUrl = "api.listenbrainz.org";
+        public const string BaseUrl = "https://api.listenbrainz.org";
     }
 }

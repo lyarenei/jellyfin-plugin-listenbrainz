@@ -52,9 +52,25 @@ Version compatibility table:
 
 ## Configuration
 
-After the plugin installation, you need to configure it for your users.
-Unfortunately, the server admin must configure the plugin for users,
-since there's no way to make user-configurable plugin (or at least I'm not aware of it).
+The plugin configuration has two parts, global and user. Each section is described in more detail below.
+
+### Global configuration
+
+**Please note that in order to apply changes in this section, you need to restart the plugin (server).**
+
+Here you can set alternative URLs for ListenBrainz and MusicBrainz compatible instances.
+By default, these URLs are set to official MetaBrainz instances,
+but if you use similar/compatible services or simply selfhost your own versions, you can point the plugin to them here.
+
+Additionally, you can enable or disable integration with MusicBrainz. This currently involves:
+- Fetching a recording MBID used by ListenBrainz (Jellyfin only provides access track ID which is not the same)
+- Fetching a full artist credit string with correct join phrases
+
+### User configuration
+
+To actually use the plugin functions, you obviously need to configure it first.
+Unfortunately, the server admin must configure the plugin for all users
+as there's no way to make user-configurable plugin (or at least I'm not aware of it).
 That means, the admin inevitably has an access to the ListenBrainz API keys of all users on their server.
 
 To configure a user:
@@ -62,7 +78,7 @@ To configure a user:
 1. Open plugin settings
 2. Select the user you want to configure
 3. Paste the ListenBrainz user token to the API token field (you can get it from [here](https://listenbrainz.org/profile/))
-4. Click on Get name (this will verify your API token)
+4. (Optional) Click on `Get name` to verify the API token
 5. Check `Enable listen submitting`, optionally favorites sync
 6. Save configuration
 

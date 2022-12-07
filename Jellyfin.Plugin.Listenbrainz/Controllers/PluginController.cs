@@ -1,6 +1,9 @@
+using System;
 using System.Net.Http;
 using Jellyfin.Plugin.Listenbrainz.Clients;
+using Jellyfin.Plugin.Listenbrainz.Configuration;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses;
+using Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
 using Jellyfin.Plugin.Listenbrainz.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -15,6 +18,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Controllers
     public class PluginController : ControllerBase
     {
         private readonly ListenbrainzClient _apiClient;
+        private GlobalConfiguration _pluginConfig;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PluginController"/> class.
@@ -23,8 +27,10 @@ namespace Jellyfin.Plugin.Listenbrainz.Controllers
         /// <param name="loggerFactory">Logger instance.</param>
         public PluginController(IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory)
         {
+            _pluginConfig = Plugin.Instance?.Configuration.GlobalConfig ?? throw new InvalidOperationException("plugin configuration is NULL");
             var logger = loggerFactory.CreateLogger<PluginController>();
-            _apiClient = new ListenbrainzClient(httpClientFactory, logger, new SleepService());
+            var baseUrl = _pluginConfig.ListenbrainzBaseUrl ?? Api.BaseUrl;
+            _apiClient = new ListenbrainzClient(baseUrl, httpClientFactory, logger, new SleepService());
         }
 
         /// <summary>

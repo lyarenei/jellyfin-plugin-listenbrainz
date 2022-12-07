@@ -23,18 +23,22 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
     {
         private readonly ILogger _logger;
         private readonly JsonSerializerOptions _serOpts;
+        private readonly string _baseUrl;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseListenbrainzClient"/> class.
         /// </summary>
+        /// <param name="baseUrl">API base URL.</param>
         /// <param name="httpClientFactory">HTTP client factory.</param>
         /// <param name="logger">Logger instance.</param>
         /// <param name="sleepService">Sleep service.</param>
         public BaseListenbrainzClient(
+            string baseUrl,
             IHttpClientFactory httpClientFactory,
             ILogger logger,
             ISleepService sleepService) : base(httpClientFactory, logger, sleepService)
         {
+            _baseUrl = baseUrl;
             _logger = logger;
             _serOpts = new JsonSerializerOptions
             {
@@ -58,7 +62,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
             var requestMessage = new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
-                RequestUri = new Uri(BuildRequestUrl(request.GetEndpoint())),
+                RequestUri = BuildRequestUri(request.GetEndpoint()),
                 Content = new StringContent(jsonData, Encoding.UTF8, "application/json")
             };
 
@@ -81,11 +85,11 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
             where TResponse : BaseResponse
         {
             var query = ToHttpGetQuery(request.ToRequestForm());
-            var url = BuildRequestUrl(request.GetEndpoint());
+            var requestUri = BuildRequestUri(request.GetEndpoint());
             var requestMessage = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,
-                RequestUri = new Uri($"{url}?{query}")
+                RequestUri = new Uri($"{requestUri}?{query}")
             };
             requestMessage.Headers.Authorization = new AuthenticationHeaderValue("token", request.ApiToken);
 
@@ -128,7 +132,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
             return null;
         }
 
-        private static string BuildRequestUrl(string endpoint) => $"https://{Api.BaseUrl}/{Api.Version}/{endpoint}";
+        private Uri BuildRequestUri(string endpoint) => new($"{_baseUrl}/{Api.Version}/{endpoint}");
 
         /// <summary>
         /// Convert dictionary to HTTP GET query.
