@@ -27,7 +27,6 @@ jobs:
       - name: Create ZIP archive for JF 10.8
         run: |
           pushd /home/runner/work/jellyfin-plugin-listenbrainz/jellyfin-plugin-listenbrainz/Jellyfin.Plugin.Listenbrainz.JF108/bin/Release/net6.0 && \
-          mv Jellyfin.Plugin.Listenbrainz.JF108.dll Jellyfin.Plugin.Listenbrainz.dll && \
           zip "/home/runner/work/jellyfin_plugin_listenbrainz_jf108.zip" Jellyfin.Plugin.Listenbrainz.dll && \
           popd
 
