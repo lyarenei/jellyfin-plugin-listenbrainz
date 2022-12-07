@@ -62,7 +62,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
             var requestMessage = new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
-                RequestUri = BuildRequestUri(_baseUrl, request.GetEndpoint()),
+                RequestUri = BuildRequestUri(request.GetEndpoint()),
                 Content = new StringContent(jsonData, Encoding.UTF8, "application/json")
             };
 
@@ -85,7 +85,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
             where TResponse : BaseResponse
         {
             var query = ToHttpGetQuery(request.ToRequestForm());
-            var requestUri = BuildRequestUri(_baseUrl, request.GetEndpoint());
+            var requestUri = BuildRequestUri(request.GetEndpoint());
             var requestMessage = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,
@@ -132,10 +132,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
             return null;
         }
 
-        private Uri BuildRequestUri(string baseUrl, string endpoint)
-        {
-            return new Uri($"{baseUrl}/{Api.Version}/{endpoint}");
-        }
+        private Uri BuildRequestUri(string endpoint) => new($"{_baseUrl}/{Api.Version}/{endpoint}");
 
         /// <summary>
         /// Convert dictionary to HTTP GET query.
