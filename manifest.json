@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/lyarenei/jellyfin-plugin-listenbrainz/master/res/listenbrainz/ListenBrainz_logo.svg",
         "versions": [
             {
+                "version": "2.2.1.0",
+                "changelog": "Allow base API URLs config & Musicbrainz integration toggle",
+                "targetAbi": "10.8.0.0",
+                "sourceUrl": "https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases/download/2.2.1.0/listenbrainz_2.2.1.0.zip",
+                "checksum": "31737100bffda43669b4128b11ab7f18",
+                "timestamp": "2022-12-08"
+            },
+            {
                 "version": "2.1.1.0",
                 "changelog": "Fix retry sleep duration",
                 "targetAbi": "10.8.0.0",
@@ -17,12 +25,12 @@
                 "timestamp": "2022-08-06"
             },
             {
-                "version": "2.1.0.1",
-                "changelog": "Send full artist credit instead of first artist",
-                "targetAbi": "10.8.0.0",
-                "sourceUrl": "https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases/download/2.1.0.1/listenbrainz_2.1.0.1.zip",
-                "checksum": "87540669dd505fbe14aa071351898f44",
-                "timestamp": "2022-07-06"
+                "version": "1.4.1.0",
+                "changelog": "Allow base API URLs config & Musicbrainz integration toggle",
+                "targetAbi": "10.7.0.0",
+                "sourceUrl": "https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases/download/1.4.1.0/listenbrainz_1.4.1.0.zip",
+                "checksum": "1b2831afda1dc47fe3d2da601d3909e1",
+                "timestamp": "2022-12-08"
             },
             {
                 "version": "1.3.1.0",
@@ -31,14 +39,6 @@
                 "sourceUrl": "https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases/download/1.3.1.0/listenbrainz_1.3.1.0.zip",
                 "checksum": "680d80224dfff2ad7f2bdacf322a845e",
                 "timestamp": "2022-08-06"
-            },
-            {
-                "version": "1.3.0.3",
-                "changelog": "Plugin maintenance; pull changes from master.",
-                "targetAbi": "10.7.0.0",
-                "sourceUrl": "https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases/download/1.3.0.3/listenbrainz_1.3.0.3.zip",
-                "checksum": "c5112dc9de17ed3f923b6b7b3bfe502a",
-                "timestamp": "2022-07-06"
             }
         ]
     }
