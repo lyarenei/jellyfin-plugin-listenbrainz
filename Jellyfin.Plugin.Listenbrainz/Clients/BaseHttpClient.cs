@@ -90,7 +90,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
                     break;
                 }
 
-                if (!_retryStatuses.Contains(response.StatusCode))
+                if (response != null && !_retryStatuses.Contains(response.StatusCode))
                 {
                     _logger.LogDebug(
                         "Response status is {Status}, will not retry ({RequestID})",
