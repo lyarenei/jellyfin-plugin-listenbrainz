@@ -95,4 +95,25 @@ public class BaseHttpClientTests
 
         await Assert.ThrowsAsync<RetryException>(() => apiClient.ExposedSendRequest(request));
     }
+
+    [Fact]
+    public async Task BaseApiClient_SendRequest_CancellationException_Timeout()
+    {
+        var mockFactory = new Mock<IHttpClientFactory>();
+        var mockHandler = new Mock<HttpMessageHandler>();
+        mockHandler.Protected()
+            .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>())
+            .ThrowsAsync(new TaskCanceledException());
+
+        var client = new HttpClient(mockHandler.Object);
+        mockFactory.Setup(_ => _.CreateClient(It.IsAny<string>())).Returns(client);
+
+        var logger = new Mock<ILogger<BaseHttpClient>>();
+        var sleepService = new Mock<ISleepService>();
+        var apiClient = new TestBaseHttpClient(mockFactory.Object, logger.Object, sleepService.Object);
+        var request = new HttpRequestMessage(HttpMethod.Post, "http://localhost");
+
+        await Assert.ThrowsAsync<RetryException>(() => apiClient.ExposedSendRequest(request));
+    }
 }
