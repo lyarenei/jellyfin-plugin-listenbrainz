@@ -83,10 +83,10 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
                         break;
                     }
                 }
-                catch (HttpRequestException e)
+                catch (Exception e)
                 {
                     _logger.LogError("an error occured when sending a request: {Err}", e.Message);
-                    _logger.LogDebug("an exception occured: {Exc}", e.ToString());
+                    _logger.LogDebug("an exception was raised: {Exc}", e.ToString());
                     break;
                 }
 
