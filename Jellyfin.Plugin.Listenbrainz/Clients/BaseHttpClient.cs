@@ -70,7 +70,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
                         .SendAsync(requestMessage, CancellationToken.None)
                         .ConfigureAwait(false);
                 }
-                catch (TaskCanceledException e)
+                catch (OperationCanceledException e)
                 {
                     if (e.InnerException is TimeoutException)
                     {
