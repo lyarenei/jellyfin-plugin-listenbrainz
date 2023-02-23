@@ -72,16 +72,8 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
                 }
                 catch (OperationCanceledException e)
                 {
-                    if (e.InnerException is TimeoutException)
-                    {
-                        _logger.LogError("the request has timed out: {Err}", e.InnerException.Message);
-                    }
-                    else
-                    {
-                        _logger.LogError("the request has been cancelled: {Err}", e.Message);
-                        _logger.LogDebug("a cancellation exception was raised: {Exc}", e.ToString());
-                        break;
-                    }
+                    _logger.LogError("the request has been cancelled: {Err}", e.Message);
+                    _logger.LogDebug("a cancellation exception was raised: {Exc}", e.ToString());
                 }
                 catch (Exception e)
                 {
