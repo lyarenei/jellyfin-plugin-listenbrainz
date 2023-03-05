@@ -53,6 +53,8 @@ namespace Jellyfin.Plugin.Listenbrainz
             _logger = loggerFactory.CreateLogger<ServerEntryPoint>();
             _sessionManager = sessionManager;
 
+            _logger.LogDebug("plugin version {Version}", ThisAssembly.AssemblyInformationalVersion);
+
             IMusicbrainzClientService mbClient;
             if (_globalConfig.MusicbrainzEnabled)
             {
