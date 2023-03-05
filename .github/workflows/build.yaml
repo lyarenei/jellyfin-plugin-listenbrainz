@@ -23,9 +23,7 @@ jobs:
 
       - name: Determine version
         shell: bash
-        run: |
-          dotnet tool install -g nbgv
-          nbgv get-version
+        run: nbgv get-version
 
       - name: Build plugin
         run: dotnet publish -c Release
