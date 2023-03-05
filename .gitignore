@@ -60,7 +60,7 @@ _ReSharper*
 *.ncrunch*
 .*crunch*.local.xml
 
-# Installshield output folder 
+# Installshield output folder
 [Ee]xpress
 
 # DocProject is a documentation generator add-in
@@ -114,3 +114,6 @@ MediaBrowser.Plugins.Lastfm.userprefs
 config/
 .DS_Store
 localconfig.sh
+
+# Other
+artifacts/
