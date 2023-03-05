@@ -8,7 +8,9 @@ jobs:
   build:
     name: Build & create release of plugin for JF 10.7
     runs-on: ubuntu-latest
-
+    defaults:
+      run:
+        working-directory: ./Jellyfin.Plugin.Listenbrainz
     steps:
       - uses: little-core-labs/get-git-tag@v3.0.2
         id: tagName
@@ -22,19 +24,23 @@ jobs:
           dotnet-version: "5.0.x"
 
       - name: Build plugin
-        run: dotnet publish -c Release
-
-      - name: Create ZIP archive for JF 10.7
         run: |
-          pushd /home/runner/work/jellyfin-plugin-listenbrainz/jellyfin-plugin-listenbrainz/Jellyfin.Plugin.Listenbrainz/bin/Release/net5.0 && \
-          zip "/home/runner/work/jellyfin_plugin_listenbrainz_jf107.zip" Jellyfin.Plugin.Listenbrainz.dll && \
-          popd
+          dotnet publish \
+          -c Release \
+          -p:Version=${{ steps.tagName.outputs.tag }} \
+          -p:AssemblyVersion=${{ steps.tagName.outputs.tag }} \
+          -o artifacts/ \
+          -f net5.0
+
+      - name: Create ZIP archive
+        working-directory: ./Jellyfin.Plugin.Listenbrainz/artifacts
+        run: zip plugin.zip Jellyfin.Plugin.Listenbrainz.dll
 
       - name: Create github release and attach plugin
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: "/home/runner/work/jellyfin_plugin_listenbrainz_jf107.zip"
+          file: "./Jellyfin.Plugin.Listenbrainz/artifacts/plugin.zip"
           asset_name: "jellyfin_plugin_listenbrainz_${{ steps.tagName.outputs.tag }}.zip"
           tag: ${{ github.ref }}
           overwrite: true
