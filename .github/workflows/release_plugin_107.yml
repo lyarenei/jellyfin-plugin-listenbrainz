@@ -38,4 +38,4 @@ jobs:
           asset_name: "jellyfin_plugin_listenbrainz_${{ steps.tagName.outputs.tag }}.zip"
           tag: ${{ github.ref }}
           overwrite: true
-          body: "This release was created by bot; no changelog available."
+          body: "This release was created by bot; no changelog available. Wait for manual edit."
