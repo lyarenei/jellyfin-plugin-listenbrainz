@@ -6,36 +6,53 @@ on:
       - '1.[0-9]+.[0-9]+'
 jobs:
   build:
-    name: Build & create release
+    name: Build & create release of plugin for JF 10.7
     runs-on: ubuntu-latest
-
+    defaults:
+      run:
+        working-directory: ./Jellyfin.Plugin.Listenbrainz
     steps:
-      - uses: little-core-labs/get-git-tag@v3.0.1
+      - uses: little-core-labs/get-git-tag@v3.0.2
         id: tagName
 
       - name: Checkout Repository
-        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@c0d4ad69d8bd405d234f1c9166d383b7a4f69ed8 # tag=v2.1.0
+        uses: actions/checkout@v3
         with:
-          dotnet-version: "6.0.x"
+          fetch-depth: 0
+
+      - name: Read release.md and use it as a body of new release
+        id: read_release
+        working-directory: ./.github
+        shell: bash
+        run: |
+          r=$(cat ./RELEASE_107.md)                         # <--- Read file
+          r="${r//'%'/'%25'}"                               # Multiline escape sequences for %
+          r="${r//$'\n'/'%0A'}"                             # Multiline escape sequences for '\n'
+          r="${r//$'\r'/'%0D'}"                             # Multiline escape sequences for '\r'
+          echo "RELEASE_BODY=$r" >> $GITHUB_OUTPUT          # <--- Set environment variable
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: "5.0.x"
 
       - name: Build plugin
-        run: dotnet publish -c Release
-
-      - name: Create ZIP archive for JF 10.7
         run: |
-          pushd /home/runner/work/jellyfin-plugin-listenbrainz/jellyfin-plugin-listenbrainz/Jellyfin.Plugin.Listenbrainz/bin/Release/net5.0 && \
-          zip "/home/runner/work/jellyfin_plugin_listenbrainz_jf107.zip" Jellyfin.Plugin.Listenbrainz.dll && \
-          popd
+          dotnet publish \
+          -c Release \
+          -o artifacts/ \
+          -f net5.0
+
+      - name: Create ZIP archive
+        working-directory: ./Jellyfin.Plugin.Listenbrainz/artifacts
+        run: zip plugin.zip Jellyfin.Plugin.Listenbrainz.dll
 
       - name: Create github release and attach plugin
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: "/home/runner/work/jellyfin_plugin_listenbrainz_jf107.zip"
+          file: "./Jellyfin.Plugin.Listenbrainz/artifacts/plugin.zip"
           asset_name: "jellyfin_plugin_listenbrainz_${{ steps.tagName.outputs.tag }}.zip"
           tag: ${{ github.ref }}
           overwrite: true
-          body: "This release was created by bot; no changelog available."
+          body: ${{ steps.read_release.outputs.RELEASE_BODY }}

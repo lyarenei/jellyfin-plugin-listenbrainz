@@ -1,4 +1,4 @@
-name: 'Test Plugin'
+name: 'Run tests'
 
 on:
   pull_request:
@@ -8,5 +8,23 @@ on:
       - '**.md'
 
 jobs:
-  call:
-    uses: jellyfin/jellyfin-meta-plugins/.github/workflows/test.yaml@master
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: "6.0.x"
+
+      - name: Determine version
+        shell: bash
+        run: nbgv get-version
+
+      - name: Run unit tests
+        run: dotnet test
