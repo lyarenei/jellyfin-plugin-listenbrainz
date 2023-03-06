@@ -40,8 +40,6 @@ jobs:
         run: |
           dotnet publish \
           -c Release \
-          -p:Version=${{ steps.tagName.outputs.tag }} \
-          -p:AssemblyVersion=${{ steps.tagName.outputs.tag }} \
           -o artifacts/ \
           -f net6.0
 
