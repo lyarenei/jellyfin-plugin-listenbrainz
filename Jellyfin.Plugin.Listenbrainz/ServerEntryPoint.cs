@@ -54,8 +54,7 @@ namespace Jellyfin.Plugin.Listenbrainz
             IHttpClientFactory httpClientFactory,
             ILoggerFactory loggerFactory,
             IUserManager userManager,
-            IUserDataManager userDataManager
-        )
+            IUserDataManager userDataManager)
         {
             var config = Plugin.Instance?.Configuration.GlobalConfig;
             _globalConfig = config ?? throw new InvalidOperationException("plugin configuration is NULL");
