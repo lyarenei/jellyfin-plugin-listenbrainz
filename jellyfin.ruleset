@@ -25,6 +25,8 @@
         <Rule Id="SA1309" Action="None" />
         <!-- disable warning SA1413: Use trailing comma in multi-line initializers -->
         <Rule Id="SA1413" Action="None" />
+        <!-- disable warning SA1503: Braces Should not be omitted -->
+        <Rule Id="SA1503" Action="None" />
         <!-- disable warning SA1512: Single-line comments must not be followed by blank line -->
         <Rule Id="SA1512" Action="None" />
         <!-- disable warning SA1515: Single-line comment should be preceded by blank line -->
@@ -102,6 +104,8 @@
         <Rule Id="CA1848" Action="None" />
         <!-- disable warning CA2101: Specify marshaling for P/Invoke string arguments -->
         <Rule Id="CA2101" Action="None" />
+        <!-- disable warning CA2234: Pass System.Uri objects instead of strings -->
+        <Rule Id="CA2234" Action="None" />
         <!-- disable warning CA2234: Pass System.Uri objects instead of strings -->
         <Rule Id="CA2234" Action="None" />
     </Rules>
