@@ -14,6 +14,7 @@ using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Plugins;
 using MediaBrowser.Controller.Session;
+using MediaBrowser.Model.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.Listenbrainz
@@ -37,6 +38,8 @@ namespace Jellyfin.Plugin.Listenbrainz
         private readonly ILogger<ServerEntryPoint> _logger;
         private readonly ListenbrainzClient _apiClient;
         private readonly GlobalConfiguration _globalConfig;
+        private readonly IUserManager _userManager;
+        private readonly IUserDataManager _userDataManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ServerEntryPoint"/> class.
@@ -44,15 +47,22 @@ namespace Jellyfin.Plugin.Listenbrainz
         /// <param name="sessionManager">Jellyfin Session manager.</param>
         /// <param name="httpClientFactory">HTTP client factory.</param>
         /// <param name="loggerFactory">Logger factory.</param>
+        /// <param name="userManager">User manager.</param>
+        /// <param name="userDataManager">User data manager.</param>
         public ServerEntryPoint(
             ISessionManager sessionManager,
             IHttpClientFactory httpClientFactory,
-            ILoggerFactory loggerFactory)
+            ILoggerFactory loggerFactory,
+            IUserManager userManager,
+            IUserDataManager userDataManager
+        )
         {
             var config = Plugin.Instance?.Configuration.GlobalConfig;
             _globalConfig = config ?? throw new InvalidOperationException("plugin configuration is NULL");
             _logger = loggerFactory.CreateLogger<ServerEntryPoint>();
             _sessionManager = sessionManager;
+            _userManager = userManager;
+            _userDataManager = userDataManager;
 
             _logger.LogDebug("plugin version {Version}", ThisAssembly.AssemblyInformationalVersion);
 
@@ -85,8 +95,26 @@ namespace Jellyfin.Plugin.Listenbrainz
         public Task RunAsync()
         {
             _sessionManager.PlaybackStart += PlaybackStart;
-            _sessionManager.PlaybackStopped += PlaybackStopped;
+            if (_globalConfig.AlternativeListenDetectionEnabled)
+                _userDataManager.UserDataSaved += UserDataSaved;
+            else
+                _sessionManager.PlaybackStopped += PlaybackStopped;
+
             return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Send "single" listen to Listenbrainz when user data were saved with playback finished reason.
+        /// </summary>
+        private async void UserDataSaved(object? sender, UserDataSaveEventArgs e)
+        {
+            if (e.Item is not Audio item) return;
+            if (e.SaveReason != UserDataSaveReason.PlaybackFinished) return;
+
+            var user = _userManager.GetUserById(e.UserId);
+            if (user == null) return;
+
+            SendListen(user, item, e.UserData.LastPlayedDate);
         }
 
         /// <summary>
@@ -269,7 +297,10 @@ namespace Jellyfin.Plugin.Listenbrainz
         {
             if (!disposing) return;
             _sessionManager.PlaybackStart -= PlaybackStart;
-            _sessionManager.PlaybackStopped -= PlaybackStopped;
+            if (_globalConfig.AlternativeListenDetectionEnabled)
+                _userDataManager.UserDataSaved -= UserDataSaved;
+            else
+                _sessionManager.PlaybackStopped -= PlaybackStopped;
         }
     }
 }
