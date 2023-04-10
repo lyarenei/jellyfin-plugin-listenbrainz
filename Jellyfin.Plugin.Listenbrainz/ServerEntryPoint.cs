@@ -105,7 +105,7 @@ namespace Jellyfin.Plugin.Listenbrainz
         /// <summary>
         /// Send "single" listen to Listenbrainz when user data were saved with playback finished reason.
         /// </summary>
-        private async void UserDataSaved(object? sender, UserDataSaveEventArgs e)
+        private void UserDataSaved(object? sender, UserDataSaveEventArgs e)
         {
             if (e.Item is not Audio item) return;
             if (e.SaveReason != UserDataSaveReason.PlaybackFinished) return;
@@ -119,7 +119,7 @@ namespace Jellyfin.Plugin.Listenbrainz
         /// <summary>
         /// Send "single" listen to Listenbrainz when playback of item has stopped.
         /// </summary>
-        private async void PlaybackStopped(object? sender, PlaybackStopEventArgs e)
+        private void PlaybackStopped(object? sender, PlaybackStopEventArgs e)
         {
             if (e.Item is not Audio item) return;
             if (e.PlaybackPositionTicks == null)
