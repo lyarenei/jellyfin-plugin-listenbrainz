@@ -93,11 +93,7 @@ namespace Jellyfin.Plugin.Listenbrainz
         /// </summary>
         private async void PlaybackStopped(object? sender, PlaybackStopEventArgs e)
         {
-            if (e.Item is not Audio item)
-            {
-                return;
-            }
-
+            if (e.Item is not Audio item) return;
             if (e.PlaybackPositionTicks == null)
             {
                 _logger.LogDebug("Playback ticks for '{Track}' is null", item.Name);
@@ -129,10 +125,7 @@ namespace Jellyfin.Plugin.Listenbrainz
             }
 
             var user = e.Users.FirstOrDefault();
-            if (user == null)
-            {
-                return;
-            }
+            if (user == null) return;
 
             var lbUser = UserHelpers.GetUser(user);
             if (lbUser == null)
@@ -167,11 +160,7 @@ namespace Jellyfin.Plugin.Listenbrainz
             var listenRequest = new SubmitListenRequest("single", item, now);
             _apiClient.SubmitListen(lbUser, user, listenRequest);
 
-            if (!lbUser.Options.SyncFavoritesEnabled)
-            {
-                return;
-            }
-
+            if (!lbUser.Options.SyncFavoritesEnabled) return;
             string? listenMsId = null;
             const int Retries = 7;
             const int BackOff = 3;
@@ -215,16 +204,9 @@ namespace Jellyfin.Plugin.Listenbrainz
         /// </summary>
         private void PlaybackStart(object? sender, PlaybackProgressEventArgs e)
         {
-            if (e.Item is not Audio item)
-            {
-                return;
-            }
-
+            if (e.Item is not Audio item) return;
             var user = e.Users.FirstOrDefault();
-            if (user == null)
-            {
-                return;
-            }
+            if (user == null) return;
 
             var lbUser = UserHelpers.GetUser(user);
             if (lbUser == null)
@@ -273,11 +255,9 @@ namespace Jellyfin.Plugin.Listenbrainz
         /// <param name="disposing">If disposing should take place.</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (disposing)
-            {
-                _sessionManager.PlaybackStart -= PlaybackStart;
-                _sessionManager.PlaybackStopped -= PlaybackStopped;
-            }
+            if (!disposing) return;
+            _sessionManager.PlaybackStart -= PlaybackStart;
+            _sessionManager.PlaybackStopped -= PlaybackStopped;
         }
     }
 }
