@@ -4,8 +4,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.Listenbrain
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.Listenbrainz.Tests", "Jellyfin.Plugin.Listenbrainz.Tests\Jellyfin.Plugin.Listenbrainz.Tests.csproj", "{1E99C43D-42EE-4178-B93D-43CDA83A41D2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.Listenbrainz.JF108", "Jellyfin.Plugin.Listenbrainz.JF108\Jellyfin.Plugin.Listenbrainz.JF108.csproj", "{42D88268-AE95-41F9-BD51-611D3910C6C1}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,10 +18,6 @@ Global
 		{1E99C43D-42EE-4178-B93D-43CDA83A41D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1E99C43D-42EE-4178-B93D-43CDA83A41D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1E99C43D-42EE-4178-B93D-43CDA83A41D2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{42D88268-AE95-41F9-BD51-611D3910C6C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{42D88268-AE95-41F9-BD51-611D3910C6C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{42D88268-AE95-41F9-BD51-611D3910C6C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{42D88268-AE95-41F9-BD51-611D3910C6C1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		Policies = $0
