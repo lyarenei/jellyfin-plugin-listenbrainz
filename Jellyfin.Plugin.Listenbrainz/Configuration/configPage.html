@@ -41,6 +41,15 @@
                             <span>Fetch additional metadata from MusicBrainz</span>
                         </label>
                     </div>
+                    <div class="checkboxContainer">
+                        <div class="inputContainer grid-row-3-4_1">
+                            <label>
+                                <input is="emby-checkbox" type="checkbox" id="AlternativeListenDetectionEnabled" name="AlternativeListenDetectionEnabled"/>
+                                <span>Use alternative mode for recognizing listens (requires plugin restart)</span>
+                            </label>
+                            <div class="fieldDescription">Use alternative events for recognizing a listen, check <a href="" style="color: gray">plugin documentation</a> for more details</div>
+                        </div>
+                    </div>
                     <button is="emby-button" type="submit" class="raised button-submit block emby-button" id="saveGlobal">Save</button>
                 </section>
                 <hr class="section-separator"/>
@@ -141,6 +150,7 @@
               ListenbrainzBaseUrl: "https://api.listenbrainz.org",
               MusicbrainzBaseUrl: "https://musicbrainz.org",
               MusicbrainzEnabled: true,
+              AlternativeListenDetectionEnabled: false,
             },
             userConfigDefaults: {
                 Token: "",
@@ -167,6 +177,9 @@
 
                 document.querySelector("#MusicbrainzEnabled")
                     .checked = globalData.MusicbrainzEnabled
+
+                document.querySelector("#AlternativeListenDetectionEnabled")
+                    .checked = globalData.AlternativeListenDetectionEnabled
             },
 
             buildUserList: function (users) {
@@ -220,6 +233,7 @@
                         ListenbrainzBaseUrl: document.querySelector("#ListenbrainzBaseUrl").value,
                         MusicbrainzBaseUrl: document.querySelector("#MusicbrainzBaseUrl").value,
                         MusicbrainzEnabled: document.querySelector("#MusicbrainzEnabled").checked,
+                        AlternativeListenDetectionEnabled: document.querySelector("#AlternativeListenDetectionEnabled").checked,
                     },
                     Token: document.querySelector("#Token").value,
                     Name: document.querySelector("#UserName").value,
@@ -301,6 +315,10 @@
                         if (gConfig?.MusicbrainzBaseUrl == null) {
                             gConfig.MusicbrainzBaseUrl = ListenbrainzConfig.globalConfigDefaults.MusicbrainzBaseUrl;
                             gConfig.MusicbrainzEnabled = ListenbrainzConfig.globalConfigDefaults.MusicbrainzEnabled;
+                        }
+
+                        if (gConfig?.AlternativeListenDetectionEnabled == null) {
+                            gConfig.AlternativeListenDetectionEnabled = ListenbrainzConfig.globalConfigDefaults.AlternativeListenDetectionEnabled;
                         }
 
                         ListenbrainzConfig.populateGlobalConfig(gConfig);
