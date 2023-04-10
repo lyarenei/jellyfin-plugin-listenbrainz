@@ -121,6 +121,8 @@ The disadvantages are:
   while disregarding any playback of the same track happening in the past. Again, it is up to the client application to properly report all meaningful playbacks of all tracks while offline.
 - Optional `datePlayed` field - this is also an issue for offline playback, as if the client does not bother with filling out this field, all listens will default to current time.
 
+In addition, Jellyfin web player marks tracks as played with as little as 1 second of it played.
+
 ### User configuration
 
 To actually use the plugin functions, you obviously need to configure it first.
