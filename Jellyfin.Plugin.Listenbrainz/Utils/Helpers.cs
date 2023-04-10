@@ -9,10 +9,17 @@ namespace Jellyfin.Plugin.Listenbrainz.Utils
     public static class Helpers
     {
         /// <summary>
+        /// Convert datetime to UNIX timestamp.
+        /// </summary>
+        /// <param name="dateTime">Datetime to convert.</param>
+        /// <returns>UNIX timestamp.</returns>
+        public static long TimestampFromDatetime(DateTime dateTime) => new DateTimeOffset(dateTime).ToUnixTimeSeconds();
+
+        /// <summary>
         /// Get current time in UNIX time.
         /// </summary>
         /// <returns>UNIX timestamp.</returns>
-        public static long GetCurrentTimestamp() => new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
+        public static long GetCurrentTimestamp() => TimestampFromDatetime(DateTime.UtcNow);
 
         /// <summary>
         /// Checks if audio item has necessary metadata for listen submission.
