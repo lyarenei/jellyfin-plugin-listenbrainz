@@ -58,13 +58,36 @@ The plugin configuration has two parts, global and user. Each section is describ
 
 **Please note that in order to apply changes in this section, you need to restart the plugin (server).**
 
-Here you can set alternative URLs for ListenBrainz and MusicBrainz compatible instances.
-By default, these URLs are set to official MetaBrainz instances,
-but if you use similar/compatible services or simply selfhost your own versions, you can point the plugin to them here.
+#### Alternative API URLs
+You can set alternative URLs for ListenBrainz and MusicBrainz instances which are compatible with their APIs.
+By default, these URLs are set to official MetaBrainz instances.
 
-Additionally, you can enable or disable integration with MusicBrainz. This currently involves:
-- Fetching a recording MBID used by ListenBrainz (Jellyfin only provides access track ID which is not the same)
-- Fetching a full artist credit string with correct join phrases
+#### MusicBrainz integration
+Jellyfin does not store all metadata which could be used by LisnteBrainz.
+So for some data, the plugin reaches out to MusicBrainz.
+Turning this integration off does not have an effect on the plugin functionality,
+but in that case, the plugin will naturally be limited in what can be sent to ListenBrainz.
+Most users will leave this on, but if you wish this integration off, you can do so.
+
+##### Data pulled from MusicBrainz
+This section describes what data are currently pulled from MusicBrainz and why.
+
+###### Recording MBID
+ListenBrainz only links to MusicBrainz with recording ID, but Jellyfin only stores track ID.
+These are not the same values unfortunately. With this integration off, the plugin simply cannot provide the ID,
+so ListenBrainz cannot link your listen to an entry in MusicBrainz.
+However, ListenBrainz may try to infer the recording ID from the other provided data.
+
+###### Full artist credit
+Sometimes, multiple artists collaborate on a track/song.
+While there can be multiple artists in metadata, the format is not standardized,
+so in some cases, Jellyfin may recognize a single artist as two separate artists.
+Having to deal with multiple artists is one problem, but another problem is how to properly credit all of them for the track/song.
+Usually, metadata managers will write such full artist credit string in a separate field,
+but then again this is not standardized and not recognized by Jellyfin either.
+
+To avoid these issues, the plugin gets the full artist credit and correct joinphrases from MusicBrainz.
+With this integration off, the plugin will simply send only the first artist (usually the album artist).
 
 ### User configuration
 
