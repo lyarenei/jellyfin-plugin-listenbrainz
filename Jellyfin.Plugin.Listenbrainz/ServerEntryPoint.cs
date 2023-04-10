@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Jellyfin.Data.Entities;
 using Jellyfin.Plugin.Listenbrainz.Clients;
 using Jellyfin.Plugin.Listenbrainz.Configuration;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
@@ -127,6 +128,17 @@ namespace Jellyfin.Plugin.Listenbrainz
             var user = e.Users.FirstOrDefault();
             if (user == null) return;
 
+            SendListen(user, item);
+        }
+
+        /// <summary>
+        /// Send "single" listen to ListenBrainz if appropriate.
+        /// </summary>
+        /// <param name="user">Jellyfin user.</param>
+        /// <param name="item">Audio item.</param>
+        /// <param name="datePlayed">When the item has been played.</param>
+        private async void SendListen(User user, Audio item, DateTime? datePlayed = null)
+        {
             var lbUser = UserHelpers.GetUser(user);
             if (lbUser == null)
             {
@@ -156,7 +168,7 @@ namespace Jellyfin.Plugin.Listenbrainz
                 return;
             }
 
-            var now = Helpers.GetCurrentTimestamp();
+            var now = Helpers.TimestampFromDatetime(datePlayed ?? DateTime.UtcNow);
             var listenRequest = new SubmitListenRequest("single", item, now);
             _apiClient.SubmitListen(lbUser, user, listenRequest);
 
