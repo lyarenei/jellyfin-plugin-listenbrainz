@@ -123,6 +123,12 @@ Copy the plugin DLL file into your Jellyfin `${CONFIG_DIR}/plugins/Listenbrainz`
 Create the Listenbrainz directory if it does not exist, and make sure Jellyfin can access it.
 After restarting the server, the plugin should be picked up by the server and should be running.
 
+## Making a release
+
+1. Make sure you have written changes to release file in [.github](.github) directory.
+2. Push tag with new version
+3. Update [manifest.json](manifest.json) with new releases
+
 # Jellyfin?
 
 This repository only contains the source code for the ListenBrainz plugin for Jellyfin media server.
