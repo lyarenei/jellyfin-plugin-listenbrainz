@@ -89,6 +89,38 @@ but then again this is not standardized and not recognized by Jellyfin either.
 To avoid these issues, the plugin gets the full artist credit and correct joinphrases from MusicBrainz.
 With this integration off, the plugin will simply send only the first artist (usually the album artist).
 
+#### Alternative listen recognition
+The plugin has two distinct approaches for recognizing listens. The `PlaybackStopped` approach and `UserData` approach.
+Both approaches have their own advantages and disadvantages, so the user needs to decide what is better for them.
+By default, the plugin uses the `PlaybackStopped` approach.
+
+##### PlaybackStopped approach
+This approach was inherited from the LastFM plugin and uses `PlaybackStopped` event for recognizing listens.
+This has the advantage of being able to check if a playback is valid from ListenBrainz point of view (4 minutes of playback or 50% played).
+On the other hand, a major disadvantage is that this approach is only suitable for online-only applications.
+
+If clients are playing tracks offline and then want to report back to server once they come online, it makes no sense for them to send `PlaybackStopped` calls.
+Additionally, a lot of clients out there do not even send this call, or send it with 0 time played (intentionally or not), which is ignored by the plugin.
+
+##### UserData approach
+This approach makes use of process of marking items as played, which emits `UserDataSaved` event.
+This has a major advantage that it is suitable for both online and offline scenarios,
+because part of the request is also `datePlayed` field, indicating when the item was played, so it is possible to record listens retroactively.
+
+However, this approach has at least three disadvantages which are described below.
+These disadvantages are mostly coming from placing too much trust on the client applications
+and Jellyfin not having any rules for marking items as played is not helping either.
+Ultimately, the client application should have its own ListenBrainz integration, so they would be directly responsible for what would be sent and what not.
+
+The disadvantages are:
+- Inability to check validity - as the API endpoint is only used for marking items as played and when,
+  there is no way for plugin to enforce ListenBrainz rules for listen submission.
+  Using this approach, it is completely up to the client application to properly take note if the track has been played in a meaningful way or not
+  and mark track as played accordingly.
+- Client can send only the last time when track was played - this is an issue for offline playback, as the application can simply send only the last time the track has been played,
+  while disregarding any playback of the same track happening in the past. Again, it is up to the client application to properly report all meaningful playbacks of all tracks while offline.
+- Optional `datePlayed` field - this is also an issue for offline playback, as if the client does not bother with filling out this field, all listens will default to current time.
+
 ### User configuration
 
 To actually use the plugin functions, you obviously need to configure it first.
