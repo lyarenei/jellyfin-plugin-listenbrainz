@@ -13,6 +13,14 @@
     <div data-role="content">
         <div class="content-primary">
             <form id="ListenbrainzConfigForm">
+                <h1>ListenBrainz plugin configuration</h1>
+                <div>
+                    <span>
+                        Please check
+                        <a href="https://github.com/lyarenei/jellyfin-plugin-listenbrainz#configuration" style="color: inherit">plugin documentation</a>
+                        for more information.
+                    </span>
+                </div>
                 <section id="GlobalConfig">
                     <h2>Global configuration</h2>
                     <div class="grid-layout-3-4">
@@ -47,7 +55,7 @@
                                 <input is="emby-checkbox" type="checkbox" id="AlternativeListenDetectionEnabled" name="AlternativeListenDetectionEnabled"/>
                                 <span>Use alternative mode for recognizing listens</span>
                             </label>
-                            <div class="fieldDescription">Use alternative event for recognizing a listen, check <a href="" style="color: gray">plugin documentation</a> for more details</div>
+                            <div class="fieldDescription">Use alternative event for recognizing a listen</div>
                         </div>
                     </div>
                     <button is="emby-button" type="submit" class="raised button-submit block emby-button" id="saveGlobal">Save (requires restart to take effect)</button>
