@@ -63,10 +63,10 @@ You can set alternative URLs for ListenBrainz and MusicBrainz instances which ar
 By default, these URLs are set to official MetaBrainz instances.
 
 #### MusicBrainz integration
-Jellyfin does not store all metadata which could be used by LisnteBrainz.
+Jellyfin does not store all metadata which could be used by ListenBrainz.
 So for some data, the plugin reaches out to MusicBrainz.
 Turning this integration off does not have an effect on the plugin functionality,
-but in that case, the plugin will naturally be limited in what can be sent to ListenBrainz.
+but the plugin will naturally be limited in what can be sent to ListenBrainz.
 Most users will leave this on, but if you wish this integration off, you can do so.
 
 ##### Data pulled from MusicBrainz
