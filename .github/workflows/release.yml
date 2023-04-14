@@ -40,8 +40,7 @@ jobs:
         run: |
           dotnet publish \
           -c Release \
-          -o artifacts/ \
-          -f net6.0
+          -o artifacts/
 
       - name: Create ZIP archive
         working-directory: ./Jellyfin.Plugin.Listenbrainz/artifacts
