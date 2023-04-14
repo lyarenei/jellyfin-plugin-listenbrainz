@@ -16,13 +16,12 @@ and share your musical taste with others using our visualizations.
 
 - Track your listening history as you play the music
 - Push 'Now Playing' updates when you play something new
-- Support for submitting optional MusicBrainz metadata
-  - Requires relevant MusicBrainz tags in Jellyfin
-  - Recording ID is fetched externally (from v1.1.x)
-- Mark Jellyfin favorite songs as loved (from v1.2.x)
+- Support for submitting optional MusicBrainz metadata (requires relevant MusicBrainz tags in Jellyfin)
+  - Recording ID is fetched externally (if MusicBrainz integration is enabled)
+- Mark favorite songs in Jellyfin as loved in ListenBrainz
   - Only one way: Jellyfin -> ListenBrainz
   - Only when pushing listen
-  - Reverse sync is not possible due to how ListenBrainz works (at least for now)
+  - Reverse sync is not possible due to how ListenBrainz works
 
 # Installation
 
@@ -32,9 +31,9 @@ The plugin can be installed either via repository or [manually](#manual-build-an
 
 The repository only serves two last versions of the plugin per Jellyfin version.
 If you need an older version for some reason, you'll need to install it manually.
-The releases are available on the [releases page](https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases).
+All plugin releases are available on the [releases page](https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases).
 
-### Reposiotory setup
+### Repository setup
 
 - Repo name: ListenBrainz (or whatever, can be anything)
 - Repo URL: `https://raw.githubusercontent.com/lyarenei/jellyfin-plugin-listenbrainz/master/manifest.json`
@@ -147,54 +146,43 @@ To configure a user:
 
 # Development
 
-Note:
-I'm not that much experienced with C# development, so my approach might not make much sense.
-But this is what I was ultimately able to come with and it works.
-If you know a better way, please let me know.
-
----
-
-The repository currently contains two projects (excluding something what might be considered as tests).
-The first one is for Jellyfin 10.7 - `Jellyfin.Plugin.Listenbrainz`. The other one is for Jellyfin 10.8.
-The 10.8 one uses file links, so the build process uses single code source for both versions.
-As long as the build command/job/whatever passes, you'll be fine.
-
-If you are adding a new file or deleting one or you are somehow changing the file structure,
-don't forget to reflect the changes in the 10.8 version project as well.
-If you forget, the compiler will complain about missing files, unresolved references, etc...
+This should be somewhat similar to standard .NET project development.
+So, clone the repo, open it in your favorite editor, restore dependencies and you should be good to go.
+Debugging setup is documented in the [jellyfin plugin template](https://github.com/jellyfin/jellyfin-plugin-template#6-set-up-debugging).
 
 ## Manual build and installation
 
 .NET 6.0 is required to build the plugin.
-To install the .NET SDK, check out the download page at https://dotnet.microsoft.com/download.
-Native package manager instructions can be found for Debian, RHEL, Ubuntu, Fedora, SLES, and CentOS.
+To install the .NET SDK, check out the [.NET download page](https://dotnet.microsoft.com/download).
 
-Once the SDK is installed, run the following:
+Once the SDK is installed, you should be able to compile the plugin in either debug or release configuration:
 
 ```shell
-> git clone https://github.com/lyarenei/jellyfin-plugin-listenbrainz
-> cd jellyfin-plugin-listenbrainz
+> dotnet publish -c Debug
+```
+
+```shell
 > dotnet publish -c Release
 ```
 
-This will build both versions, for Jellyfin 10.7 and 10.8.
-The built DLL locations should be as follows:
-- For JF 10.7 plugin binary: `Jellyfin.Plugin.Listenbrainz/bin/Release/net5.0/Jellyfin.Plugin.Listenbrainz.dll`
-- For JF 10.8 plugin binary: `Jellyfin.Plugin.Listenbrainz.JF108/bin/Release/net6.0/Jellyfin.Plugin.Listenbrainz.dll`
+Once the build is completed, the compiled DLL should be available at:
+- For `Debug` configuration: `Jellyfin.Plugin.Listenbrainz/bin/Debug/net6.0/Jellyfin.Plugin.Listenbrainz.dll`
+- For `Release` configuration: `Jellyfin.Plugin.Listenbrainz/bin/Release/net6.0/Jellyfin.Plugin.Listenbrainz.dll`
 
 Copy the plugin DLL file into your Jellyfin `${CONFIG_DIR}/plugins/Listenbrainz` directory.
-Create the Listenbrainz directory if it does not exist, and make sure Jellyfin can access it.
-After restarting the server, the plugin should be picked up by the server and should be running.
+Create the Listenbrainz directory if it does not exist, and make sure Jellyfin has correct permissions to access it.
+After restarting Jellyfin, the plugin should be picked up and active.
 
-## Making a release
+## Making a plugin release
 
-1. Make sure you have written changes to release file in [.github](.github) directory.
-2. Push tag with new version
-3. Update [manifest.json](manifest.json) with new releases
+1. Make sure you have written changes to release file in [.github](.github) directory (should be part of feature pull request)
+2. Make sure you have correctly updated (according to semver rules) plugin version (should be part of feature pull request)
+3. Push tag with new version
+4. Update [manifest.json](manifest.json) with new release
 
 # Jellyfin?
 
-This repository only contains the source code for the ListenBrainz plugin for Jellyfin media server.
+This repository only contains the source code for the ListenBrainz plugin for Jellyfin Media Server.
 If you somehow arrived here without knowing what Jellyfin is, check out the [offical website](https://jellyfin.org).
 
 # License
