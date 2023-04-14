@@ -152,6 +152,7 @@ namespace Jellyfin.Plugin.Listenbrainz
         private void PlaybackStopped(object? sender, PlaybackStopEventArgs e)
         {
             if (e.Item is not Audio item) { return; }
+
             if (e.PlaybackPositionTicks == null)
             {
                 _logger.LogDebug("Playback ticks for '{Track}' is null", item.Name);
@@ -208,6 +209,7 @@ namespace Jellyfin.Plugin.Listenbrainz
             _apiClient.SubmitListen(lbUser, user, listenRequest);
 
             if (!lbUser.Options.SyncFavoritesEnabled) { return; }
+
             string? listenMsId = null;
             const int Retries = 7;
             const int BackOff = 3;
@@ -252,6 +254,7 @@ namespace Jellyfin.Plugin.Listenbrainz
         private void PlaybackStart(object? sender, PlaybackProgressEventArgs e)
         {
             if (e.Item is not Audio item) { return; }
+
             var user = e.Users.FirstOrDefault();
             if (user == null) { return; }
 
