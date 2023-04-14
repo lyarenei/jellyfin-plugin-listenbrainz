@@ -82,9 +82,9 @@ namespace Jellyfin.Plugin.Listenbrainz
         }
 
         /// <summary>
-        /// Gets the instance.
+        /// Gets and sets the plugin instance.
         /// </summary>
-        /// <value>The instance.</value>
+        /// <value>The plugin instance.</value>
         public static ServerEntryPoint? Instance { get; private set; }
 
         /// <summary>
