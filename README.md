@@ -67,27 +67,26 @@ Jellyfin does not store all metadata which could be used by ListenBrainz.
 So for some data, the plugin reaches out to MusicBrainz.
 Turning this integration off does not have an effect on the plugin functionality,
 but the plugin will naturally be limited in what can be sent to ListenBrainz.
-Most users will leave this on, but if you wish this integration off, you can do so.
+Most users will leave this on.
 
 ##### Data pulled from MusicBrainz
 This section describes what data are currently pulled from MusicBrainz and why.
 
 ###### Recording MBID
 ListenBrainz only links to MusicBrainz with recording ID, but Jellyfin only stores track ID.
-These are not the same values unfortunately. With this integration off, the plugin simply cannot provide the ID,
-so ListenBrainz cannot link your listen to an entry in MusicBrainz.
-However, ListenBrainz may try to infer the recording ID from the other provided data.
+With this integration off, the plugin simply cannot provide the ID, so ListenBrainz cannot link your listen to an entry in MusicBrainz.
+ListenBrainz may try to infer the recording ID from the other provided data though.
 
 ###### Full artist credit
-Sometimes, multiple artists collaborate on a track/song.
-While there can be multiple artists in metadata, the format is not standardized,
-so in some cases, Jellyfin may recognize a single artist as two separate artists.
-Having to deal with multiple artists is one problem, but another problem is how to properly credit all of them for the track/song.
+Sometimes, multiple artists are credited for a track.
+While track metadata allows storing multiple artists, the format is unfortunately not standardized.
+Because of that, Jellyfin may recognize a single artist as two separate artists.
+Having to deal with multiple artists is one problem, but another problem is how to properly credit all of them for the track.
 Usually, metadata managers will write such full artist credit string in a separate field,
-but then again this is not standardized and not recognized by Jellyfin either.
+but this is not standardized and not recognized by Jellyfin.
 
-To avoid these issues, the plugin gets the full artist credit and correct joinphrases from MusicBrainz.
-With this integration off, the plugin will simply send only the first artist (usually the album artist).
+To work around this, the plugin gets the full artist credit and correct joinphrases from MusicBrainz.
+With this integration off, the plugin will send only the first artist (usually the album artist).
 
 #### Alternative listen recognition
 The plugin has two distinct approaches for recognizing listens. The `PlaybackStopped` approach and `UserData` approach.
@@ -96,32 +95,39 @@ By default, the plugin uses the `PlaybackStopped` approach.
 
 ##### PlaybackStopped approach
 This approach was inherited from the LastFM plugin and uses `PlaybackStopped` event for recognizing listens.
-This has the advantage of being able to check if a playback is valid from ListenBrainz point of view (4 minutes of playback or 50% played).
-On the other hand, a major disadvantage is that this approach is only suitable for online-only applications.
+This has the advantage of being able to check if a playback is valid from ListenBrainz point of view (4 minutes or 50% of playback).
+A major disadvantage is that this approach is only suitable for online-only applications.
 
 If clients are playing tracks offline and then want to report back to server once they come online, it makes no sense for them to send `PlaybackStopped` calls.
-Additionally, a lot of clients out there do not even send this call, or send it with 0 time played (intentionally or not), which is ignored by the plugin.
+Additionally, a client may not even send this call (or send it with 0 time played - which will be ignored by the plugin).
 
 ##### UserData approach
 This approach makes use of process of marking items as played, which emits `UserDataSaved` event.
 This has a major advantage that it is suitable for both online and offline scenarios,
-because part of the request is also `datePlayed` field, indicating when the item was played, so it is possible to record listens retroactively.
+because it is possible to specify at what time was the item marked as played.
+That way, it is possible to record listens retroactively.
 
-However, this approach has at least three disadvantages which are described below.
-These disadvantages are mostly coming from placing too much trust on the client applications
-and Jellyfin not having any rules for marking items as played is not helping either.
-Ultimately, the client application should have its own ListenBrainz integration, so they would be directly responsible for what would be sent and what not.
+However, this approach has some disadvantages which are described below.
+These disadvantages are mostly coming from placing too much trust on the client and Jellyfin not having any rules for marking items as played.
+Ultimately, the client should have its own ListenBrainz integration, so it would be directly responsible for sending listens to ListenBrainz.
 
 The disadvantages are:
 - Inability to check validity - as the API endpoint is only used for marking items as played and when,
-  there is no way for plugin to enforce ListenBrainz rules for listen submission.
-  Using this approach, it is completely up to the client application to properly take note if the track has been played in a meaningful way or not
-  and mark track as played accordingly.
-- Client can send only the last time when track was played - this is an issue for offline playback, as the application can simply send only the last time the track has been played,
-  while disregarding any playback of the same track happening in the past. Again, it is up to the client application to properly report all meaningful playbacks of all tracks while offline.
-- Optional `datePlayed` field - this is also an issue for offline playback, as if the client does not bother with filling out this field, all listens will default to current time.
+  there is no way for plugin to enforce ListenBrainz rules for listen submission, since there is no provided information about playback position.
+  It is completely up to the client to properly take note if the track has been played in a meaningful way or not and mark track as played accordingly.
+- Client can send only the last time when track was played - this is an issue for offline playback, as the client can simply send only the last time the track has been played,
+  while disregarding any playback of the same track happening in the past. Again, it is up to the client to properly report all meaningful playbacks of all tracks while offline.
+- Optional `datePlayed` field - this is also an issue for offline playback - if the client does not bother with filling out this field, all listens will default to current time.
 
-In addition, Jellyfin web player marks tracks as played with as little as 1 second of it played.
+To partially work around the first limitation, the plugin internally notes what tracks are being played.
+However, this is only possible for online playback - as the plugin relies on the `PlaybackStarted` event for this to work.
+If the server is notified, then the plugin will save the time and when `UserDataSave` event is emitted for the same track and user,
+it will compare the current time with the playback start time.
+If the delta between these two times satisfies ListenBrainz submission rules, the listen for that track will be sent.
+This allows to filter out too short playbacks on clients which are too eager to mark item as played (i.e.: Jellyfin Web).
+
+In case of offline playback, there will be no `PlaybackStart` event emitted, so if a `UserDataSave` event is emitted without matching `PlaybackStart` event,
+the plugin will assume so and the listen will be sent with the date specified in the event (or current time if not provided).
 
 ### User configuration
 
