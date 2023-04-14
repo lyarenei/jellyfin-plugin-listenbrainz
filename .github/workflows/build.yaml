@@ -30,8 +30,7 @@ jobs:
         run: |
           dotnet publish \
           -c Release \
-          -o artifacts/ \
-          -f net6.0
+          -o artifacts/
 
       - name: Upload plugin binary
         uses: actions/upload-artifact@v3
