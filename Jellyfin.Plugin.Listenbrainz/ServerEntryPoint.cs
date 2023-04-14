@@ -9,6 +9,7 @@ using Jellyfin.Plugin.Listenbrainz.Clients;
 using Jellyfin.Plugin.Listenbrainz.Configuration;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
 using Jellyfin.Plugin.Listenbrainz.Services;
+using Jellyfin.Plugin.Listenbrainz.Services.PlaybackTracker;
 using Jellyfin.Plugin.Listenbrainz.Utils;
 using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
@@ -40,6 +41,7 @@ namespace Jellyfin.Plugin.Listenbrainz
         private readonly GlobalConfiguration _globalConfig;
         private readonly IUserManager _userManager;
         private readonly IUserDataManager _userDataManager;
+        private readonly IPlaybackTrackerService _playbackTracker;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ServerEntryPoint"/> class.
@@ -78,6 +80,8 @@ namespace Jellyfin.Plugin.Listenbrainz
 
             var lbBaseUrl = _globalConfig.ListenbrainzBaseUrl ?? Resources.Listenbrainz.Api.BaseUrl;
             _apiClient = new ListenbrainzClient(lbBaseUrl, httpClientFactory, mbClient, _logger, new SleepService());
+
+            _playbackTracker = new PlaybackTracker();
             Instance = this;
         }
 
@@ -113,6 +117,32 @@ namespace Jellyfin.Plugin.Listenbrainz
             var user = _userManager.GetUserById(e.UserId);
             if (user == null) return;
 
+            var trackedItem = _playbackTracker.GetItem(audio: item, user);
+            if (trackedItem != null)
+            {
+                _logger.LogDebug(
+                    "Found tracking of {Item} (for {User}), will check listen eligibility",
+                    item.Id,
+                    user.Username);
+
+                var delta = DateTime.Now - trackedItem.StartedAt;
+                var deltaTicks = delta.TotalSeconds * TimeSpan.TicksPerSecond;
+                if (!IsItemForListenbrainzSubmission(item, deltaTicks)) { return; }
+
+                _playbackTracker.StopTracking(audio: item, user);
+            }
+            else
+            {
+                _logger.LogDebug(
+                    "No tracking for {Item} (for {User}), assuming offline playback",
+                    item.Id,
+                    user.Username);
+            }
+
+            _logger.LogInformation("Will send listen for {Item}, associated with user {User}",
+                item.Name,
+                user.Username);
+
             SendListen(user, item, e.UserData.LastPlayedDate);
         }
 
@@ -128,29 +158,7 @@ namespace Jellyfin.Plugin.Listenbrainz
                 return;
             }
 
-            var playPercent = ((double)e.PlaybackPositionTicks / item.RunTimeTicks) * 100;
-            _logger.LogDebug(
-                "Playback of '{Track}' stopped: played {Percent}% ({Position} ticks), " +
-                "required {MinimumPercentage}% or {MinimumPlayTicks} ticks for submission",
-                item.Name,
-                playPercent,
-                e.PlaybackPositionTicks,
-                MinimumPlayPercentage,
-                MinimumPlayTimeToSubmitInTicks);
-
-            if (playPercent < MinimumPlayPercentage && e.PlaybackPositionTicks < MinimumPlayTimeToSubmitInTicks)
-            {
-                _logger.LogDebug(
-                    "Listen for track '{Track}' won't be submitted, " +
-                    "played {Percent}% ({Position} ticks), " +
-                    "required {PlayPercentage}% or {MinimumPlayTicks} ticks",
-                    item.Name,
-                    playPercent,
-                    e.PlaybackPositionTicks,
-                    MinimumPlayPercentage,
-                    MinimumPlayTimeToSubmitInTicks);
-                return;
-            }
+            if (!IsItemForListenbrainzSubmission(item, (double)e.PlaybackPositionTicks)) { return; }
 
             var user = e.Users.FirstOrDefault();
             if (user == null) { return; }
@@ -277,6 +285,7 @@ namespace Jellyfin.Plugin.Listenbrainz
             }
 
             _apiClient.NowPlaying(item, lbUser, user);
+            _playbackTracker.StartTracking(audio: item, user: user);
         }
 
         /// <summary>
@@ -300,6 +309,41 @@ namespace Jellyfin.Plugin.Listenbrainz
                 _userDataManager.UserDataSaved -= UserDataSaved;
             else
                 _sessionManager.PlaybackStopped -= PlaybackStopped;
+        }
+
+        /// <summary>
+        /// Check if specified item meet criteria for sending listen of this item to ListenBrainz.
+        /// </summary>
+        /// <param name="item">Item to check.</param>
+        /// <param name="positionTicks">Item playback position ticks.</param>
+        /// <returns>True if item meets criteria, false otherwise.</returns>
+        private bool IsItemForListenbrainzSubmission(Audio item, double positionTicks)
+        {
+            var playPercent = (positionTicks / item.RunTimeTicks) * 100;
+            _logger.LogDebug(
+                "Playback of '{Track}' stopped: played {Percent}% ({Position} ticks), " +
+                "required {MinimumPercentage}% or {MinimumPlayTicks} ticks for submission",
+                item.Name,
+                playPercent,
+                positionTicks,
+                MinimumPlayPercentage,
+                MinimumPlayTimeToSubmitInTicks);
+
+            if (playPercent < MinimumPlayPercentage && positionTicks < MinimumPlayTimeToSubmitInTicks)
+            {
+                _logger.LogDebug(
+                    "Listen for track '{Track}' won't be submitted, " +
+                    "played {Percent}% ({Position} ticks), " +
+                    "required {PlayPercentage}% or {MinimumPlayTicks} ticks",
+                    item.Name,
+                    playPercent,
+                    positionTicks,
+                    MinimumPlayPercentage,
+                    MinimumPlayTimeToSubmitInTicks);
+                return false;
+            }
+
+            return true;
         }
     }
 }
