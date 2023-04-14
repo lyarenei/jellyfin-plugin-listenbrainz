@@ -70,14 +70,19 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
                         .SendAsync(requestMessage, CancellationToken.None)
                         .ConfigureAwait(false);
                 }
-                catch (HttpRequestException e)
+                catch (OperationCanceledException e)
+                {
+                    _logger.LogError("the request has been cancelled: {Err}", e.Message);
+                    _logger.LogDebug("a cancellation exception was raised: {Exc}", e.ToString());
+                }
+                catch (Exception e)
                 {
                     _logger.LogError("an error occured when sending a request: {Err}", e.Message);
-                    _logger.LogDebug("an exception occured: {Exc}", e.ToString());
+                    _logger.LogDebug("an exception was raised: {Exc}", e.ToString());
                     break;
                 }
 
-                if (!_retryStatuses.Contains(response.StatusCode))
+                if (response != null && !_retryStatuses.Contains(response.StatusCode))
                 {
                     _logger.LogDebug(
                         "Response status is {Status}, will not retry ({RequestID})",
