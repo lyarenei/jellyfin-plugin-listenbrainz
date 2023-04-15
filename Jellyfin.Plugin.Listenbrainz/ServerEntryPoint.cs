@@ -139,7 +139,8 @@ namespace Jellyfin.Plugin.Listenbrainz
                     user.Username);
             }
 
-            _logger.LogInformation("Will send listen for {Item}, associated with user {User}",
+            _logger.LogInformation(
+                "Will send listen for {Item}, associated with user {User}",
                 item.Name,
                 user.Username);
 
