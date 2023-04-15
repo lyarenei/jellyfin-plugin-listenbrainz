@@ -59,7 +59,6 @@ public class PlaybackTracker : IPlaybackTrackerService
         return _trackedItems[user].LastOrDefault(item => EqualPredicate(item, audio, user));
     }
 
-
     private static bool EqualPredicate(TrackedAudio trackedItem, Audio audio, User user)
     {
         return trackedItem.AudioItem.Equals(audio) && trackedItem.User == user;
