@@ -54,9 +54,10 @@ public class PlaybackTracker : IPlaybackTrackerService
     /// <inheritdoc />
     public TrackedAudio? GetItem(Audio audio, User user)
     {
-        if (!_trackedItems.ContainsKey(user)) { return null; }
+        if (_trackedItems.ContainsKey(user))
+            return _trackedItems[user].LastOrDefault(item => EqualPredicate(item, audio, user));
 
-        return _trackedItems[user].LastOrDefault(item => EqualPredicate(item, audio, user));
+        return null;
     }
 
     private static bool EqualPredicate(TrackedAudio trackedItem, Audio audio, User user)
