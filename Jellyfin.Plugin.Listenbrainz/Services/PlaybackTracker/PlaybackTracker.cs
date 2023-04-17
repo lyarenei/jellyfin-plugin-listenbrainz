@@ -4,6 +4,7 @@ using System.Linq;
 using Jellyfin.Data.Entities;
 using Jellyfin.Plugin.Listenbrainz.Models;
 using MediaBrowser.Controller.Entities.Audio;
+using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.Listenbrainz.Services.PlaybackTracker;
 
@@ -13,13 +14,15 @@ namespace Jellyfin.Plugin.Listenbrainz.Services.PlaybackTracker;
 public class PlaybackTracker : IPlaybackTrackerService
 {
     private Dictionary<User, Collection<TrackedAudio>> _trackedItems;
+    private ILogger<PlaybackTracker> _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PlaybackTracker"/> class.
     /// </summary>
-    public PlaybackTracker()
+    public PlaybackTracker(ILoggerFactory loggerFactory)
     {
         _trackedItems = new Dictionary<User, Collection<TrackedAudio>>();
+        _logger = loggerFactory.CreateLogger<PlaybackTracker>();
     }
 
     /// <inheritdoc />
@@ -30,6 +33,10 @@ public class PlaybackTracker : IPlaybackTrackerService
 
         var newItem = new TrackedAudio(audioItem: audio, user: user);
         _trackedItems[user].Add(newItem);
+        _logger.LogDebug(
+            "Started tracking playback of {Item} for user {User}",
+            audio.Id,
+            user.Username);
     }
 
     /// <inheritdoc />
@@ -48,7 +55,13 @@ public class PlaybackTracker : IPlaybackTrackerService
         if (_trackedItems[user].Count == 0) { return; }
 
         var idx = _trackedItems[user].ToList().FindLastIndex(item => EqualPredicate(item, audio, user));
-        if (idx >= 0) { _trackedItems[user].RemoveAt(idx); }
+        if (idx < 0) { return; }
+
+        _trackedItems[user].RemoveAt(idx);
+        _logger.LogDebug(
+            "Stopped tracking playback of {Item} for user {User}",
+            audio.Id,
+            user.Username);
     }
 
     /// <inheritdoc />
