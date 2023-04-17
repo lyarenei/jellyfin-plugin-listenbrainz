@@ -19,6 +19,7 @@ public class PlaybackTracker : IPlaybackTrackerService
     /// <summary>
     /// Initializes a new instance of the <see cref="PlaybackTracker"/> class.
     /// </summary>
+    /// <param name="loggerFactory">Logger factory.</param>
     public PlaybackTracker(ILoggerFactory loggerFactory)
     {
         _trackedItems = new Dictionary<User, Collection<TrackedAudio>>();
