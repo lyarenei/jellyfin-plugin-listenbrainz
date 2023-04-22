@@ -9,20 +9,20 @@
         "imageUrl": "https://raw.githubusercontent.com/lyarenei/jellyfin-plugin-listenbrainz/master/res/listenbrainz/ListenBrainz_logo.svg",
         "versions": [
             {
+                "version": "2.3.0",
+                "changelog": "Add alternative listen recognition mode.",
+                "targetAbi": "10.8.0.0",
+                "sourceUrl": "https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases/download/2.3.0/jellyfin_plugin_listenbrainz_2.3.0.zip",
+                "checksum": "ed81ee09b3499d107e8d2cf6f2697c12",
+                "timestamp": "2023-04-22"
+            },
+            {
                 "version": "2.2.2",
                 "changelog": "Handle exceptions when requests are cancelled.",
                 "targetAbi": "10.8.0.0",
                 "sourceUrl": "https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases/download/2.2.2/jellyfin_plugin_listenbrainz_2.2.2.zip",
                 "checksum": "2bfcc69d88d3bbef32f65ce21d8ffab4",
                 "timestamp": "2023-04-14"
-            },
-            {
-                "version": "2.2.1.0",
-                "changelog": "Allow base API URLs config & Musicbrainz integration toggle",
-                "targetAbi": "10.8.0.0",
-                "sourceUrl": "https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases/download/2.2.1.0/listenbrainz_2.2.1.0.zip",
-                "checksum": "31737100bffda43669b4128b11ab7f18",
-                "timestamp": "2022-12-08"
             },
             {
                 "version": "1.4.1.0",
