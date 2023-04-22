@@ -11,19 +11,19 @@ namespace Jellyfin.Plugin.Listenbrainz.Services.PlaybackTracker;
 /// <summary>
 /// Concrete implementation of <see cref="IPlaybackTrackerService"/>.
 /// </summary>
-public class PlaybackTracker : IPlaybackTrackerService
+public class DefaultPlaybackTracker : IPlaybackTrackerService
 {
-    private Dictionary<User, Collection<TrackedAudio>> _trackedItems;
-    private ILogger<PlaybackTracker> _logger;
+    private readonly Dictionary<User, Collection<TrackedAudio>> _trackedItems;
+    private readonly ILogger<DefaultPlaybackTracker> _logger;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="PlaybackTracker"/> class.
+    /// Initializes a new instance of the <see cref="DefaultPlaybackTracker"/> class.
     /// </summary>
     /// <param name="loggerFactory">Logger factory.</param>
-    public PlaybackTracker(ILoggerFactory loggerFactory)
+    public DefaultPlaybackTracker(ILoggerFactory loggerFactory)
     {
         _trackedItems = new Dictionary<User, Collection<TrackedAudio>>();
-        _logger = loggerFactory.CreateLogger<PlaybackTracker>();
+        _logger = loggerFactory.CreateLogger<DefaultPlaybackTracker>();
     }
 
     /// <inheritdoc />

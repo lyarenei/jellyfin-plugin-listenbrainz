@@ -84,7 +84,7 @@ namespace Jellyfin.Plugin.Listenbrainz
             var lbBaseUrl = _globalConfig.ListenbrainzBaseUrl ?? Resources.Listenbrainz.Api.BaseUrl;
             _apiClient = new ListenbrainzClient(lbBaseUrl, httpClientFactory, mbClient, _logger, new SleepService());
 
-            _playbackTracker = new PlaybackTracker(loggerFactory);
+            _playbackTracker = new DefaultPlaybackTracker(loggerFactory);
             Instance = this;
         }
 
