@@ -13,13 +13,21 @@
     <div data-role="content">
         <div class="content-primary">
             <form id="ListenbrainzConfigForm">
+                <h1>ListenBrainz plugin configuration</h1>
+                <div>
+                    <span>
+                        Please check
+                        <a href="https://github.com/lyarenei/jellyfin-plugin-listenbrainz#configuration" style="color: inherit" target="_blank">plugin documentation</a>
+                        for more information.
+                    </span>
+                </div>
                 <section id="GlobalConfig">
                     <h2>Global configuration</h2>
                     <div class="grid-layout-3-4">
                         <div class="inputContainer grid-row-3-4_1">
-                            <label class="inputLabel inputLabelUnfocused" for="ListenbrainzBaseUrl">Listenbrainz API URL</label>
+                            <label class="inputLabel inputLabelUnfocused" for="ListenbrainzBaseUrl">ListenBrainz API URL</label>
                             <input id="ListenbrainzBaseUrl" name="ListenbrainzBaseUrl" type="text" is="emby-input"/>
-                            <div class="fieldDescription">Listenbrainz API base URL</div>
+                            <div class="fieldDescription">ListenBrainz API base URL</div>
                         </div>
                         <div class="inputContainer grid-row-3-4_2 grid-row-vertical-center">
                             <div id="ResetListenbrainzBaseUrl" class="raised button block emby-button">Use default</div>
@@ -27,9 +35,9 @@
                     </div>
                     <div class="grid-layout-3-4">
                         <div class="inputContainer grid-row-3-4_1">
-                            <label class="inputLabel inputLabelUnfocused" for="MusicbrainzBaseUrl">Musicbrainz API URL</label>
+                            <label class="inputLabel inputLabelUnfocused" for="MusicbrainzBaseUrl">MusicBrainz API URL</label>
                             <input id="MusicbrainzBaseUrl" name="MusicbrainzBaseUrl" type="text" is="emby-input"/>
-                            <div class="fieldDescription">Musicbrainz API base URL</div>
+                            <div class="fieldDescription">MusicBrainz API base URL</div>
                         </div>
                         <div class="inputContainer grid-row-3-4_2 grid-row-vertical-center">
                             <div id="ResetMusicbrainzBaseUrl" class="raised button block emby-button">Use default</div>
@@ -38,10 +46,19 @@
                     <div class="checkboxContainer">
                         <label>
                             <input is="emby-checkbox" type="checkbox" id="MusicbrainzEnabled" name="MusicbrainzEnabled"/>
-                            <span>Fetch additional metadata from Musicbrainz</span>
+                            <span>Fetch additional metadata from MusicBrainz</span>
                         </label>
                     </div>
-                    <button is="emby-button" type="submit" class="raised button-submit block emby-button" id="saveGlobal">Save</button>
+                    <div class="checkboxContainer">
+                        <div class="inputContainer grid-row-3-4_1">
+                            <label>
+                                <input is="emby-checkbox" type="checkbox" id="AlternativeListenDetectionEnabled" name="AlternativeListenDetectionEnabled"/>
+                                <span>Use alternative mode for recognizing listens</span>
+                            </label>
+                            <div class="fieldDescription">Use alternative event for recognizing a listen</div>
+                        </div>
+                    </div>
+                    <button is="emby-button" type="submit" class="raised button-submit block emby-button" id="saveGlobal">Save (requires restart to take effect)</button>
                 </section>
                 <hr class="section-separator"/>
                 <section id="UserConfig">
@@ -63,12 +80,12 @@
                             <div class="inputContainer" style="grid-area: tokenInput">
                                 <label class="inputLabel inputLabelUnfocused" for="Token">API token</label>
                                 <input id="Token" name="Token" type="text" is="emby-input"/>
-                                <div class="fieldDescription">Listenbrainz API token.</div>
+                                <div class="fieldDescription">ListenBrainz API token.</div>
                             </div>
                             <div class="inputContainer" style="grid-area: nameValue">
                                 <label class="inputLabel inputLabelUnfocused" for="UserName">User name</label>
                                 <input id="UserName" name="UserName" type="text" is="emby-input" readonly/>
-                                <div class="fieldDescription">Listenbrainz user name.</div>
+                                <div class="fieldDescription">ListenBrainz user name.</div>
                             </div>
                             <div class="inputContainer" style="grid-area: getName; display:flex; flex-flow: column; justify-content: center">
                                 <div id="TokenTestButton"
@@ -141,6 +158,7 @@
               ListenbrainzBaseUrl: "https://api.listenbrainz.org",
               MusicbrainzBaseUrl: "https://musicbrainz.org",
               MusicbrainzEnabled: true,
+              AlternativeListenDetectionEnabled: false,
             },
             userConfigDefaults: {
                 Token: "",
@@ -167,6 +185,9 @@
 
                 document.querySelector("#MusicbrainzEnabled")
                     .checked = globalData.MusicbrainzEnabled
+
+                document.querySelector("#AlternativeListenDetectionEnabled")
+                    .checked = globalData.AlternativeListenDetectionEnabled
             },
 
             buildUserList: function (users) {
@@ -220,6 +241,7 @@
                         ListenbrainzBaseUrl: document.querySelector("#ListenbrainzBaseUrl").value,
                         MusicbrainzBaseUrl: document.querySelector("#MusicbrainzBaseUrl").value,
                         MusicbrainzEnabled: document.querySelector("#MusicbrainzEnabled").checked,
+                        AlternativeListenDetectionEnabled: document.querySelector("#AlternativeListenDetectionEnabled").checked,
                     },
                     Token: document.querySelector("#Token").value,
                     Name: document.querySelector("#UserName").value,
@@ -301,6 +323,10 @@
                         if (gConfig?.MusicbrainzBaseUrl == null) {
                             gConfig.MusicbrainzBaseUrl = ListenbrainzConfig.globalConfigDefaults.MusicbrainzBaseUrl;
                             gConfig.MusicbrainzEnabled = ListenbrainzConfig.globalConfigDefaults.MusicbrainzEnabled;
+                        }
+
+                        if (gConfig?.AlternativeListenDetectionEnabled == null) {
+                            gConfig.AlternativeListenDetectionEnabled = ListenbrainzConfig.globalConfigDefaults.AlternativeListenDetectionEnabled;
                         }
 
                         ListenbrainzConfig.populateGlobalConfig(gConfig);

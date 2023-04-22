@@ -1,1 +1,1 @@
-Handle exceptions when requests are cancelled.
+Add support for alternative listens detection mode, see plugin documentation for more details

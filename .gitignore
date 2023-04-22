@@ -117,3 +117,4 @@ localconfig.sh
 
 # Other
 artifacts/
+.idea/

@@ -24,5 +24,11 @@ namespace Jellyfin.Plugin.Listenbrainz.Configuration
         /// </summary>
         [SuppressMessage("Usage", "CA2227", Justification = "Needed for deserialization.")]
         public bool MusicbrainzEnabled { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether alternative mechanism for sending listens should be used.
+        /// </summary>
+        [SuppressMessage("Usage", "CA2227", Justification = "Needed for deserialization.")]
+        public bool AlternativeListenDetectionEnabled { get; set; }
     }
 }

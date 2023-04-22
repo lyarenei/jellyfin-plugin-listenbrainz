@@ -4,15 +4,18 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Jellyfin.Data.Entities;
 using Jellyfin.Plugin.Listenbrainz.Clients;
 using Jellyfin.Plugin.Listenbrainz.Configuration;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
 using Jellyfin.Plugin.Listenbrainz.Services;
+using Jellyfin.Plugin.Listenbrainz.Services.PlaybackTracker;
 using Jellyfin.Plugin.Listenbrainz.Utils;
 using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Plugins;
 using MediaBrowser.Controller.Session;
+using MediaBrowser.Model.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.Listenbrainz
@@ -36,6 +39,12 @@ namespace Jellyfin.Plugin.Listenbrainz
         private readonly ILogger<ServerEntryPoint> _logger;
         private readonly ListenbrainzClient _apiClient;
         private readonly GlobalConfiguration _globalConfig;
+        private readonly IUserManager _userManager;
+        private readonly IUserDataManager _userDataManager;
+        private readonly IPlaybackTrackerService _playbackTracker;
+
+        // Lock for detecting duplicate data saved events
+        private static readonly object _dataSavedLock = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ServerEntryPoint"/> class.
@@ -43,15 +52,21 @@ namespace Jellyfin.Plugin.Listenbrainz
         /// <param name="sessionManager">Jellyfin Session manager.</param>
         /// <param name="httpClientFactory">HTTP client factory.</param>
         /// <param name="loggerFactory">Logger factory.</param>
+        /// <param name="userManager">User manager.</param>
+        /// <param name="userDataManager">User data manager.</param>
         public ServerEntryPoint(
             ISessionManager sessionManager,
             IHttpClientFactory httpClientFactory,
-            ILoggerFactory loggerFactory)
+            ILoggerFactory loggerFactory,
+            IUserManager userManager,
+            IUserDataManager userDataManager)
         {
             var config = Plugin.Instance?.Configuration.GlobalConfig;
             _globalConfig = config ?? throw new InvalidOperationException("plugin configuration is NULL");
             _logger = loggerFactory.CreateLogger<ServerEntryPoint>();
             _sessionManager = sessionManager;
+            _userManager = userManager;
+            _userDataManager = userDataManager;
 
             _logger.LogDebug("plugin version {Version}", ThisAssembly.AssemblyInformationalVersion);
 
@@ -68,13 +83,15 @@ namespace Jellyfin.Plugin.Listenbrainz
 
             var lbBaseUrl = _globalConfig.ListenbrainzBaseUrl ?? Resources.Listenbrainz.Api.BaseUrl;
             _apiClient = new ListenbrainzClient(lbBaseUrl, httpClientFactory, mbClient, _logger, new SleepService());
+
+            _playbackTracker = new DefaultPlaybackTracker(loggerFactory);
             Instance = this;
         }
 
         /// <summary>
-        /// Gets the instance.
+        /// Gets and sets the plugin instance.
         /// </summary>
-        /// <value>The instance.</value>
+        /// <value>The plugin instance.</value>
         public static ServerEntryPoint? Instance { get; private set; }
 
         /// <summary>
@@ -84,19 +101,73 @@ namespace Jellyfin.Plugin.Listenbrainz
         public Task RunAsync()
         {
             _sessionManager.PlaybackStart += PlaybackStart;
-            _sessionManager.PlaybackStopped += PlaybackStopped;
+            if (_globalConfig.AlternativeListenDetectionEnabled)
+                _userDataManager.UserDataSaved += UserDataSaved;
+            else
+                _sessionManager.PlaybackStopped += PlaybackStopped;
+
             return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Send "single" listen to Listenbrainz when user data were saved with playback finished reason.
+        /// </summary>
+        private void UserDataSaved(object? sender, UserDataSaveEventArgs e)
+        {
+            if (e.Item is not Audio item) return;
+            if (e.SaveReason != UserDataSaveReason.PlaybackFinished) return;
+
+            var user = _userManager.GetUserById(e.UserId);
+            if (user == null) return;
+
+            var trackedItem = _playbackTracker.GetItem(audio: item, user);
+            if (trackedItem != null)
+            {
+                lock (_dataSavedLock)
+                {
+                    if (_playbackTracker.GetItem(audio: item, user) is null)
+                    {
+                        _logger.LogDebug(
+                            "Detected duplicate playback report of {Item} (for {User}), ignoring",
+                            item.Id,
+                            user.Username);
+                        return;
+                    }
+
+                    _logger.LogDebug(
+                        "Found tracking of {Item} (for {User}), will check listen eligibility",
+                        item.Id,
+                        user.Username);
+
+                    var delta = DateTime.Now - trackedItem.StartedAt;
+                    var deltaTicks = delta.TotalSeconds * TimeSpan.TicksPerSecond;
+                    if (!IsItemForListenbrainzSubmission(item, deltaTicks)) { return; }
+
+                    _playbackTracker.StopTracking(audio: item, user);
+                }
+            }
+            else
+            {
+                _logger.LogDebug(
+                    "No tracking for {Item} (for {User}), assuming offline playback",
+                    item.Id,
+                    user.Username);
+            }
+
+            _logger.LogInformation(
+                "Will send listen for {Item}, associated with user {User}",
+                item.Name,
+                user.Username);
+
+            SendListen(user, item, e.UserData.LastPlayedDate);
         }
 
         /// <summary>
         /// Send "single" listen to Listenbrainz when playback of item has stopped.
         /// </summary>
-        private async void PlaybackStopped(object? sender, PlaybackStopEventArgs e)
+        private void PlaybackStopped(object? sender, PlaybackStopEventArgs e)
         {
-            if (e.Item is not Audio item)
-            {
-                return;
-            }
+            if (e.Item is not Audio item) { return; }
 
             if (e.PlaybackPositionTicks == null)
             {
@@ -104,36 +175,22 @@ namespace Jellyfin.Plugin.Listenbrainz
                 return;
             }
 
-            var playPercent = ((double)e.PlaybackPositionTicks / item.RunTimeTicks) * 100;
-            _logger.LogDebug(
-                "Playback of '{Track}' stopped: played {Percent}% ({Position} ticks), " +
-                "required {MinimumPercentage}% or {MinimumPlayTicks} ticks for submission",
-                item.Name,
-                playPercent,
-                e.PlaybackPositionTicks,
-                MinimumPlayPercentage,
-                MinimumPlayTimeToSubmitInTicks);
-
-            if (playPercent < MinimumPlayPercentage && e.PlaybackPositionTicks < MinimumPlayTimeToSubmitInTicks)
-            {
-                _logger.LogDebug(
-                    "Listen for track '{Track}' won't be submitted, " +
-                    "played {Percent}% ({Position} ticks), " +
-                    "required {PlayPercentage}% or {MinimumPlayTicks} ticks",
-                    item.Name,
-                    playPercent,
-                    e.PlaybackPositionTicks,
-                    MinimumPlayPercentage,
-                    MinimumPlayTimeToSubmitInTicks);
-                return;
-            }
+            if (!IsItemForListenbrainzSubmission(item, (double)e.PlaybackPositionTicks)) { return; }
 
             var user = e.Users.FirstOrDefault();
-            if (user == null)
-            {
-                return;
-            }
+            if (user == null) { return; }
 
+            SendListen(user, item);
+        }
+
+        /// <summary>
+        /// Send "single" listen to ListenBrainz if appropriate.
+        /// </summary>
+        /// <param name="user">Jellyfin user.</param>
+        /// <param name="item">Audio item.</param>
+        /// <param name="datePlayed">When the item has been played.</param>
+        private async void SendListen(User user, Audio item, DateTime? datePlayed = null)
+        {
             var lbUser = UserHelpers.GetUser(user);
             if (lbUser == null)
             {
@@ -163,14 +220,11 @@ namespace Jellyfin.Plugin.Listenbrainz
                 return;
             }
 
-            var now = Helpers.GetCurrentTimestamp();
+            var now = Helpers.TimestampFromDatetime(datePlayed ?? DateTime.UtcNow);
             var listenRequest = new SubmitListenRequest("single", item, now);
             _apiClient.SubmitListen(lbUser, user, listenRequest);
 
-            if (!lbUser.Options.SyncFavoritesEnabled)
-            {
-                return;
-            }
+            if (!lbUser.Options.SyncFavoritesEnabled) { return; }
 
             string? listenMsId = null;
             const int Retries = 7;
@@ -215,16 +269,10 @@ namespace Jellyfin.Plugin.Listenbrainz
         /// </summary>
         private void PlaybackStart(object? sender, PlaybackProgressEventArgs e)
         {
-            if (e.Item is not Audio item)
-            {
-                return;
-            }
+            if (e.Item is not Audio item) { return; }
 
             var user = e.Users.FirstOrDefault();
-            if (user == null)
-            {
-                return;
-            }
+            if (user == null) { return; }
 
             var lbUser = UserHelpers.GetUser(user);
             if (lbUser == null)
@@ -256,6 +304,7 @@ namespace Jellyfin.Plugin.Listenbrainz
             }
 
             _apiClient.NowPlaying(item, lbUser, user);
+            _playbackTracker.StartTracking(audio: item, user: user);
         }
 
         /// <summary>
@@ -273,11 +322,47 @@ namespace Jellyfin.Plugin.Listenbrainz
         /// <param name="disposing">If disposing should take place.</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (disposing)
-            {
-                _sessionManager.PlaybackStart -= PlaybackStart;
+            if (!disposing) return;
+            _sessionManager.PlaybackStart -= PlaybackStart;
+            if (_globalConfig.AlternativeListenDetectionEnabled)
+                _userDataManager.UserDataSaved -= UserDataSaved;
+            else
                 _sessionManager.PlaybackStopped -= PlaybackStopped;
+        }
+
+        /// <summary>
+        /// Check if specified item meet criteria for sending listen of this item to ListenBrainz.
+        /// </summary>
+        /// <param name="item">Item to check.</param>
+        /// <param name="positionTicks">Item playback position ticks.</param>
+        /// <returns>True if item meets criteria, false otherwise.</returns>
+        private bool IsItemForListenbrainzSubmission(Audio item, double positionTicks)
+        {
+            var playPercent = (positionTicks / item.RunTimeTicks) * 100;
+            _logger.LogDebug(
+                "Playback of '{Track}' stopped: played {Percent}% ({Position} ticks), " +
+                "required {MinimumPercentage}% or {MinimumPlayTicks} ticks for submission",
+                item.Name,
+                playPercent,
+                positionTicks,
+                MinimumPlayPercentage,
+                MinimumPlayTimeToSubmitInTicks);
+
+            if (playPercent < MinimumPlayPercentage && positionTicks < MinimumPlayTimeToSubmitInTicks)
+            {
+                _logger.LogDebug(
+                    "Listen for track '{Track}' won't be submitted, " +
+                    "played {Percent}% ({Position} ticks), " +
+                    "required {PlayPercentage}% or {MinimumPlayTicks} ticks",
+                    item.Name,
+                    playPercent,
+                    positionTicks,
+                    MinimumPlayPercentage,
+                    MinimumPlayTimeToSubmitInTicks);
+                return false;
             }
+
+            return true;
         }
     }
 }
