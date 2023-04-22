@@ -43,6 +43,9 @@ namespace Jellyfin.Plugin.Listenbrainz
         private readonly IUserDataManager _userDataManager;
         private readonly IPlaybackTrackerService _playbackTracker;
 
+        // Lock for detecting duplicate data saved events
+        private static readonly object _dataSavedLock = new();
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ServerEntryPoint"/> class.
         /// </summary>
@@ -120,16 +123,28 @@ namespace Jellyfin.Plugin.Listenbrainz
             var trackedItem = _playbackTracker.GetItem(audio: item, user);
             if (trackedItem != null)
             {
-                _logger.LogDebug(
-                    "Found tracking of {Item} (for {User}), will check listen eligibility",
-                    item.Id,
-                    user.Username);
+                lock (_dataSavedLock)
+                {
+                    if (_playbackTracker.GetItem(audio: item, user) is null)
+                    {
+                        _logger.LogDebug(
+                            "Detected duplicate playback report of {Item} (for {User}), ignoring",
+                            item.Id,
+                            user.Username);
+                        return;
+                    }
 
-                var delta = DateTime.Now - trackedItem.StartedAt;
-                var deltaTicks = delta.TotalSeconds * TimeSpan.TicksPerSecond;
-                if (!IsItemForListenbrainzSubmission(item, deltaTicks)) { return; }
+                    _logger.LogDebug(
+                        "Found tracking of {Item} (for {User}), will check listen eligibility",
+                        item.Id,
+                        user.Username);
 
-                _playbackTracker.StopTracking(audio: item, user);
+                    var delta = DateTime.Now - trackedItem.StartedAt;
+                    var deltaTicks = delta.TotalSeconds * TimeSpan.TicksPerSecond;
+                    if (!IsItemForListenbrainzSubmission(item, deltaTicks)) { return; }
+
+                    _playbackTracker.StopTracking(audio: item, user);
+                }
             }
             else
             {
