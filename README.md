@@ -26,19 +26,16 @@ and share your musical taste with others using our visualizations.
 # Installation
 
 The plugin can be installed either via repository or [manually](#manual-build-and-installation).
+All plugin releases are available on the [releases page](https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases).
 
 ## Install via repository
 
-The repository only serves two last versions of the plugin per Jellyfin version.
-If you need an older version for some reason, you'll need to install it manually.
-All plugin releases are available on the [releases page](https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases).
+The plugin is available on: `https://repo.xkrivo.net/jellyfin/manifest.json`
 
-### Repository setup
+Head over to Repositories tab in Jellyfin server settings > Plugins (advanced section), and add the repository there, using the URL above.
+Repository name does not matter, it can be anything and has only informational purpose for the server admin.
 
-- Repo name: ListenBrainz (or whatever, can be anything)
-- Repo URL: `https://raw.githubusercontent.com/lyarenei/jellyfin-plugin-listenbrainz/master/manifest.json`
-
-After you add the repository, you should be able to see the plugin in the catalog under `General` category.
+After you add the repository, you should be able to see `ListenBrainz` plugin in the catalog under `General` category.
 Install version according to the compatibility table below and restart the server as asked.
 Continue with plugin [configuration](#configuration).
 
