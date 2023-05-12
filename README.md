@@ -172,10 +172,8 @@ After restarting Jellyfin, the plugin should be picked up and active.
 
 ## Making a plugin release
 
-1. Make sure you have written changes to release file in [.github](.github) directory (should be part of feature pull request)
-2. Make sure you have correctly updated (according to semver rules) plugin version (should be part of feature pull request)
-3. Push tag with new version
-4. Update [manifest.json](manifest.json) with new release
+1. Make sure you have updated [build file](build.yaml) (ideally should be part of feature pull request)
+2. Create a new release in the repository
 
 # Jellyfin?
 
