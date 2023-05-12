@@ -12,4 +12,4 @@ owner: "lyarenei"
 artifacts:
   - "Jellyfin.Plugin.Listenbrainz.dll"
 changelog: >
-  Rerelease on new repo
+  Re-release on new repo
