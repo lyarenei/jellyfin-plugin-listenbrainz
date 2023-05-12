@@ -1,41 +1,18 @@
 name: 'Build Plugin'
 
 on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '**/*.md'
   pull_request:
     branches:
       - master
     paths-ignore:
-      - '**.md'
+      - '**/*.md'
+  workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v2
-        with:
-          dotnet-version: "6.0.x"
-
-      - name: Determine version
-        shell: bash
-        run: nbgv get-version
-
-      - name: Build plugin
-        run: |
-          dotnet publish \
-          -c Release \
-          -o artifacts/
-
-      - name: Upload plugin binary
-        uses: actions/upload-artifact@v3
-        with:
-          name: plugin_binaries
-          retention-days: 14
-          if-no-files-found: error
-          path: /home/runner/work/jellyfin-plugin-listenbrainz/jellyfin-plugin-listenbrainz/artifacts/Jellyfin.Plugin.Listenbrainz.dll
+  call:
+    uses: jellyfin/jellyfin-meta-plugins/.github/workflows/build.yaml@master
