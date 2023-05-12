@@ -1,0 +1,108 @@
+name: 'Publish Plugin'
+
+on:
+  release:
+    types:
+      - released
+      - prereleased
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@607fce577a46308457984d59e4954e075820f10a # tag=v3.0.3
+        with:
+          dotnet-version: "${{ inputs.dotnet-version }}"
+
+      - name: Build Jellyfin Plugin
+        uses: oddstr13/jellyfin-plugin-repository-manager@4a2b165a3dc2cfc392db865a85f23c02e9f78c68 # v0.5.1
+        id: jprm
+        with:
+          dotnet-target: "${{ inputs.dotnet-target }}"
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        with:
+          name: build-artifact
+          retention-days: 30
+          if-no-files-found: error
+          path: ${{ steps.jprm.outputs.artifact }}
+
+  upload:
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        with:
+          name: build-artifact
+
+      - name: Prepare GH Release Assets
+        run: |-
+          for file in ./*; do
+            md5sum ${file#./} >> ${file%.*}.md5
+            sha256sum ${file#./} >> ${file%.*}.sha256
+          done
+          ls -l
+
+      - name: Upload GH Release Assets
+        uses: shogo82148/actions-upload-release-asset@b016af922a61601d647ff60226adadbe146b7651 # v1.6.4
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./*
+
+      - name: Ensure Destination Path Exists
+        uses: appleboy/ssh-action@334f9259f2f8eb3376d33fa4c684fff373f2c2a6 # v0.1.10
+        if: ${{ contains(github.repository, 'lyarenei/') }}
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script_stop: true
+          script: |-
+            mkdir -p "/var/www/repos/jellyfin/${{ github.repository }}/${{ inputs.version }}" || exit 1
+
+      - name: Upload Jellyfin Plugin Repository Assets
+        uses: burnett01/rsync-deployments@0dc935cdecc5f5e571865e60d2a6cdc673704823 # tag=5.2
+        if: ${{ contains(github.repository, 'lyarenei/') }}
+        with:
+          switches: -vrptz
+          path: ./*.zip
+          remote_path: /var/www/repos/jellyfin/${{ github.repository }}/${{ inputs.version }}
+          remote_host: ${{ secrets.DEPLOY_HOST }}
+          remote_user: ${{ secrets.DEPLOY_USER }}
+          remote_key: ${{ secrets.DEPLOY_KEY }}
+
+  publish:
+    needs:
+      - upload
+    runs-on: ubuntu-latest
+    if: ${{ contains(github.repository, 'lyarenei/') }}
+    env:
+      MANIFEST_FILE: "/var/www/repos/jellyfin/manifest.json"
+      REPO_PATH: "/var/www/repos/jellyfin"
+      REPO_URL: "https://repo.xkrivo.net/jellyfin"
+    steps:
+      - name: Update Plugin Manifest
+        uses: appleboy/ssh-action@334f9259f2f8eb3376d33fa4c684fff373f2c2a6 # v0.1.10
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script_stop: true
+          envs: MANIFEST_FILE,REPO_PATH,REPO_URL
+          script: |-
+            lockfile="/run/lock/jprm.lock"
+            pushd "${REPO_PATH}/${{ github.repository }}/${{ inputs.version }}" || exit 1
+            (
+                flock -x 300
+                python3.9 -m jprm --verbosity=debug repo add --url="${REPO_URL}" "${MANIFEST_FILE}" ./*.zip || exit 1
+            ) 300>${lockfile}
+            popd || exit 1
+            rm -r "${REPO_PATH}/${{ github.repository }}/${{ inputs.version }}" || exit 1
