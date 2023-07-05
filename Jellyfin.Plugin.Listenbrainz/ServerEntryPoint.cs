@@ -10,6 +10,7 @@ using Jellyfin.Plugin.Listenbrainz.Configuration;
 using Jellyfin.Plugin.Listenbrainz.Extensions;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
+using Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
 using Jellyfin.Plugin.Listenbrainz.Services;
 using Jellyfin.Plugin.Listenbrainz.Services.ListenCache;
 using Jellyfin.Plugin.Listenbrainz.Services.PlaybackTracker;
@@ -29,16 +30,6 @@ namespace Jellyfin.Plugin.Listenbrainz
     /// </summary>
     public class ServerEntryPoint : IServerEntryPoint
     {
-        // Rules for submitting listens: https://listenbrainz.readthedocs.io/en/production/dev/api/#post--1-submit-listens.
-        // Listens should be submitted for tracks when the user has listened to half the track or 4 minutes of the track, whichever is lower.
-        // If the user hasn't listened to 4 minutes or half the track, it doesn’t fully count as a listen and should not be submitted.
-
-        // Rule A - if a song reaches >= 4 minutes of playback
-        private const long MinimumPlayTimeToSubmitInTicks = 4 * TimeSpan.TicksPerMinute;
-
-        // Rule B - if a song reaches >= 50% played
-        private const double MinimumPlayPercentage = 50.00;
-
         private readonly ISessionManager _sessionManager;
         private readonly ILogger<ServerEntryPoint> _logger;
         private readonly ListenbrainzClient _apiClient;
@@ -354,10 +345,10 @@ namespace Jellyfin.Plugin.Listenbrainz
                 item.Name,
                 playPercent,
                 positionTicks,
-                MinimumPlayPercentage,
-                MinimumPlayTimeToSubmitInTicks);
+                Limits.MinPlayPercentage,
+                Limits.MinPlayTimeTicks);
 
-            if (playPercent < MinimumPlayPercentage && positionTicks < MinimumPlayTimeToSubmitInTicks)
+            if (playPercent < Limits.MinPlayPercentage && positionTicks < Limits.MinPlayTimeTicks)
             {
                 _logger.LogDebug(
                     "Listen for track '{Track}' won't be submitted, " +
@@ -366,8 +357,8 @@ namespace Jellyfin.Plugin.Listenbrainz
                     item.Name,
                     playPercent,
                     positionTicks,
-                    MinimumPlayPercentage,
-                    MinimumPlayTimeToSubmitInTicks);
+                    Limits.MinPlayPercentage,
+                    Limits.MinPlayTimeTicks);
                 return false;
             }
 
