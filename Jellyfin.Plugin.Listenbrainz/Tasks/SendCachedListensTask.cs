@@ -34,7 +34,14 @@ public class SendCachedListensTask : IScheduledTask
     /// <inheritdoc />
     public IEnumerable<TaskTriggerInfo> GetDefaultTriggers()
     {
-        throw new NotImplementedException();
+        return new[]
+        {
+            new TaskTriggerInfo
+            {
+                Type = TaskTriggerInfo.TriggerInterval,
+                IntervalTicks = GetInterval()
+            }
+        };
     }
 
     private PluginConfiguration GetPluginConfig()
@@ -46,5 +53,12 @@ public class SendCachedListensTask : IScheduledTask
         }
 
         return config;
+    }
+
+    private static long GetInterval()
+    {
+        var random = new Random();
+        var randomMinute = random.Next(50);
+        return TimeSpan.TicksPerDay + (randomMinute * TimeSpan.TicksPerMinute);
     }
 }
