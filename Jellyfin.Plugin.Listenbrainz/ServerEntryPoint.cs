@@ -79,7 +79,9 @@ namespace Jellyfin.Plugin.Listenbrainz
                 applicationPaths.PluginsPath,
                 $"{Plugin.Instance?.Name ?? "Listenbrainz"}_cachedListens.json");
 
-            _listenCache = new DefaultListenCache(listenCachePath);
+            _listenCache = new DefaultListenCache(
+                listenCachePath,
+                loggerFactory.CreateLogger<DefaultListenCache>());
 
             IMusicbrainzClientService mbClient;
             if (_globalConfig.MusicbrainzEnabled)
@@ -236,6 +238,7 @@ namespace Jellyfin.Plugin.Listenbrainz
 
             try
             {
+                throw new Exception();
                 _apiClient.SubmitListen(lbUser, user, listenRequest);
             }
             catch (Exception)

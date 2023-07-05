@@ -4,12 +4,16 @@ using System.Collections.ObjectModel;
 using Jellyfin.Plugin.Listenbrainz.Models;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz;
 using Jellyfin.Plugin.Listenbrainz.Services.ListenCache;
+using Microsoft.Extensions.Logging;
+using Moq;
 using Xunit;
 
 namespace Jellyfin.Plugin.Listenbrainz.Tests;
 
 public class ListenCacheTest
 {
+    private static readonly Mock<ILogger<DefaultListenCache>> _loggerMock = new();
+
     private readonly LbUser _exampleUser = new()
     {
         Name = "exampleUser",
@@ -31,7 +35,7 @@ public class ListenCacheTest
     [Fact]
     public void ListenCache_AddListenUserNotExists()
     {
-        var cache = new DefaultListenCache(string.Empty);
+        var cache = new DefaultListenCache(string.Empty, _loggerMock.Object);
         cache.Add(_exampleUser, _exampleListen);
 
         var gotListens = cache.Get(_exampleUser);
@@ -42,7 +46,7 @@ public class ListenCacheTest
     public void ListenCache_AddListenUserExists()
     {
         var cacheData = new Dictionary<string, List<Listen>> { { _exampleUser.Name, new List<Listen> { _exampleListen } } };
-        var cache = new DefaultListenCache(string.Empty, cacheData);
+        var cache = new DefaultListenCache(string.Empty, cacheData, _loggerMock.Object);
         cache.Add(_exampleUser, _exampleListen);
 
         var expectedListens = new List<Listen> { _exampleListen, _exampleListen };
