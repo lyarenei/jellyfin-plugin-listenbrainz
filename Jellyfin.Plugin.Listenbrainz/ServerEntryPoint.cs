@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Jellyfin.Data.Entities;
 using Jellyfin.Plugin.Listenbrainz.Clients;
 using Jellyfin.Plugin.Listenbrainz.Configuration;
+using Jellyfin.Plugin.Listenbrainz.Exceptions;
 using Jellyfin.Plugin.Listenbrainz.Extensions;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
@@ -130,7 +131,15 @@ namespace Jellyfin.Plugin.Listenbrainz
 
                     var delta = DateTime.Now - trackedItem.StartedAt;
                     var deltaTicks = delta.TotalSeconds * TimeSpan.TicksPerSecond;
-                    if (!IsItemForListenbrainzSubmission(item, deltaTicks)) { return; }
+                    try
+                    {
+                        Limits.EvaluateSubmitConditions(item.RunTimeTicks ?? 0, (long)deltaTicks);
+                    }
+                    catch (SubmissionConditionsNotMet ex)
+                    {
+                        _logger.LogInformation("Listen won't be submitted, conditions have not been met: {Reason}", ex.Message);
+                        return;
+                    }
 
                     _playbackTracker.StopTracking(audio: item, user);
                 }
@@ -164,7 +173,15 @@ namespace Jellyfin.Plugin.Listenbrainz
                 return;
             }
 
-            if (!IsItemForListenbrainzSubmission(item, (double)e.PlaybackPositionTicks)) { return; }
+            try
+            {
+                Limits.EvaluateSubmitConditions(item.RunTimeTicks ?? 0, e.PlaybackPositionTicks ?? 0);
+            }
+            catch (SubmissionConditionsNotMet ex)
+            {
+                _logger.LogInformation("Listen won't be submitted, conditions have not been met: {Reason}", ex.Message);
+                return;
+            }
 
             var user = e.Users.FirstOrDefault();
             if (user == null) { return; }
@@ -328,41 +345,6 @@ namespace Jellyfin.Plugin.Listenbrainz
                 _userDataManager.UserDataSaved -= UserDataSaved;
             else
                 _sessionManager.PlaybackStopped -= PlaybackStopped;
-        }
-
-        /// <summary>
-        /// Check if specified item meet criteria for sending listen of this item to ListenBrainz.
-        /// </summary>
-        /// <param name="item">Item to check.</param>
-        /// <param name="positionTicks">Item playback position ticks.</param>
-        /// <returns>True if item meets criteria, false otherwise.</returns>
-        private bool IsItemForListenbrainzSubmission(Audio item, double positionTicks)
-        {
-            var playPercent = (positionTicks / item.RunTimeTicks) * 100;
-            _logger.LogDebug(
-                "Playback of '{Track}' stopped: played {Percent}% ({Position} ticks), " +
-                "required {MinimumPercentage}% or {MinimumPlayTicks} ticks for submission",
-                item.Name,
-                playPercent,
-                positionTicks,
-                Limits.MinPlayPercentage,
-                Limits.MinPlayTimeTicks);
-
-            if (playPercent < Limits.MinPlayPercentage && positionTicks < Limits.MinPlayTimeTicks)
-            {
-                _logger.LogDebug(
-                    "Listen for track '{Track}' won't be submitted, " +
-                    "played {Percent}% ({Position} ticks), " +
-                    "required {PlayPercentage}% or {MinimumPlayTicks} ticks",
-                    item.Name,
-                    playPercent,
-                    positionTicks,
-                    Limits.MinPlayPercentage,
-                    Limits.MinPlayTimeTicks);
-                return false;
-            }
-
-            return true;
         }
 
         private static IMusicbrainzClientService GetMusicBrainzClient(IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory)
