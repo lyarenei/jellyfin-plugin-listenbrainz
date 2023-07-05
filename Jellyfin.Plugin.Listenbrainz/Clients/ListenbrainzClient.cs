@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Jellyfin.Data.Entities;
+using Jellyfin.Plugin.Listenbrainz.Exceptions;
 using Jellyfin.Plugin.Listenbrainz.Models;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses;
@@ -107,10 +108,12 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
                 }
 
                 _logger.LogWarning("Failed to submit listen for user {User}: {Error}", jfUser.Username, response?.Error);
+                throw new ListenSubmitFailedException(string.Empty);
             }
             catch (Exception ex)
             {
                 _logger.LogError("Exception while submitting listen for user {User}: {Exception}", jfUser.Username, ex.StackTrace);
+                throw;
             }
         }
 
