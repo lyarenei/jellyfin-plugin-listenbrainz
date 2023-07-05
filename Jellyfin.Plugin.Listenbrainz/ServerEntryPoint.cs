@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
@@ -76,12 +75,8 @@ namespace Jellyfin.Plugin.Listenbrainz
             _userManager = userManager;
             _userDataManager = userDataManager;
 
-            var listenCachePath = Path.Join(
-                applicationPaths.PluginsPath,
-                $"{Plugin.Instance?.Name ?? "Listenbrainz"}_cachedListens.json");
-
             _listenCache = new DefaultListenCache(
-                listenCachePath,
+                Helpers.GetListenCacheFilePath(applicationPaths),
                 loggerFactory.CreateLogger<DefaultListenCache>());
 
             IMusicbrainzClientService mbClient;

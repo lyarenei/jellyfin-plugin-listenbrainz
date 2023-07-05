@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller.Entities.Audio;
 
 namespace Jellyfin.Plugin.Listenbrainz.Utils
@@ -20,5 +22,16 @@ namespace Jellyfin.Plugin.Listenbrainz.Utils
         /// </summary>
         /// <returns>UNIX timestamp.</returns>
         public static long GetCurrentTimestamp() => TimestampFromDatetime(DateTime.UtcNow);
+
+        /// <summary>
+        /// Get path to listen cache file.
+        /// </summary>
+        /// <param name="applicationPaths">Server application paths.</param>
+        /// <returns>Path to the file.</returns>
+        public static string GetListenCacheFilePath(IApplicationPaths applicationPaths)
+        {
+            var prefix = Plugin.Instance?.Name ?? "Listenbrainz";
+            return Path.Join(applicationPaths.PluginsPath, $"{prefix}_cachedListens.json");
+        }
     }
 }
