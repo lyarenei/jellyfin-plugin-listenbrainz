@@ -17,35 +17,35 @@ namespace Jellyfin.Plugin.Listenbrainz.Tasks;
 /// <summary>
 /// Jellyfin scheduled task for re-sending listens stored in cache.
 /// </summary>
-public class SendCachedListensTask : IScheduledTask
+public class ResubmitListensTask : IScheduledTask
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILoggerFactory _loggerFactory;
-    private readonly ILogger<SendCachedListensTask> _logger;
+    private readonly ILogger<ResubmitListensTask> _logger;
     private readonly IApplicationPaths _applicationPaths;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="SendCachedListensTask"/> class.
+    /// Initializes a new instance of the <see cref="ResubmitListensTask"/> class.
     /// </summary>
     /// <param name="httpClientFactory">HTTP client factory.</param>
     /// <param name="loggerFactory">Logger factory.</param>
     /// <param name="applicationPaths">Application paths.</param>
-    public SendCachedListensTask(IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory, IApplicationPaths applicationPaths)
+    public ResubmitListensTask(IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory, IApplicationPaths applicationPaths)
     {
         _httpClientFactory = httpClientFactory;
         _loggerFactory = loggerFactory;
-        _logger = loggerFactory.CreateLogger<SendCachedListensTask>();
+        _logger = loggerFactory.CreateLogger<ResubmitListensTask>();
         _applicationPaths = applicationPaths;
     }
 
     /// <inheritdoc />
-    public string Name => "Send cached listens to ListenBrainz";
+    public string Name => "Resubmit listens to ListenBrainz";
 
     /// <inheritdoc />
-    public string Key => "SendCachedListens";
+    public string Key => "ResubmitListens";
 
     /// <inheritdoc />
-    public string Description => "Send listens currently held in listen cache.";
+    public string Description => "Resubmit listens in cache to ListenBrainz.";
 
     /// <inheritdoc />
     public string Category => "ListenBrainz";
