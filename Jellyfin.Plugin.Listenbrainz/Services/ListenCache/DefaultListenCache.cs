@@ -32,6 +32,11 @@ public class DefaultListenCache : IListenCache
     /// <inheritdoc />
     public void Add(LbUser user, Listen listen)
     {
-        throw new System.NotImplementedException();
+        if (!_listens.ContainsKey(user.Name))
+        {
+            _listens.Add(user.Name, new List<Listen>());
+        }
+
+        _listens[user.Name].Add(listen);
     }
 }
