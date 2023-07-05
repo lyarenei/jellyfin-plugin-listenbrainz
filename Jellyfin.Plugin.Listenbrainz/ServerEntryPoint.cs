@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
@@ -9,8 +10,10 @@ using Jellyfin.Plugin.Listenbrainz.Clients;
 using Jellyfin.Plugin.Listenbrainz.Configuration;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
 using Jellyfin.Plugin.Listenbrainz.Services;
+using Jellyfin.Plugin.Listenbrainz.Services.ListenCache;
 using Jellyfin.Plugin.Listenbrainz.Services.PlaybackTracker;
 using Jellyfin.Plugin.Listenbrainz.Utils;
+using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Plugins;
@@ -42,6 +45,7 @@ namespace Jellyfin.Plugin.Listenbrainz
         private readonly IUserManager _userManager;
         private readonly IUserDataManager _userDataManager;
         private readonly IPlaybackTrackerService _playbackTracker;
+        private readonly IListenCache _listenCache;
 
         // Lock for detecting duplicate data saved events
         private static readonly object _dataSavedLock = new();
@@ -54,12 +58,14 @@ namespace Jellyfin.Plugin.Listenbrainz
         /// <param name="loggerFactory">Logger factory.</param>
         /// <param name="userManager">User manager.</param>
         /// <param name="userDataManager">User data manager.</param>
+        /// <param name="applicationPaths">Server application paths.</param>
         public ServerEntryPoint(
             ISessionManager sessionManager,
             IHttpClientFactory httpClientFactory,
             ILoggerFactory loggerFactory,
             IUserManager userManager,
-            IUserDataManager userDataManager)
+            IUserDataManager userDataManager,
+            IApplicationPaths applicationPaths)
         {
             var config = Plugin.Instance?.Configuration.GlobalConfig;
             _globalConfig = config ?? throw new InvalidOperationException("plugin configuration is NULL");
@@ -67,6 +73,12 @@ namespace Jellyfin.Plugin.Listenbrainz
             _sessionManager = sessionManager;
             _userManager = userManager;
             _userDataManager = userDataManager;
+
+            var listenCachePath = Path.Join(
+                applicationPaths.PluginsPath,
+                $"{Plugin.Instance?.Name ?? "Listenbrainz"}_cachedListens.json");
+
+            _listenCache = new DefaultListenCache(listenCachePath);
 
             IMusicbrainzClientService mbClient;
             if (_globalConfig.MusicbrainzEnabled)
