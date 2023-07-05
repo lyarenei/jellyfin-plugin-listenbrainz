@@ -1,4 +1,5 @@
 using System;
+using Jellyfin.Plugin.Listenbrainz.Exceptions;
 
 namespace Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
 
@@ -15,7 +16,7 @@ public static class Limits
 
     // ListenBrainz rules for submitting listens:
     // Listens should be submitted for tracks when the user has listened to half the track or 4 minutes of the track, whichever is lower.
-    // If the user hasn't listened to 4 minutes or half the track, it doesn’t fully count as a listen and should not be submitted.
+    // If the user hasn't listened to 4 minutes or half the track, it doesn't fully count as a listen and should not be submitted.
     // https://listenbrainz.readthedocs.io/en/latest/users/api/core.html#post--1-submit-listens
 
     /// <summary>
@@ -29,4 +30,26 @@ public static class Limits
     /// <seealso cref="MinPlayTimeTicks"/>
     /// </summary>
     public const double MinPlayPercentage = 50.00;
+
+    /// <summary>
+    /// Convenience method to check if ListenBrainz submission conditions have been met.
+    /// </summary>
+    /// <param name="runtime">Track runtime (in ticks).</param>
+    /// <param name="playbackPosition">Playback position in track (in ticks).</param>
+    /// <returns>Conditions have been met.</returns>
+    /// <exception cref="SubmissionConditionsNotMet">Conditions have not been met.</exception>
+    public static bool EvaluateSubmitConditions(long runtime, long playbackPosition)
+    {
+        var playPercent = ((double)playbackPosition / runtime) * 100;
+        var percentageRulePassed = playPercent >= MinPlayPercentage;
+        var playtimeRulePassed = playbackPosition >= MinPlayTimeTicks;
+
+        if (percentageRulePassed || playtimeRulePassed)
+        {
+            return true;
+        }
+
+        var msg = $"Played {playPercent}% (== {playbackPosition} ticks), but required {MinPlayPercentage}% or {MinPlayTimeTicks}";
+        throw new SubmissionConditionsNotMet(msg);
+    }
 }
