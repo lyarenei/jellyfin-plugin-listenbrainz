@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Jellyfin.Plugin.Listenbrainz.Models;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz;
 
@@ -38,5 +39,16 @@ public class DefaultListenCache : IListenCache
         }
 
         _listens[user.Name].Add(listen);
+    }
+
+    /// <inheritdoc />
+    public Collection<Listen> Get(LbUser user)
+    {
+        if (!_listens.ContainsKey(user.Name))
+        {
+            return new Collection<Listen>();
+        }
+
+        return new Collection<Listen>(_listens[user.Name]);
     }
 }

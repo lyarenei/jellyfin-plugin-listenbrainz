@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using Jellyfin.Plugin.Listenbrainz.Models;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz;
 
@@ -19,4 +20,11 @@ public interface IListenCache
     /// <param name="user">User of the listen.</param>
     /// <param name="listen">Listen to add.</param>
     public void Add(LbUser user, Listen listen);
+
+    /// <summary>
+    /// Get listens for specified user.
+    /// </summary>
+    /// <param name="user">User of the listens.</param>
+    /// <returns>Collection of listens.</returns>
+    public Collection<Listen> Get(LbUser user);
 }
