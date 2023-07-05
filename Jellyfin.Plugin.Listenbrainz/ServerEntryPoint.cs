@@ -79,19 +79,8 @@ namespace Jellyfin.Plugin.Listenbrainz
                 Helpers.GetListenCacheFilePath(applicationPaths),
                 loggerFactory.CreateLogger<DefaultListenCache>());
 
-            IMusicbrainzClientService mbClient;
-            if (_globalConfig.MusicbrainzEnabled)
-            {
-                var mbBaseUrl = _globalConfig.MusicbrainzBaseUrl ?? Resources.Musicbrainz.Api.BaseUrl;
-                mbClient = new MusicbrainzClient(mbBaseUrl, httpClientFactory, _logger, new SleepService());
-            }
-            else
-            {
-                mbClient = new DummyMusicbrainzClient(_logger);
-            }
-
-            var lbBaseUrl = _globalConfig.ListenbrainzBaseUrl ?? Resources.Listenbrainz.Api.BaseUrl;
-            _apiClient = new ListenbrainzClient(lbBaseUrl, httpClientFactory, mbClient, _logger, new SleepService());
+            var mbClient = GetMusicBrainzClient(httpClientFactory, loggerFactory);
+            _apiClient = GetListenBrainzClient(mbClient, httpClientFactory, loggerFactory);
 
             _playbackTracker = new DefaultPlaybackTracker(loggerFactory);
             Instance = this;
@@ -383,6 +372,28 @@ namespace Jellyfin.Plugin.Listenbrainz
             }
 
             return true;
+        }
+
+        private static IMusicbrainzClientService GetMusicBrainzClient(IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory)
+        {
+            var config = Plugin.GetConfiguration();
+            if (!config.GlobalConfig.MusicbrainzEnabled)
+            {
+                return new DummyMusicbrainzClient(loggerFactory.CreateLogger<DummyMusicbrainzClient>());
+            }
+
+            var logger = loggerFactory.CreateLogger<MusicbrainzClient>();
+            return new MusicbrainzClient(config.MusicBrainzUrl(), httpClientFactory, logger, new SleepService());
+        }
+
+        private static ListenbrainzClient GetListenBrainzClient(
+            IMusicbrainzClientService mbClient,
+            IHttpClientFactory httpClientFactory,
+            ILoggerFactory loggerFactory)
+        {
+            var config = Plugin.GetConfiguration();
+            var logger = loggerFactory.CreateLogger<ListenbrainzClient>();
+            return new ListenbrainzClient(config.ListenBrainzUrl(), httpClientFactory, mbClient, logger, new SleepService());
         }
     }
 }
