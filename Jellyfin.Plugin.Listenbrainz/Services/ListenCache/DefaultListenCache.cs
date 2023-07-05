@@ -12,7 +12,8 @@ namespace Jellyfin.Plugin.Listenbrainz.Services.ListenCache;
 /// </summary>
 public class DefaultListenCache : IListenCache
 {
-    private string _cachePath;
+    private readonly string _cachePath;
+    private readonly JsonSerializerOptions _serializerOptions;
     private Dictionary<string, List<Listen>> _listens;
 
     /// <summary>
@@ -22,8 +23,15 @@ public class DefaultListenCache : IListenCache
     public DefaultListenCache(string cachePath)
     {
         _cachePath = cachePath;
-        // TODO: load json from path
         _listens = new Dictionary<string, List<Listen>>();
+
+        // Enable pretty-print to allow easy user editing
+        _serializerOptions = new JsonSerializerOptions { WriteIndented = true };
+
+        if (File.Exists(_cachePath))
+        {
+            RestoreCache();
+        }
     }
 
     /// <summary>
@@ -35,13 +43,16 @@ public class DefaultListenCache : IListenCache
     {
         _cachePath = cachePath;
         _listens = cacheData;
+
+        // Enable pretty-print to allow easy user editing
+        _serializerOptions = new JsonSerializerOptions { WriteIndented = true };
     }
 
     /// <inheritdoc />
     public async void Save()
     {
         await using var stream = File.Create(_cachePath);
-        await JsonSerializer.SerializeAsync(stream, _listens);
+        await JsonSerializer.SerializeAsync(stream, _listens, _serializerOptions);
         await stream.DisposeAsync();
     }
 
@@ -65,5 +76,15 @@ public class DefaultListenCache : IListenCache
         }
 
         return new Collection<Listen>(_listens[user.Name]);
+    }
+
+    private async void RestoreCache()
+    {
+        await using var stream = File.OpenRead(_cachePath);
+        var data = await JsonSerializer.DeserializeAsync<Dictionary<string, List<Listen>>>(stream);
+        if (data != null)
+        {
+            _listens = data;
+        }
     }
 }
