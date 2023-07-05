@@ -44,7 +44,7 @@ public class SendCachedListensTask : IScheduledTask
         };
     }
 
-    private PluginConfiguration GetPluginConfig()
+    private static PluginConfiguration GetPluginConfig()
     {
         var config = Plugin.Instance?.Configuration;
         if (config == null)
