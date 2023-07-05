@@ -24,6 +24,17 @@ public class DefaultListenCache : IListenCache
         _listens = new Dictionary<string, List<Listen>>();
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DefaultListenCache"/> class.
+    /// </summary>
+    /// <param name="cachePath">Path to the cache file.</param>
+    /// <param name="cacheData">Initial cache data.</param>
+    public DefaultListenCache(string cachePath, Dictionary<string, List<Listen>> cacheData)
+    {
+        _cachePath = cachePath;
+        _listens = cacheData;
+    }
+
     /// <inheritdoc />
     public void Save()
     {
