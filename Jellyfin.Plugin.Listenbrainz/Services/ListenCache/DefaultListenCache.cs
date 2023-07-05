@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
+using System.Text.Json;
 using Jellyfin.Plugin.Listenbrainz.Models;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz;
 
@@ -36,9 +38,11 @@ public class DefaultListenCache : IListenCache
     }
 
     /// <inheritdoc />
-    public void Save()
+    public async void Save()
     {
-        throw new System.NotImplementedException();
+        await using var stream = File.Create(_cachePath);
+        await JsonSerializer.SerializeAsync(stream, _listens);
+        await stream.DisposeAsync();
     }
 
     /// <inheritdoc />
