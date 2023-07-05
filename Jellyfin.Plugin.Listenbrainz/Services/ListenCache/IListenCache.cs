@@ -1,4 +1,4 @@
-using System.IO;
+using Jellyfin.Plugin.Listenbrainz.Models;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz;
 
 namespace Jellyfin.Plugin.Listenbrainz.Services.ListenCache;
@@ -16,6 +16,7 @@ public interface IListenCache
     /// <summary>
     /// Add a listen to a cache.
     /// </summary>
+    /// <param name="user">User of the listen.</param>
     /// <param name="listen">Listen to add.</param>
-    public void Add(Listen listen);
+    public void Add(LbUser user, Listen listen);
 }

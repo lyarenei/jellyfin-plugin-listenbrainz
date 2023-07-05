@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Jellyfin.Data.Entities;
 using Jellyfin.Plugin.Listenbrainz.Clients;
 using Jellyfin.Plugin.Listenbrainz.Configuration;
+using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
 using Jellyfin.Plugin.Listenbrainz.Services;
 using Jellyfin.Plugin.Listenbrainz.Services.ListenCache;
@@ -232,7 +233,17 @@ namespace Jellyfin.Plugin.Listenbrainz
 
             var now = Helpers.TimestampFromDatetime(datePlayed ?? DateTime.UtcNow);
             var listenRequest = new SubmitListenRequest("single", item, now);
-            _apiClient.SubmitListen(lbUser, user, listenRequest);
+
+            try
+            {
+                _apiClient.SubmitListen(lbUser, user, listenRequest);
+            }
+            catch (Exception)
+            {
+                _logger.LogDebug("Listen submission failed, persisting listen to retry later");
+                _listenCache.Add(lbUser, new Listen(item, now));
+                _listenCache.Save();
+            }
 
             if (!lbUser.Options.SyncFavoritesEnabled) { return; }
 

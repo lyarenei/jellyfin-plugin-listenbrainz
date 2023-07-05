@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Jellyfin.Plugin.Listenbrainz.Models;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz;
 
 namespace Jellyfin.Plugin.Listenbrainz.Services.ListenCache;
@@ -29,7 +30,7 @@ public class DefaultListenCache : IListenCache
     }
 
     /// <inheritdoc />
-    public void Add(Listen listen)
+    public void Add(LbUser user, Listen listen)
     {
         throw new System.NotImplementedException();
     }
