@@ -30,5 +30,17 @@ namespace Jellyfin.Plugin.Listenbrainz.Configuration
         /// </summary>
         [SuppressMessage("Usage", "CA2227", Justification = "Needed for deserialization.")]
         public Collection<LbUser> LbUsers { get; set; }
+
+        /// <summary>
+        /// Get MusicBrainz API URL.
+        /// </summary>
+        /// <returns>API URL.</returns>
+        public string MusicBrainzUrl() => GlobalConfig.MusicbrainzBaseUrl ?? Resources.Musicbrainz.Api.BaseUrl;
+
+        /// <summary>
+        /// Get ListenBrainz API URL.
+        /// </summary>
+        /// <returns>API URL.</returns>
+        public string ListenBrainzUrl() => GlobalConfig.ListenbrainzBaseUrl ?? Resources.Listenbrainz.Api.BaseUrl;
     }
 }
