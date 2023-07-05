@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Jellyfin.Plugin.Listenbrainz.Configuration;
+using Jellyfin.Plugin.Listenbrainz.Exceptions;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Plugins;
@@ -43,6 +44,22 @@ namespace Jellyfin.Plugin.Listenbrainz
                     EmbeddedResourcePath = string.Format(CultureInfo.InvariantCulture, "{0}.Configuration.configPage.html", GetType().Namespace)
                 }
             };
+        }
+
+        /// <summary>
+        /// Convenience method for getting plugin configuration.
+        /// </summary>
+        /// <returns>Plugin configuration.</returns>
+        /// <exception cref="PluginInstanceException">Plugin configuration is not available.</exception>
+        public static PluginConfiguration GetConfiguration()
+        {
+            var config = Instance?.Configuration;
+            if (config == null)
+            {
+                throw new PluginInstanceException();
+            }
+
+            return config;
         }
     }
 }

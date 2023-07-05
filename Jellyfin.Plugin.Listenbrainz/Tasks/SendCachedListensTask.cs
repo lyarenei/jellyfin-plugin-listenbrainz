@@ -44,17 +44,6 @@ public class SendCachedListensTask : IScheduledTask
         };
     }
 
-    private static PluginConfiguration GetPluginConfig()
-    {
-        var config = Plugin.Instance?.Configuration;
-        if (config == null)
-        {
-            throw new PluginInstanceException();
-        }
-
-        return config;
-    }
-
     private static long GetInterval()
     {
         var random = new Random();
