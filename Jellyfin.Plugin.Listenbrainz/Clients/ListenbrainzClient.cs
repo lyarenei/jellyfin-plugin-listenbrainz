@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Jellyfin.Data.Entities;
 using Jellyfin.Plugin.Listenbrainz.Exceptions;
 using Jellyfin.Plugin.Listenbrainz.Models;
+using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses;
 using Jellyfin.Plugin.Listenbrainz.Services;
@@ -113,6 +115,43 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
             catch (Exception ex)
             {
                 _logger.LogError("Exception while submitting listen for user {User}: {Exception}", jfUser.Username, ex.StackTrace);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Submit multiple listens for specified user.
+        /// </summary>
+        /// <param name="user">ListenBrainz user.</param>
+        /// <param name="listens">Listens to submit.</param>
+        /// <exception cref="ListenSubmitFailedException">Listen submit failed.</exception>
+        public async void SubmitListens(LbUser user, ICollection<Listen> listens)
+        {
+            if (_mbClient == null)
+            {
+                _logger.LogDebug("MusicBrainz client is not initialized");
+            }
+            else
+            {
+                foreach (var listen in listens) ProcessListen(listen);
+            }
+
+            var request = new SubmitListensRequest(listens) { ApiToken = user.Token };
+            try
+            {
+                var response = await Post<SubmitListensRequest, SubmitListenResponse>(request);
+                if (response != null && !response.IsError())
+                {
+                    _logger.LogInformation("Listens submitted for user {User}", user.Name);
+                    return;
+                }
+
+                _logger.LogWarning("Failed to submit listens for user {User}: {Error}", user.Name, response?.Error);
+                throw new ListenSubmitFailedException(string.Empty);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Exception while submitting listens for user {User}: {Exception}", user.Name, ex.StackTrace);
                 throw;
             }
         }
@@ -301,6 +340,27 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
 
             _logger.LogDebug("No listen matches expected timestamp");
             return null;
+        }
+
+        private async void ProcessListen(Listen listen)
+        {
+            if (_mbClient == null) return;
+            var trackMBID = listen.TrackMBID;
+            if (trackMBID == null)
+            {
+                _logger.LogDebug("No track MBID found, cannot fetch data from MusicBrainz");
+                return;
+            }
+
+            var recordingData = await _mbClient.GetRecordingData(trackMBID);
+            if (recordingData == null)
+            {
+                _logger.LogDebug("No recording data received from MusicBrainz");
+                return;
+            }
+
+            listen.RecordingMBID = recordingData.Id;
+            listen.ArtistCredit = recordingData.GetCreditString();
         }
     }
 }
