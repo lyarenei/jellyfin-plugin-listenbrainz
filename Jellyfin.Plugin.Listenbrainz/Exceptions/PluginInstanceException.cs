@@ -11,7 +11,7 @@ public class PluginInstanceException : Exception
     /// Initializes a new instance of the <see cref="PluginInstanceException"/> class.
     /// </summary>
     /// <param name="msg">Exception message.</param>
-    public PluginInstanceException(string msg = "Plugin instance is not available")
+    public PluginInstanceException(string msg = "Plugin instance is not available") : base(msg)
     {
     }
 }
