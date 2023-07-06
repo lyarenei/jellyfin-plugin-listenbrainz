@@ -71,12 +71,9 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz
         }
 
         /// <summary>
-        /// Sets artist credit string.
+        /// Convenience method for setting artist credit string.
         /// </summary>
-        [JsonIgnore]
-        public string ArtistCredit
-        {
-            set => Data.ArtistName = value;
-        }
+        /// <param name="value">Artist credit string.</param>
+        public void SetArtistCredit(string value) => Data.ArtistName = value;
     }
 }
