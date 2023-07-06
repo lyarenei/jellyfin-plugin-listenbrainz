@@ -56,7 +56,7 @@ namespace Jellyfin.Plugin.Listenbrainz
             var config = Instance?.Configuration;
             if (config == null)
             {
-                throw new PluginInstanceException();
+                throw new PluginInstanceException("Plugin instance is NULL");
             }
 
             return config;
