@@ -70,6 +70,7 @@ public class ResubmitListensTask : IScheduledTask
                 {
                     _logger.LogInformation("Found listens in cache for user {Username}, will try resubmitting", user.Name);
                     // lbClient.SubmitListens(user, userListens);
+                    // TODO: remove from cache on successful submit
                 }
                 else
                 {
