@@ -34,11 +34,11 @@ public static class Limits
     /// <summary>
     /// Convenience method to check if ListenBrainz submission conditions have been met.
     /// </summary>
-    /// <param name="runtime">Track runtime (in ticks).</param>
     /// <param name="playbackPosition">Playback position in track (in ticks).</param>
+    /// <param name="runtime">Track runtime (in ticks).</param>
     /// <returns>Conditions have been met.</returns>
     /// <exception cref="SubmissionConditionsNotMet">Conditions have not been met.</exception>
-    public static bool EvaluateSubmitConditions(long runtime, long playbackPosition)
+    public static bool EvaluateSubmitConditions(long playbackPosition, long runtime)
     {
         var playPercent = ((double)playbackPosition / runtime) * 100;
         var percentageRulePassed = playPercent >= MinPlayPercentage;

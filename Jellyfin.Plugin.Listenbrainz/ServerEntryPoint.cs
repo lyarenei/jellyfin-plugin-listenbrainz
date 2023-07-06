@@ -133,7 +133,7 @@ namespace Jellyfin.Plugin.Listenbrainz
                     var deltaTicks = delta.TotalSeconds * TimeSpan.TicksPerSecond;
                     try
                     {
-                        Limits.EvaluateSubmitConditions(item.RunTimeTicks ?? 0, (long)deltaTicks);
+                        Limits.EvaluateSubmitConditions((long)deltaTicks, item.RunTimeTicks ?? 0);
                     }
                     catch (SubmissionConditionsNotMet ex)
                     {
@@ -175,7 +175,7 @@ namespace Jellyfin.Plugin.Listenbrainz
 
             try
             {
-                Limits.EvaluateSubmitConditions(item.RunTimeTicks ?? 0, e.PlaybackPositionTicks ?? 0);
+                Limits.EvaluateSubmitConditions(e.PlaybackPositionTicks ?? 0, item.RunTimeTicks ?? 0);
             }
             catch (SubmissionConditionsNotMet ex)
             {
