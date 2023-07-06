@@ -28,7 +28,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests
         public string ListenType { get; }
 
         /// <summary>
-        /// Gets a collection of payloads for the request.
+        /// Gets a payload for the request.
         /// </summary>
         [JsonPropertyName("payload")]
         public Collection<Listen> Data { get; }
