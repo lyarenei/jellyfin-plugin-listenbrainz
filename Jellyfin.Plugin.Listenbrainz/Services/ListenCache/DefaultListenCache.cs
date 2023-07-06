@@ -88,6 +88,12 @@ public class DefaultListenCache : IListenCache
         return new Collection<Listen>(_listens[user.Name]);
     }
 
+    /// <inheritdoc />
+    public void Remove(LbUser user, IEnumerable<Listen> subset)
+    {
+        throw new System.NotImplementedException();
+    }
+
     private async void RestoreCache()
     {
         await using var stream = File.OpenRead(_cachePath);

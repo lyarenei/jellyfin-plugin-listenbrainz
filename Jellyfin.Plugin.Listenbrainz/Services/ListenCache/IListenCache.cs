@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Jellyfin.Plugin.Listenbrainz.Models;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz;
@@ -27,4 +28,11 @@ public interface IListenCache
     /// <param name="user">User of the listens.</param>
     /// <returns>Collection of listens.</returns>
     public Collection<Listen> Get(LbUser user);
+
+    /// <summary>
+    /// Remove specified listens from cache.
+    /// </summary>
+    /// <param name="user">User of the listens.</param>
+    /// <param name="listens">Listens to remove.</param>
+    public void Remove(LbUser user, IEnumerable<Listen> listens);
 }

@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.Listenbrainz.Clients;
+using Jellyfin.Plugin.Listenbrainz.Exceptions;
 using Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
 using Jellyfin.Plugin.Listenbrainz.Services;
 using Jellyfin.Plugin.Listenbrainz.Services.ListenCache;
@@ -71,9 +72,18 @@ public class ResubmitListensTask : IScheduledTask
                 {
                     _logger.LogInformation("Found listens in cache for user {Username}, will try resubmitting", user.Name);
                     // TODO: Submit all, not just first X
-                    var subset = userListens.Take(Limits.MaxListensPerRequest);
-                    lbClient.SubmitListens(user, subset.ToList());
-                    // TODO: remove from cache on successful submit
+                    var subset = userListens.Take(Limits.MaxListensPerRequest).ToList();
+                    try
+                    {
+                        lbClient.SubmitListens(user, subset);
+                    }
+                    catch (ListenSubmitFailedException)
+                    {
+                        _logger.LogInformation("Failed to resubmit listens for user {User}", user.Name);
+                        continue;
+                    }
+
+                    listenCache.Remove(user, subset);
                 }
                 else
                 {
