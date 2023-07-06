@@ -359,7 +359,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
                 return;
             }
 
-            listen.RecordingMBID = recordingData.Id;
+            listen.SetRecordingMBID(recordingData.Id);
             listen.ArtistCredit = recordingData.GetCreditString();
         }
     }
