@@ -45,7 +45,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz
         public string? RecordingMsid { get; set; }
 
         /// <summary>
-        /// Gets or sets listenbrainz username.
+        /// Gets or sets ListenBrainz username.
         /// </summary>
         public string? UserName { get; set; }
 
