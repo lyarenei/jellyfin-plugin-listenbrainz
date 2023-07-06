@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using Jellyfin.Plugin.Listenbrainz.Models;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz;
@@ -89,9 +90,12 @@ public class DefaultListenCache : IListenCache
     }
 
     /// <inheritdoc />
-    public void Remove(LbUser user, IEnumerable<Listen> subset)
+    public void Remove(LbUser user, IEnumerable<Listen> listens)
     {
-        throw new System.NotImplementedException();
+        if (_listens.ContainsKey(user.Name))
+        {
+            _listens[user.Name].RemoveAll(listens.Contains);
+        }
     }
 
     private async void RestoreCache()
