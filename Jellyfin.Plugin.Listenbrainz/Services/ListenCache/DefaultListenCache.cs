@@ -80,12 +80,12 @@ public class DefaultListenCache : IListenCache
     /// <inheritdoc />
     public Collection<Listen> Get(LbUser user)
     {
-        if (!_listens.ContainsKey(user.Name))
+        if (_listens.ContainsKey(user.Name))
         {
-            return new Collection<Listen>();
+            return new Collection<Listen>(_listens[user.Name]);
         }
 
-        return new Collection<Listen>(_listens[user.Name]);
+        return new Collection<Listen>();
     }
 
     /// <inheritdoc />
