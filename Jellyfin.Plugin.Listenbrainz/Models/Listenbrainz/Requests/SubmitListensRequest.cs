@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.Json.Serialization;
 using Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
@@ -17,7 +18,7 @@ public class SubmitListensRequest : BaseRequest
     public SubmitListensRequest(IEnumerable<Listen> listens)
     {
         ListenType = "import";
-        Data = listens.ToList();
+        Data = new Collection<Listen>(listens.ToList());
     }
 
     /// <summary>
@@ -29,7 +30,7 @@ public class SubmitListensRequest : BaseRequest
     /// Gets a payload for the request.
     /// </summary>
     [JsonPropertyName("payload")]
-    public List<Listen> Data { get; }
+    public Collection<Listen> Data { get; }
 
     /// <inheritdoc />
     public override string GetEndpoint() => Endpoints.SubmitListen;
