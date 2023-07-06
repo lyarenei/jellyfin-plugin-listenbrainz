@@ -110,7 +110,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
                 }
 
                 _logger.LogWarning("Failed to submit listen for user {User}: {Error}", jfUser.Username, response?.Error);
-                throw new ListenSubmitFailedException(string.Empty);
+                throw new ListenSubmitFailedException();
             }
             catch (Exception ex)
             {
@@ -147,7 +147,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
                 }
 
                 _logger.LogWarning("Failed to submit listens for user {User}: {Error}", user.Name, response?.Error);
-                throw new ListenSubmitFailedException(string.Empty);
+                throw new ListenSubmitFailedException();
             }
             catch (Exception ex)
             {

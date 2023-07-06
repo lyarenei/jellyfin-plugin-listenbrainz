@@ -11,7 +11,7 @@ public class ListenSubmitFailedException : Exception
     /// Initializes a new instance of the <see cref="ListenSubmitFailedException"/> class.
     /// </summary>
     /// <param name="msg">Exception message.</param>
-    public ListenSubmitFailedException(string msg) : base(msg)
+    public ListenSubmitFailedException(string msg = "") : base(msg)
     {
     }
 }
