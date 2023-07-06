@@ -89,7 +89,10 @@
         <Rule Id="CA2000" Action="Info" />
         <!-- disable warning CA2253: Named placeholders should not be numeric values -->
         <Rule Id="CA2007" Action="Info" />
-        <!-- disable warning CA2007: Consider calling ConfigureAwait on the awaited task -->
+        <!-- disable warning CA2007: Consider calling ConfigureAwait on the awaited task
+             generally, there are little to no benefits in using that (especially in this plugin), so it's better to just not use it
+             https://devblogs.microsoft.com/dotnet/configureawait-faq/
+        -->
         <Rule Id="CA2253" Action="Info" />
         <!-- disable warning CA5394: Do not use insecure randomness -->
         <Rule Id="CA5394" Action="Info" />
