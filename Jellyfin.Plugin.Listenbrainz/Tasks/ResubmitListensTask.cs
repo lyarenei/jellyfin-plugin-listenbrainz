@@ -76,14 +76,12 @@ public class ResubmitListensTask : IScheduledTask
                     try
                     {
                         lbClient.SubmitListens(user, subset);
+                        listenCache.Remove(user, subset);
                     }
                     catch (ListenSubmitFailedException)
                     {
                         _logger.LogInformation("Failed to resubmit listens for user {User}", user.Name);
-                        continue;
                     }
-
-                    listenCache.Remove(user, subset);
                 }
                 else
                 {
