@@ -110,7 +110,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
                 }
 
                 _logger.LogWarning("Failed to submit listen for user {User}: {Error}", jfUser.Username, response?.Error);
-                throw new ListenSubmitFailedException();
+                throw new ListenSubmitException();
             }
             catch (Exception ex)
             {
@@ -124,7 +124,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
         /// </summary>
         /// <param name="user">ListenBrainz user.</param>
         /// <param name="listens">Listens to submit.</param>
-        /// <exception cref="ListenSubmitFailedException">Listen submit failed.</exception>
+        /// <exception cref="ListenSubmitException">Listen submit failed.</exception>
         public async void SubmitListens(LbUser user, ICollection<Listen> listens)
         {
             IEnumerable<Listen> listensToSend = listens;
@@ -148,7 +148,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
                 }
 
                 _logger.LogWarning("Failed to submit listens for user {User}: {Error}", user.Name, response?.Error);
-                throw new ListenSubmitFailedException();
+                throw new ListenSubmitException();
             }
             catch (Exception ex)
             {
