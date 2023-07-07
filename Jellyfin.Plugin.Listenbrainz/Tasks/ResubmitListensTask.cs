@@ -41,7 +41,7 @@ public class ResubmitListensTask : IScheduledTask
     }
 
     /// <inheritdoc />
-    public string Name => "Resubmit listens to ListenBrainz";
+    public string Name => "Resubmit listens";
 
     /// <inheritdoc />
     public string Key => "ResubmitListens";
