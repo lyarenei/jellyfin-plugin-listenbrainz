@@ -33,10 +33,7 @@ public class DefaultListenCache : IListenCache
         // Enable pretty-print to allow easy user editing
         _serializerOptions = new JsonSerializerOptions { WriteIndented = true };
 
-        if (File.Exists(_cachePath))
-        {
-            RestoreCache();
-        }
+        if (File.Exists(_cachePath)) RestoreCache();
     }
 
     /// <summary>
@@ -68,44 +65,32 @@ public class DefaultListenCache : IListenCache
     /// <inheritdoc />
     public void Add(LbUser user, Listen listen)
     {
-        if (!_listens.ContainsKey(user.Name))
-        {
-            _listens.Add(user.Name, new List<Listen>());
-        }
+        if (!_listens.ContainsKey(user.Name)) _listens.Add(user.Name, new List<Listen>());
 
         _listens[user.Name].Add(listen);
-
         _logger.LogInformation("Listen for user {User} has been saved to cache", user.Name);
     }
 
     /// <inheritdoc />
     public Collection<Listen> Get(LbUser user)
     {
-        if (_listens.ContainsKey(user.Name))
-        {
-            return new Collection<Listen>(_listens[user.Name]);
-        }
-
+        if (_listens.ContainsKey(user.Name)) return new Collection<Listen>(_listens[user.Name]);
         return new Collection<Listen>();
     }
 
     /// <inheritdoc />
     public void Remove(LbUser user, IEnumerable<Listen> listens)
     {
-        if (_listens.ContainsKey(user.Name))
-        {
-            _listens[user.Name].RemoveAll(listens.Contains);
-        }
+        if (_listens.ContainsKey(user.Name)) _listens[user.Name].RemoveAll(listens.Contains);
     }
 
     private async void RestoreCache()
     {
         await using var stream = File.OpenRead(_cachePath);
         var data = await JsonSerializer.DeserializeAsync<Dictionary<string, List<Listen>>>(stream);
-        if (data != null)
-        {
-            _listens = data;
-            _logger.LogDebug("Listen cache has been restored");
-        }
+        if (data == null) return;
+
+        _listens = data;
+        _logger.LogDebug("Listen cache has been restored");
     }
 }

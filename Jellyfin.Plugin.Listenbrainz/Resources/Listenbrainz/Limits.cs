@@ -44,10 +44,7 @@ public static class Limits
         var percentageRulePassed = playPercent >= MinPlayPercentage;
         var playtimeRulePassed = playbackPosition >= MinPlayTimeTicks;
 
-        if (percentageRulePassed || playtimeRulePassed)
-        {
-            return true;
-        }
+        if (percentageRulePassed || playtimeRulePassed) return true;
 
         var msg = $"Played {playPercent}% (== {playbackPosition} ticks), but required {MinPlayPercentage}% or {MinPlayTimeTicks} ticks";
         throw new ListenBrainzConditionsException(msg);
