@@ -133,7 +133,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
             }
             else
             {
-                foreach (var listen in listens) ProcessListen(listen);
+                foreach (var listen in listens) UpdateListenData(listen);
             }
 
             var request = new SubmitListensRequest(listens) { ApiToken = user.Token };
@@ -342,7 +342,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
             return null;
         }
 
-        private async void ProcessListen(Listen listen)
+        private async void UpdateListenData(Listen listen)
         {
             if (_mbClient == null) return;
             var trackMBID = listen.TrackMBID;
