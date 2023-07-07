@@ -53,10 +53,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz
         /// Gets track MBID.
         /// </summary>
         [JsonIgnore]
-        public string? TrackMBID
-        {
-            get => Data.Info?.TrackMbId;
-        }
+        public string? TrackMBID => Data.Info?.TrackMbId;
 
         /// <summary>
         /// Gets or sets recording MBID.
