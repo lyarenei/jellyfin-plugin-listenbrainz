@@ -235,7 +235,7 @@ namespace Jellyfin.Plugin.Listenbrainz
             }
             catch (Exception)
             {
-                _logger.LogDebug("Listen submission failed, persisting listen to retry later");
+                _logger.LogInformation("Listen submission for user {User} failed, persisting listen to cache", user.Username);
                 _listenCache.Add(lbUser, new Listen(item, now));
                 _listenCache.Save();
             }
