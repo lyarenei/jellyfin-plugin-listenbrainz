@@ -23,13 +23,13 @@ public static class Limits
     /// ListenBrainz condition A for listen submission - at least 4 minutes of playback.
     /// <seealso cref="MinPlayPercentage"/>
     /// </summary>
-    public const long MinPlayTimeTicks = 4 * TimeSpan.TicksPerMinute;
+    private const long MinPlayTimeTicks = 4 * TimeSpan.TicksPerMinute;
 
     /// <summary>
     /// ListenBrainz condition B for listen submission - at least 50% of track has been played.
     /// <seealso cref="MinPlayTimeTicks"/>
     /// </summary>
-    public const double MinPlayPercentage = 50.00;
+    private const double MinPlayPercentage = 50.00;
 
     /// <summary>
     /// Convenience method to check if ListenBrainz submission conditions have been met.
