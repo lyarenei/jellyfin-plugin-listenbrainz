@@ -49,7 +49,7 @@ public static class Limits
             return true;
         }
 
-        var msg = $"Played {playPercent}% (== {playbackPosition} ticks), but required {MinPlayPercentage}% or {MinPlayTimeTicks}";
+        var msg = $"Played {playPercent}% (== {playbackPosition} ticks), but required {MinPlayPercentage}% or {MinPlayTimeTicks} ticks";
         throw new SubmissionConditionsNotMetException(msg);
     }
 }
