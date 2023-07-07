@@ -231,10 +231,7 @@ namespace Jellyfin.Plugin.Listenbrainz
 
             try
             {
-                // _apiClient.SubmitListen(lbUser, user, listenRequest);
-#pragma warning disable CA2201
-                throw new Exception();
-#pragma warning restore CA2201
+                _apiClient.SubmitListen(lbUser, user, listenRequest);
             }
             catch (Exception)
             {
