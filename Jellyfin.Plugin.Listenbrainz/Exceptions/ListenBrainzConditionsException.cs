@@ -5,13 +5,13 @@ namespace Jellyfin.Plugin.Listenbrainz.Exceptions;
 /// <summary>
 /// Exception thrown when ListenBrainz submission conditions were not met.
 /// </summary>
-public class SubmissionConditionsNotMetException : Exception
+public class ListenBrainzConditionsException : Exception
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="SubmissionConditionsNotMetException"/> class.
+    /// Initializes a new instance of the <see cref="ListenBrainzConditionsException"/> class.
     /// </summary>
     /// <param name="reason">Why conditions were not met.</param>
-    public SubmissionConditionsNotMetException(string reason) : base(reason)
+    public ListenBrainzConditionsException(string reason) : base(reason)
     {
     }
 }

@@ -16,7 +16,7 @@ public class ListenBrainzLimitsTest
     {
         if (throws)
         {
-            Assert.Throws<SubmissionConditionsNotMetException>(() => Limits.EvaluateSubmitConditions(position, runtime));
+            Assert.Throws<ListenBrainzConditionsException>(() => Limits.EvaluateSubmitConditions(position, runtime));
         }
         else
         {

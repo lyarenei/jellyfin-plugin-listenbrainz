@@ -37,7 +37,7 @@ public static class Limits
     /// <param name="playbackPosition">Playback position in track (in ticks).</param>
     /// <param name="runtime">Track runtime (in ticks).</param>
     /// <returns>Conditions have been met.</returns>
-    /// <exception cref="SubmissionConditionsNotMetException">Conditions have not been met.</exception>
+    /// <exception cref="ListenBrainzConditionsException">Conditions have not been met.</exception>
     public static bool EvaluateSubmitConditions(long playbackPosition, long runtime)
     {
         var playPercent = ((double)playbackPosition / runtime) * 100;
@@ -50,6 +50,6 @@ public static class Limits
         }
 
         var msg = $"Played {playPercent}% (== {playbackPosition} ticks), but required {MinPlayPercentage}% or {MinPlayTimeTicks} ticks";
-        throw new SubmissionConditionsNotMetException(msg);
+        throw new ListenBrainzConditionsException(msg);
     }
 }

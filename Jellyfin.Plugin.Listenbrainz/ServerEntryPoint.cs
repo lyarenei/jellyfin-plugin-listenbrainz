@@ -135,7 +135,7 @@ namespace Jellyfin.Plugin.Listenbrainz
                     {
                         Limits.EvaluateSubmitConditions((long)deltaTicks, item.RunTimeTicks ?? 0);
                     }
-                    catch (SubmissionConditionsNotMetException ex)
+                    catch (ListenBrainzConditionsException ex)
                     {
                         _logger.LogInformation("Listen won't be submitted, conditions have not been met: {Reason}", ex.Message);
                         return;
@@ -177,7 +177,7 @@ namespace Jellyfin.Plugin.Listenbrainz
             {
                 Limits.EvaluateSubmitConditions(e.PlaybackPositionTicks ?? 0, item.RunTimeTicks ?? 0);
             }
-            catch (SubmissionConditionsNotMetException ex)
+            catch (ListenBrainzConditionsException ex)
             {
                 _logger.LogInformation("Listen won't be submitted, conditions have not been met: {Reason}", ex.Message);
                 return;
