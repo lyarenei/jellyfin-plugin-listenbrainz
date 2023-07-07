@@ -62,7 +62,6 @@ public class ResubmitListensTask : IScheduledTask
             Helpers.GetListenCacheFilePath(_applicationPaths),
             _loggerFactory.CreateLogger<DefaultListenCache>());
 
-        cancellationToken.ThrowIfCancellationRequested();
         try
         {
             foreach (var user in config.LbUsers)
@@ -75,6 +74,7 @@ public class ResubmitListensTask : IScheduledTask
                     var subset = userListens.Take(Limits.MaxListensPerRequest).ToList();
                     try
                     {
+                        cancellationToken.ThrowIfCancellationRequested();
                         lbClient.SubmitListens(user, subset);
                         listenCache.Remove(user, subset);
                     }
