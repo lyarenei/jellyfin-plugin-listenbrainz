@@ -22,6 +22,8 @@ and share your musical taste with others using our visualizations.
   - Only one way: Jellyfin -> ListenBrainz
   - Only when pushing listen
   - Reverse sync is not possible due to how ListenBrainz works
+- Cache listens when ListenBrainz server cannot be reached
+  - Resubmitting is attempted automatically every 24h + random (0-50) minutes from server start
 
 # Installation
 
