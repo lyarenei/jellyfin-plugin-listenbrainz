@@ -59,14 +59,16 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz
         }
 
         /// <summary>
-        /// Convenience method for setting recording MBID.
+        /// Gets or sets recording MBID.
         /// </summary>
         /// <param name="value">Recording MBID.</param>
-        public void SetRecordingMBID(string value)
+        [JsonIgnore]
+        public string? RecordingMBID
         {
-            if (Data.Info != null)
+            get => Data.Info?.RecordingMbId;
+            set
             {
-                Data.Info.RecordingMbId = value;
+                if (Data.Info != null) { Data.Info.RecordingMbId = value; }
             }
         }
 

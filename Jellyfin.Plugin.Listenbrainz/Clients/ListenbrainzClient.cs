@@ -352,6 +352,9 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
                 return;
             }
 
+            // Assume MusicBrainz data have been already fetched if Recording MBID is available
+            if (listen.RecordingMBID != null) { return; }
+
             var recordingData = await _mbClient.GetRecordingData(trackMBID);
             if (recordingData == null)
             {
@@ -359,7 +362,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
                 return;
             }
 
-            listen.SetRecordingMBID(recordingData.Id);
+            listen.RecordingMBID = recordingData.Id;
             listen.SetArtistCredit(recordingData.GetCreditString());
         }
     }
