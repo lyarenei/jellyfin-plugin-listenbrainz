@@ -233,19 +233,16 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
                     return null;
                 }
 
-                if (response.IsError())
-                {
-                    _logger.LogWarning("Failed to get listens for user {User}: {Error}", jfUser.Username, response.Error);
-                    return null;
-                }
+                if (!response.IsError()) return response.Payload;
 
-                return response.Payload;
+                _logger.LogWarning("Failed to get listens for user {User}: {Error}", jfUser.Username, response.Error);
             }
             catch (Exception ex)
             {
                 _logger.LogError("Exception while getting listens for user {User}: {Exception}", jfUser.Username, ex.StackTrace);
-                return null;
             }
+
+            return null;
         }
 
         /// <summary>
@@ -300,18 +297,16 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
                     return null;
                 }
 
-                if (response.IsError())
-                {
-                    _logger.LogWarning("Validation of token '{Token}' failed: {Message}", token, response.Message);
-                }
+                if (!response.IsError()) return response;
 
-                return response;
+                _logger.LogWarning("Validation of token '{Token}' failed: {Message}", token, response.Message);
             }
             catch (Exception ex)
             {
                 _logger.LogError("Exception while validating token {Token}: {Exception}", token, ex.StackTrace);
-                return null;
             }
+
+            return null;
         }
 
         /// <summary>
