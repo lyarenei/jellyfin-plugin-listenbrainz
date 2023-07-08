@@ -6,17 +6,17 @@ using Microsoft.Extensions.Logging;
 namespace Jellyfin.Plugin.Listenbrainz.Clients.MusicBrainz
 {
     /// <summary>
-    /// Dummy implementation of <see cref="IMusicbrainzClient"/>.
+    /// Dummy implementation of <see cref="IMusicBrainzClient"/>.
     /// </summary>
-    public class DummyMusicbrainzClient : IMusicbrainzClient
+    public class DummyMusicBrainzClient : IMusicBrainzClient
     {
         private readonly ILogger _logger;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DummyMusicbrainzClient"/> class.
+        /// Initializes a new instance of the <see cref="DummyMusicBrainzClient"/> class.
         /// </summary>
         /// <param name="logger">Logger instance.</param>
-        public DummyMusicbrainzClient(ILogger logger)
+        public DummyMusicBrainzClient(ILogger logger)
         {
             _logger = logger;
         }

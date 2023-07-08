@@ -12,21 +12,21 @@ using Microsoft.Extensions.Logging;
 namespace Jellyfin.Plugin.Listenbrainz.Clients.MusicBrainz
 {
     /// <summary>
-    /// Implementation of <see cref="IMusicbrainzClient"/>.
+    /// Implementation of <see cref="IMusicBrainzClient"/>.
     /// </summary>
-    public class DefaultMusicbrainzClient : BaseMusicbrainzClient, IMusicbrainzClient
+    public class DefaultMusicBrainzClient : BaseMusicbrainzClient, IMusicBrainzClient
     {
         private readonly ILogger _logger;
         private readonly GlobalConfiguration _globalConfig;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DefaultMusicbrainzClient"/> class.
+        /// Initializes a new instance of the <see cref="DefaultMusicBrainzClient"/> class.
         /// </summary>
         /// <param name="baseUrl">API base URL.</param>
         /// <param name="httpClientFactory">HTTP client factory.</param>
         /// <param name="logger">Logger instance.</param>
         /// <param name="sleepService">Sleep service.</param>
-        public DefaultMusicbrainzClient(
+        public DefaultMusicBrainzClient(
             string baseUrl,
             IHttpClientFactory httpClientFactory,
             ILogger logger,

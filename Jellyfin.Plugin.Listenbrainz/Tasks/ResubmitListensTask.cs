@@ -110,16 +110,16 @@ public class ResubmitListensTask : IScheduledTask
         return TimeSpan.TicksPerDay + (randomMinute * TimeSpan.TicksPerMinute);
     }
 
-    private IMusicbrainzClient GetMusicBrainzClient(ILoggerFactory loggerFactory)
+    private IMusicBrainzClient GetMusicBrainzClient(ILoggerFactory loggerFactory)
     {
         var config = Plugin.GetConfiguration();
         if (!config.GlobalConfig.MusicbrainzEnabled)
         {
-            return new DummyMusicbrainzClient(loggerFactory.CreateLogger<DummyMusicbrainzClient>());
+            return new DummyMusicBrainzClient(loggerFactory.CreateLogger<DummyMusicBrainzClient>());
         }
 
-        var logger = loggerFactory.CreateLogger<DefaultMusicbrainzClient>();
-        return new DefaultMusicbrainzClient(config.MusicBrainzUrl, _httpClientFactory, logger, new SleepService());
+        var logger = loggerFactory.CreateLogger<DefaultMusicBrainzClient>();
+        return new DefaultMusicBrainzClient(config.MusicBrainzUrl, _httpClientFactory, logger, new SleepService());
     }
 
     private async Task SubmitListens(LbUser user, CancellationToken token)

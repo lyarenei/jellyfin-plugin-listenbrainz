@@ -345,20 +345,20 @@ namespace Jellyfin.Plugin.Listenbrainz
                 _sessionManager.PlaybackStopped -= PlaybackStopped;
         }
 
-        private static IMusicbrainzClient GetMusicBrainzClient(IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory)
+        private static IMusicBrainzClient GetMusicBrainzClient(IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory)
         {
             var config = Plugin.GetConfiguration();
             if (!config.GlobalConfig.MusicbrainzEnabled)
             {
-                return new DummyMusicbrainzClient(loggerFactory.CreateLogger<DummyMusicbrainzClient>());
+                return new DummyMusicBrainzClient(loggerFactory.CreateLogger<DummyMusicBrainzClient>());
             }
 
-            var logger = loggerFactory.CreateLogger<DefaultMusicbrainzClient>();
-            return new DefaultMusicbrainzClient(config.MusicBrainzUrl, httpClientFactory, logger, new SleepService());
+            var logger = loggerFactory.CreateLogger<DefaultMusicBrainzClient>();
+            return new DefaultMusicBrainzClient(config.MusicBrainzUrl, httpClientFactory, logger, new SleepService());
         }
 
         private static ListenbrainzClient GetListenBrainzClient(
-            IMusicbrainzClient mbClient,
+            IMusicBrainzClient mbClient,
             IHttpClientFactory httpClientFactory,
             ILoggerFactory loggerFactory)
         {

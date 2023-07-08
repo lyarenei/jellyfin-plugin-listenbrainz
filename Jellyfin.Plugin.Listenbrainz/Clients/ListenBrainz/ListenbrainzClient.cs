@@ -21,7 +21,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients.ListenBrainz
     /// </summary>
     public class ListenbrainzClient : BaseListenbrainzClient
     {
-        private readonly IMusicbrainzClient? _mbClient;
+        private readonly IMusicBrainzClient? _mbClient;
         private readonly ILogger _logger;
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients.ListenBrainz
         public ListenbrainzClient(
             string baseUrl,
             IHttpClientFactory httpClientFactory,
-            IMusicbrainzClient mbClient,
+            IMusicBrainzClient mbClient,
             ILogger logger,
             ISleepService sleepService) : base(baseUrl, httpClientFactory, logger, sleepService)
         {
