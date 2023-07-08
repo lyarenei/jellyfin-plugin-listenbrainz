@@ -226,11 +226,9 @@ namespace Jellyfin.Plugin.Listenbrainz
             }
 
             var now = Helpers.TimestampFromDatetime(datePlayed ?? DateTime.UtcNow);
-            var listenRequest = new SubmitListenRequest("single", item, now);
-
             try
             {
-                _apiClient.SubmitListen(lbUser, listenRequest);
+                _apiClient.SubmitListen(lbUser, "single", new Listen(item, now));
             }
             catch (Exception)
             {

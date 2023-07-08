@@ -61,13 +61,14 @@ public class ListenBrainzClient : BaseListenbrainzClient
     }
 
     /// <summary>
-    /// Submit a listen.
+    /// Submit a listen for specified user.
     /// </summary>
     /// <param name="user">ListenBrainz user.</param>
-    /// <param name="request">Listen request to submit.</param>
-    public async void SubmitListen(LbUser user, SubmitListenRequest request)
+    /// <param name="listenType">Listen type.</param>
+    /// <param name="listen">Listen to submit.</param>
+    public async void SubmitListen(LbUser user, string listenType, Listen listen)
     {
-        if (request.TrackMBID == null)
+        if (listen.TrackMBID == null)
         {
             _logger.LogDebug("No track MBID available, cannot get recording data");
             return;
@@ -79,18 +80,8 @@ public class ListenBrainzClient : BaseListenbrainzClient
             return;
         }
 
-        // Fetch additional data from MusicBrainz
-        request.ApiToken = user.Token;
-        var recordingData = await _mbClient.GetRecordingData(request.TrackMBID).ConfigureAwait(true);
-        if (recordingData != null)
-        {
-            // Set recording MBID as Jellyfin does not store it
-            request.SetRecordingMbId(recordingData.Id);
-
-            // Set correct artist credit per MusicBrainz entry.
-            request.SetArtist(recordingData.GetCreditString());
-        }
-
+        var listenToSend = await UpdateListenData(listen);
+        var request = new SubmitListenRequest(listenType, listenToSend) { ApiToken = user.Token };
         try
         {
             var response = await Post<SubmitListenRequest, SubmitListenResponse>(request).ConfigureAwait(false);
@@ -98,7 +89,7 @@ public class ListenBrainzClient : BaseListenbrainzClient
             {
                 _logger.LogInformation(
                     "Submitted listen of {Track} for user {User}",
-                    request.Data[0].Data.TrackName,
+                    listen.Data.TrackName,
                     user.Name);
                 return;
             }
