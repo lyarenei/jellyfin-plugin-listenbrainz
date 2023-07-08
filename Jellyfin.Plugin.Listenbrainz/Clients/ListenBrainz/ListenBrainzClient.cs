@@ -68,30 +68,28 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients.ListenBrainz
         /// <param name="request">Listen request to submit.</param>
         public async void SubmitListen(LbUser user, User jfUser, SubmitListenRequest request)
         {
-            // Fetch Recording data
-            if (request.TrackMBID != null)
-            {
-                if (_mbClient != null)
-                {
-                    request.ApiToken = user.Token;
-                    var recordingData = await _mbClient.GetRecordingData(request.TrackMBID).ConfigureAwait(true);
-                    if (recordingData != null)
-                    {
-                        // Set recording MBID as Jellyfin does not store it
-                        request.SetRecordingMbId(recordingData.Id);
-
-                        // Set correct artist credit per MusicBrainz entry.
-                        request.SetArtist(recordingData.GetCreditString());
-                    }
-                }
-                else
-                {
-                    _logger.LogDebug("MusicBrainz client not initialized, cannot make requests");
-                }
-            }
-            else
+            if (request.TrackMBID == null)
             {
                 _logger.LogDebug("No track MBID available, cannot get recording data");
+                return;
+            }
+
+            if (_mbClient == null)
+            {
+                _logger.LogDebug("MusicBrainz client not initialized, cannot make requests");
+                return;
+            }
+
+            // Fetch additional data from MusicBrainz
+            request.ApiToken = user.Token;
+            var recordingData = await _mbClient.GetRecordingData(request.TrackMBID).ConfigureAwait(true);
+            if (recordingData != null)
+            {
+                // Set recording MBID as Jellyfin does not store it
+                request.SetRecordingMbId(recordingData.Id);
+
+                // Set correct artist credit per MusicBrainz entry.
+                request.SetArtist(recordingData.GetCreditString());
             }
 
             try
