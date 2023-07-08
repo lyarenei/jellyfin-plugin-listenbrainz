@@ -20,6 +20,18 @@ namespace Jellyfin.Plugin.Listenbrainz.Configuration
         }
 
         /// <summary>
+        /// Gets MusicBrainz API URL.
+        /// </summary>
+        /// <returns>API URL.</returns>
+        public string MusicBrainzUrl => GlobalConfig.MusicbrainzBaseUrl ?? Resources.Musicbrainz.Api.BaseUrl;
+
+        /// <summary>
+        /// Gets ListenBrainz API URL.
+        /// </summary>
+        /// <returns>API URL.</returns>
+        public string ListenBrainzUrl => GlobalConfig.ListenbrainzBaseUrl ?? Resources.Listenbrainz.Api.BaseUrl;
+
+        /// <summary>
         /// Gets or sets plugin global configuration.
         /// </summary>
         [SuppressMessage("Usage", "CA2227", Justification = "Needed for deserialization.")]

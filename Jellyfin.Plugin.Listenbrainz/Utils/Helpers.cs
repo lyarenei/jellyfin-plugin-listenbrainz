@@ -1,5 +1,5 @@
 using System;
-using MediaBrowser.Controller.Entities.Audio;
+using System.IO;
 
 namespace Jellyfin.Plugin.Listenbrainz.Utils
 {
@@ -22,15 +22,9 @@ namespace Jellyfin.Plugin.Listenbrainz.Utils
         public static long GetCurrentTimestamp() => TimestampFromDatetime(DateTime.UtcNow);
 
         /// <summary>
-        /// Checks if audio item has necessary metadata for listen submission.
+        /// Get path to listen cache file.
         /// </summary>
-        /// <param name="item">Audio item.</param>
-        /// <returns>Audio item can be used for listen submission.</returns>
-        public static bool HasRequiredMetadata(this Audio item)
-        {
-            var hasArtistName = !string.IsNullOrWhiteSpace(item.Artists[0]);
-            var hasName = !string.IsNullOrWhiteSpace(item.Name);
-            return hasArtistName && hasName;
-        }
+        /// <returns>Path to the file.</returns>
+        public static string GetListenCacheFilePath() => Path.Join(Plugin.GetDataPath(), "cache.json");
     }
 }

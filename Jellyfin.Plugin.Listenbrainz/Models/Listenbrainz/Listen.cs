@@ -45,8 +45,34 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz
         public string? RecordingMsid { get; set; }
 
         /// <summary>
-        /// Gets or sets listenbrainz username.
+        /// Gets or sets ListenBrainz username.
         /// </summary>
         public string? UserName { get; set; }
+
+        /// <summary>
+        /// Gets track MBID.
+        /// </summary>
+        [JsonIgnore]
+        public string? TrackMBID => Data.Info?.TrackMbId;
+
+        /// <summary>
+        /// Gets or sets recording MBID.
+        /// </summary>
+        /// <param name="value">Recording MBID.</param>
+        [JsonIgnore]
+        public string? RecordingMBID
+        {
+            get => Data.Info?.RecordingMbId;
+            set
+            {
+                if (Data.Info != null) { Data.Info.RecordingMbId = value; }
+            }
+        }
+
+        /// <summary>
+        /// Convenience method for setting artist credit string.
+        /// </summary>
+        /// <param name="value">Artist credit string.</param>
+        public void SetArtistCredit(string value) => Data.ArtistName = value;
     }
 }

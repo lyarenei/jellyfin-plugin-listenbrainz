@@ -7,8 +7,13 @@ using System.Threading.Tasks;
 using Jellyfin.Data.Entities;
 using Jellyfin.Plugin.Listenbrainz.Clients;
 using Jellyfin.Plugin.Listenbrainz.Configuration;
+using Jellyfin.Plugin.Listenbrainz.Exceptions;
+using Jellyfin.Plugin.Listenbrainz.Extensions;
+using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
+using Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
 using Jellyfin.Plugin.Listenbrainz.Services;
+using Jellyfin.Plugin.Listenbrainz.Services.ListenCache;
 using Jellyfin.Plugin.Listenbrainz.Services.PlaybackTracker;
 using Jellyfin.Plugin.Listenbrainz.Utils;
 using MediaBrowser.Controller.Entities.Audio;
@@ -25,16 +30,6 @@ namespace Jellyfin.Plugin.Listenbrainz
     /// </summary>
     public class ServerEntryPoint : IServerEntryPoint
     {
-        // Rules for submitting listens: https://listenbrainz.readthedocs.io/en/production/dev/api/#post--1-submit-listens.
-        // Listens should be submitted for tracks when the user has listened to half the track or 4 minutes of the track, whichever is lower.
-        // If the user hasn't listened to 4 minutes or half the track, it doesn’t fully count as a listen and should not be submitted.
-
-        // Rule A - if a song reaches >= 4 minutes of playback
-        private const long MinimumPlayTimeToSubmitInTicks = 4 * TimeSpan.TicksPerMinute;
-
-        // Rule B - if a song reaches >= 50% played
-        private const double MinimumPlayPercentage = 50.00;
-
         private readonly ISessionManager _sessionManager;
         private readonly ILogger<ServerEntryPoint> _logger;
         private readonly ListenbrainzClient _apiClient;
@@ -42,6 +37,7 @@ namespace Jellyfin.Plugin.Listenbrainz
         private readonly IUserManager _userManager;
         private readonly IUserDataManager _userDataManager;
         private readonly IPlaybackTrackerService _playbackTracker;
+        private readonly IListenCache _listenCache;
 
         // Lock for detecting duplicate data saved events
         private static readonly object _dataSavedLock = new();
@@ -68,19 +64,12 @@ namespace Jellyfin.Plugin.Listenbrainz
             _userManager = userManager;
             _userDataManager = userDataManager;
 
-            IMusicbrainzClientService mbClient;
-            if (_globalConfig.MusicbrainzEnabled)
-            {
-                var mbBaseUrl = _globalConfig.MusicbrainzBaseUrl ?? Resources.Musicbrainz.Api.BaseUrl;
-                mbClient = new MusicbrainzClient(mbBaseUrl, httpClientFactory, _logger, new SleepService());
-            }
-            else
-            {
-                mbClient = new DummyMusicbrainzClient(_logger);
-            }
+            _listenCache = new DefaultListenCache(
+                Helpers.GetListenCacheFilePath(),
+                loggerFactory.CreateLogger<DefaultListenCache>());
 
-            var lbBaseUrl = _globalConfig.ListenbrainzBaseUrl ?? Resources.Listenbrainz.Api.BaseUrl;
-            _apiClient = new ListenbrainzClient(lbBaseUrl, httpClientFactory, mbClient, _logger, new SleepService());
+            var mbClient = GetMusicBrainzClient(httpClientFactory, loggerFactory);
+            _apiClient = GetListenBrainzClient(mbClient, httpClientFactory, loggerFactory);
 
             _playbackTracker = new DefaultPlaybackTracker(loggerFactory);
             Instance = this;
@@ -139,7 +128,15 @@ namespace Jellyfin.Plugin.Listenbrainz
 
                     var delta = DateTime.Now - trackedItem.StartedAt;
                     var deltaTicks = delta.TotalSeconds * TimeSpan.TicksPerSecond;
-                    if (!IsItemForListenbrainzSubmission(item, deltaTicks)) { return; }
+                    try
+                    {
+                        Limits.EvaluateSubmitConditions((long)deltaTicks, item.RunTimeTicks ?? 0);
+                    }
+                    catch (ListenBrainzConditionsException ex)
+                    {
+                        _logger.LogInformation("Listen won't be submitted, conditions have not been met: {Reason}", ex.Message);
+                        return;
+                    }
 
                     _playbackTracker.StopTracking(audio: item, user);
                 }
@@ -173,7 +170,15 @@ namespace Jellyfin.Plugin.Listenbrainz
                 return;
             }
 
-            if (!IsItemForListenbrainzSubmission(item, (double)e.PlaybackPositionTicks)) { return; }
+            try
+            {
+                Limits.EvaluateSubmitConditions(e.PlaybackPositionTicks ?? 0, item.RunTimeTicks ?? 0);
+            }
+            catch (ListenBrainzConditionsException ex)
+            {
+                _logger.LogInformation("Listen won't be submitted, conditions have not been met: {Reason}", ex.Message);
+                return;
+            }
 
             var user = e.Users.FirstOrDefault();
             if (user == null) { return; }
@@ -220,7 +225,17 @@ namespace Jellyfin.Plugin.Listenbrainz
 
             var now = Helpers.TimestampFromDatetime(datePlayed ?? DateTime.UtcNow);
             var listenRequest = new SubmitListenRequest("single", item, now);
-            _apiClient.SubmitListen(lbUser, user, listenRequest);
+
+            try
+            {
+                _apiClient.SubmitListen(lbUser, user, listenRequest);
+            }
+            catch (Exception)
+            {
+                _logger.LogInformation("Listen submission for user {User} failed, persisting listen to cache", user.Username);
+                _listenCache.Add(lbUser, new Listen(item, now));
+                await _listenCache.SaveToFile();
+            }
 
             if (!lbUser.Options.SyncFavoritesEnabled) { return; }
 
@@ -328,39 +343,26 @@ namespace Jellyfin.Plugin.Listenbrainz
                 _sessionManager.PlaybackStopped -= PlaybackStopped;
         }
 
-        /// <summary>
-        /// Check if specified item meet criteria for sending listen of this item to ListenBrainz.
-        /// </summary>
-        /// <param name="item">Item to check.</param>
-        /// <param name="positionTicks">Item playback position ticks.</param>
-        /// <returns>True if item meets criteria, false otherwise.</returns>
-        private bool IsItemForListenbrainzSubmission(Audio item, double positionTicks)
+        private static IMusicbrainzClientService GetMusicBrainzClient(IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory)
         {
-            var playPercent = (positionTicks / item.RunTimeTicks) * 100;
-            _logger.LogDebug(
-                "Playback of '{Track}' stopped: played {Percent}% ({Position} ticks), " +
-                "required {MinimumPercentage}% or {MinimumPlayTicks} ticks for submission",
-                item.Name,
-                playPercent,
-                positionTicks,
-                MinimumPlayPercentage,
-                MinimumPlayTimeToSubmitInTicks);
-
-            if (playPercent < MinimumPlayPercentage && positionTicks < MinimumPlayTimeToSubmitInTicks)
+            var config = Plugin.GetConfiguration();
+            if (!config.GlobalConfig.MusicbrainzEnabled)
             {
-                _logger.LogDebug(
-                    "Listen for track '{Track}' won't be submitted, " +
-                    "played {Percent}% ({Position} ticks), " +
-                    "required {PlayPercentage}% or {MinimumPlayTicks} ticks",
-                    item.Name,
-                    playPercent,
-                    positionTicks,
-                    MinimumPlayPercentage,
-                    MinimumPlayTimeToSubmitInTicks);
-                return false;
+                return new DummyMusicbrainzClient(loggerFactory.CreateLogger<DummyMusicbrainzClient>());
             }
 
-            return true;
+            var logger = loggerFactory.CreateLogger<MusicbrainzClient>();
+            return new MusicbrainzClient(config.MusicBrainzUrl, httpClientFactory, logger, new SleepService());
+        }
+
+        private static ListenbrainzClient GetListenBrainzClient(
+            IMusicbrainzClientService mbClient,
+            IHttpClientFactory httpClientFactory,
+            ILoggerFactory loggerFactory)
+        {
+            var config = Plugin.GetConfiguration();
+            var logger = loggerFactory.CreateLogger<ListenbrainzClient>();
+            return new ListenbrainzClient(config.ListenBrainzUrl, httpClientFactory, mbClient, logger, new SleepService());
         }
     }
 }
