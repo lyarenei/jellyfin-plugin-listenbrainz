@@ -24,7 +24,7 @@ public class ResubmitListensTask : IScheduledTask
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILoggerFactory _loggerFactory;
     private readonly ILogger<ResubmitListensTask> _logger;
-    private readonly IApplicationPaths _applicationPaths;
+    private readonly IListenCache _listenCache;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ResubmitListensTask"/> class.
@@ -37,7 +37,9 @@ public class ResubmitListensTask : IScheduledTask
         _httpClientFactory = httpClientFactory;
         _loggerFactory = loggerFactory;
         _logger = loggerFactory.CreateLogger<ResubmitListensTask>();
-        _applicationPaths = applicationPaths;
+        _listenCache = new DefaultListenCache(
+            Helpers.GetListenCacheFilePath(applicationPaths),
+            loggerFactory.CreateLogger<DefaultListenCache>());
     }
 
     /// <inheritdoc />
@@ -58,15 +60,12 @@ public class ResubmitListensTask : IScheduledTask
         var config = Plugin.GetConfiguration();
         var mbClient = GetMusicBrainzClient();
         var lbClient = GetListenBrainzClient(mbClient);
-        var listenCache = new DefaultListenCache(
-            Helpers.GetListenCacheFilePath(_applicationPaths),
-            _loggerFactory.CreateLogger<DefaultListenCache>());
 
         try
         {
             foreach (var user in config.LbUsers)
             {
-                var userListens = listenCache.Get(user);
+                var userListens = _listenCache.Get(user);
                 if (userListens.Any())
                 {
                     _logger.LogInformation("Found listens in cache for user {Username}, will try resubmitting", user.Name);
@@ -76,8 +75,8 @@ public class ResubmitListensTask : IScheduledTask
                     {
                         cancellationToken.ThrowIfCancellationRequested();
                         lbClient.SubmitListens(user, subset);
-                        listenCache.Remove(user, subset);
-                        listenCache.Save();
+                        _listenCache.Remove(user, subset);
+                        _listenCache.Save();
                     }
                     catch (ListenSubmitException)
                     {
