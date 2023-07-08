@@ -25,7 +25,7 @@ public class ResubmitListensTask : IScheduledTask
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<ResubmitListensTask> _logger;
-    private readonly ListenbrainzClient _lbClient;
+    private readonly ListenBrainzClient _lbClient;
     private readonly IListenCache _listenCache;
 
     /// <summary>
@@ -39,11 +39,11 @@ public class ResubmitListensTask : IScheduledTask
         _logger = loggerFactory.CreateLogger<ResubmitListensTask>();
 
         var config = Plugin.GetConfiguration();
-        _lbClient = new ListenbrainzClient(
+        _lbClient = new ListenBrainzClient(
             config.ListenBrainzUrl,
             _httpClientFactory,
             GetMusicBrainzClient(loggerFactory),
-            loggerFactory.CreateLogger<ListenbrainzClient>(),
+            loggerFactory.CreateLogger<ListenBrainzClient>(),
             new SleepService());
 
         _listenCache = new DefaultListenCache(

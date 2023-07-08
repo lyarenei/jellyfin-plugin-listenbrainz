@@ -19,19 +19,19 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients.ListenBrainz
     /// <summary>
     /// Listenbrainz API client.
     /// </summary>
-    public class ListenbrainzClient : BaseListenbrainzClient
+    public class ListenBrainzClient : BaseListenbrainzClient
     {
         private readonly IMusicBrainzClient? _mbClient;
         private readonly ILogger _logger;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ListenbrainzClient"/> class.
+        /// Initializes a new instance of the <see cref="ListenBrainzClient"/> class.
         /// </summary>
         /// <param name="baseUrl">API base URL.</param>
         /// <param name="httpClientFactory">HTTP client factory.</param>
         /// <param name="logger">Logger instance.</param>
         /// <param name="sleepService">Sleep service.</param>
-        public ListenbrainzClient(
+        public ListenBrainzClient(
             string baseUrl,
             IHttpClientFactory httpClientFactory,
             ILogger logger,
@@ -42,14 +42,14 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients.ListenBrainz
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ListenbrainzClient"/> class.
+        /// Initializes a new instance of the <see cref="ListenBrainzClient"/> class.
         /// </summary>
         /// <param name="baseUrl">API base URL.</param>
         /// <param name="httpClientFactory">HTTP client factory.</param>
         /// <param name="mbClient">Musicbrainz API client.</param>
         /// <param name="logger">Logger instance.</param>
         /// <param name="sleepService">Sleep service.</param>
-        public ListenbrainzClient(
+        public ListenBrainzClient(
             string baseUrl,
             IHttpClientFactory httpClientFactory,
             IMusicBrainzClient mbClient,
@@ -63,7 +63,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients.ListenBrainz
         /// <summary>
         /// Submit a listen.
         /// </summary>
-        /// <param name="user">Listenbrainz user.</param>
+        /// <param name="user">ListenBrainz user.</param>
         /// <param name="jfUser">Jellyfin user. Used for logging.</param>
         /// <param name="request">Listen request to submit.</param>
         public async void SubmitListen(LbUser user, User jfUser, SubmitListenRequest request)

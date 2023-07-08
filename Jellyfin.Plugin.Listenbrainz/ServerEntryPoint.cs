@@ -34,7 +34,7 @@ namespace Jellyfin.Plugin.Listenbrainz
     {
         private readonly ISessionManager _sessionManager;
         private readonly ILogger<ServerEntryPoint> _logger;
-        private readonly ListenbrainzClient _apiClient;
+        private readonly ListenBrainzClient _apiClient;
         private readonly GlobalConfiguration _globalConfig;
         private readonly IUserManager _userManager;
         private readonly IUserDataManager _userDataManager;
@@ -357,14 +357,14 @@ namespace Jellyfin.Plugin.Listenbrainz
             return new DefaultMusicBrainzClient(config.MusicBrainzUrl, httpClientFactory, logger, new SleepService());
         }
 
-        private static ListenbrainzClient GetListenBrainzClient(
+        private static ListenBrainzClient GetListenBrainzClient(
             IMusicBrainzClient mbClient,
             IHttpClientFactory httpClientFactory,
             ILoggerFactory loggerFactory)
         {
             var config = Plugin.GetConfiguration();
-            var logger = loggerFactory.CreateLogger<ListenbrainzClient>();
-            return new ListenbrainzClient(config.ListenBrainzUrl, httpClientFactory, mbClient, logger, new SleepService());
+            var logger = loggerFactory.CreateLogger<ListenBrainzClient>();
+            return new ListenBrainzClient(config.ListenBrainzUrl, httpClientFactory, mbClient, logger, new SleepService());
         }
     }
 }

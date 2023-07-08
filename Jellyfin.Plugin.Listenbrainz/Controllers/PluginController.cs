@@ -18,7 +18,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Controllers
     [Route("Listenbrainz/ValidateToken")]
     public class PluginController : ControllerBase
     {
-        private readonly ListenbrainzClient _apiClient;
+        private readonly ListenBrainzClient _apiClient;
         private GlobalConfiguration _pluginConfig;
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Controllers
             _pluginConfig = Plugin.Instance?.Configuration.GlobalConfig ?? throw new InvalidOperationException("plugin configuration is NULL");
             var logger = loggerFactory.CreateLogger<PluginController>();
             var baseUrl = _pluginConfig.ListenbrainzBaseUrl ?? Api.BaseUrl;
-            _apiClient = new ListenbrainzClient(baseUrl, httpClientFactory, logger, new SleepService());
+            _apiClient = new ListenBrainzClient(baseUrl, httpClientFactory, logger, new SleepService());
         }
 
         /// <summary>
