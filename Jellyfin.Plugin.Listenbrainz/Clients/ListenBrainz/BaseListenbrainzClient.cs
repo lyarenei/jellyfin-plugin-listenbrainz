@@ -14,7 +14,7 @@ using Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
 using Jellyfin.Plugin.Listenbrainz.Services;
 using Microsoft.Extensions.Logging;
 
-namespace Jellyfin.Plugin.Listenbrainz.Clients
+namespace Jellyfin.Plugin.Listenbrainz.Clients.ListenBrainz
 {
     /// <summary>
     /// Base Listenbrainz API client.
