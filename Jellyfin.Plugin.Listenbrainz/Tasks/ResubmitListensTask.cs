@@ -10,7 +10,6 @@ using Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
 using Jellyfin.Plugin.Listenbrainz.Services;
 using Jellyfin.Plugin.Listenbrainz.Services.ListenCache;
 using Jellyfin.Plugin.Listenbrainz.Utils;
-using MediaBrowser.Common.Configuration;
 using MediaBrowser.Model.Tasks;
 using Microsoft.Extensions.Logging;
 
@@ -31,14 +30,13 @@ public class ResubmitListensTask : IScheduledTask
     /// </summary>
     /// <param name="httpClientFactory">HTTP client factory.</param>
     /// <param name="loggerFactory">Logger factory.</param>
-    /// <param name="applicationPaths">Application paths.</param>
-    public ResubmitListensTask(IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory, IApplicationPaths applicationPaths)
+    public ResubmitListensTask(IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory)
     {
         _httpClientFactory = httpClientFactory;
         _loggerFactory = loggerFactory;
         _logger = loggerFactory.CreateLogger<ResubmitListensTask>();
         _listenCache = new DefaultListenCache(
-            Helpers.GetListenCacheFilePath(applicationPaths),
+            Helpers.GetListenCacheFilePath(),
             loggerFactory.CreateLogger<DefaultListenCache>());
     }
 

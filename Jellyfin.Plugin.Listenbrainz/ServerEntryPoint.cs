@@ -16,7 +16,6 @@ using Jellyfin.Plugin.Listenbrainz.Services;
 using Jellyfin.Plugin.Listenbrainz.Services.ListenCache;
 using Jellyfin.Plugin.Listenbrainz.Services.PlaybackTracker;
 using Jellyfin.Plugin.Listenbrainz.Utils;
-using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Plugins;
@@ -51,14 +50,12 @@ namespace Jellyfin.Plugin.Listenbrainz
         /// <param name="loggerFactory">Logger factory.</param>
         /// <param name="userManager">User manager.</param>
         /// <param name="userDataManager">User data manager.</param>
-        /// <param name="applicationPaths">Server application paths.</param>
         public ServerEntryPoint(
             ISessionManager sessionManager,
             IHttpClientFactory httpClientFactory,
             ILoggerFactory loggerFactory,
             IUserManager userManager,
-            IUserDataManager userDataManager,
-            IApplicationPaths applicationPaths)
+            IUserDataManager userDataManager)
         {
             var config = Plugin.Instance?.Configuration.GlobalConfig;
             _globalConfig = config ?? throw new InvalidOperationException("plugin configuration is NULL");
@@ -68,7 +65,7 @@ namespace Jellyfin.Plugin.Listenbrainz
             _userDataManager = userDataManager;
 
             _listenCache = new DefaultListenCache(
-                Helpers.GetListenCacheFilePath(applicationPaths),
+                Helpers.GetListenCacheFilePath(),
                 loggerFactory.CreateLogger<DefaultListenCache>());
 
             var mbClient = GetMusicBrainzClient(httpClientFactory, loggerFactory);
