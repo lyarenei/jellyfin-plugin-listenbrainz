@@ -3,7 +3,7 @@ using Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz;
 using Jellyfin.Plugin.Listenbrainz.Services;
 using Microsoft.Extensions.Logging;
 
-namespace Jellyfin.Plugin.Listenbrainz.Clients
+namespace Jellyfin.Plugin.Listenbrainz.Clients.MusicBrainz
 {
     /// <summary>
     /// Dummy implementation of <see cref="IMusicbrainzClientService"/>.

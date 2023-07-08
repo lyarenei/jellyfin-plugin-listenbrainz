@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz;
 
-namespace Jellyfin.Plugin.Listenbrainz.Services
+namespace Jellyfin.Plugin.Listenbrainz.Clients.MusicBrainz
 {
     /// <summary>
     /// Musicbrainz service client interface.

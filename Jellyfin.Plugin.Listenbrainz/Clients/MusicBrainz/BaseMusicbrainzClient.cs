@@ -14,7 +14,7 @@ using Jellyfin.Plugin.Listenbrainz.Resources.Musicbrainz;
 using Jellyfin.Plugin.Listenbrainz.Services;
 using Microsoft.Extensions.Logging;
 
-namespace Jellyfin.Plugin.Listenbrainz.Clients
+namespace Jellyfin.Plugin.Listenbrainz.Clients.MusicBrainz
 {
     /// <summary>
     /// Base Musicbrainz API client.

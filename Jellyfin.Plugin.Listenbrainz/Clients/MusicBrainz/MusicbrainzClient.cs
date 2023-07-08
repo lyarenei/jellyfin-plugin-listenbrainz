@@ -9,7 +9,7 @@ using Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz.Responses;
 using Jellyfin.Plugin.Listenbrainz.Services;
 using Microsoft.Extensions.Logging;
 
-namespace Jellyfin.Plugin.Listenbrainz.Clients
+namespace Jellyfin.Plugin.Listenbrainz.Clients.MusicBrainz
 {
     /// <summary>
     /// Implementation of <see cref="IMusicbrainzClientService"/>.
