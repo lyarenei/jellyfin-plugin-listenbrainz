@@ -44,16 +44,6 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests
         public override string GetEndpoint() => Endpoints.SubmitListen;
 
         /// <summary>
-        /// Determines if there is a Recording MBID available.
-        /// </summary>
-        /// <returns>Recording MBID is available.</returns>
-        public bool HasRecordingMbId()
-        {
-            var recordingId = Data[0].Data.Info?.RecordingMbId;
-            return recordingId != null;
-        }
-
-        /// <summary>
         /// Sets a recording MBID.
         /// </summary>
         /// <param name="recordingMbId">Recording MBID.</param>
