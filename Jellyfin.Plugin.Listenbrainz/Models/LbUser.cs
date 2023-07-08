@@ -43,16 +43,8 @@ namespace Jellyfin.Plugin.Listenbrainz.Models
         /// <returns>User can submit listens. If cannot, returns false and reason.</returns>
         public (bool CanSubmit, string Reason) CanSubmitListen()
         {
-            if (!Options.ListenSubmitEnabled)
-            {
-                return (false, "listen submitting disabled");
-            }
-
-            if (string.IsNullOrWhiteSpace(Token))
-            {
-                return (false, "no API token set");
-            }
-
+            if (!Options.ListenSubmitEnabled) return (false, "listen submitting disabled");
+            if (string.IsNullOrWhiteSpace(Token)) return (false, "no API token set");
             return (true, string.Empty);
         }
     }
