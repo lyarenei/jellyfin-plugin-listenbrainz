@@ -279,7 +279,7 @@ namespace Jellyfin.Plugin.Listenbrainz
         }
 
         /// <summary>
-        /// Send "playing_now" listen to Listenbrainz on playback start.
+        /// Send "playing_now" listen to ListenBrainz on playback start.
         /// </summary>
         private void PlaybackStart(object? sender, PlaybackProgressEventArgs e)
         {
@@ -293,7 +293,7 @@ namespace Jellyfin.Plugin.Listenbrainz
             {
                 _logger.LogInformation(
                     "Listen won't be sent: " +
-                    "could not find Listenbrainz configuration for user '{User}'",
+                    "could not find ListenBrainz configuration for user '{User}'",
                     user.Username);
                 return;
             }
