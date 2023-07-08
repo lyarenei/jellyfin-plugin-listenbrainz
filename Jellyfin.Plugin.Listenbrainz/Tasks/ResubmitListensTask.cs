@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.Listenbrainz.Clients;
 using Jellyfin.Plugin.Listenbrainz.Exceptions;
+using Jellyfin.Plugin.Listenbrainz.Models;
 using Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
 using Jellyfin.Plugin.Listenbrainz.Services;
 using Jellyfin.Plugin.Listenbrainz.Services.ListenCache;
@@ -23,6 +24,7 @@ public class ResubmitListensTask : IScheduledTask
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILoggerFactory _loggerFactory;
     private readonly ILogger<ResubmitListensTask> _logger;
+    private readonly ListenbrainzClient _lbClient;
     private readonly IListenCache _listenCache;
 
     /// <summary>
@@ -35,6 +37,7 @@ public class ResubmitListensTask : IScheduledTask
         _httpClientFactory = httpClientFactory;
         _loggerFactory = loggerFactory;
         _logger = loggerFactory.CreateLogger<ResubmitListensTask>();
+        _lbClient = GetListenBrainzClient(GetMusicBrainzClient());
         _listenCache = new DefaultListenCache(
             Helpers.GetListenCacheFilePath(),
             loggerFactory.CreateLogger<DefaultListenCache>());
@@ -56,31 +59,16 @@ public class ResubmitListensTask : IScheduledTask
     public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
         var config = Plugin.GetConfiguration();
-        var mbClient = GetMusicBrainzClient();
-        var lbClient = GetListenBrainzClient(mbClient);
         await _listenCache.LoadFromFile();
 
         try
         {
             foreach (var user in config.LbUsers)
             {
-                var userListens = _listenCache.Get(user);
-                if (userListens.Any())
+                if (_listenCache.Get(user).Any())
                 {
                     _logger.LogInformation("Found listens in cache for user {Username}, will try resubmitting", user.Name);
-                    // TODO: Submit all, not just first X
-                    var subset = userListens.Take(Limits.MaxListensPerRequest).ToList();
-                    try
-                    {
-                        cancellationToken.ThrowIfCancellationRequested();
-                        lbClient.SubmitListens(user, subset);
-                        _listenCache.Remove(user, subset);
-                        await _listenCache.SaveToFile();
-                    }
-                    catch (ListenSubmitException)
-                    {
-                        _logger.LogInformation("Failed to resubmit listens for user {User}", user.Name);
-                    }
+                    await SubmitListens(user, cancellationToken);
                 }
                 else
                 {
@@ -131,5 +119,25 @@ public class ResubmitListensTask : IScheduledTask
         var config = Plugin.GetConfiguration();
         var logger = _loggerFactory.CreateLogger<ListenbrainzClient>();
         return new ListenbrainzClient(config.ListenBrainzUrl(), _httpClientFactory, mbClient, logger, new SleepService());
+    }
+
+    private async Task SubmitListens(LbUser user, CancellationToken token)
+    {
+        var listenChunks = _listenCache.Get(user).Chunk(Limits.MaxListensPerRequest);
+        foreach (var chunk in listenChunks)
+        {
+            try
+            {
+                token.ThrowIfCancellationRequested();
+                _lbClient.SubmitListens(user, chunk);
+                _listenCache.Remove(user, chunk);
+                await _listenCache.SaveToFile();
+            }
+            catch (ListenSubmitException)
+            {
+                _logger.LogInformation("Failed to resubmit listens for user {User}", user.Name);
+                break;
+            }
+        }
     }
 }
