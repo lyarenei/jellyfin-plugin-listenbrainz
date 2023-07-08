@@ -10,6 +10,7 @@ using Jellyfin.Plugin.Listenbrainz.Models;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses;
+using Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
 using Jellyfin.Plugin.Listenbrainz.Services;
 using MediaBrowser.Controller.Entities.Audio;
 using Microsoft.Extensions.Logging;
@@ -66,7 +67,7 @@ public class ListenBrainzClient : BaseListenbrainzClient
     /// <param name="user">ListenBrainz user.</param>
     /// <param name="listenType">Listen type.</param>
     /// <param name="listen">Listen to submit.</param>
-    public async void SubmitListen(LbUser user, string listenType, Listen listen)
+    public async void SubmitListen(LbUser user, ListenType listenType, Listen listen)
     {
         if (listen.TrackMBID == null)
         {
@@ -81,7 +82,7 @@ public class ListenBrainzClient : BaseListenbrainzClient
         }
 
         var listenToSend = await UpdateListenData(listen);
-        var request = new SubmitListenRequest(listenType, listenToSend) { ApiToken = user.Token };
+        var request = new SubmitListenRequest(listenType.Value, listenToSend) { ApiToken = user.Token };
         try
         {
             var response = await Post<SubmitListenRequest, SubmitListenResponse>(request).ConfigureAwait(false);

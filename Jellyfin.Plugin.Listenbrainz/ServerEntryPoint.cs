@@ -227,7 +227,7 @@ public class ServerEntryPoint : IServerEntryPoint
         var now = Helpers.TimestampFromDatetime(datePlayed ?? DateTime.UtcNow);
         try
         {
-            _apiClient.SubmitListen(lbUser, "single", new Listen(item, now));
+            _apiClient.SubmitListen(lbUser, ListenType.Single, new Listen(item, now));
         }
         catch (Exception)
         {
