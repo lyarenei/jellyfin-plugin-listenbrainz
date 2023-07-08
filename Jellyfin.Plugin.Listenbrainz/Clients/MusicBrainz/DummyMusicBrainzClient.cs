@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 using Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz;
-using Jellyfin.Plugin.Listenbrainz.Services;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.Listenbrainz.Clients.MusicBrainz
