@@ -41,7 +41,9 @@ namespace Jellyfin.Plugin.Listenbrainz
                 new PluginPageInfo
                 {
                     Name = Name,
-                    EmbeddedResourcePath = string.Format(CultureInfo.InvariantCulture, "{0}.Configuration.configPage.html", GetType().Namespace)
+                    EmbeddedResourcePath = string.Format(CultureInfo.InvariantCulture, "{0}.Configuration.configPage.html", GetType().Namespace),
+                    EnableInMainMenu = true,
+                    MenuIcon = "music_note"
                 }
             };
         }
