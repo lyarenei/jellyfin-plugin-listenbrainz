@@ -75,7 +75,7 @@ public class ResubmitListensTask : IScheduledTask
                         cancellationToken.ThrowIfCancellationRequested();
                         lbClient.SubmitListens(user, subset);
                         _listenCache.Remove(user, subset);
-                        await _listenCache.Save();
+                        await _listenCache.SaveToFile();
                     }
                     catch (ListenSubmitException)
                     {

@@ -15,7 +15,7 @@ public interface IListenCache
     /// Persist cache to disk.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public Task Save();
+    public Task SaveToFile();
 
     /// <summary>
     /// Load persisted data from cache file.

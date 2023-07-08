@@ -54,7 +54,7 @@ public class DefaultListenCache : IListenCache
     }
 
     /// <inheritdoc />
-    public async Task Save()
+    public async Task SaveToFile()
     {
         await using var stream = File.Create(_cachePath);
         await JsonSerializer.SerializeAsync(stream, _listens, _serializerOptions);
