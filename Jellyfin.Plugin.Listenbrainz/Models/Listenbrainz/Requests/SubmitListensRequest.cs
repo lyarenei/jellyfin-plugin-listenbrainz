@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.Json.Serialization;
-using Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
+using Jellyfin.Plugin.Listenbrainz.Resources.ListenBrainz;
 
 namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
 

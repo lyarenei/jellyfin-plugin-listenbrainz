@@ -29,7 +29,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Configuration
         /// Gets ListenBrainz API URL.
         /// </summary>
         /// <returns>API URL.</returns>
-        public string ListenBrainzUrl => GlobalConfig.ListenbrainzBaseUrl ?? Resources.Listenbrainz.Api.BaseUrl;
+        public string ListenBrainzUrl => GlobalConfig.ListenbrainzBaseUrl ?? Resources.ListenBrainz.Api.BaseUrl;
 
         /// <summary>
         /// Gets or sets plugin global configuration.

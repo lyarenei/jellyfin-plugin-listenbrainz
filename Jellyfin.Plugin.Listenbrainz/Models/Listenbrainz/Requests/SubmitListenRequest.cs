@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Text.Json.Serialization;
-using Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
+using Jellyfin.Plugin.Listenbrainz.Resources.ListenBrainz;
 using MediaBrowser.Controller.Entities.Audio;
 
 namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests

@@ -10,7 +10,7 @@ using Jellyfin.Plugin.Listenbrainz.Clients.MusicBrainz;
 using Jellyfin.Plugin.Listenbrainz.Exceptions;
 using Jellyfin.Plugin.Listenbrainz.Extensions;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz;
-using Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
+using Jellyfin.Plugin.Listenbrainz.Resources.ListenBrainz;
 using Jellyfin.Plugin.Listenbrainz.Services;
 using Jellyfin.Plugin.Listenbrainz.Services.ListenCache;
 using Jellyfin.Plugin.Listenbrainz.Services.PlaybackTracker;

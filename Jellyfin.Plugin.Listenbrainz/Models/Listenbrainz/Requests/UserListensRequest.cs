@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Globalization;
-using Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
+using Jellyfin.Plugin.Listenbrainz.Resources.ListenBrainz;
 
 namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests
 {

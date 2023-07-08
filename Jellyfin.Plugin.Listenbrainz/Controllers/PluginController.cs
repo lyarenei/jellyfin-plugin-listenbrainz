@@ -1,10 +1,9 @@
 using System;
 using System.Net.Http;
-using Jellyfin.Plugin.Listenbrainz.Clients;
 using Jellyfin.Plugin.Listenbrainz.Clients.ListenBrainz;
 using Jellyfin.Plugin.Listenbrainz.Configuration;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses;
-using Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
+using Jellyfin.Plugin.Listenbrainz.Resources.ListenBrainz;
 using Jellyfin.Plugin.Listenbrainz.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;

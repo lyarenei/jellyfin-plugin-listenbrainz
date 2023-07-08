@@ -1,4 +1,4 @@
-namespace Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz
+namespace Jellyfin.Plugin.Listenbrainz.Resources.ListenBrainz
 {
     /// <summary>
     /// Listenbrainz API endpoints.

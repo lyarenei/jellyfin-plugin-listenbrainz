@@ -10,7 +10,7 @@ using Jellyfin.Plugin.Listenbrainz.Models;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses;
-using Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
+using Jellyfin.Plugin.Listenbrainz.Resources.ListenBrainz;
 using Jellyfin.Plugin.Listenbrainz.Services;
 using MediaBrowser.Controller.Entities.Audio;
 using Microsoft.Extensions.Logging;

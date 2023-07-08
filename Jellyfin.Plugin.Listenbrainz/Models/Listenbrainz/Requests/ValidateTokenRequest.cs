@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
+using Jellyfin.Plugin.Listenbrainz.Resources.ListenBrainz;
 
 namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests
 {

@@ -1,7 +1,7 @@
 using System;
 using Jellyfin.Plugin.Listenbrainz.Exceptions;
 
-namespace Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
+namespace Jellyfin.Plugin.Listenbrainz.Resources.ListenBrainz;
 
 /// <summary>
 /// ListenBrainz limits, thresholds, etc...

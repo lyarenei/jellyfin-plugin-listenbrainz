@@ -1,6 +1,6 @@
 using System;
 using Jellyfin.Plugin.Listenbrainz.Exceptions;
-using Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
+using Jellyfin.Plugin.Listenbrainz.Resources.ListenBrainz;
 using Xunit;
 
 namespace Jellyfin.Plugin.Listenbrainz.Tests;
