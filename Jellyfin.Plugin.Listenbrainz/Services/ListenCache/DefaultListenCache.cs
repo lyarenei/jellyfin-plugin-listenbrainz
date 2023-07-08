@@ -60,7 +60,7 @@ public class DefaultListenCache : IListenCache
         await JsonSerializer.SerializeAsync(stream, _listens, _serializerOptions);
         await stream.DisposeAsync();
 
-        _logger.LogDebug("Listen cache file has been updated");
+        _logger.LogDebug("Saved listens to cache file");
     }
 
     /// <inheritdoc />
@@ -71,7 +71,7 @@ public class DefaultListenCache : IListenCache
         if (data == null) return;
 
         _listens = data;
-        _logger.LogDebug("Listen cache has been updated");
+        _logger.LogDebug("Loaded listens from cache file");
     }
 
     /// <inheritdoc />
