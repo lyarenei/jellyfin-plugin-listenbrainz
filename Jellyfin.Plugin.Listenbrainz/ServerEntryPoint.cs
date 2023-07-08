@@ -353,8 +353,8 @@ namespace Jellyfin.Plugin.Listenbrainz
                 return new DummyMusicbrainzClient(loggerFactory.CreateLogger<DummyMusicbrainzClient>());
             }
 
-            var logger = loggerFactory.CreateLogger<MusicbrainzClient>();
-            return new MusicbrainzClient(config.MusicBrainzUrl, httpClientFactory, logger, new SleepService());
+            var logger = loggerFactory.CreateLogger<DefaultMusicbrainzClient>();
+            return new DefaultMusicbrainzClient(config.MusicBrainzUrl, httpClientFactory, logger, new SleepService());
         }
 
         private static ListenbrainzClient GetListenBrainzClient(

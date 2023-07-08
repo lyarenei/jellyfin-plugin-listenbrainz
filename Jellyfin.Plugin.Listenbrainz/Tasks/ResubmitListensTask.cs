@@ -118,8 +118,8 @@ public class ResubmitListensTask : IScheduledTask
             return new DummyMusicbrainzClient(loggerFactory.CreateLogger<DummyMusicbrainzClient>());
         }
 
-        var logger = loggerFactory.CreateLogger<MusicbrainzClient>();
-        return new MusicbrainzClient(config.MusicBrainzUrl, _httpClientFactory, logger, new SleepService());
+        var logger = loggerFactory.CreateLogger<DefaultMusicbrainzClient>();
+        return new DefaultMusicbrainzClient(config.MusicBrainzUrl, _httpClientFactory, logger, new SleepService());
     }
 
     private async Task SubmitListens(LbUser user, CancellationToken token)

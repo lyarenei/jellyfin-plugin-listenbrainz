@@ -14,19 +14,19 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients.MusicBrainz
     /// <summary>
     /// Implementation of <see cref="IMusicbrainzClient"/>.
     /// </summary>
-    public class MusicbrainzClient : BaseMusicbrainzClient, IMusicbrainzClient
+    public class DefaultMusicbrainzClient : BaseMusicbrainzClient, IMusicbrainzClient
     {
         private readonly ILogger _logger;
         private readonly GlobalConfiguration _globalConfig;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MusicbrainzClient"/> class.
+        /// Initializes a new instance of the <see cref="DefaultMusicbrainzClient"/> class.
         /// </summary>
         /// <param name="baseUrl">API base URL.</param>
         /// <param name="httpClientFactory">HTTP client factory.</param>
         /// <param name="logger">Logger instance.</param>
         /// <param name="sleepService">Sleep service.</param>
-        public MusicbrainzClient(
+        public DefaultMusicbrainzClient(
             string baseUrl,
             IHttpClientFactory httpClientFactory,
             ILogger logger,
