@@ -1,18 +1,17 @@
-namespace Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz
+namespace Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
+
+/// <summary>
+/// Listenbrainz API resources.
+/// </summary>
+public static class Api
 {
     /// <summary>
-    /// Listenbrainz API resources.
+    /// API version.
     /// </summary>
-    public static class Api
-    {
-        /// <summary>
-        /// API version.
-        /// </summary>
-        public const string Version = "1";
+    public const string Version = "1";
 
-        /// <summary>
-        /// API base URL.
-        /// </summary>
-        public const string BaseUrl = "https://api.listenbrainz.org";
-    }
+    /// <summary>
+    /// API base URL.
+    /// </summary>
+    public const string BaseUrl = "https://api.listenbrainz.org";
 }
