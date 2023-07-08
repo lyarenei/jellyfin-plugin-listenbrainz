@@ -230,7 +230,7 @@ namespace Jellyfin.Plugin.Listenbrainz
 
             try
             {
-                _apiClient.SubmitListen(lbUser, user, listenRequest);
+                _apiClient.SubmitListen(lbUser, listenRequest);
             }
             catch (Exception)
             {

@@ -64,9 +64,8 @@ public class ListenBrainzClient : BaseListenbrainzClient
     /// Submit a listen.
     /// </summary>
     /// <param name="user">ListenBrainz user.</param>
-    /// <param name="jfUser">Jellyfin user. Used for logging.</param>
     /// <param name="request">Listen request to submit.</param>
-    public async void SubmitListen(LbUser user, User jfUser, SubmitListenRequest request)
+    public async void SubmitListen(LbUser user, SubmitListenRequest request)
     {
         if (request.TrackMBID == null)
         {
@@ -98,20 +97,18 @@ public class ListenBrainzClient : BaseListenbrainzClient
             if (response != null && !response.IsError())
             {
                 _logger.LogInformation(
-                    "User {User} listened to '{Track}' from album '{Album}' by '{Artist}'",
-                    jfUser.Username,
+                    "Submitted listen of {Track} for user {User}",
                     request.Data[0].Data.TrackName,
-                    request.Data[0].Data.ReleaseName,
-                    request.Data[0].Data.ArtistName);
+                    user.Name);
                 return;
             }
 
-            _logger.LogWarning("Failed to submit listen for user {User}: {Error}", jfUser.Username, response?.Error);
+            _logger.LogWarning("Failed to submit listen for user {User}: {Error}", user.Name, response?.Error);
             throw new ListenSubmitException();
         }
         catch (Exception ex)
         {
-            _logger.LogError("Exception while submitting listen for user {User}: {Exception}", jfUser.Username, ex.StackTrace);
+            _logger.LogError("Exception while submitting listen for user {User}: {Exception}", user.Name, ex.StackTrace);
             throw;
         }
     }
