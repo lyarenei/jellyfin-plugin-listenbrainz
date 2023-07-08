@@ -65,7 +65,7 @@ public class Listen
         get => Data.Info?.RecordingMbId;
         set
         {
-            if (Data.Info != null) { Data.Info.RecordingMbId = value; }
+            if (Data.Info != null) Data.Info.RecordingMbId = value;
         }
     }
 
