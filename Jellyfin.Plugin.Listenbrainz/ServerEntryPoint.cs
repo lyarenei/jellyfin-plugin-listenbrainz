@@ -352,7 +352,7 @@ namespace Jellyfin.Plugin.Listenbrainz
             }
 
             var logger = loggerFactory.CreateLogger<MusicbrainzClient>();
-            return new MusicbrainzClient(config.MusicBrainzUrl(), httpClientFactory, logger, new SleepService());
+            return new MusicbrainzClient(config.MusicBrainzUrl, httpClientFactory, logger, new SleepService());
         }
 
         private static ListenbrainzClient GetListenBrainzClient(
@@ -362,7 +362,7 @@ namespace Jellyfin.Plugin.Listenbrainz
         {
             var config = Plugin.GetConfiguration();
             var logger = loggerFactory.CreateLogger<ListenbrainzClient>();
-            return new ListenbrainzClient(config.ListenBrainzUrl(), httpClientFactory, mbClient, logger, new SleepService());
+            return new ListenbrainzClient(config.ListenBrainzUrl, httpClientFactory, mbClient, logger, new SleepService());
         }
     }
 }

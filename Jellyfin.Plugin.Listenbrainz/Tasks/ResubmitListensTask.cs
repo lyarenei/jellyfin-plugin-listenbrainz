@@ -38,7 +38,7 @@ public class ResubmitListensTask : IScheduledTask
 
         var config = Plugin.GetConfiguration();
         _lbClient = new ListenbrainzClient(
-            config.ListenBrainzUrl(),
+            config.ListenBrainzUrl,
             _httpClientFactory,
             GetMusicBrainzClient(loggerFactory),
             loggerFactory.CreateLogger<ListenbrainzClient>(),
@@ -117,7 +117,7 @@ public class ResubmitListensTask : IScheduledTask
         }
 
         var logger = loggerFactory.CreateLogger<MusicbrainzClient>();
-        return new MusicbrainzClient(config.MusicBrainzUrl(), _httpClientFactory, logger, new SleepService());
+        return new MusicbrainzClient(config.MusicBrainzUrl, _httpClientFactory, logger, new SleepService());
     }
 
     private async Task SubmitListens(LbUser user, CancellationToken token)
