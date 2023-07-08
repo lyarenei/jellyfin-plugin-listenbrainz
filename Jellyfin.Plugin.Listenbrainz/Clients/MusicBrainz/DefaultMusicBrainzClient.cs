@@ -36,14 +36,16 @@ public class DefaultMusicBrainzClient : BaseMusicbrainzClient, IMusicBrainzClien
     public async Task<Recording?> GetRecordingData(string trackId)
     {
         var config = Plugin.GetConfiguration();
-        _logger.LogDebug("Getting Recording data for Track: {TrackMbId}", trackId);
+
+        _logger.LogInformation("Getting Recording data for Track: {TrackMbId}", trackId);
+
         if (!config.GlobalConfig.MusicbrainzEnabled)
         {
-            _logger.LogDebug("Nothing to do - Musicbrainz integration is disabled");
+            _logger.LogInformation("Nothing to do - Musicbrainz integration is disabled");
             return null;
         }
 
-        var response = await Get<RecordingIdRequest, RecordingsResponse>(new RecordingIdRequest(trackId)).ConfigureAwait(true);
+        var response = await Get<RecordingIdRequest, RecordingsResponse>(new RecordingIdRequest(trackId));
         if (response == null || response.IsError())
         {
             _logger.LogInformation("Failed to retrieve Recording data for '{TrackMbId}'", trackId);
@@ -51,10 +53,7 @@ public class DefaultMusicBrainzClient : BaseMusicbrainzClient, IMusicBrainzClien
         }
 
         var recording = response.Recordings.MinBy(r => r.Score);
-        if (recording != null)
-        {
-            return recording;
-        }
+        if (recording != null) return recording;
 
         _logger.LogInformation("Recording data for track '{TrackMbId}' not found", trackId);
         return null;
