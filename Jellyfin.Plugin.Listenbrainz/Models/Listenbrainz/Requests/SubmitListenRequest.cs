@@ -33,6 +33,13 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests
         [JsonPropertyName("payload")]
         public Collection<Listen> Data { get; }
 
+        /// <summary>
+        /// Gets a track MBID.
+        /// </summary>
+        /// <returns>Track MBID.</returns>
+        [JsonIgnore]
+        public string? TrackMBID => Data[0].Data.Info?.TrackMbId;
+
         /// <inheritdoc />
         public override string GetEndpoint() => Endpoints.SubmitListen;
 
@@ -64,15 +71,6 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests
             }
 
             Data[0].Data.Info!.RecordingMbId = recordingMbId;
-        }
-
-        /// <summary>
-        /// Gets a track MBID.
-        /// </summary>
-        /// <returns>Track MBID.</returns>
-        public string? GetTrackMbId()
-        {
-            return Data[0].Data.Info?.TrackMbId;
         }
 
         /// <summary>

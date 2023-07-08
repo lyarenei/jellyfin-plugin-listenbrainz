@@ -68,15 +68,13 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients.ListenBrainz
         /// <param name="request">Listen request to submit.</param>
         public async void SubmitListen(LbUser user, User jfUser, SubmitListenRequest request)
         {
-            request.ApiToken = user.Token;
-
             // Fetch Recording data
-            var trackMbId = request.GetTrackMbId();
-            if (trackMbId != null)
+            if (request.TrackMBID != null)
             {
                 if (_mbClient != null)
                 {
-                    var recordingData = await _mbClient.GetRecordingData(trackMbId).ConfigureAwait(true);
+                    request.ApiToken = user.Token;
+                    var recordingData = await _mbClient.GetRecordingData(request.TrackMBID).ConfigureAwait(true);
                     if (recordingData != null)
                     {
                         // Set recording MBID as Jellyfin does not store it
@@ -169,7 +167,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients.ListenBrainz
             var listenRequest = new SubmitListenRequest("playing_now", item) { ApiToken = user.Token };
 
             // Fetch Recording data
-            var trackMbId = listenRequest.GetTrackMbId();
+            var trackMbId = listenRequest.TrackMBID;
             if (trackMbId != null)
             {
                 if (_mbClient != null)
