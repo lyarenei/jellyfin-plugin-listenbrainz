@@ -34,7 +34,7 @@ public class DefaultListenCache : IListenCache
         // Enable pretty-print to allow easy user editing
         _serializerOptions = new JsonSerializerOptions { WriteIndented = true };
 
-        if (File.Exists(_cachePath)) RestoreCache();
+        Task.Run(LoadFromFile);
     }
 
     /// <summary>
@@ -64,6 +64,17 @@ public class DefaultListenCache : IListenCache
     }
 
     /// <inheritdoc />
+    public async Task LoadFromFile()
+    {
+        await using var stream = File.OpenRead(_cachePath);
+        var data = await JsonSerializer.DeserializeAsync<Dictionary<string, List<Listen>>>(stream);
+        if (data == null) return;
+
+        _listens = data;
+        _logger.LogDebug("Listen cache has been updated");
+    }
+
+    /// <inheritdoc />
     public void Add(LbUser user, Listen listen)
     {
         if (!_listens.ContainsKey(user.Name)) _listens.Add(user.Name, new List<Listen>());
@@ -83,15 +94,5 @@ public class DefaultListenCache : IListenCache
     public void Remove(LbUser user, IEnumerable<Listen> listens)
     {
         if (_listens.ContainsKey(user.Name)) _listens[user.Name].RemoveAll(listens.Contains);
-    }
-
-    private async void RestoreCache()
-    {
-        await using var stream = File.OpenRead(_cachePath);
-        var data = await JsonSerializer.DeserializeAsync<Dictionary<string, List<Listen>>>(stream);
-        if (data == null) return;
-
-        _listens = data;
-        _logger.LogDebug("Listen cache has been restored");
     }
 }

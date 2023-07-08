@@ -18,6 +18,12 @@ public interface IListenCache
     public Task Save();
 
     /// <summary>
+    /// Load persisted data from cache file.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public Task LoadFromFile();
+
+    /// <summary>
     /// Add a listen to a cache.
     /// </summary>
     /// <param name="user">User of the listen.</param>
