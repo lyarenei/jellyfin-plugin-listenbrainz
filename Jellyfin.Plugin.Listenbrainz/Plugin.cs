@@ -57,5 +57,17 @@ namespace Jellyfin.Plugin.Listenbrainz
             if (config != null) return config;
             throw new PluginInstanceException("Plugin instance is NULL");
         }
+
+        /// <summary>
+        /// Convenience method for getting plugin data path.
+        /// </summary>
+        /// <returns>Plugin data path.</returns>
+        /// <exception cref="PluginInstanceException">Plugin instance is not available.</exception>
+        public static string GetDataPath()
+        {
+            var path = Plugin.Instance?.DataFolderPath;
+            if (path != null) return path;
+            throw new PluginInstanceException("Plugin instance is NULL");
+        }
     }
 }
