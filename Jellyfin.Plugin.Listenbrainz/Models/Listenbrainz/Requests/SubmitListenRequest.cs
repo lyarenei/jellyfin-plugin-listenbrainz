@@ -23,6 +23,17 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="SubmitListenRequest"/> class.
+        /// </summary>
+        /// <param name="listenType">Type of listen.</param>
+        /// <param name="listen">Listen data.</param>
+        public SubmitListenRequest(string listenType, Listen listen)
+        {
+            ListenType = listenType;
+            Data = new Collection<Listen> { listen };
+        }
+
+        /// <summary>
         /// Gets listen type.
         /// </summary>
         public string ListenType { get; }
