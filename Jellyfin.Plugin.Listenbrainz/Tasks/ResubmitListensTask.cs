@@ -22,7 +22,6 @@ namespace Jellyfin.Plugin.Listenbrainz.Tasks;
 public class ResubmitListensTask : IScheduledTask
 {
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly ILoggerFactory _loggerFactory;
     private readonly ILogger<ResubmitListensTask> _logger;
     private readonly ListenbrainzClient _lbClient;
     private readonly IListenCache _listenCache;
@@ -35,9 +34,16 @@ public class ResubmitListensTask : IScheduledTask
     public ResubmitListensTask(IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory)
     {
         _httpClientFactory = httpClientFactory;
-        _loggerFactory = loggerFactory;
         _logger = loggerFactory.CreateLogger<ResubmitListensTask>();
-        _lbClient = GetListenBrainzClient(GetMusicBrainzClient());
+
+        var config = Plugin.GetConfiguration();
+        _lbClient = new ListenbrainzClient(
+            config.ListenBrainzUrl(),
+            _httpClientFactory,
+            GetMusicBrainzClient(loggerFactory),
+            loggerFactory.CreateLogger<ListenbrainzClient>(),
+            new SleepService());
+
         _listenCache = new DefaultListenCache(
             Helpers.GetListenCacheFilePath(),
             loggerFactory.CreateLogger<DefaultListenCache>());
@@ -102,23 +108,16 @@ public class ResubmitListensTask : IScheduledTask
         return TimeSpan.TicksPerDay + (randomMinute * TimeSpan.TicksPerMinute);
     }
 
-    private IMusicbrainzClientService GetMusicBrainzClient()
+    private IMusicbrainzClientService GetMusicBrainzClient(ILoggerFactory loggerFactory)
     {
         var config = Plugin.GetConfiguration();
         if (!config.GlobalConfig.MusicbrainzEnabled)
         {
-            return new DummyMusicbrainzClient(_loggerFactory.CreateLogger<DummyMusicbrainzClient>());
+            return new DummyMusicbrainzClient(loggerFactory.CreateLogger<DummyMusicbrainzClient>());
         }
 
-        var logger = _loggerFactory.CreateLogger<MusicbrainzClient>();
+        var logger = loggerFactory.CreateLogger<MusicbrainzClient>();
         return new MusicbrainzClient(config.MusicBrainzUrl(), _httpClientFactory, logger, new SleepService());
-    }
-
-    private ListenbrainzClient GetListenBrainzClient(IMusicbrainzClientService mbClient)
-    {
-        var config = Plugin.GetConfiguration();
-        var logger = _loggerFactory.CreateLogger<ListenbrainzClient>();
-        return new ListenbrainzClient(config.ListenBrainzUrl(), _httpClientFactory, mbClient, logger, new SleepService());
     }
 
     private async Task SubmitListens(LbUser user, CancellationToken token)
