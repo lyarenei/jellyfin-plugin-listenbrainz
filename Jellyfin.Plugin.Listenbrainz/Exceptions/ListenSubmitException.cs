@@ -3,7 +3,7 @@ using System;
 namespace Jellyfin.Plugin.Listenbrainz.Exceptions;
 
 /// <summary>
-/// Exception thrown when the listen submission failed.
+/// Exception related to listen submissions.
 /// </summary>
 public class ListenSubmitException : Exception
 {
