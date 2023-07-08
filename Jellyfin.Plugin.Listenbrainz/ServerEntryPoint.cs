@@ -204,13 +204,16 @@ namespace Jellyfin.Plugin.Listenbrainz
                 return;
             }
 
-            var (canSubmit, reason) = lbUser.CanSubmitListen();
-            if (!canSubmit)
+            try
+            {
+                lbUser.CanSubmitListen();
+            }
+            catch (ListenSubmitException e)
             {
                 _logger.LogInformation(
                     "Listen won't be sent for user {User}: {Reason}",
-                    user.Username,
-                    reason);
+                    lbUser.Name,
+                    e.Message);
                 return;
             }
 
@@ -295,13 +298,16 @@ namespace Jellyfin.Plugin.Listenbrainz
                 return;
             }
 
-            var (canSubmit, reason) = lbUser.CanSubmitListen();
-            if (!canSubmit)
+            try
+            {
+                lbUser.CanSubmitListen();
+            }
+            catch (ListenSubmitException ex)
             {
                 _logger.LogInformation(
                     "Listen won't be sent for user {User}: {Reason}",
-                    user.Username,
-                    reason);
+                    lbUser.Name,
+                    ex.Message);
                 return;
             }
 

@@ -1,4 +1,5 @@
 using System;
+using Jellyfin.Plugin.Listenbrainz.Exceptions;
 
 namespace Jellyfin.Plugin.Listenbrainz.Models
 {
@@ -40,12 +41,13 @@ namespace Jellyfin.Plugin.Listenbrainz.Models
         /// <summary>
         /// Checks if this user can submit listens.
         /// </summary>
-        /// <returns>User can submit listens. If cannot, returns false and reason.</returns>
-        public (bool CanSubmit, string Reason) CanSubmitListen()
+        /// <returns>User can submit listens.</returns>
+        /// <exception cref="ListenSubmitException">User cannot submit listen.</exception>
+        public bool CanSubmitListen()
         {
-            if (!Options.ListenSubmitEnabled) return (false, "listen submitting disabled");
-            if (string.IsNullOrWhiteSpace(Token)) return (false, "no API token set");
-            return (true, string.Empty);
+            if (!Options.ListenSubmitEnabled) throw new ListenSubmitException("Listen submitting is not enabled.");
+            if (string.IsNullOrWhiteSpace(Token)) throw new ListenSubmitException("User does not have API token set.");
+            return true;
         }
     }
 }
