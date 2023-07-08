@@ -50,7 +50,7 @@ namespace Jellyfin.Plugin.Listenbrainz
         /// Convenience method for getting plugin configuration.
         /// </summary>
         /// <returns>Plugin configuration.</returns>
-        /// <exception cref="PluginInstanceException">Plugin configuration is not available.</exception>
+        /// <exception cref="PluginInstanceException">Plugin instance is not available.</exception>
         public static PluginConfiguration GetConfiguration()
         {
             var config = Instance?.Configuration;
