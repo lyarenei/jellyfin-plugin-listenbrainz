@@ -344,7 +344,7 @@ namespace Jellyfin.Plugin.Listenbrainz
                 _sessionManager.PlaybackStopped -= PlaybackStopped;
         }
 
-        private static IMusicbrainzClientService GetMusicBrainzClient(IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory)
+        private static IMusicbrainzClient GetMusicBrainzClient(IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory)
         {
             var config = Plugin.GetConfiguration();
             if (!config.GlobalConfig.MusicbrainzEnabled)
@@ -357,7 +357,7 @@ namespace Jellyfin.Plugin.Listenbrainz
         }
 
         private static ListenbrainzClient GetListenBrainzClient(
-            IMusicbrainzClientService mbClient,
+            IMusicbrainzClient mbClient,
             IHttpClientFactory httpClientFactory,
             ILoggerFactory loggerFactory)
         {

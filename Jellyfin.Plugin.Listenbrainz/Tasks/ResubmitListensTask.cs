@@ -109,7 +109,7 @@ public class ResubmitListensTask : IScheduledTask
         return TimeSpan.TicksPerDay + (randomMinute * TimeSpan.TicksPerMinute);
     }
 
-    private IMusicbrainzClientService GetMusicBrainzClient(ILoggerFactory loggerFactory)
+    private IMusicbrainzClient GetMusicBrainzClient(ILoggerFactory loggerFactory)
     {
         var config = Plugin.GetConfiguration();
         if (!config.GlobalConfig.MusicbrainzEnabled)

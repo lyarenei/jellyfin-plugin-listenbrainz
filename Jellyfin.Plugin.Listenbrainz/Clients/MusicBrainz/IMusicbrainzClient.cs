@@ -6,7 +6,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients.MusicBrainz
     /// <summary>
     /// Musicbrainz service client interface.
     /// </summary>
-    public interface IMusicbrainzClientService
+    public interface IMusicbrainzClient
     {
         /// <summary>
         /// Get recording data by track MBID.

@@ -12,9 +12,9 @@ using Microsoft.Extensions.Logging;
 namespace Jellyfin.Plugin.Listenbrainz.Clients.MusicBrainz
 {
     /// <summary>
-    /// Implementation of <see cref="IMusicbrainzClientService"/>.
+    /// Implementation of <see cref="IMusicbrainzClient"/>.
     /// </summary>
-    public class MusicbrainzClient : BaseMusicbrainzClient, IMusicbrainzClientService
+    public class MusicbrainzClient : BaseMusicbrainzClient, IMusicbrainzClient
     {
         private readonly ILogger _logger;
         private readonly GlobalConfiguration _globalConfig;
