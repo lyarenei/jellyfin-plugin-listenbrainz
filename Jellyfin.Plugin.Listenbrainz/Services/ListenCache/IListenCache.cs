@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using Jellyfin.Plugin.Listenbrainz.Models;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz;
 
@@ -13,7 +14,8 @@ public interface IListenCache
     /// <summary>
     /// Persist cache to disk.
     /// </summary>
-    public void Save();
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public Task Save();
 
     /// <summary>
     /// Add a listen to a cache.

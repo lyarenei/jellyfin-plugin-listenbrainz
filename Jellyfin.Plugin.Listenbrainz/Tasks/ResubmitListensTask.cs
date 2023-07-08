@@ -53,7 +53,7 @@ public class ResubmitListensTask : IScheduledTask
     public string Category => "ListenBrainz";
 
     /// <inheritdoc />
-    public Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
+    public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
         var config = Plugin.GetConfiguration();
         var mbClient = GetMusicBrainzClient();
@@ -74,7 +74,7 @@ public class ResubmitListensTask : IScheduledTask
                         cancellationToken.ThrowIfCancellationRequested();
                         lbClient.SubmitListens(user, subset);
                         _listenCache.Remove(user, subset);
-                        _listenCache.Save();
+                        await _listenCache.Save();
                     }
                     catch (ListenSubmitException)
                     {
@@ -91,8 +91,6 @@ public class ResubmitListensTask : IScheduledTask
         {
             _logger.LogInformation("Listen resubmitting has been cancelled");
         }
-
-        return Task.CompletedTask;
     }
 
     /// <inheritdoc />

@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Threading.Tasks;
 using Jellyfin.Plugin.Listenbrainz.Models;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz;
 using Microsoft.Extensions.Logging;
@@ -53,7 +54,7 @@ public class DefaultListenCache : IListenCache
     }
 
     /// <inheritdoc />
-    public async void Save()
+    public async Task Save()
     {
         await using var stream = File.Create(_cachePath);
         await JsonSerializer.SerializeAsync(stream, _listens, _serializerOptions);
