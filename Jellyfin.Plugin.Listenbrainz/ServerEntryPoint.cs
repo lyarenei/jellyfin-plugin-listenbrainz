@@ -234,7 +234,7 @@ namespace Jellyfin.Plugin.Listenbrainz
             {
                 _logger.LogInformation("Listen submission for user {User} failed, persisting listen to cache", user.Username);
                 _listenCache.Add(lbUser, new Listen(item, now));
-                _listenCache.Save();
+                await _listenCache.Save();
             }
 
             if (!lbUser.Options.SyncFavoritesEnabled) { return; }
