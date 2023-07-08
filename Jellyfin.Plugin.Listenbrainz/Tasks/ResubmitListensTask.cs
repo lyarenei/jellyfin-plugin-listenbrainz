@@ -58,6 +58,7 @@ public class ResubmitListensTask : IScheduledTask
         var config = Plugin.GetConfiguration();
         var mbClient = GetMusicBrainzClient();
         var lbClient = GetListenBrainzClient(mbClient);
+        await _listenCache.LoadFromFile();
 
         try
         {
