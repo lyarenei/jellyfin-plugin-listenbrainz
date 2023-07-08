@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Jellyfin.Data.Entities;
 using Jellyfin.Plugin.Listenbrainz.Clients.ListenBrainz;
 using Jellyfin.Plugin.Listenbrainz.Clients.MusicBrainz;
-using Jellyfin.Plugin.Listenbrainz.Configuration;
 using Jellyfin.Plugin.Listenbrainz.Exceptions;
 using Jellyfin.Plugin.Listenbrainz.Extensions;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz;
@@ -33,7 +32,6 @@ namespace Jellyfin.Plugin.Listenbrainz
         private readonly ISessionManager _sessionManager;
         private readonly ILogger<ServerEntryPoint> _logger;
         private readonly ListenBrainzClient _apiClient;
-        private readonly GlobalConfiguration _globalConfig;
         private readonly IUserManager _userManager;
         private readonly IUserDataManager _userDataManager;
         private readonly IPlaybackTrackerService _playbackTracker;
@@ -57,8 +55,6 @@ namespace Jellyfin.Plugin.Listenbrainz
             IUserManager userManager,
             IUserDataManager userDataManager)
         {
-            var config = Plugin.Instance?.Configuration.GlobalConfig;
-            _globalConfig = config ?? throw new InvalidOperationException("plugin configuration is NULL");
             _logger = loggerFactory.CreateLogger<ServerEntryPoint>();
             _sessionManager = sessionManager;
             _userManager = userManager;
@@ -88,7 +84,9 @@ namespace Jellyfin.Plugin.Listenbrainz
         public Task RunAsync()
         {
             _sessionManager.PlaybackStart += PlaybackStart;
-            if (_globalConfig.AlternativeListenDetectionEnabled)
+
+            var config = Plugin.GetConfiguration().GlobalConfig;
+            if (config.AlternativeListenDetectionEnabled)
                 _userDataManager.UserDataSaved += UserDataSaved;
             else
                 _sessionManager.PlaybackStopped += PlaybackStopped;
@@ -340,8 +338,11 @@ namespace Jellyfin.Plugin.Listenbrainz
         protected virtual void Dispose(bool disposing)
         {
             if (!disposing) return;
+
             _sessionManager.PlaybackStart -= PlaybackStart;
-            if (_globalConfig.AlternativeListenDetectionEnabled)
+
+            var config = Plugin.GetConfiguration().GlobalConfig;
+            if (config.AlternativeListenDetectionEnabled)
                 _userDataManager.UserDataSaved -= UserDataSaved;
             else
                 _sessionManager.PlaybackStopped -= PlaybackStopped;
