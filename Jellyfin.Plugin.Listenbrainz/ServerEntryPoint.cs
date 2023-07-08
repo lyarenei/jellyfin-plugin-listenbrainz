@@ -5,14 +5,12 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Data.Entities;
-using Jellyfin.Plugin.Listenbrainz.Clients;
 using Jellyfin.Plugin.Listenbrainz.Clients.ListenBrainz;
 using Jellyfin.Plugin.Listenbrainz.Clients.MusicBrainz;
 using Jellyfin.Plugin.Listenbrainz.Configuration;
 using Jellyfin.Plugin.Listenbrainz.Exceptions;
 using Jellyfin.Plugin.Listenbrainz.Extensions;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz;
-using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
 using Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
 using Jellyfin.Plugin.Listenbrainz.Services;
 using Jellyfin.Plugin.Listenbrainz.Services.ListenCache;
@@ -99,7 +97,7 @@ namespace Jellyfin.Plugin.Listenbrainz
         }
 
         /// <summary>
-        /// Send "single" listen to Listenbrainz when user data were saved with playback finished reason.
+        /// Send "single" listen to ListenBrainz when user data were saved with playback finished reason.
         /// </summary>
         private void UserDataSaved(object? sender, UserDataSaveEventArgs e)
         {
@@ -160,7 +158,7 @@ namespace Jellyfin.Plugin.Listenbrainz
         }
 
         /// <summary>
-        /// Send "single" listen to Listenbrainz when playback of item has stopped.
+        /// Send "single" listen to ListenBrainz when playback of item has stopped.
         /// </summary>
         private void PlaybackStopped(object? sender, PlaybackStopEventArgs e)
         {
@@ -201,7 +199,7 @@ namespace Jellyfin.Plugin.Listenbrainz
             {
                 _logger.LogInformation(
                     "Listen won't be sent: " +
-                    "could not find Listenbrainz configuration for user '{User}'",
+                    "could not find ListenBrainz configuration for user '{User}'",
                     user.Username);
                 return;
             }
