@@ -50,7 +50,7 @@ public class DefaultMusicBrainzClient : BaseMusicbrainzClient, IMusicBrainzClien
             return null;
         }
 
-        var recording = response.Recordings.OrderBy(r => r.Score).FirstOrDefault();
+        var recording = response.Recordings.MinBy(r => r.Score);
         if (recording != null)
         {
             return recording;
