@@ -49,11 +49,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests
         /// <param name="recordingMbId">Recording MBID.</param>
         public void SetRecordingMbId(string? recordingMbId)
         {
-            if (recordingMbId == null)
-            {
-                return;
-            }
-
+            if (recordingMbId == null) return;
             if (Data[0].Data.Info == null)
             {
                 Data[0].Data.Info = new AdditionalInfo(recordingMbId);
@@ -67,9 +63,6 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests
         /// Set artist name.
         /// </summary>
         /// <param name="artistName">Artist name.</param>
-        public void SetArtist(string artistName)
-        {
-            Data[0].Data.ArtistName = artistName;
-        }
+        public void SetArtist(string artistName) => Data[0].Data.ArtistName = artistName;
     }
 }
