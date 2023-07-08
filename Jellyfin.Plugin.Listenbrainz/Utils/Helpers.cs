@@ -25,10 +25,6 @@ namespace Jellyfin.Plugin.Listenbrainz.Utils
         /// Get path to listen cache file.
         /// </summary>
         /// <returns>Path to the file.</returns>
-        public static string GetListenCacheFilePath()
-        {
-            var prefix = Plugin.Instance?.Name ?? "Listenbrainz";
-            return Path.Join(Plugin.GetDataPath(), $"{prefix}_cachedListens.json");
-        }
+        public static string GetListenCacheFilePath() => Path.Join(Plugin.GetDataPath(), "cache.json");
     }
 }
