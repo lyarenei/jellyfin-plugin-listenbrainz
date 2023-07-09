@@ -32,7 +32,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Utils
         /// </summary>
         /// <param name="user">Jellyfin user.</param>
         /// <returns>Listenbrainz user. Null if not found.</returns>
-        public static LbUser? GetUser(User? user)
+        public static LbUser? GetListenBrainzUser(User? user)
         {
             return user != null ? GetUser(user.Id) : null;
         }

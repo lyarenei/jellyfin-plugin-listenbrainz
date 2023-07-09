@@ -195,7 +195,7 @@ public class ServerEntryPoint : IServerEntryPoint
     /// <param name="datePlayed">When the item has been played.</param>
     private async void SendListen(User user, Audio item, DateTime? datePlayed = null)
     {
-        var lbUser = UserHelpers.GetUser(user);
+        var lbUser = UserHelpers.GetListenBrainzUser(user);
         if (lbUser == null)
         {
             _logger.LogInformation(
@@ -289,7 +289,7 @@ public class ServerEntryPoint : IServerEntryPoint
         var user = e.Users.FirstOrDefault();
         if (user == null) { return; }
 
-        var lbUser = UserHelpers.GetUser(user);
+        var lbUser = UserHelpers.GetListenBrainzUser(user);
         if (lbUser == null)
         {
             _logger.LogInformation(
