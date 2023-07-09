@@ -164,35 +164,6 @@ public class ServerEntryPoint : IServerEntryPoint
     }
 
     /// <summary>
-    /// Send "single" listen to ListenBrainz when playback of item has stopped.
-    /// </summary>
-    private void PlaybackStopped(object? sender, PlaybackStopEventArgs e)
-    {
-        if (e.Item is not Audio item) { return; }
-
-        if (e.PlaybackPositionTicks == null)
-        {
-            _logger.LogDebug("Playback ticks for '{Track}' is null", item.Name);
-            return;
-        }
-
-        try
-        {
-            Limits.EvaluateSubmitConditions(e.PlaybackPositionTicks ?? 0, item.RunTimeTicks ?? 0);
-        }
-        catch (ListenBrainzConditionsException ex)
-        {
-            _logger.LogInformation("Listen won't be submitted, conditions have not been met: {Reason}", ex.Message);
-            return;
-        }
-
-        var user = e.Users.FirstOrDefault();
-        if (user == null) { return; }
-
-        SendListen(user, item);
-    }
-
-    /// <summary>
     /// Send "single" listen to ListenBrainz if appropriate.
     /// </summary>
     /// <param name="user">Jellyfin user.</param>
