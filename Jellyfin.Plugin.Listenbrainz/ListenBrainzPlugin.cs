@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Data.Entities;
 using Jellyfin.Plugin.Listenbrainz.Clients.ListenBrainz;
@@ -152,7 +153,10 @@ public class ListenBrainzPlugin : IPlaybackTrackerPlugin
         var listen = new Listen(data.AudioItem, now);
         await HandleSubmitListen(data.ListenBrainzUser, listen);
 
-        if (data.ListenBrainzUser.Options.SyncFavoritesEnabled) await SyncFavorite();
+        if (!data.ListenBrainzUser.Options.SyncFavoritesEnabled) return;
+
+        var isFavorite = data.AudioItem.IsFavoriteOrLiked(data.JellyfinUser);
+        await SyncFavorite(data.ListenBrainzUser, listen, isFavorite);
     }
 
     /// <inheritdoc />
@@ -231,7 +235,10 @@ public class ListenBrainzPlugin : IPlaybackTrackerPlugin
         var listen = new Listen(data.AudioItem, listenedAt);
         await HandleSubmitListen(data.ListenBrainzUser, listen);
 
-        if (data.ListenBrainzUser.Options.SyncFavoritesEnabled) await SyncFavorite();
+        if (!data.ListenBrainzUser.Options.SyncFavoritesEnabled) return;
+
+        var isFavorite = data.AudioItem.IsFavoriteOrLiked(data.JellyfinUser);
+        await SyncFavorite(data.ListenBrainzUser, listen, isFavorite);
     }
 
     private async Task HandleSubmitListen(LbUser user, Listen listen)
@@ -249,9 +256,46 @@ public class ListenBrainzPlugin : IPlaybackTrackerPlugin
         }
     }
 
-    private async Task SyncFavorite()
+    private async Task SyncFavorite(LbUser user, Listen listen, bool isFavorite)
     {
-        throw new NotImplementedException();
+        // TODO skip getting msid if mbid is available
+        const int Retries = 7;
+        const int BackOff = 3;
+        var waitTime = 1;
+        for (int i = 1; i <= Retries; i++)
+        {
+            var listenMsid = await _lbClient.GetMsidForListen(user, listen);
+            if (listenMsid is not null)
+            {
+                _logger.LogDebug(
+                    "Found recording MSID for listen of {ItemName} at {Timestamp} (user {Username}): {Msid}",
+                    listen.Data.TrackName,
+                    listen.ListenedAt,
+                    user.Name,
+                    listenMsid);
+
+                listen.RecordingMsid = listenMsid;
+                break;
+            }
+
+            _logger.LogDebug(
+                "Could not find recording MSID for listen of {ItemName} at {Timestamp} (user {Username})",
+                listen.Data.TrackName,
+                listen.ListenedAt,
+                user.Name);
+
+            if (i + 1 > Retries)
+            {
+                _logger.LogInformation("Favorite sync failed; retry limit reached");
+                return;
+            }
+
+            waitTime *= BackOff;
+            _logger.LogDebug("Waiting {Seconds}s before trying again...", waitTime);
+            Thread.Sleep(waitTime * 1000);
+        }
+
+        _lbClient.SubmitFeedback(user, listen, isFavorite);
     }
 
     private static EventData AssertPrerequisites(PlaybackProgressEventArgs args)

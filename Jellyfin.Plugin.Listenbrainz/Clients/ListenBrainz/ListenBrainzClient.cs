@@ -232,6 +232,35 @@ public class ListenBrainzClient : BaseListenbrainzClient
     }
 
     /// <summary>
+    /// Get listens for specified user.
+    /// </summary>
+    /// <param name="user">ListenBrainz user.</param>
+    /// <returns>User listens, wrapped in a payload response. Null if error.</returns>
+    public async Task<UserListensPayload?> GetUserListens(LbUser user)
+    {
+        var request = new UserListensRequest(user.Name, Limits.MaxListensToGet) { ApiToken = user.Token };
+        try
+        {
+            var response = await Get<UserListensRequest, UserListensResponse>(request);
+            if (response == null)
+            {
+                _logger.LogError("Failed to get listens for user {User}: no response available", user.Name);
+                return null;
+            }
+
+            if (!response.IsError()) return response.Payload;
+
+            _logger.LogWarning("Failed to get listens for user {User}: {Error}", user.Name, response.Error);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Exception while getting listens for user {User}: {Exception}", user.Name, ex.StackTrace);
+        }
+
+        return null;
+    }
+
+    /// <summary>
     /// Submit a feedback for provided Messybrainz ID.
     /// </summary>
     /// <param name="item">Audio item. Only used for logging.</param>
@@ -363,6 +392,31 @@ public class ListenBrainzClient : BaseListenbrainzClient
         }
 
         _logger.LogDebug("No listen matches expected timestamp");
+        return null;
+    }
+
+    /// <summary>
+    /// Get recording MSID by specified listen.
+    /// </summary>
+    /// <param name="user">ListenBrainz user.</param>
+    /// <param name="listen">Listen data source.</param>
+    /// <returns>Recording MSID. Null if not found.</returns>
+    public async Task<string?> GetMsidForListen(LbUser user, Listen listen)
+    {
+        var userListens = await GetUserListens(user);
+        if (userListens == null || userListens.Count == 0)
+        {
+            _logger.LogDebug("No listens received for user {User}", user.Name);
+            return null;
+        }
+
+        _logger.LogDebug("Expected listen timestamp for favorite sync: {Timestamp}", listen.ListenedAt);
+        _logger.LogDebug("Received last listen timestamp: {Timestamp}", userListens.LatestListenTs);
+
+        var matchedListen = userListens.Listens.FirstOrDefault(l => l.ListenedAt == listen.ListenedAt);
+        if (matchedListen != null) return matchedListen.RecordingMsid;
+
+        _logger.LogDebug("No listen matched expected timestamp");
         return null;
     }
 

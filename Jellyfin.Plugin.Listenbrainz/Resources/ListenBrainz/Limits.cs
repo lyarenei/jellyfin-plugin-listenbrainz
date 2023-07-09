@@ -14,6 +14,12 @@ public static class Limits
     /// </summary>
     public const int MaxListensPerRequest = 100;
 
+
+    /// <summary>
+    /// Maximum listens to get from ListenBrainz server.
+    /// </summary>
+    public const int MaxListensToGet = 30;
+
     // ListenBrainz rules for submitting listens:
     // Listens should be submitted for tracks when the user has listened to half the track or 4 minutes of the track, whichever is lower.
     // If the user hasn't listened to 4 minutes or half the track, it doesn't fully count as a listen and should not be submitted.
