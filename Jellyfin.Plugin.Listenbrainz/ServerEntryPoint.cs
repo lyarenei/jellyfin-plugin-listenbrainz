@@ -1,20 +1,12 @@
 using System;
-using System.Diagnostics;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
-using Jellyfin.Data.Entities;
 using Jellyfin.Plugin.Listenbrainz.Clients.ListenBrainz;
 using Jellyfin.Plugin.Listenbrainz.Clients.MusicBrainz;
-using Jellyfin.Plugin.Listenbrainz.Exceptions;
-using Jellyfin.Plugin.Listenbrainz.Extensions;
-using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz;
-using Jellyfin.Plugin.Listenbrainz.Resources.ListenBrainz;
 using Jellyfin.Plugin.Listenbrainz.Services;
 using Jellyfin.Plugin.Listenbrainz.Services.ListenCache;
 using Jellyfin.Plugin.Listenbrainz.Services.PlaybackTracker;
 using Jellyfin.Plugin.Listenbrainz.Utils;
-using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Plugins;
 using MediaBrowser.Controller.Session;
@@ -28,10 +20,7 @@ namespace Jellyfin.Plugin.Listenbrainz;
 public class ServerEntryPoint : IServerEntryPoint
 {
     private readonly ISessionManager _sessionManager;
-    private readonly ILogger<ServerEntryPoint> _logger;
-    private readonly ListenBrainzClient _apiClient;
     private readonly IUserDataManager _userDataManager;
-    private readonly IListenCache _listenCache;
     private readonly IPlaybackTrackerPlugin _plugin;
 
     /// <summary>
@@ -49,24 +38,23 @@ public class ServerEntryPoint : IServerEntryPoint
         IUserManager userManager,
         IUserDataManager userDataManager)
     {
-        _logger = loggerFactory.CreateLogger<ServerEntryPoint>();
+        Instance = this;
         _sessionManager = sessionManager;
         _userDataManager = userDataManager;
 
-        _listenCache = new DefaultListenCache(
+        var cache = new DefaultListenCache(
             Helpers.GetListenCacheFilePath(),
             loggerFactory.CreateLogger<DefaultListenCache>());
 
         var mbClient = GetMusicBrainzClient(httpClientFactory, loggerFactory);
-        _apiClient = GetListenBrainzClient(mbClient, httpClientFactory, loggerFactory);
+        var lbClient = GetListenBrainzClient(mbClient, httpClientFactory, loggerFactory);
 
         _plugin = new ListenBrainzPlugin(
             loggerFactory.CreateLogger<ListenBrainzPlugin>(),
             userManager,
-            _apiClient,
+            lbClient,
             new DefaultPlaybackTracker(loggerFactory),
-            _listenCache);
-        Instance = this;
+            cache);
     }
 
     /// <summary>
