@@ -182,50 +182,49 @@ public class ListenBrainzPlugin : IPlaybackTrackerPlugin
         }
 
         var trackedItem = _tracker.GetItem(data.AudioItem, data.JellyfinUser);
-        if (trackedItem is null)
+        if (trackedItem is not null)
+        {
+            lock (_dataSavedLock)
+            {
+                if (_tracker.GetItem(data.AudioItem, data.JellyfinUser) is null)
+                {
+                    // If we are here, then the item has been removed by earlier event and this one would be duplicate.
+                    _logger.LogDebug(
+                        "Detected duplicate playback report of {ItemName} ({ItemId}) for user {Username}, ignoring event",
+                        data.AudioItem.Name,
+                        data.AudioItem.Id,
+                        data.JellyfinUser.Username);
+                    return;
+                }
+
+                _logger.LogInformation(
+                    "Found tracking of {ItemName} ({ItemId}) for user {Username}",
+                    data.AudioItem.Name,
+                    data.AudioItem.Id,
+                    data.JellyfinUser.Username);
+
+                var delta = DateTime.Now - trackedItem.StartedAt;
+                var deltaTicks = delta.TotalSeconds * TimeSpan.TicksPerSecond;
+                try
+                {
+                    Limits.EvaluateSubmitConditions((long)deltaTicks, data.AudioItem.RunTimeTicks);
+                }
+                catch (ListenBrainzConditionsException ex)
+                {
+                    _logger.LogInformation("Listen won't be submitted, conditions have not been met: {Reason}", ex.Message);
+                    return;
+                }
+
+                _tracker.StopTracking(data.AudioItem, data.JellyfinUser);
+            }
+        }
+        else
         {
             _logger.LogInformation(
                 "No tracking of {ItemName} ({ItemId}) for user {Username}, assuming offline playback",
                 data.AudioItem.Name,
                 data.AudioItem.Id,
                 data.JellyfinUser.Username);
-            trackedItem = new TrackedAudio(data.AudioItem, data.JellyfinUser, DateTime.MinValue);
-        }
-        else
-        {
-            _logger.LogInformation(
-                "Found tracking of {ItemName} ({ItemId}) for user {Username}",
-                data.AudioItem.Name,
-                data.AudioItem.Id,
-                data.JellyfinUser.Username);
-        }
-
-        lock (_dataSavedLock)
-        {
-            if (_tracker.GetItem(data.AudioItem, data.JellyfinUser) is null)
-            {
-                // If we are here, then the item has been removed by earlier event and this one would be duplicate.
-                _logger.LogDebug(
-                    "Detected duplicate playback report of {ItemName} ({ItemId}) for user {Username}, ignoring event",
-                    data.AudioItem.Name,
-                    data.AudioItem.Id,
-                    data.JellyfinUser.Username);
-                return;
-            }
-
-            var delta = DateTime.Now - trackedItem.StartedAt;
-            var deltaTicks = delta.TotalSeconds * TimeSpan.TicksPerSecond;
-            try
-            {
-                Limits.EvaluateSubmitConditions((long)deltaTicks, data.AudioItem.RunTimeTicks);
-            }
-            catch (ListenBrainzConditionsException ex)
-            {
-                _logger.LogInformation("Listen won't be submitted, conditions have not been met: {Reason}", ex.Message);
-                return;
-            }
-
-            _tracker.StopTracking(data.AudioItem, data.JellyfinUser);
         }
 
         var listenedAt = Helpers.TimestampFromDatetime(args.UserData.LastPlayedDate ?? DateTime.Now);
