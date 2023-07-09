@@ -36,6 +36,7 @@ public class ServerEntryPoint : IServerEntryPoint
     private readonly IUserDataManager _userDataManager;
     private readonly IPlaybackTrackerService _playbackTracker;
     private readonly IListenCache _listenCache;
+    private readonly IPlaybackTrackerPlugin _plugin;
 
     // Lock for detecting duplicate data saved events
     private static readonly object _dataSavedLock = new();
@@ -68,6 +69,8 @@ public class ServerEntryPoint : IServerEntryPoint
         _apiClient = GetListenBrainzClient(mbClient, httpClientFactory, loggerFactory);
 
         _playbackTracker = new DefaultPlaybackTracker(loggerFactory);
+
+        _plugin = new ListenBrainzPlugin();
         Instance = this;
     }
 
@@ -83,13 +86,13 @@ public class ServerEntryPoint : IServerEntryPoint
     /// <returns>A completed <see cref="Task"/>.</returns>
     public Task RunAsync()
     {
-        _sessionManager.PlaybackStart += PlaybackStart;
+        _sessionManager.PlaybackStart += _plugin.OnPlaybackStarted;
 
         var config = Plugin.GetConfiguration().GlobalConfig;
         if (config.AlternativeListenDetectionEnabled)
-            _userDataManager.UserDataSaved += UserDataSaved;
+            _userDataManager.UserDataSaved += _plugin.OnUserDataSaved;
         else
-            _sessionManager.PlaybackStopped += PlaybackStopped;
+            _sessionManager.PlaybackStopped += _plugin.OnPlaybackStopped;
 
         return Task.CompletedTask;
     }
@@ -339,13 +342,13 @@ public class ServerEntryPoint : IServerEntryPoint
     {
         if (!disposing) return;
 
-        _sessionManager.PlaybackStart -= PlaybackStart;
+        _sessionManager.PlaybackStart -= _plugin.OnPlaybackStarted;
 
         var config = Plugin.GetConfiguration().GlobalConfig;
         if (config.AlternativeListenDetectionEnabled)
-            _userDataManager.UserDataSaved -= UserDataSaved;
+            _userDataManager.UserDataSaved -= _plugin.OnUserDataSaved;
         else
-            _sessionManager.PlaybackStopped -= PlaybackStopped;
+            _sessionManager.PlaybackStopped -= _plugin.OnPlaybackStopped;
     }
 
     private static IMusicBrainzClient GetMusicBrainzClient(IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory)
