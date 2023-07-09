@@ -23,7 +23,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients.ListenBrainz;
 public class ListenBrainzClient : BaseListenbrainzClient
 {
     private readonly IMusicBrainzClient? _mbClient;
-    private readonly ILogger _logger;
+    private readonly ILogger<ListenBrainzClient> _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ListenBrainzClient"/> class.
@@ -35,7 +35,7 @@ public class ListenBrainzClient : BaseListenbrainzClient
     public ListenBrainzClient(
         string baseUrl,
         IHttpClientFactory httpClientFactory,
-        ILogger logger,
+        ILogger<ListenBrainzClient> logger,
         ISleepService sleepService) : base(baseUrl, httpClientFactory, logger, sleepService)
     {
         _mbClient = null;
@@ -54,7 +54,7 @@ public class ListenBrainzClient : BaseListenbrainzClient
         string baseUrl,
         IHttpClientFactory httpClientFactory,
         IMusicBrainzClient mbClient,
-        ILogger logger,
+        ILogger<ListenBrainzClient> logger,
         ISleepService sleepService) : base(baseUrl, httpClientFactory, logger, sleepService)
     {
         _mbClient = mbClient;

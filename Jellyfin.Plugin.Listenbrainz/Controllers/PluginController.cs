@@ -28,7 +28,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Controllers
         public PluginController(IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory)
         {
             _pluginConfig = Plugin.Instance?.Configuration.GlobalConfig ?? throw new InvalidOperationException("plugin configuration is NULL");
-            var logger = loggerFactory.CreateLogger<PluginController>();
+            var logger = loggerFactory.CreateLogger<ListenBrainzClient>();
             var baseUrl = _pluginConfig.ListenbrainzBaseUrl ?? Api.BaseUrl;
             _apiClient = new ListenBrainzClient(baseUrl, httpClientFactory, logger, new SleepService());
         }
