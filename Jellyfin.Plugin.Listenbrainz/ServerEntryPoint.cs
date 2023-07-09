@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,7 +18,6 @@ using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Plugins;
 using MediaBrowser.Controller.Session;
-using MediaBrowser.Model.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.Listenbrainz;
@@ -32,14 +30,9 @@ public class ServerEntryPoint : IServerEntryPoint
     private readonly ISessionManager _sessionManager;
     private readonly ILogger<ServerEntryPoint> _logger;
     private readonly ListenBrainzClient _apiClient;
-    private readonly IUserManager _userManager;
     private readonly IUserDataManager _userDataManager;
-    private readonly IPlaybackTrackerService _playbackTracker;
     private readonly IListenCache _listenCache;
     private readonly IPlaybackTrackerPlugin _plugin;
-
-    // Lock for detecting duplicate data saved events
-    private static readonly object _dataSavedLock = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ServerEntryPoint"/> class.
@@ -58,7 +51,6 @@ public class ServerEntryPoint : IServerEntryPoint
     {
         _logger = loggerFactory.CreateLogger<ServerEntryPoint>();
         _sessionManager = sessionManager;
-        _userManager = userManager;
         _userDataManager = userDataManager;
 
         _listenCache = new DefaultListenCache(
@@ -68,13 +60,11 @@ public class ServerEntryPoint : IServerEntryPoint
         var mbClient = GetMusicBrainzClient(httpClientFactory, loggerFactory);
         _apiClient = GetListenBrainzClient(mbClient, httpClientFactory, loggerFactory);
 
-        _playbackTracker = new DefaultPlaybackTracker(loggerFactory);
-
         _plugin = new ListenBrainzPlugin(
             loggerFactory.CreateLogger<ListenBrainzPlugin>(),
             userManager,
             _apiClient,
-            _playbackTracker,
+            new DefaultPlaybackTracker(loggerFactory),
             _listenCache);
         Instance = this;
     }
