@@ -70,7 +70,12 @@ public class ServerEntryPoint : IServerEntryPoint
 
         _playbackTracker = new DefaultPlaybackTracker(loggerFactory);
 
-        _plugin = new ListenBrainzPlugin();
+        _plugin = new ListenBrainzPlugin(
+            loggerFactory.CreateLogger<ListenBrainzPlugin>(),
+            userManager,
+            _apiClient,
+            _playbackTracker,
+            _listenCache);
         Instance = this;
     }
 
