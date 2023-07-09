@@ -267,6 +267,48 @@ public class ListenBrainzClient : BaseListenbrainzClient
     }
 
     /// <summary>
+    /// Submit feedback for specified listen.
+    /// </summary>
+    /// <param name="user">ListenBrainz user.</param>
+    /// <param name="listen">Listen subject for feedback.</param>
+    /// <param name="isFavorite">Listen is favorite.</param>
+    public async void SubmitFeedback(LbUser user, Listen listen, bool isFavorite)
+    {
+        var request = new FeedbackRequest
+        {
+            Score = isFavorite ? 1 : 0,
+            RecordingMbid = listen.RecordingMBID,
+            RecordingMsId = listen.RecordingMsid,
+            ApiToken = user.Token
+        };
+
+        try
+        {
+            var response = await Post<FeedbackRequest, BaseResponse>(request);
+            if (response != null && !response.IsError())
+            {
+                _logger.LogInformation(
+                    "Successfully submitted feedback for user {User} for track {Track}",
+                    user.Name,
+                    listen.Data.TrackName);
+                return;
+            }
+
+            _logger.LogInformation(
+                "Failed to submit feedback for user {User} feedback: {Error}",
+                user.Name,
+                response?.Error);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                "Exception while submitting feedback for user {User}: {Exception}",
+                user.Name,
+                ex.StackTrace);
+        }
+    }
+
+    /// <summary>
     /// Validate provided token.
     /// </summary>
     /// <param name="token">Token to validate.</param>
