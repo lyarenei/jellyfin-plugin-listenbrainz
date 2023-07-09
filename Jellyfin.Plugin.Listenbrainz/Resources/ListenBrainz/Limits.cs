@@ -14,7 +14,6 @@ public static class Limits
     /// </summary>
     public const int MaxListensPerRequest = 100;
 
-
     /// <summary>
     /// Maximum listens to get from ListenBrainz server.
     /// </summary>
