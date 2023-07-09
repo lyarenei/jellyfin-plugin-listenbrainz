@@ -3,38 +3,26 @@ using System.Linq;
 using Jellyfin.Data.Entities;
 using Jellyfin.Plugin.Listenbrainz.Models;
 
-namespace Jellyfin.Plugin.Listenbrainz.Utils
+namespace Jellyfin.Plugin.Listenbrainz.Utils;
+
+/// <summary>
+/// User helpers.
+/// </summary>
+public static class UserHelpers
 {
     /// <summary>
-    /// User helpers.
+    /// Get ListenBrainz user by Jellyfin <see cref="User"/>.
     /// </summary>
-    public static class UserHelpers
+    /// <param name="user">Jellyfin user.</param>
+    /// <returns>ListenBrainz user. Null if not found.</returns>
+    public static LbUser? GetListenBrainzUser(User? user)
     {
-        /// <summary>
-        /// Get Listenbrainz user by jellyfin GUID.
-        /// </summary>
-        /// <param name="userId">Jellyfin GUID.</param>
-        /// <returns>Listenbrainz user.</returns>
-        public static LbUser? GetUser(Guid userId)
-        {
-            try
-            {
-                return Plugin.Instance?.Configuration.LbUsers.First(u => u.MediaBrowserUserId.Equals(userId));
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-        }
+        return user != null ? GetUser(user.Id) : null;
+    }
 
-        /// <summary>
-        /// Get ListenBrainz user by jellyfin <see cref="User"/>.
-        /// </summary>
-        /// <param name="user">Jellyfin user.</param>
-        /// <returns>ListenBrainz user. Null if not found.</returns>
-        public static LbUser? GetListenBrainzUser(User? user)
-        {
-            return user != null ? GetUser(user.Id) : null;
-        }
+    private static LbUser? GetUser(Guid userId)
+    {
+        var config = Plugin.GetConfiguration();
+        return config.LbUsers.FirstOrDefault(u => u.MediaBrowserUserId.Equals(userId));
     }
 }
