@@ -28,10 +28,10 @@ namespace Jellyfin.Plugin.Listenbrainz.Utils
         }
 
         /// <summary>
-        /// Get Listenbrainz user by jellyfin <see cref="User"/>.
+        /// Get ListenBrainz user by jellyfin <see cref="User"/>.
         /// </summary>
         /// <param name="user">Jellyfin user.</param>
-        /// <returns>Listenbrainz user. Null if not found.</returns>
+        /// <returns>ListenBrainz user. Null if not found.</returns>
         public static LbUser? GetListenBrainzUser(User? user)
         {
             return user != null ? GetUser(user.Id) : null;
