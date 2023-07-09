@@ -285,52 +285,6 @@ public class ServerEntryPoint : IServerEntryPoint
     }
 
     /// <summary>
-    /// Send "playing_now" listen to ListenBrainz on playback start.
-    /// </summary>
-    private void PlaybackStart(object? sender, PlaybackProgressEventArgs e)
-    {
-        if (e.Item is not Audio item) { return; }
-
-        var user = e.Users.FirstOrDefault();
-        if (user == null) { return; }
-
-        var lbUser = UserHelpers.GetListenBrainzUser(user);
-        if (lbUser == null)
-        {
-            _logger.LogInformation(
-                "Listen won't be sent: " +
-                "could not find ListenBrainz configuration for user '{User}'",
-                user.Username);
-            return;
-        }
-
-        try
-        {
-            lbUser.CanSubmitListen();
-        }
-        catch (ListenSubmitException ex)
-        {
-            _logger.LogInformation(
-                "Listen won't be sent for user {User}: {Reason}",
-                lbUser.Name,
-                ex.Message);
-            return;
-        }
-
-        if (!item.HasRequiredMetadata())
-        {
-            _logger.LogError(
-                "Listen won't be sent: " +
-                "Track ({Path}) has invalid metadata - missing artist and/or track name",
-                item.Path);
-            return;
-        }
-
-        _apiClient.NowPlaying(item, lbUser, user);
-        _playbackTracker.StartTracking(audio: item, user: user);
-    }
-
-    /// <summary>
     /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
     /// </summary>
     public void Dispose()

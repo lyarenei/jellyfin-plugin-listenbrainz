@@ -93,15 +93,6 @@ public class ListenBrainzPlugin : IPlaybackTrackerPlugin
             return;
         }
 
-        // TODO: try/catch refactor
-        if (!data.AudioItem.HasRequiredMetadata())
-        {
-            _logger.LogWarning(
-                "Cannot process listen for item at {ItemPath}, file has invalid metadata",
-                data.AudioItem.Path);
-            return;
-        }
-
         var config = Plugin.GetConfiguration().GlobalConfig;
         if (config.AlternativeListenDetectionEnabled)
         {
