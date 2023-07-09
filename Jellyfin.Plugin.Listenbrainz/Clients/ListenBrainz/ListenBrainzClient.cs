@@ -204,36 +204,6 @@ public class ListenBrainzClient : BaseListenbrainzClient
     /// <summary>
     /// Get listens for specified user.
     /// </summary>
-    /// <param name="user">Listenbrainz user.</param>
-    /// <param name="jfUser">Jellyfin user. Used for logging.</param>
-    /// <returns>Listens of a provided user, wrapped in a payload response. Null if error.</returns>
-    public async Task<UserListensPayload?> GetUserListens(LbUser user, User jfUser)
-    {
-        var request = new UserListensRequest(user.Name, 30) { ApiToken = user.Token };
-        try
-        {
-            var response = await Get<UserListensRequest, UserListensResponse>(request).ConfigureAwait(false);
-            if (response == null)
-            {
-                _logger.LogError("Failed to get listens for user {User}: no response available", user.Name);
-                return null;
-            }
-
-            if (!response.IsError()) return response.Payload;
-
-            _logger.LogWarning("Failed to get listens for user {User}: {Error}", jfUser.Username, response.Error);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError("Exception while getting listens for user {User}: {Exception}", jfUser.Username, ex.StackTrace);
-        }
-
-        return null;
-    }
-
-    /// <summary>
-    /// Get listens for specified user.
-    /// </summary>
     /// <param name="user">ListenBrainz user.</param>
     /// <returns>User listens, wrapped in a payload response. Null if error.</returns>
     public async Task<UserListensPayload?> GetUserListens(LbUser user)
@@ -258,41 +228,6 @@ public class ListenBrainzClient : BaseListenbrainzClient
         }
 
         return null;
-    }
-
-    /// <summary>
-    /// Submit a feedback for provided Messybrainz ID.
-    /// </summary>
-    /// <param name="item">Audio item. Only used for logging.</param>
-    /// <param name="user">Listenbrainz user.</param>
-    /// <param name="jfUser">Jellyfin user. Only used for logging.</param>
-    /// <param name="msid">Messybrainz ID of an item.</param>
-    /// <param name="isLiked">Audio item is liked.</param>
-    public async void SubmitFeedback(Audio item, LbUser user, User jfUser, string msid, bool isLiked)
-    {
-        var feedbackRequest = new FeedbackRequest
-        {
-            // No option for -1 as Jellyfin does not have a concept of dislikes
-            Score = isLiked ? 1 : 0,
-            RecordingMsId = msid,
-            ApiToken = user.Token
-        };
-
-        try
-        {
-            var response = await Post<FeedbackRequest, BaseResponse>(feedbackRequest).ConfigureAwait(false);
-            if (response != null && !response.IsError())
-            {
-                _logger.LogInformation("Successfully submitted feedback for user {User} for track '{Track}'", jfUser.Username, item.Name);
-                return;
-            }
-
-            _logger.LogError("Failed to submit feedback for user {User} feedback: {Error}", jfUser.Username, response?.Error);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError("Exception while submitting feedback for user {User}: {Exception}", jfUser.Username, ex.StackTrace);
-        }
     }
 
     /// <summary>
@@ -363,35 +298,6 @@ public class ListenBrainzClient : BaseListenbrainzClient
             _logger.LogError("Exception while validating token {Token}: {Exception}", token, ex.StackTrace);
         }
 
-        return null;
-    }
-
-    /// <summary>
-    /// Get recording MSID by listen timestamp.
-    /// </summary>
-    /// <param name="listenedAt">Listen timestamp.</param>
-    /// <param name="user">Listenbrainz user.</param>
-    /// <param name="jfUser">Jellyfin user. Only used for logging.</param>
-    /// <returns>Recording MSID. Null if error or not found.</returns>
-    public async Task<string?> GetMsIdByListenTimestamp(long listenedAt, LbUser user, User jfUser)
-    {
-        var userListens = await GetUserListens(user, jfUser).ConfigureAwait(false);
-        if (userListens == null || userListens.Count == 0)
-        {
-            _logger.LogDebug("No listens received for user {User}", jfUser.Username);
-            return null;
-        }
-
-        _logger.LogDebug("Expected listen timestamp for favorite sync: {Timestamp}", listenedAt);
-        _logger.LogDebug("Received last listen timestamp: {Timestamp}", userListens.LatestListenTs);
-
-        var listen = userListens.Listens.FirstOrDefault(listen => listen.ListenedAt == listenedAt);
-        if (listen != null)
-        {
-            return listen.RecordingMsid;
-        }
-
-        _logger.LogDebug("No listen matches expected timestamp");
         return null;
     }
 
