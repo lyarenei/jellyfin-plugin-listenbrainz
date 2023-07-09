@@ -38,8 +38,11 @@ public static class Limits
     /// <param name="runtime">Track runtime (in ticks).</param>
     /// <returns>Conditions have been met.</returns>
     /// <exception cref="ListenBrainzConditionsException">Conditions have not been met.</exception>
-    public static bool EvaluateSubmitConditions(long playbackPosition, long runtime)
+    public static bool EvaluateSubmitConditions(long? playbackPosition, long? runtime)
     {
+        if (playbackPosition == null) throw new ArgumentNullException(nameof(playbackPosition));
+        if (runtime == null) throw new ArgumentNullException(nameof(runtime));
+
         var playPercent = ((double)playbackPosition / runtime) * 100;
         var percentageRulePassed = playPercent >= MinPlayPercentage;
         var playtimeRulePassed = playbackPosition >= MinPlayTimeTicks;
