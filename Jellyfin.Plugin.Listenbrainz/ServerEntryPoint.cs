@@ -103,67 +103,6 @@ public class ServerEntryPoint : IServerEntryPoint
     }
 
     /// <summary>
-    /// Send "single" listen to ListenBrainz when user data were saved with playback finished reason.
-    /// </summary>
-    private void UserDataSaved(object? sender, UserDataSaveEventArgs e)
-    {
-        if (e.Item is not Audio item) return;
-        if (e.SaveReason != UserDataSaveReason.PlaybackFinished) return;
-
-        var user = _userManager.GetUserById(e.UserId);
-        if (user == null) return;
-
-        var trackedItem = _playbackTracker.GetItem(audio: item, user);
-        if (trackedItem != null)
-        {
-            lock (_dataSavedLock)
-            {
-                if (_playbackTracker.GetItem(audio: item, user) is null)
-                {
-                    _logger.LogDebug(
-                        "Detected duplicate playback report of {Item} (for {User}), ignoring",
-                        item.Id,
-                        user.Username);
-                    return;
-                }
-
-                _logger.LogDebug(
-                    "Found tracking of {Item} (for {User}), will check listen eligibility",
-                    item.Id,
-                    user.Username);
-
-                var delta = DateTime.Now - trackedItem.StartedAt;
-                var deltaTicks = delta.TotalSeconds * TimeSpan.TicksPerSecond;
-                try
-                {
-                    Limits.EvaluateSubmitConditions((long)deltaTicks, item.RunTimeTicks ?? 0);
-                }
-                catch (ListenBrainzConditionsException ex)
-                {
-                    _logger.LogInformation("Listen won't be submitted, conditions have not been met: {Reason}", ex.Message);
-                    return;
-                }
-
-                _playbackTracker.StopTracking(audio: item, user);
-            }
-        }
-        else
-        {
-            _logger.LogDebug(
-                "No tracking for {Item} (for {User}), assuming offline playback",
-                item.Id,
-                user.Username);
-        }
-
-        _logger.LogInformation(
-            "Will send listen for {Item}, associated with user {User}",
-            item.Name,
-            user.Username);
-
-        SendListen(user, item, e.UserData.LastPlayedDate);
-    }
-
-    /// <summary>
     /// Send "single" listen to ListenBrainz if appropriate.
     /// </summary>
     /// <param name="user">Jellyfin user.</param>
