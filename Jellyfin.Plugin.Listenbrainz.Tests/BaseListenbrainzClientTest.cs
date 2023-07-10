@@ -2,7 +2,6 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Jellyfin.Plugin.Listenbrainz.Clients;
 using Jellyfin.Plugin.Listenbrainz.Clients.ListenBrainz;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses;
@@ -17,7 +16,10 @@ namespace Jellyfin.Plugin.Listenbrainz.Tests;
 
 public class TestBaseListenBrainzClient : BaseListenBrainzClient
 {
-    public TestBaseListenBrainzClient(IHttpClientFactory f, ILogger l, ISleepService s) : base(Api.BaseUrl, f, l, s) { }
+    public TestBaseListenBrainzClient(
+        IHttpClientFactory f,
+        ILogger<TestBaseListenBrainzClient> l,
+        ISleepService s) : base(Api.BaseUrl, f, l, s) { }
 
     public async Task<TResponse> ExposedPost<TRequest, TResponse>(TRequest request)
         where TRequest : BaseRequest
@@ -50,7 +52,7 @@ public class BaseListenbrainzClientTest
          var client = new HttpClient(mockHandler.Object);
          mockFactory.Setup(_ => _.CreateClient(It.IsAny<string>())).Returns(client);
 
-         var logger = new Mock<ILogger<BaseHttpClient>>();
+         var logger = new Mock<ILogger<TestBaseListenBrainzClient>>();
          var sleepService = new Mock<ISleepService>();
          var apiClient = new TestBaseListenBrainzClient(mockFactory.Object, logger.Object, sleepService.Object);
 
@@ -73,7 +75,7 @@ public class BaseListenbrainzClientTest
          var client = new HttpClient(mockHandler.Object);
          mockFactory.Setup(_ => _.CreateClient(It.IsAny<string>())).Returns(client);
 
-         var logger = new Mock<ILogger<BaseHttpClient>>();
+         var logger = new Mock<ILogger<TestBaseListenBrainzClient>>();
          var sleepService = new Mock<ISleepService>();
          var apiClient = new TestBaseListenBrainzClient(mockFactory.Object, logger.Object, sleepService.Object);
 
@@ -96,7 +98,7 @@ public class BaseListenbrainzClientTest
          var client = new HttpClient(mockHandler.Object);
          mockFactory.Setup(_ => _.CreateClient(It.IsAny<string>())).Returns(client);
 
-         var logger = new Mock<ILogger<BaseHttpClient>>();
+         var logger = new Mock<ILogger<TestBaseListenBrainzClient>>();
          var sleepService = new Mock<ISleepService>();
          var apiClient = new TestBaseListenBrainzClient(mockFactory.Object, logger.Object, sleepService.Object);
 
@@ -119,7 +121,7 @@ public class BaseListenbrainzClientTest
          var client = new HttpClient(mockHandler.Object);
          mockFactory.Setup(_ => _.CreateClient(It.IsAny<string>())).Returns(client);
 
-         var logger = new Mock<ILogger<BaseHttpClient>>();
+         var logger = new Mock<ILogger<TestBaseListenBrainzClient>>();
          var sleepService = new Mock<ISleepService>();
          var apiClient = new TestBaseListenBrainzClient(mockFactory.Object, logger.Object, sleepService.Object);
 

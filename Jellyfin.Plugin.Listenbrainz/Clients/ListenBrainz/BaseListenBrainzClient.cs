@@ -21,7 +21,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients.ListenBrainz;
 /// </summary>
 public class BaseListenBrainzClient : BaseHttpClient
 {
-    private readonly ILogger _logger;
+    private readonly ILogger<BaseListenBrainzClient> _logger;
     private readonly JsonSerializerOptions _serOpts;
     private readonly string _baseUrl;
 
@@ -35,7 +35,7 @@ public class BaseListenBrainzClient : BaseHttpClient
     public BaseListenBrainzClient(
         string baseUrl,
         IHttpClientFactory httpClientFactory,
-        ILogger logger,
+        ILogger<BaseListenBrainzClient> logger,
         ISleepService sleepService) : base(httpClientFactory, logger, sleepService)
     {
         _baseUrl = baseUrl;
