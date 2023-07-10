@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Jellyfin.Data.Entities;
 using Jellyfin.Plugin.Listenbrainz.Clients.MusicBrainz;
 using Jellyfin.Plugin.Listenbrainz.Exceptions;
 using Jellyfin.Plugin.Listenbrainz.Models;
@@ -12,7 +11,6 @@ using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Responses;
 using Jellyfin.Plugin.Listenbrainz.Resources.ListenBrainz;
 using Jellyfin.Plugin.Listenbrainz.Services;
-using MediaBrowser.Controller.Entities.Audio;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.Listenbrainz.Clients.ListenBrainz;
@@ -149,64 +147,6 @@ public class ListenBrainzClient : BaseListenBrainzClient
     /// <param name="user">ListenBrainz user.</param>
     /// <param name="listen">Listen to submit.</param>
     public void NowPlaying(LbUser user, Listen listen) => SubmitListen(user, ListenType.PlayingNow, listen);
-
-    /// <summary>
-    /// Submit a now playing listen.
-    /// </summary>
-    /// <param name="item">Audio item which will be submitted.</param>
-    /// <param name="user">Listenbrainz user.</param>
-    /// <param name="jfUser">Jellyfin user. Used for logging.</param>
-    public async void NowPlaying(Audio item, LbUser user, User jfUser)
-    {
-        var listenRequest = new SubmitListenRequest("playing_now", item) { ApiToken = user.Token };
-
-        // Fetch Recording data
-        var trackMbId = listenRequest.TrackMBID;
-        if (trackMbId != null)
-        {
-            if (_mbClient != null)
-            {
-                var recordingData = await _mbClient.GetRecordingData(trackMbId).ConfigureAwait(true);
-                if (recordingData != null)
-                {
-                    // Set recording MBID as Jellyfin does not store it
-                    listenRequest.SetRecordingMbId(recordingData.Id);
-
-                    // Set correct artist credit per MusicBrainz entry.
-                    listenRequest.SetArtist(recordingData.GetCreditString());
-                }
-            }
-            else
-            {
-                _logger.LogDebug("MusicBrainz client not initialized, cannot make requests");
-            }
-        }
-        else
-        {
-            _logger.LogDebug("No track MBID available, cannot get recording data");
-        }
-
-        try
-        {
-            var response = await Post<SubmitListenRequest, SubmitListenResponse>(listenRequest).ConfigureAwait(false);
-            if (response != null && !response.IsError())
-            {
-                _logger.LogInformation(
-                    "User {User} is now listening to '{Track}' from album '{Album}' by '{Artists}'",
-                    jfUser.Username,
-                    item.Name,
-                    item.Album,
-                    item.Artists[0]);
-                return;
-            }
-
-            _logger.LogWarning("Failed to submit now listening for user {User}: {Error}", jfUser.Username, response?.Error);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError("Exception while submitting now listening for user {User}: {Exception}", jfUser.Username, ex.StackTrace);
-        }
-    }
 
     /// <summary>
     /// Get listens for specified user.
