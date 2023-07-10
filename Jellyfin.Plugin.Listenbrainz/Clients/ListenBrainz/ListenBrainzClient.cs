@@ -190,7 +190,7 @@ public class ListenBrainzClient : BaseListenBrainzClient
         {
             Score = isFavorite ? 1 : 0,
             RecordingMbid = listen.RecordingMBID,
-            RecordingMsId = listen.RecordingMsid,
+            RecordingMsid = listen.RecordingMsid,
             ApiToken = user.Token
         };
 

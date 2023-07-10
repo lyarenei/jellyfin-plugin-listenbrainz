@@ -13,7 +13,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests
         /// </summary>
         public FeedbackRequest()
         {
-            RecordingMsId = string.Empty;
+            RecordingMsid = string.Empty;
             RecordingMbid = string.Empty;
         }
 
@@ -26,7 +26,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests
         /// Gets or sets recording MSID.
         /// </summary>
         [JsonPropertyName("recording_msid")]
-        public string? RecordingMsId { get; set; }
+        public string? RecordingMsid { get; set; }
 
         /// <summary>
         /// Gets or sets recording MBID.
