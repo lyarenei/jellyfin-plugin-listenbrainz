@@ -255,13 +255,20 @@ public class ListenBrainzPlugin : IPlaybackTrackerPlugin
     {
         try
         {
-            // TODO: get updated listen back with musicbrainz data
             _lbClient.SubmitListen(user, ListenType.Single, listen);
         }
         catch (Exception ex)
         {
             _logger.LogInformation("Listen submission for user {User} failed, adding to cache", user.Name);
-            _cache.Add(user, listen);
+            if (ex is ListenSubmitException exc && exc.Listen is not null)
+            {
+                _cache.Add(user, exc.Listen);
+            }
+            else
+            {
+                _cache.Add(user, listen);
+            }
+
             await _cache.SaveToFile();
         }
     }

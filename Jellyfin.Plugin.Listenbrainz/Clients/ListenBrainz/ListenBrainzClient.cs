@@ -81,9 +81,10 @@ public class ListenBrainzClient : BaseListenBrainzClient
 
         var listenToSend = await UpdateListenData(listen);
         var request = new SubmitListenRequest(listenType.Value, listenToSend) { ApiToken = user.Token };
+        SubmitListenResponse? response;
         try
         {
-            var response = await Post<SubmitListenRequest, SubmitListenResponse>(request).ConfigureAwait(false);
+            response = await Post<SubmitListenRequest, SubmitListenResponse>(request).ConfigureAwait(false);
             if (response != null && !response.IsError())
             {
                 _logger.LogInformation(
@@ -92,15 +93,15 @@ public class ListenBrainzClient : BaseListenBrainzClient
                     user.Name);
                 return;
             }
-
-            _logger.LogWarning("Failed to submit listen for user {User}: {Error}", user.Name, response?.Error);
-            throw new ListenSubmitException();
         }
         catch (Exception ex)
         {
             _logger.LogError("Exception while submitting listen for user {User}: {Exception}", user.Name, ex.StackTrace);
-            throw;
+            throw new ListenSubmitException("Listen submit failed", ex, listenToSend);
         }
+
+        _logger.LogWarning("Failed to submit listen for user {User}: {Error}", user.Name, response?.Error);
+        throw new ListenSubmitException(listenToSend);
     }
 
     /// <summary>
