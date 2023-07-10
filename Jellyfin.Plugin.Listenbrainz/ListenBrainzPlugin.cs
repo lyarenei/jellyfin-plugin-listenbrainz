@@ -106,8 +106,18 @@ public class ListenBrainzPlugin : IPlaybackTrackerPlugin
             _tracker.StartTracking(data.AudioItem, data.JellyfinUser);
         }
 
-        // TODO: remove jellyfin user from signature
-        _lbClient.NowPlaying(data.AudioItem, data.ListenBrainzUser, data.JellyfinUser);
+        try
+        {
+            var listen = new Listen(data.AudioItem);
+            _lbClient.NowPlaying(data.ListenBrainzUser, listen);
+        }
+        catch (Exception e)
+        {
+            _logger.LogWarning(
+                "Failed to submit 'now playing' listen for user {User}: {Reason}",
+                data.ListenBrainzUser.Name,
+                e.Message);
+        }
     }
 
     /// <inheritdoc />

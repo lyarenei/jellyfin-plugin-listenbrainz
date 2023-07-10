@@ -144,6 +144,13 @@ public class ListenBrainzClient : BaseListenBrainzClient
     }
 
     /// <summary>
+    /// Convenience method for submitting 'now playing' listens.
+    /// </summary>
+    /// <param name="user">ListenBrainz user.</param>
+    /// <param name="listen">Listen to submit.</param>
+    public void NowPlaying(LbUser user, Listen listen) => SubmitListen(user, ListenType.PlayingNow, listen);
+
+    /// <summary>
     /// Submit a now playing listen.
     /// </summary>
     /// <param name="item">Audio item which will be submitted.</param>
