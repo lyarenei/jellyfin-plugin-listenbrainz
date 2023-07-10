@@ -275,7 +275,15 @@ public class ListenBrainzPlugin : IPlaybackTrackerPlugin
 
     private async Task SyncFavorite(LbUser user, Listen listen, bool isFavorite)
     {
-        // TODO skip getting msid if mbid is available
+        if (listen.RecordingMBID is not null)
+        {
+            _logger.LogDebug("Will use recording MBID for feedback submission");
+            _lbClient.SubmitFeedback(user, listen, isFavorite);
+            return;
+        }
+
+        _logger.LogDebug("Recording MBID is not available, will submit feedback using MSID");
+
         const int Retries = 7;
         const int BackOff = 3;
         var waitTime = 1;
