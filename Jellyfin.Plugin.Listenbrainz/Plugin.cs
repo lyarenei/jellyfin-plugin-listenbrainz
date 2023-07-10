@@ -23,7 +23,7 @@ namespace Jellyfin.Plugin.Listenbrainz
         public Plugin(IApplicationPaths applicationPaths, IXmlSerializer xmlSerializer) : base(applicationPaths, xmlSerializer) => Instance = this;
 
         /// <inheritdoc />
-        public override string Name => "Listenbrainz";
+        public override string Name => "ListenBrainz";
 
         /// <inheritdoc />
         public override Guid Id => Guid.Parse("59B20823-AAFE-454C-A393-17427F518631");
