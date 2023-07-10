@@ -20,7 +20,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients.ListenBrainz;
 /// <summary>
 /// ListenBrainz API client.
 /// </summary>
-public class ListenBrainzClient : BaseListenbrainzClient
+public class ListenBrainzClient : BaseListenBrainzClient
 {
     private readonly IMusicBrainzClient? _mbClient;
     private readonly ILogger<ListenBrainzClient> _logger;

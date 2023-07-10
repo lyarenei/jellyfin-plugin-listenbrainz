@@ -17,22 +17,22 @@ using Microsoft.Extensions.Logging;
 namespace Jellyfin.Plugin.Listenbrainz.Clients.ListenBrainz;
 
 /// <summary>
-/// Base Listenbrainz API client.
+/// Base ListenBrainz API client.
 /// </summary>
-public class BaseListenbrainzClient : BaseHttpClient
+public class BaseListenBrainzClient : BaseHttpClient
 {
     private readonly ILogger _logger;
     private readonly JsonSerializerOptions _serOpts;
     private readonly string _baseUrl;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="BaseListenbrainzClient"/> class.
+    /// Initializes a new instance of the <see cref="BaseListenBrainzClient"/> class.
     /// </summary>
     /// <param name="baseUrl">API base URL.</param>
     /// <param name="httpClientFactory">HTTP client factory.</param>
     /// <param name="logger">Logger instance.</param>
     /// <param name="sleepService">Sleep service.</param>
-    public BaseListenbrainzClient(
+    public BaseListenBrainzClient(
         string baseUrl,
         IHttpClientFactory httpClientFactory,
         ILogger logger,

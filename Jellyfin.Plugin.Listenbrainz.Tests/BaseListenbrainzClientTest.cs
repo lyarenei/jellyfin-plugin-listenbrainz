@@ -15,9 +15,9 @@ using Xunit;
 
 namespace Jellyfin.Plugin.Listenbrainz.Tests;
 
-public class TestBaseListenbrainzClient : BaseListenbrainzClient
+public class TestBaseListenBrainzClient : BaseListenBrainzClient
 {
-    public TestBaseListenbrainzClient(IHttpClientFactory f, ILogger l, ISleepService s) : base(Api.BaseUrl, f, l, s) { }
+    public TestBaseListenBrainzClient(IHttpClientFactory f, ILogger l, ISleepService s) : base(Api.BaseUrl, f, l, s) { }
 
     public async Task<TResponse> ExposedPost<TRequest, TResponse>(TRequest request)
         where TRequest : BaseRequest
@@ -52,7 +52,7 @@ public class BaseListenbrainzClientTest
 
          var logger = new Mock<ILogger<BaseHttpClient>>();
          var sleepService = new Mock<ISleepService>();
-         var apiClient = new TestBaseListenbrainzClient(mockFactory.Object, logger.Object, sleepService.Object);
+         var apiClient = new TestBaseListenBrainzClient(mockFactory.Object, logger.Object, sleepService.Object);
 
          var request = new BaseRequest();
          var result = await apiClient.ExposedPost<BaseRequest, BaseResponse>(request);
@@ -75,7 +75,7 @@ public class BaseListenbrainzClientTest
 
          var logger = new Mock<ILogger<BaseHttpClient>>();
          var sleepService = new Mock<ISleepService>();
-         var apiClient = new TestBaseListenbrainzClient(mockFactory.Object, logger.Object, sleepService.Object);
+         var apiClient = new TestBaseListenBrainzClient(mockFactory.Object, logger.Object, sleepService.Object);
 
          var request = new BaseRequest();
          var result = await apiClient.ExposedGet<BaseRequest, BaseResponse>(request);
@@ -98,7 +98,7 @@ public class BaseListenbrainzClientTest
 
          var logger = new Mock<ILogger<BaseHttpClient>>();
          var sleepService = new Mock<ISleepService>();
-         var apiClient = new TestBaseListenbrainzClient(mockFactory.Object, logger.Object, sleepService.Object);
+         var apiClient = new TestBaseListenBrainzClient(mockFactory.Object, logger.Object, sleepService.Object);
 
          var request = new BaseRequest();
          var result = await apiClient.ExposedPost<BaseRequest, BaseResponse>(request);
@@ -121,7 +121,7 @@ public class BaseListenbrainzClientTest
 
          var logger = new Mock<ILogger<BaseHttpClient>>();
          var sleepService = new Mock<ISleepService>();
-         var apiClient = new TestBaseListenbrainzClient(mockFactory.Object, logger.Object, sleepService.Object);
+         var apiClient = new TestBaseListenBrainzClient(mockFactory.Object, logger.Object, sleepService.Object);
 
          var request = new BaseRequest();
          var result = await apiClient.ExposedGet<BaseRequest, BaseResponse>(request);
