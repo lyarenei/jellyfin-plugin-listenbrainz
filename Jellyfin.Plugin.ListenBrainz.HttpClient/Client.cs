@@ -74,6 +74,7 @@ public class Client
                 {
                     _logger.LogWarning("An error occured when sending a request: {Reason}", ex.Message);
                     _logger.LogDebug(ex, "An exception was thrown when sending a request");
+                    break;
                 }
 
                 if (responseMessage is not null && !_retryStatuses.Contains(responseMessage.StatusCode))
