@@ -41,13 +41,18 @@ namespace Jellyfin.Plugin.Listenbrainz.Models
         /// <summary>
         /// Checks if this user can submit listens.
         /// </summary>
-        /// <returns>User can submit listens.</returns>
-        /// <exception cref="ListenSubmitException">User cannot submit listen.</exception>
-        public bool CanSubmitListen()
+        /// <exception cref="PluginConfigurationException">User cannot submit listen.</exception>
+        public void AssertCanSubmitListen()
         {
-            if (!Options.ListenSubmitEnabled) throw new ListenSubmitException("Listen submitting is not enabled.");
-            if (string.IsNullOrWhiteSpace(Token)) throw new ListenSubmitException("User does not have API token set.");
-            return true;
+            if (!Options.ListenSubmitEnabled)
+            {
+                throw new PluginConfigurationException("Listen submitting for this user is not enabled.");
+            }
+
+            if (string.IsNullOrWhiteSpace(Token))
+            {
+                throw new PluginConfigurationException("This user does not have API token set.");
+            }
         }
     }
 }

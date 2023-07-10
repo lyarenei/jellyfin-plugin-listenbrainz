@@ -83,9 +83,9 @@ public class ListenBrainzPlugin : IPlaybackTrackerPlugin
 
         try
         {
-            data.ListenBrainzUser.CanSubmitListen();
+            data.ListenBrainzUser.AssertCanSubmitListen();
         }
-        catch (ListenSubmitException ex)
+        catch (PluginConfigurationException ex)
         {
             _logger.LogInformation(
                 "Ignoring event for user {Username}: {Reason}",
@@ -258,7 +258,7 @@ public class ListenBrainzPlugin : IPlaybackTrackerPlugin
             // TODO: get updated listen back with musicbrainz data
             _lbClient.SubmitListen(user, ListenType.Single, listen);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             _logger.LogInformation("Listen submission for user {User} failed, adding to cache", user.Name);
             _cache.Add(user, listen);
@@ -324,16 +324,7 @@ public class ListenBrainzPlugin : IPlaybackTrackerPlugin
         var user = UserHelpers.GetListenBrainzUser(jellyfinUser);
         if (user is null) throw new PluginConfigurationException($"No configuration for user {jellyfinUser.Username}");
 
-        try
-        {
-            // TODO: refactor to use config exception
-            user.CanSubmitListen();
-        }
-        catch (ListenSubmitException e)
-        {
-            throw new PluginConfigurationException("User config", e);
-        }
-
+        user.AssertCanSubmitListen();
         return new EventData
         {
             ListenBrainzUser = user,
@@ -363,16 +354,7 @@ public class ListenBrainzPlugin : IPlaybackTrackerPlugin
         var user = UserHelpers.GetListenBrainzUser(jellyfinUser);
         if (user is null) throw new PluginConfigurationException($"No configuration for user {jellyfinUser.Username}");
 
-        try
-        {
-            // TODO: refactor to use config exception
-            user.CanSubmitListen();
-        }
-        catch (ListenSubmitException e)
-        {
-            throw new PluginConfigurationException("User config", e);
-        }
-
+        user.AssertCanSubmitListen();
         return new EventData
         {
             ListenBrainzUser = user,

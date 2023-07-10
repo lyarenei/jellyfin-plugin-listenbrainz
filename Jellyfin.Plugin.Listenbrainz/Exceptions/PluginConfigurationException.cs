@@ -3,7 +3,7 @@ using System;
 namespace Jellyfin.Plugin.Listenbrainz.Exceptions;
 
 /// <summary>
-/// Exception thrown when plugin configuration is not valid.
+/// Exception for things related to plugin configuration.
 /// </summary>
 public class PluginConfigurationException : Exception
 {
