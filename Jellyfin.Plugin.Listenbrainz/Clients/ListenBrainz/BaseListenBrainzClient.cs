@@ -48,7 +48,7 @@ public class BaseListenBrainzClient : BaseHttpClient
     }
 
     /// <summary>
-    /// Send a POST request to the Listenbrainz server.
+    /// Send a POST request to the ListenBrainz server.
     /// </summary>
     /// <typeparam name="TRequest">Data type of the request.</typeparam>
     /// <typeparam name="TResponse">Data type of the response.</typeparam>
@@ -67,14 +67,11 @@ public class BaseListenBrainzClient : BaseHttpClient
         };
 
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("token", request.ApiToken);
-        using (requestMessage)
-        {
-            return await DoRequest<TResponse>(requestMessage).ConfigureAwait(false);
-        }
+        using (requestMessage) return await DoRequest<TResponse>(requestMessage);
     }
 
     /// <summary>
-    /// Send a GET request to the Listenbrainz server.
+    /// Send a GET request to the ListenBrainz server.
     /// </summary>
     /// <typeparam name="TRequest">Data type of the request.</typeparam>
     /// <typeparam name="TResponse">Data type of the response.</typeparam>
@@ -91,38 +88,31 @@ public class BaseListenBrainzClient : BaseHttpClient
             Method = HttpMethod.Get,
             RequestUri = new Uri($"{requestUri}?{query}")
         };
-        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("token", request.ApiToken);
 
-        using (requestMessage)
-        {
-            return await DoRequest<TResponse>(requestMessage).ConfigureAwait(false);
-        }
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("token", request.ApiToken);
+        using (requestMessage) return await DoRequest<TResponse>(requestMessage);
     }
 
     private async Task<TResponse?> DoRequest<TResponse>(HttpRequestMessage requestMessage)
         where TResponse : BaseResponse
     {
-        HttpResponseMessage? response;
+        HttpResponseMessage response;
         try
         {
-            response = await SendRequest(requestMessage).ConfigureAwait(false);
+            response = await SendRequest(requestMessage);
         }
         catch (Exception ex) when (ex is RetryException or InvalidResponseException)
         {
             return null;
         }
 
-        var responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+        var responseStream = await response.Content.ReadAsStreamAsync();
         try
         {
-            var result = await JsonSerializer.DeserializeAsync<TResponse>(responseStream, _serOpts).ConfigureAwait(true);
-            if (result == null)
-            {
-                _logger.LogDebug("Response deserialized to null");
-                return null;
-            }
+            var result = await JsonSerializer.DeserializeAsync<TResponse>(responseStream, _serOpts);
+            if (result != null) return result;
 
-            return result;
+            _logger.LogDebug("Response deserialized to null");
         }
         catch (Exception e)
         {
@@ -157,10 +147,7 @@ public class BaseListenBrainzClient : BaseHttpClient
         foreach (var d in reqData)
         {
             query += $"{d.Key}={d.Value}";
-            if (++i != reqData.Count)
-            {
-                query += '&';
-            }
+            if (++i != reqData.Count) query += '&';
         }
 
         return query;
