@@ -9,19 +9,19 @@ public sealed class ListenType
     /// Single listen type.
     /// Used when sending a single listen.
     /// </summary>
-    public static readonly ListenType Single = new ListenType("single");
+    public static readonly ListenType Single = new("single");
 
     /// <summary>
     /// Playing now listen type.
     /// Used when sending a 'playing now' update.
     /// </summary>
-    public static readonly ListenType PlayingNow = new ListenType("playing_now");
+    public static readonly ListenType PlayingNow = new("playing_now");
 
     /// <summary>
     /// Import listen type.
     /// Used when sending multiple listens at once.
     /// </summary>
-    public static readonly ListenType Import = new ListenType("import");
+    public static readonly ListenType Import = new("import");
 
     private ListenType(string value)
     {
@@ -29,7 +29,7 @@ public sealed class ListenType
     }
 
     /// <summary>
-    /// Gets or sets value.
+    /// Gets value.
     /// </summary>
-    public string Value { get; private set; }
+    public string Value { get; }
 }
