@@ -110,6 +110,11 @@
         <Rule Id="CA1848" Action="None" />
         <!-- disable warning CA2101: Specify marshaling for P/Invoke string arguments -->
         <Rule Id="CA2101" Action="None" />
+        <!-- disable warning CA2109: Consider making method not externally visible
+             This is no longer an issue since .NET 4.5.
+             More info: https://github.com/dotnet/roslyn-analyzers/issues/5974#issuecomment-1269171828
+        -->
+        <Rule Id="CA2109" Action="None"/>
         <!-- disable warning CA2234: Pass System.Uri objects instead of strings -->
         <Rule Id="CA2234" Action="None" />
     </Rules>
