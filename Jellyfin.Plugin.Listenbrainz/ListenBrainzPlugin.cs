@@ -70,7 +70,7 @@ public class ListenBrainzPlugin : IPlaybackTrackerPlugin
                 case ArgumentException:
                     _logger.LogDebug("Ignoring event: {Reason}", ex.Message);
                     break;
-                case PluginConfigurationException:
+                case PluginConfigurationException or ItemMetadataException:
                     _logger.LogInformation("Ignoring event: {Reason}", ex.Message);
                     break;
                 default:
@@ -135,7 +135,7 @@ public class ListenBrainzPlugin : IPlaybackTrackerPlugin
                 case ArgumentException:
                     _logger.LogDebug("Ignoring event: {Reason}", ex.Message);
                     break;
-                case PluginConfigurationException:
+                case PluginConfigurationException or ItemMetadataException:
                     _logger.LogInformation("Ignoring event: {Reason}", ex.Message);
                     break;
                 default:
@@ -326,12 +326,7 @@ public class ListenBrainzPlugin : IPlaybackTrackerPlugin
     private static EventData AssertPrerequisites(PlaybackProgressEventArgs args)
     {
         if (args.Item is not Audio item) throw new ArgumentException("Item in this event is not an audio");
-        if (!item.HasRequiredMetadata())
-        {
-            // TODO:
-            // throw new ItemMetadataException("Missing metadata: artist or track name");
-            throw new Exception("Invalid metadata");
-        }
+        item.AssertHasRequiredMetadata();
 
         var jellyfinUser = args.Users.FirstOrDefault();
         if (jellyfinUser is null) throw new ArgumentException("This event does not have a Jellyfin user");
@@ -356,12 +351,7 @@ public class ListenBrainzPlugin : IPlaybackTrackerPlugin
             throw new ArgumentException("Not a playback finished event");
         }
 
-        if (!item.HasRequiredMetadata())
-        {
-            // TODO:
-            // throw new ItemMetadataException("Missing metadata: artist or track name");
-            throw new Exception("Invalid metadata");
-        }
+        item.AssertHasRequiredMetadata();
 
         var jellyfinUser = _userManager.GetUserById(args.UserId);
         if (jellyfinUser is null) throw new ArgumentException("This event does not have a Jellyfin user");

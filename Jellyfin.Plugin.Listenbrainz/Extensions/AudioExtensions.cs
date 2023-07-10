@@ -1,3 +1,4 @@
+using Jellyfin.Plugin.Listenbrainz.Exceptions;
 using MediaBrowser.Controller.Entities.Audio;
 
 namespace Jellyfin.Plugin.Listenbrainz.Extensions;
@@ -8,14 +9,12 @@ namespace Jellyfin.Plugin.Listenbrainz.Extensions;
 public static class AudioExtensions
 {
     /// <summary>
-    /// Checks if audio item has necessary metadata for listen submission.
+    /// Assert audio item has necessary metadata for listen submission.
     /// </summary>
     /// <param name="item">Audio item.</param>
-    /// <returns>Audio item can be used for listen submission.</returns>
-    public static bool HasRequiredMetadata(this Audio item)
+    public static void AssertHasRequiredMetadata(this Audio item)
     {
-        var hasArtistName = !string.IsNullOrWhiteSpace(item.Artists[0]);
-        var hasName = !string.IsNullOrWhiteSpace(item.Name);
-        return hasArtistName && hasName;
+        if (string.IsNullOrWhiteSpace(item.Artists[0])) throw new ItemMetadataException("Artist name is empty");
+        if (string.IsNullOrWhiteSpace(item.Name)) throw new ItemMetadataException("Item name is empty");
     }
 }
