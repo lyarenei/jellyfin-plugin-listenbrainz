@@ -32,7 +32,7 @@ public class BaseListenBrainzClient : BaseHttpClient
     /// <param name="httpClientFactory">HTTP client factory.</param>
     /// <param name="logger">Logger instance.</param>
     /// <param name="sleepService">Sleep service.</param>
-    public BaseListenBrainzClient(
+    protected BaseListenBrainzClient(
         string baseUrl,
         IHttpClientFactory httpClientFactory,
         ILogger<BaseListenBrainzClient> logger,
