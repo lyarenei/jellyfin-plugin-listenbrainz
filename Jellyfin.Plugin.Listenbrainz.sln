@@ -4,9 +4,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.Listenbrain
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.Listenbrainz.Tests", "Jellyfin.Plugin.Listenbrainz.Tests\Jellyfin.Plugin.Listenbrainz.Tests.csproj", "{1E99C43D-42EE-4178-B93D-43CDA83A41D2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.ListenBrainz.HttpClient", "Jellyfin.Plugin.ListenBrainz.HttpClient\Jellyfin.Plugin.ListenBrainz.HttpClient.csproj", "{3DB729B9-2EAA-4BBA-A4F4-AB4BB250813B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.ListenBrainz.Http", "Jellyfin.Plugin.ListenBrainz.Http\Jellyfin.Plugin.ListenBrainz.Http.csproj", "{3DB729B9-2EAA-4BBA-A4F4-AB4BB250813B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.ListenBrainz.HttpClient.Tests", "Jellyfin.Plugin.ListenBrainz.HttpClient.Tests\Jellyfin.Plugin.ListenBrainz.HttpClient.Tests.csproj", "{E5822DEA-5974-4020-A2C6-8F47832695EB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.ListenBrainz.Http.Tests", "Jellyfin.Plugin.ListenBrainz.Http.Tests\Jellyfin.Plugin.ListenBrainz.Http.Tests.csproj", "{E5822DEA-5974-4020-A2C6-8F47832695EB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

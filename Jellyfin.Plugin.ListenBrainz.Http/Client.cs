@@ -1,9 +1,9 @@
 ﻿using System.Net;
-using Jellyfin.Plugin.ListenBrainz.HttpClient.Exceptions;
-using Jellyfin.Plugin.ListenBrainz.HttpClient.Interfaces;
+using Jellyfin.Plugin.ListenBrainz.Http.Exceptions;
+using Jellyfin.Plugin.ListenBrainz.Http.Interfaces;
 using Microsoft.Extensions.Logging;
 
-namespace Jellyfin.Plugin.ListenBrainz.HttpClient;
+namespace Jellyfin.Plugin.ListenBrainz.Http;
 
 /// <summary>
 /// A custom HTTP client.

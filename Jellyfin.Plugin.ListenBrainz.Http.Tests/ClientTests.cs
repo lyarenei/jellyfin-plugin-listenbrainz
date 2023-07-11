@@ -3,15 +3,15 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Jellyfin.Plugin.ListenBrainz.HttpClient;
-using Jellyfin.Plugin.ListenBrainz.HttpClient.Exceptions;
-using Jellyfin.Plugin.ListenBrainz.HttpClient.Interfaces;
+using Jellyfin.Plugin.ListenBrainz.Http;
+using Jellyfin.Plugin.ListenBrainz.Http.Exceptions;
+using Jellyfin.Plugin.ListenBrainz.Http.Interfaces;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Moq.Protected;
 using Xunit;
 
-namespace Jellyfin.Plugin.Listenbrainz.HttpClient.Tests;
+namespace Jellyfin.Plugin.Listenbrainz.Http.Tests;
 
 public class TestClient : Client
 {

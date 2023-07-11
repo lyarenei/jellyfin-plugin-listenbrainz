@@ -1,4 +1,4 @@
-namespace Jellyfin.Plugin.ListenBrainz.HttpClient.Exceptions;
+namespace Jellyfin.Plugin.ListenBrainz.Http.Exceptions;
 
 /// <summary>
 /// Exception thrown when maximum number of retries has been reached.

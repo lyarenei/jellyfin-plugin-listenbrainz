@@ -1,6 +1,6 @@
-using Jellyfin.Plugin.ListenBrainz.HttpClient.Interfaces;
+using Jellyfin.Plugin.ListenBrainz.Http.Interfaces;
 
-namespace Jellyfin.Plugin.ListenBrainz.HttpClient.Services;
+namespace Jellyfin.Plugin.ListenBrainz.Http.Services;
 
 /// <summary>
 /// Implementation of <see cref="ISleepService"/>.

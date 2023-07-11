@@ -1,4 +1,4 @@
-namespace Jellyfin.Plugin.ListenBrainz.HttpClient.Interfaces;
+namespace Jellyfin.Plugin.ListenBrainz.Http.Interfaces;
 
 /// <summary>
 /// Sleep service.
