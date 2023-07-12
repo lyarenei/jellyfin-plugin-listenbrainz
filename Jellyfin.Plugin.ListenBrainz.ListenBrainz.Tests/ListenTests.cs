@@ -28,7 +28,7 @@ public class ListenTests
         var listenJson = JsonSerializer.Serialize(_exampleListen, BaseClient.SerializerOptions);
         Assert.NotNull(listenJson);
 
-        var expectedJSON = @"{""listened_at"":1234,""track_metadata"":{""artist_name"":""Foo Bar"",""release_name"":""Foobar"",""track_name"":""Foo - Bar"",""additional_info"":{""release_mbid"":""release-foo"",""artist_mbids"":[""artist-foo""],""recording_mbid"":""recording-foo""}}}";
+        var expectedJSON = @"{""listened_at"":1234,""track_metadata"":{""artist_name"":""Foo Bar"",""track_name"":""Foo - Bar"",""release_name"":""Foobar"",""additional_info"":{""release_mbid"":""release-foo"",""artist_mbids"":[""artist-foo""],""recording_mbid"":""recording-foo""}}}";
         Assert.Equal(expectedJSON, listenJson);
     }
 
