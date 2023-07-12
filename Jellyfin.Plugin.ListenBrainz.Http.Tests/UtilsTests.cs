@@ -38,7 +38,7 @@ public class UtilsTests
             { "number", "42" }
         };
 
-        const string Expected = "space=a+b&special=%26%2F%2F&number=42";
+        const string Expected = "space=a+b&special=%26%2f%2f&number=42";
         Assert.Equal(Expected, Utils.ToHttpGetQuery(data));
     }
 }
