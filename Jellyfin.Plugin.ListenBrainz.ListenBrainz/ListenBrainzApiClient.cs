@@ -8,16 +8,16 @@ namespace Jellyfin.Plugin.ListenBrainz.ListenBrainz;
 /// <summary>
 /// ListenBrainz API client.
 /// </summary>
-public class Client : BaseClient
+public class ListenBrainzApiClient : BaseClient
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="Client"/> class.
+    /// Initializes a new instance of the <see cref="ListenBrainzApiClient"/> class.
     /// </summary>
     /// <param name="baseUrl">API base URL.</param>
     /// <param name="httpClientFactory">HTTP client factory.</param>
     /// <param name="logger">Logger instance.</param>
     /// <param name="sleepService">Sleep service.</param>
-    public Client(string baseUrl, IHttpClientFactory httpClientFactory, ILogger logger, ISleepService sleepService)
+    public ListenBrainzApiClient(string baseUrl, IHttpClientFactory httpClientFactory, ILogger logger, ISleepService sleepService)
         : base(baseUrl, httpClientFactory, logger, sleepService)
     {
     }

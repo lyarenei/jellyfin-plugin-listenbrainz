@@ -8,10 +8,10 @@ namespace Jellyfin.Plugin.ListenBrainz.MusicBrainz;
 /// <summary>
 /// MusicBrainz API client.
 /// </summary>
-public class Client : BaseClient
+public class MusicBrainzApiClient : BaseClient
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="Client"/> class.
+    /// Initializes a new instance of the <see cref="MusicBrainzApiClient"/> class.
     /// </summary>
     /// <param name="baseUrl">API base URL.</param>
     /// <param name="clientName">Name of the client application.</param>
@@ -20,7 +20,7 @@ public class Client : BaseClient
     /// <param name="httpClientFactory">HTTP client factory.</param>
     /// <param name="logger">Logger instance.</param>
     /// <param name="sleepService">Sleep service.</param>
-    protected Client(
+    protected MusicBrainzApiClient(
         string baseUrl,
         string clientName,
         string clientVersion,
