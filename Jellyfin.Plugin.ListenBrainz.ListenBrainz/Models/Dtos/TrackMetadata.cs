@@ -8,6 +8,15 @@ public class TrackMetadata
     /// <summary>
     /// Initializes a new instance of the <see cref="TrackMetadata"/> class.
     /// </summary>
+    public TrackMetadata()
+    {
+        ArtistName = string.Empty;
+        TrackName = string.Empty;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TrackMetadata"/> class.
+    /// </summary>
     /// <param name="artistName">Name of the artist(s).</param>
     /// <param name="trackName">Name of the track.</param>
     public TrackMetadata(string artistName, string trackName)

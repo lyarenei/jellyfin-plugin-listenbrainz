@@ -8,6 +8,14 @@ public class Listen
     /// <summary>
     /// Initializes a new instance of the <see cref="Listen"/> class.
     /// </summary>
+    public Listen()
+    {
+        TrackMetadata = new TrackMetadata();
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Listen"/> class.
+    /// </summary>
     /// <param name="artistName">Full credit string for artists of the track.</param>
     /// <param name="trackName">Track name.</param>
     public Listen(string artistName, string trackName)
