@@ -21,7 +21,6 @@ namespace Jellyfin.Plugin.Listenbrainz.Tasks;
 /// </summary>
 public class ResubmitListensTask : IScheduledTask
 {
-    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<ResubmitListensTask> _logger;
     private readonly ListenbrainzClient _lbClient;
     private readonly IListenCache _listenCache;
@@ -33,14 +32,13 @@ public class ResubmitListensTask : IScheduledTask
     /// <param name="loggerFactory">Logger factory.</param>
     public ResubmitListensTask(IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory)
     {
-        _httpClientFactory = httpClientFactory;
         _logger = loggerFactory.CreateLogger<ResubmitListensTask>();
 
         var config = Plugin.GetConfiguration();
         _lbClient = new ListenbrainzClient(
             config.ListenBrainzUrl,
-            _httpClientFactory,
-            Helpers.GetMusicBrainzClient(_httpClientFactory, _logger),
+            httpClientFactory,
+            Helpers.GetMusicBrainzClient(httpClientFactory, _logger),
             loggerFactory.CreateLogger<ListenbrainzClient>(),
             new SleepService());
 
