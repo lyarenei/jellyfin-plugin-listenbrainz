@@ -9,6 +9,7 @@ using Jellyfin.Plugin.Listenbrainz.Clients;
 using Jellyfin.Plugin.Listenbrainz.Configuration;
 using Jellyfin.Plugin.Listenbrainz.Exceptions;
 using Jellyfin.Plugin.Listenbrainz.Extensions;
+using Jellyfin.Plugin.Listenbrainz.Interfaces;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
 using Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
@@ -59,6 +60,7 @@ namespace Jellyfin.Plugin.Listenbrainz
         {
             var config = Plugin.Instance?.Configuration.GlobalConfig;
             _globalConfig = config ?? throw new InvalidOperationException("plugin configuration is NULL");
+            // TODO: Rename server entry point
             _logger = loggerFactory.CreateLogger<ServerEntryPoint>();
             _sessionManager = sessionManager;
             _userManager = userManager;
@@ -68,7 +70,7 @@ namespace Jellyfin.Plugin.Listenbrainz
                 Helpers.GetListenCacheFilePath(),
                 loggerFactory.CreateLogger<DefaultListenCache>());
 
-            var mbClient = GetMusicBrainzClient(httpClientFactory, loggerFactory);
+            var mbClient = Helpers.GetMusicBrainzClient(httpClientFactory, _logger);
             _apiClient = GetListenBrainzClient(mbClient, httpClientFactory, loggerFactory);
 
             _playbackTracker = new DefaultPlaybackTracker(loggerFactory);
@@ -343,20 +345,8 @@ namespace Jellyfin.Plugin.Listenbrainz
                 _sessionManager.PlaybackStopped -= PlaybackStopped;
         }
 
-        private static IMusicbrainzClientService GetMusicBrainzClient(IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory)
-        {
-            var config = Plugin.GetConfiguration();
-            if (!config.GlobalConfig.MusicbrainzEnabled)
-            {
-                return new DummyMusicbrainzClient(loggerFactory.CreateLogger<DummyMusicbrainzClient>());
-            }
-
-            var logger = loggerFactory.CreateLogger<MusicbrainzClient>();
-            return new MusicbrainzClient(config.MusicBrainzUrl, httpClientFactory, logger, new SleepService());
-        }
-
         private static ListenbrainzClient GetListenBrainzClient(
-            IMusicbrainzClientService mbClient,
+            IMusicBrainzClient mbClient,
             IHttpClientFactory httpClientFactory,
             ILoggerFactory loggerFactory)
         {

@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Jellyfin.Data.Entities;
 using Jellyfin.Plugin.Listenbrainz.Exceptions;
+using Jellyfin.Plugin.Listenbrainz.Interfaces;
 using Jellyfin.Plugin.Listenbrainz.Models;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz;
 using Jellyfin.Plugin.Listenbrainz.Models.Listenbrainz.Requests;
@@ -20,7 +21,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
     /// </summary>
     public class ListenbrainzClient : BaseListenbrainzClient
     {
-        private readonly IMusicbrainzClientService? _mbClient;
+        private readonly IMusicBrainzClient? _mbClient;
         private readonly ILogger _logger;
 
         /// <summary>
@@ -51,7 +52,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
         public ListenbrainzClient(
             string baseUrl,
             IHttpClientFactory httpClientFactory,
-            IMusicbrainzClientService mbClient,
+            IMusicBrainzClient mbClient,
             ILogger logger,
             ISleepService sleepService) : base(baseUrl, httpClientFactory, logger, sleepService)
         {
@@ -75,14 +76,14 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
             {
                 if (_mbClient != null)
                 {
-                    var recordingData = await _mbClient.GetRecordingData(trackMbId).ConfigureAwait(true);
+                    var recordingData = await _mbClient.GetRecordingByTrackId(trackMbId);
                     if (recordingData != null)
                     {
                         // Set recording MBID as Jellyfin does not store it
-                        request.SetRecordingMbId(recordingData.Id);
+                        request.SetRecordingMbId(recordingData.Mbid);
 
                         // Set correct artist credit per MusicBrainz entry.
-                        request.SetArtist(recordingData.GetCreditString());
+                        request.SetArtist(recordingData.GetFullCreditString());
                     }
                 }
                 else
@@ -173,14 +174,14 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
             {
                 if (_mbClient != null)
                 {
-                    var recordingData = await _mbClient.GetRecordingData(trackMbId).ConfigureAwait(true);
+                    var recordingData = await _mbClient.GetRecordingByTrackId(trackMbId);
                     if (recordingData != null)
                     {
                         // Set recording MBID as Jellyfin does not store it
-                        listenRequest.SetRecordingMbId(recordingData.Id);
+                        listenRequest.SetRecordingMbId(recordingData.Mbid);
 
                         // Set correct artist credit per MusicBrainz entry.
-                        listenRequest.SetArtist(recordingData.GetCreditString());
+                        listenRequest.SetArtist(recordingData.GetFullCreditString());
                     }
                 }
                 else
@@ -351,15 +352,15 @@ namespace Jellyfin.Plugin.Listenbrainz.Clients
             // Assume MusicBrainz data have been already fetched if Recording MBID is available
             if (listen.RecordingMBID != null) return listen;
 
-            var recordingData = await _mbClient.GetRecordingData(trackMBID);
+            var recordingData = await _mbClient.GetRecordingByTrackId(trackMBID);
             if (recordingData == null)
             {
                 _logger.LogDebug("No recording data received from MusicBrainz");
                 return listen;
             }
 
-            listen.RecordingMBID = recordingData.Id;
-            listen.SetArtistCredit(recordingData.GetCreditString());
+            listen.RecordingMBID = recordingData.Mbid;
+            listen.SetArtistCredit(recordingData.GetFullCreditString());
             return listen;
         }
     }

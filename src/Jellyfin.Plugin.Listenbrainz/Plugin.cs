@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Reflection;
 using Jellyfin.Plugin.Listenbrainz.Configuration;
 using Jellyfin.Plugin.Listenbrainz.Exceptions;
 using MediaBrowser.Common.Configuration;
@@ -32,6 +33,14 @@ namespace Jellyfin.Plugin.Listenbrainz
         /// Gets plugin instance.
         /// </summary>
         public static Plugin? Instance { get; private set; }
+
+        /// <summary>
+        /// Gets plugin version.
+        /// </summary>
+        public static new string Version
+        {
+            get => Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0.0";
+        }
 
         /// <inheritdoc />
         public IEnumerable<PluginPageInfo> GetPages()

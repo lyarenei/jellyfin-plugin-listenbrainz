@@ -1,31 +1,30 @@
 using System.Threading.Tasks;
-using Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz;
-using Jellyfin.Plugin.Listenbrainz.Services;
+using Jellyfin.Plugin.Listenbrainz.Interfaces;
+using Jellyfin.Plugin.ListenBrainz.MusicBrainz.Models.Dtos;
 using Microsoft.Extensions.Logging;
 
-namespace Jellyfin.Plugin.Listenbrainz.Clients
+namespace Jellyfin.Plugin.Listenbrainz.Clients;
+
+/// <summary>
+/// Dummy implementation of <see cref="IMusicBrainzClient"/>.
+/// </summary>
+public class DummyMusicbrainzClient : IMusicBrainzClient
 {
+    private readonly ILogger _logger;
+
     /// <summary>
-    /// Dummy implementation of <see cref="IMusicbrainzClientService"/>.
+    /// Initializes a new instance of the <see cref="DummyMusicbrainzClient"/> class.
     /// </summary>
-    public class DummyMusicbrainzClient : IMusicbrainzClientService
+    /// <param name="logger">Logger instance.</param>
+    public DummyMusicbrainzClient(ILogger logger)
     {
-        private readonly ILogger _logger;
+        _logger = logger;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DummyMusicbrainzClient"/> class.
-        /// </summary>
-        /// <param name="logger">Logger instance.</param>
-        public DummyMusicbrainzClient(ILogger logger)
-        {
-            _logger = logger;
-        }
-
-        /// <inheritdoc />
-        public Task<Recording?> GetRecordingData(string trackId)
-        {
-            _logger.LogDebug("Using dummy implementation of Musicbrainz client - no recording data available");
-            return new Task<Recording?>(() => null);
-        }
+    /// <inheritdoc />
+    public Task<Recording?> GetRecordingByTrackId(string trackId)
+    {
+        _logger.LogDebug("Integration with MusicBrainz is not enabled; no recording data available");
+        return Task.FromResult<Recording?>(null);
     }
 }

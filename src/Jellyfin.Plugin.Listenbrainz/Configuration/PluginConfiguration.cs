@@ -23,7 +23,7 @@ namespace Jellyfin.Plugin.Listenbrainz.Configuration
         /// Gets MusicBrainz API URL.
         /// </summary>
         /// <returns>API URL.</returns>
-        public string MusicBrainzUrl => GlobalConfig.MusicbrainzBaseUrl ?? Resources.Musicbrainz.Api.BaseUrl;
+        public string MusicBrainzUrl => GlobalConfig.MusicbrainzBaseUrl ?? MusicBrainz.Resources.Api.BaseUrl;
 
         /// <summary>
         /// Gets ListenBrainz API URL.
