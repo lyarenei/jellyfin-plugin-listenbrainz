@@ -1,4 +1,5 @@
 using Jellyfin.Plugin.ListenBrainz.Http.Interfaces;
+using Jellyfin.Plugin.ListenBrainz.MusicBrainz.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.MusicBrainz.Models.Requests;
 using Jellyfin.Plugin.ListenBrainz.MusicBrainz.Models.Responses;
 using Microsoft.Extensions.Logging;
@@ -8,7 +9,7 @@ namespace Jellyfin.Plugin.ListenBrainz.MusicBrainz;
 /// <summary>
 /// MusicBrainz API client.
 /// </summary>
-public class MusicBrainzApiClient : BaseClient
+public class MusicBrainzApiClient : BaseClient, IMusicBrainzApiClient
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="MusicBrainzApiClient"/> class.
@@ -32,12 +33,7 @@ public class MusicBrainzApiClient : BaseClient
     {
     }
 
-    /// <summary>
-    /// Get recording MusicBrainz data.
-    /// </summary>
-    /// <param name="request">Recording request.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>Recording response.</returns>
+    /// <inheritdoc />
     public async Task<RecordingResponse?> GetRecording(RecordingRequest request, CancellationToken cancellationToken)
     {
         return await Get<RecordingRequest, RecordingResponse>(request, cancellationToken);

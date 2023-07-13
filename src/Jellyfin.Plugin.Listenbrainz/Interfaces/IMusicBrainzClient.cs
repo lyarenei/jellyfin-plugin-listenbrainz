@@ -13,5 +13,5 @@ public interface IMusicBrainzClient
     /// </summary>
     /// <param name="trackId">Track MBID.</param>
     /// <returns>Recording.</returns>
-    public Task<Recording> GetRecordingByTrackId(string trackId);
+    public Task<Recording?> GetRecordingByTrackId(string trackId);
 }
