@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using Jellyfin.Plugin.ListenBrainz.Http.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Http.Interfaces;
+using Jellyfin.Plugin.ListenBrainz.Http.Services;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.ListenBrainz.Http;
@@ -33,11 +34,11 @@ public class Client
     /// <param name="httpClientFactory">HTTP client factory.</param>
     /// <param name="logger">Logger instance.</param>
     /// <param name="sleepService">Sleep service.</param>
-    public Client(IHttpClientFactory httpClientFactory, ILogger logger, ISleepService sleepService)
+    public Client(IHttpClientFactory httpClientFactory, ILogger logger, ISleepService? sleepService)
     {
         _httpClientFactory = httpClientFactory;
         _logger = logger;
-        _sleepService = sleepService;
+        _sleepService = sleepService ?? new DefaultSleepService();
     }
 
     /// <summary>

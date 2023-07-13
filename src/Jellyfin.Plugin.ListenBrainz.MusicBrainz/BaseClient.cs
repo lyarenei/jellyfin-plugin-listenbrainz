@@ -47,7 +47,7 @@ public class BaseClient : Http.Client
         string clientLink,
         IHttpClientFactory httpClientFactory,
         ILogger logger,
-        ISleepService sleepService) : base(httpClientFactory, logger, sleepService)
+        ISleepService? sleepService) : base(httpClientFactory, logger, sleepService)
     {
         _baseUrl = baseUrl;
         _clientName = clientName;

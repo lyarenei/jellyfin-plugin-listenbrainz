@@ -28,7 +28,7 @@ public class MusicBrainzApiClient : BaseClient, IMusicBrainzApiClient
         string clientLink,
         IHttpClientFactory httpClientFactory,
         ILogger logger,
-        ISleepService sleepService)
+        ISleepService? sleepService = null)
         : base(baseUrl, clientName, clientVersion, clientLink, httpClientFactory, logger, sleepService)
     {
     }
