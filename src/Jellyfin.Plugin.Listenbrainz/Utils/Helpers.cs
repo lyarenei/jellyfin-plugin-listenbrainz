@@ -38,7 +38,9 @@ namespace Jellyfin.Plugin.Listenbrainz.Utils
         /// <param name="httpClientFactory">HTTP client factory.</param>
         /// <param name="logger">Logger instance.</param>
         /// <returns>MusicBrainz client.</returns>
-        public static IMusicBrainzClient GetMusicBrainzClient(IHttpClientFactory httpClientFactory, ILogger logger)
+        public static IMusicBrainzClient GetMusicBrainzClient(
+            IHttpClientFactory httpClientFactory,
+            ILogger<IMusicBrainzClient> logger)
         {
             var config = Plugin.GetConfiguration();
             if (!config.GlobalConfig.MusicbrainzEnabled) return new DummyMusicbrainzClient(logger);

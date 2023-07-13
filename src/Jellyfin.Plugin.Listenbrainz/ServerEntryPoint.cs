@@ -70,7 +70,7 @@ namespace Jellyfin.Plugin.Listenbrainz
                 Helpers.GetListenCacheFilePath(),
                 loggerFactory.CreateLogger<DefaultListenCache>());
 
-            var mbClient = Helpers.GetMusicBrainzClient(httpClientFactory, _logger);
+            var mbClient = Helpers.GetMusicBrainzClient(httpClientFactory, loggerFactory.CreateLogger<MusicBrainzClient>());
             _apiClient = GetListenBrainzClient(mbClient, httpClientFactory, loggerFactory);
 
             _playbackTracker = new DefaultPlaybackTracker(loggerFactory);

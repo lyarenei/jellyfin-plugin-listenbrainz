@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.Listenbrainz.Clients;
 using Jellyfin.Plugin.Listenbrainz.Exceptions;
+using Jellyfin.Plugin.Listenbrainz.Interfaces;
 using Jellyfin.Plugin.Listenbrainz.Models;
 using Jellyfin.Plugin.Listenbrainz.Resources.Listenbrainz;
 using Jellyfin.Plugin.Listenbrainz.Services;
@@ -38,7 +39,7 @@ public class ResubmitListensTask : IScheduledTask
         _lbClient = new ListenbrainzClient(
             config.ListenBrainzUrl,
             httpClientFactory,
-            Helpers.GetMusicBrainzClient(httpClientFactory, _logger),
+            Helpers.GetMusicBrainzClient(httpClientFactory, loggerFactory.CreateLogger<MusicBrainzClient>()),
             loggerFactory.CreateLogger<ListenbrainzClient>(),
             new SleepService());
 
