@@ -1,20 +1,24 @@
 ﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.Listenbrainz", "Jellyfin.Plugin.Listenbrainz\Jellyfin.Plugin.Listenbrainz.csproj", "{D921B930-CF91-406F-ACBC-08914DCD0D34}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.Listenbrainz", "src\Jellyfin.Plugin.Listenbrainz\Jellyfin.Plugin.Listenbrainz.csproj", "{D921B930-CF91-406F-ACBC-08914DCD0D34}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.Listenbrainz.Tests", "Jellyfin.Plugin.Listenbrainz.Tests\Jellyfin.Plugin.Listenbrainz.Tests.csproj", "{1E99C43D-42EE-4178-B93D-43CDA83A41D2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.Listenbrainz.Tests", "tests\Jellyfin.Plugin.Listenbrainz.Tests\Jellyfin.Plugin.Listenbrainz.Tests.csproj", "{1E99C43D-42EE-4178-B93D-43CDA83A41D2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.ListenBrainz.Http", "Jellyfin.Plugin.ListenBrainz.Http\Jellyfin.Plugin.ListenBrainz.Http.csproj", "{3DB729B9-2EAA-4BBA-A4F4-AB4BB250813B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.ListenBrainz.Http", "src\Jellyfin.Plugin.ListenBrainz.Http\Jellyfin.Plugin.ListenBrainz.Http.csproj", "{3DB729B9-2EAA-4BBA-A4F4-AB4BB250813B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.ListenBrainz.Http.Tests", "Jellyfin.Plugin.ListenBrainz.Http.Tests\Jellyfin.Plugin.ListenBrainz.Http.Tests.csproj", "{E5822DEA-5974-4020-A2C6-8F47832695EB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.ListenBrainz.Http.Tests", "tests\Jellyfin.Plugin.ListenBrainz.Http.Tests\Jellyfin.Plugin.ListenBrainz.Http.Tests.csproj", "{E5822DEA-5974-4020-A2C6-8F47832695EB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.ListenBrainz.ListenBrainz", "Jellyfin.Plugin.ListenBrainz.ListenBrainz\Jellyfin.Plugin.ListenBrainz.ListenBrainz.csproj", "{8F25EBBB-01C8-45AA-94D4-D7C2FFC888D8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.ListenBrainz.ListenBrainz", "src\Jellyfin.Plugin.ListenBrainz.ListenBrainz\Jellyfin.Plugin.ListenBrainz.ListenBrainz.csproj", "{8F25EBBB-01C8-45AA-94D4-D7C2FFC888D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.ListenBrainz.ListenBrainz.Tests", "Jellyfin.Plugin.ListenBrainz.ListenBrainz.Tests\Jellyfin.Plugin.ListenBrainz.ListenBrainz.Tests.csproj", "{9524F75F-57DE-4C31-8D69-1291C9919571}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.ListenBrainz.ListenBrainz.Tests", "tests\Jellyfin.Plugin.ListenBrainz.ListenBrainz.Tests\Jellyfin.Plugin.ListenBrainz.ListenBrainz.Tests.csproj", "{9524F75F-57DE-4C31-8D69-1291C9919571}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.ListenBrainz.MusicBrainz", "Jellyfin.Plugin.ListenBrainz.MusicBrainz\Jellyfin.Plugin.ListenBrainz.MusicBrainz.csproj", "{D95A5B29-AC1B-4FBD-8090-5AA8C7756390}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.ListenBrainz.MusicBrainz", "src\Jellyfin.Plugin.ListenBrainz.MusicBrainz\Jellyfin.Plugin.ListenBrainz.MusicBrainz.csproj", "{D95A5B29-AC1B-4FBD-8090-5AA8C7756390}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.ListenBrainz.MusicBrainz.Tests", "Jellyfin.Plugin.ListenBrainz.MusicBrainz.Tests\Jellyfin.Plugin.ListenBrainz.MusicBrainz.Tests.csproj", "{5D8747C9-0175-4674-A538-E24F86226CCA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.ListenBrainz.MusicBrainz.Tests", "tests\Jellyfin.Plugin.ListenBrainz.MusicBrainz.Tests\Jellyfin.Plugin.ListenBrainz.MusicBrainz.Tests.csproj", "{5D8747C9-0175-4674-A538-E24F86226CCA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{703159BD-2AFB-446C-A427-2BCB3310DA7B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0405E5C5-7A76-4FBB-ABDA-83E659162508}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -54,6 +58,10 @@ Global
 		{5D8747C9-0175-4674-A538-E24F86226CCA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5D8747C9-0175-4674-A538-E24F86226CCA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5D8747C9-0175-4674-A538-E24F86226CCA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{08A70476-9DB2-43F6-94AB-119A11E20365}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08A70476-9DB2-43F6-94AB-119A11E20365}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08A70476-9DB2-43F6-94AB-119A11E20365}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08A70476-9DB2-43F6-94AB-119A11E20365}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		Policies = $0
@@ -61,5 +69,15 @@ Global
 		$1.DirectoryNamespaceAssociation = PrefixedHierarchical
 		$0.StandardHeader = $2
 		$0.VersionControlPolicy = $3
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D921B930-CF91-406F-ACBC-08914DCD0D34} = {703159BD-2AFB-446C-A427-2BCB3310DA7B}
+		{3DB729B9-2EAA-4BBA-A4F4-AB4BB250813B} = {703159BD-2AFB-446C-A427-2BCB3310DA7B}
+		{8F25EBBB-01C8-45AA-94D4-D7C2FFC888D8} = {703159BD-2AFB-446C-A427-2BCB3310DA7B}
+		{D95A5B29-AC1B-4FBD-8090-5AA8C7756390} = {703159BD-2AFB-446C-A427-2BCB3310DA7B}
+		{E5822DEA-5974-4020-A2C6-8F47832695EB} = {0405E5C5-7A76-4FBB-ABDA-83E659162508}
+		{9524F75F-57DE-4C31-8D69-1291C9919571} = {0405E5C5-7A76-4FBB-ABDA-83E659162508}
+		{5D8747C9-0175-4674-A538-E24F86226CCA} = {0405E5C5-7A76-4FBB-ABDA-83E659162508}
+		{1E99C43D-42EE-4178-B93D-43CDA83A41D2} = {0405E5C5-7A76-4FBB-ABDA-83E659162508}
 	EndGlobalSection
 EndGlobal

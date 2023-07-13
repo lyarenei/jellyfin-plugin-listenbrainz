@@ -21,7 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Jellyfin.Plugin.ListenBrainz.ListenBrainz\Jellyfin.Plugin.ListenBrainz.ListenBrainz.csproj" />
+      <ProjectReference Include="..\..\src\Jellyfin.Plugin.ListenBrainz.MusicBrainz\Jellyfin.Plugin.ListenBrainz.MusicBrainz.csproj" />
     </ItemGroup>
 
 </Project>
