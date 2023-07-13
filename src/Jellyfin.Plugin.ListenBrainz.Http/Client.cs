@@ -134,13 +134,12 @@ public class Client
 
     private async Task LogRequest(HttpRequestMessage requestMessage, string id)
     {
-        if (requestMessage.Content is null)
+        string requestData = "<no content>";
+        if (requestMessage.Content is not null)
         {
-            _logger.LogDebug("Request has no content");
-            return;
+            requestData = await requestMessage.Content.ReadAsStringAsync();
         }
 
-        var requestData = await requestMessage.Content.ReadAsStringAsync();
         _logger.LogDebug(
             "Sending request ({RequestId}):\nMethod: {Method}\nURI: {Uri}\nData: {Data}",
             id,
