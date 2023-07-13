@@ -7,7 +7,7 @@
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
         <AnalysisMode>AllEnabledByDefault</AnalysisMode>
-        <CodeAnalysisRuleSet>../jellyfin.ruleset</CodeAnalysisRuleSet>
+        <CodeAnalysisRuleSet>../../jellyfin.ruleset</CodeAnalysisRuleSet>
         <RootNamespace>Jellyfin.Plugin.ListenBrainz.MusicBrainz</RootNamespace>
     </PropertyGroup>
 
