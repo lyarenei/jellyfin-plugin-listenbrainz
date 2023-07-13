@@ -34,7 +34,7 @@ public class Client
     /// <param name="httpClientFactory">HTTP client factory.</param>
     /// <param name="logger">Logger instance.</param>
     /// <param name="sleepService">Sleep service.</param>
-    public Client(IHttpClientFactory httpClientFactory, ILogger logger, ISleepService? sleepService)
+    protected Client(IHttpClientFactory httpClientFactory, ILogger logger, ISleepService? sleepService)
     {
         _httpClientFactory = httpClientFactory;
         _logger = logger;
@@ -49,7 +49,7 @@ public class Client
     /// <returns>Request response.</returns>
     /// <exception cref="RetryException">Number of retries has been reached.</exception>
     /// <exception cref="InvalidResponseException">Response is not available.</exception>
-    public async Task<HttpResponseMessage> SendRequest(HttpRequestMessage requestMessage, CancellationToken cancellationToken)
+    protected async Task<HttpResponseMessage> SendRequest(HttpRequestMessage requestMessage, CancellationToken cancellationToken)
     {
         using var httpClient = _httpClientFactory.CreateClient();
         var correlationId = Guid.NewGuid().ToString("N")[..7];
