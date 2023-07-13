@@ -24,4 +24,7 @@
   <ItemGroup>
     <Compile Remove="artifacts\**" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Jellyfin.Plugin.ListenBrainz.MusicBrainz\Jellyfin.Plugin.ListenBrainz.MusicBrainz.csproj" />
+  </ItemGroup>
 </Project>
