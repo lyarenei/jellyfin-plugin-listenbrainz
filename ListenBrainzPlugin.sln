@@ -8,6 +8,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ListenBrainzPlugin.Http", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ListenBrainzPlugin.Http.Tests", "tests\ListenBrainzPlugin.Http.Tests\ListenBrainzPlugin.Http.Tests.csproj", "{B55D95AE-9B00-488D-B78B-86308C9129A7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ListenBrainzPlugin.MusicBrainzApi", "src\ListenBrainzPlugin.MusicBrainzApi\ListenBrainzPlugin.MusicBrainzApi.csproj", "{27CBD9F1-5529-400D-8AD7-8BE32465D0E5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ListenBrainzPlugin.MusicBrainzApi.Tests", "tests\ListenBrainzPlugin.MusicBrainzApi.Tests\ListenBrainzPlugin.MusicBrainzApi.Tests.csproj", "{08A62589-F3AC-44B3-810C-0D69814B04AC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -22,9 +26,19 @@ Global
 		{B55D95AE-9B00-488D-B78B-86308C9129A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B55D95AE-9B00-488D-B78B-86308C9129A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B55D95AE-9B00-488D-B78B-86308C9129A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{27CBD9F1-5529-400D-8AD7-8BE32465D0E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27CBD9F1-5529-400D-8AD7-8BE32465D0E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27CBD9F1-5529-400D-8AD7-8BE32465D0E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27CBD9F1-5529-400D-8AD7-8BE32465D0E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{08A62589-F3AC-44B3-810C-0D69814B04AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08A62589-F3AC-44B3-810C-0D69814B04AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08A62589-F3AC-44B3-810C-0D69814B04AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08A62589-F3AC-44B3-810C-0D69814B04AC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{33145D22-8C66-4C69-A409-3934840EAF4C} = {BCFEC1CA-66E1-462A-BFA8-00D61DCCD970}
 		{B55D95AE-9B00-488D-B78B-86308C9129A7} = {99C564F4-BF8F-4555-AAB7-3A379C784CC4}
+		{27CBD9F1-5529-400D-8AD7-8BE32465D0E5} = {BCFEC1CA-66E1-462A-BFA8-00D61DCCD970}
+		{08A62589-F3AC-44B3-810C-0D69814B04AC} = {99C564F4-BF8F-4555-AAB7-3A379C784CC4}
 	EndGlobalSection
 EndGlobal
