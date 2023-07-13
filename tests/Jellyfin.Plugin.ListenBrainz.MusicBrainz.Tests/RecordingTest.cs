@@ -1,8 +1,8 @@
 using System.Collections.ObjectModel;
-using Jellyfin.Plugin.Listenbrainz.Models.Musicbrainz;
+using Jellyfin.Plugin.ListenBrainz.MusicBrainz.Models.Dtos;
 using Xunit;
 
-namespace Jellyfin.Plugin.Listenbrainz.Tests;
+namespace Jellyfin.Plugin.Listenbrainz.MusicBrainz.Tests;
 
 public class RecordingTest
 {
@@ -19,7 +19,7 @@ public class RecordingTest
 
     private readonly Recording _example = new()
     {
-        Id = "recordingId",
+        Mbid = "recordingId",
         Score = 99
     };
 
@@ -27,7 +27,7 @@ public class RecordingTest
     public void Recording_GetCreditString()
     {
         var creditList = new[] { _artistCredit1, _artistCredit2 };
-        _example.ArtistCredit = new Collection<ArtistCredit>(creditList);
-        Assert.Equal("Artist 1 with Artist 2", _example.GetCreditString());
+        _example.ArtistCredits = new Collection<ArtistCredit>(creditList);
+        Assert.Equal("Artist 1 with Artist 2", _example.GetFullCreditString());
     }
 }
