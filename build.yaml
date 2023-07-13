@@ -11,5 +11,7 @@ category: "General"
 owner: "lyarenei"
 artifacts:
   - "Jellyfin.Plugin.Listenbrainz.dll"
+  - "Jellyfin.Plugin.Listenbrainz.MusicBrainz.dll"
+  - "Jellyfin.Plugin.Listenbrainz.Http.dll"
 changelog: >
   Re-release on new repo
