@@ -164,12 +164,12 @@ Once the SDK is installed, you should be able to compile the plugin in either de
 > dotnet publish -c Release
 ```
 
-Once the build is completed, the compiled DLL should be available at:
-- For `Debug` configuration: `Jellyfin.Plugin.Listenbrainz/bin/Debug/net6.0/Jellyfin.Plugin.Listenbrainz.dll`
-- For `Release` configuration: `Jellyfin.Plugin.Listenbrainz/bin/Release/net6.0/Jellyfin.Plugin.Listenbrainz.dll`
+Once the build is completed, the copy all DLL files at:
+- For `Debug` configuration: `Jellyfin.Plugin.Listenbrainz/bin/Debug/net6.0/`
+- For `Release` configuration: `Jellyfin.Plugin.Listenbrainz/bin/Release/net6.0/`
 
-Copy the plugin DLL file into your Jellyfin `${CONFIG_DIR}/plugins/Listenbrainz` directory.
-Create the Listenbrainz directory if it does not exist, and make sure Jellyfin has correct permissions to access it.
+Copy the DLL files into your Jellyfin `${CONFIG_DIR}/plugins/Jellyfin.Plugin.Listenbrainz` directory.
+Create the `Jellyfin.Plugin.Listenbrainz` directory if it does not exist. Make sure Jellyfin has correct permissions to access it.
 After restarting Jellyfin, the plugin should be picked up and active.
 
 ## Making a plugin release
