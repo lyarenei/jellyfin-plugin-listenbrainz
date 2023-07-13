@@ -21,7 +21,7 @@ public class MusicBrainzApiClient : BaseClient, IMusicBrainzApiClient
     /// <param name="httpClientFactory">HTTP client factory.</param>
     /// <param name="logger">Logger instance.</param>
     /// <param name="sleepService">Sleep service.</param>
-    protected MusicBrainzApiClient(
+    public MusicBrainzApiClient(
         string baseUrl,
         string clientName,
         string clientVersion,
