@@ -1,4 +1,7 @@
 using Jellyfin.Data.Entities;
+using ListenBrainzPlugin.Configuration;
+using ListenBrainzPlugin.Exceptions;
+using ListenBrainzPlugin.Extensions;
 using ListenBrainzPlugin.Interfaces;
 using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
@@ -37,8 +40,20 @@ public class ListenBrainzPlugin : IJellyfinPlaybackWatcher
         }
         catch (Exception e)
         {
-            _logger.LogInformation("Failed to get event data: {Reason}", e.Message);
+            _logger.LogInformation("Cannot handle this event: {Reason}", e.Message);
             _logger.LogDebug(e, "Event data are not valid");
+            return;
+        }
+
+        ListenBrainzUserConfig config;
+        try
+        {
+            config = AssertListenBrainzRequirements(data.Item, data.JellyfinUser);
+        }
+        catch (Exception e)
+        {
+            _logger.LogInformation("Cannot handle this event: {Reason}", e.Message);
+            _logger.LogDebug(e, "Requirements were not met");
             return;
         }
     }
@@ -71,6 +86,31 @@ public class ListenBrainzPlugin : IJellyfinPlaybackWatcher
             Item = item,
             JellyfinUser = jellyfinUser
         };
+    }
+
+    private static ListenBrainzUserConfig AssertListenBrainzRequirements(Audio item, User jellyfinUser)
+    {
+        try
+        {
+            item.AssertHasMetadata();
+        }
+        catch (Exception e)
+        {
+            throw new ListenBrainzPluginException("Audio item metadata are not valid", e);
+        }
+
+        var userConfig = jellyfinUser.GetListenBrainzConfig();
+        if (userConfig is null)
+        {
+            throw new ListenBrainzPluginException($"No ListenBrainz configuration for user {jellyfinUser.Username}");
+        }
+
+        if (userConfig.IsNotEnabled)
+        {
+            throw new ListenBrainzPluginException($"ListenBrainz is disabled for user {jellyfinUser.Username}");
+        }
+
+        return userConfig;
     }
 
     private struct EventData
