@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using MediaBrowser.Model.Plugins;
 
 namespace ListenBrainzPlugin.Configuration;
@@ -16,7 +17,7 @@ public class PluginConfiguration : BasePluginConfiguration
     /// </summary>
     public PluginConfiguration()
     {
-        UserConfigs = new List<ListenBrainzUserConfig>();
+        UserConfigs = new Collection<ListenBrainzUserConfig>();
     }
 
     /// <summary>
@@ -49,5 +50,5 @@ public class PluginConfiguration : BasePluginConfiguration
     /// <summary>
     /// Gets or sets ListenBrainz user configurations.
     /// </summary>
-    public IEnumerable<ListenBrainzUserConfig> UserConfigs { get; set; }
+    public Collection<ListenBrainzUserConfig> UserConfigs { get; set; }
 }
