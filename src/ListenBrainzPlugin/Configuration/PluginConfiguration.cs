@@ -16,7 +16,7 @@ public class PluginConfiguration : BasePluginConfiguration
     /// </summary>
     public PluginConfiguration()
     {
-        Users = new List<ListenBrainzUser>();
+        UserConfigs = new List<ListenBrainzUserConfig>();
     }
 
     /// <summary>
@@ -49,5 +49,5 @@ public class PluginConfiguration : BasePluginConfiguration
     /// <summary>
     /// Gets or sets ListenBrainz user configurations.
     /// </summary>
-    public IEnumerable<ListenBrainzUser> Users { get; set; }
+    public IEnumerable<ListenBrainzUserConfig> UserConfigs { get; set; }
 }
