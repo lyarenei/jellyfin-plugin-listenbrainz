@@ -30,6 +30,7 @@
 
     <ItemGroup>
         <EmbeddedResource Include="Configuration\configurationPage.html" />
+        <EmbeddedResource Include="Configuration\styles.css" />
     </ItemGroup>
 
 </Project>

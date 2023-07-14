@@ -1,10 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>ListenBrainz plugin</title>
+    <title>ListenBrainz Plugin configuration</title>
 </head>
 <body>
+<div id="ListenBrainzSettingsPage" data-role="page" class="page type-interior pluginConfigurationPage"
+     data-require="emby-input,emby-button,emby-select,emby-checkbox">
+    <div data-role="content">
+        <div class="content-primary">
+            ListenBrainz plugin configuration
+        </div>
+    </div>
+    <script type="text/javascript">
+        let ListenBrainzConfig = {
+            loadCss: function (fileName) {
+                let path = 'ListenBrainzPlugin/internal/styles/' + fileName;
+                ApiClient.ajax({
+                    type: "GET",
+                    url: ApiClient.getUrl(path),
+                }).then((cssValue) => {
+                    let styleTag = document.createElement("style");
+                    styleTag.innerText = cssValue;
+                    document.getElementsByTagName("head")[0].appendChild(styleTag);
+                });
+            },
+        }
 
+        document.querySelector('#ListenBrainzSettingsPage')
+            .addEventListener('pageshow', function () {
+                ListenBrainzConfig.loadCss('bootstrap-grid.min.css');
+                ListenBrainzConfig.loadCss('styles.css');
+            });
+    </script>
+</div>
 </body>
 </html>
