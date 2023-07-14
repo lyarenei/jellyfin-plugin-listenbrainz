@@ -1,3 +1,4 @@
+using System.Reflection;
 using ListenBrainzPlugin.Configuration;
 using ListenBrainzPlugin.Exceptions;
 using MediaBrowser.Common.Configuration;
@@ -29,6 +30,14 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 
     /// <inheritdoc />
     public override Guid Id => Guid.Parse("ec60dece-f76f-4996-bf2b-3c26d5ae4597");
+
+    /// <summary>
+    /// Gets plugin version.
+    /// </summary>
+    public static new string Version
+    {
+        get => Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0.0";
+    }
 
     /// <inheritdoc />
     public IEnumerable<PluginPageInfo> GetPages()
