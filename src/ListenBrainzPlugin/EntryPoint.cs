@@ -1,6 +1,7 @@
 using ListenBrainzPlugin.Interfaces;
 using MediaBrowser.Controller.Plugins;
 using MediaBrowser.Controller.Session;
+using Microsoft.Extensions.Logging;
 
 namespace ListenBrainzPlugin;
 
@@ -16,10 +17,13 @@ public class EntryPoint : IServerEntryPoint
     /// Initializes a new instance of the <see cref="EntryPoint"/> class.
     /// </summary>
     /// <param name="sessionManager">Session manager.</param>
-    public EntryPoint(ISessionManager sessionManager)
+    /// <param name="loggerFactory">Logger factory.</param>
+    public EntryPoint(ISessionManager sessionManager, ILoggerFactory loggerFactory)
     {
         _sessionManager = sessionManager;
-        _watcher = new ListenBrainzPlugin();
+
+        var logger = loggerFactory.CreateLogger<ListenBrainzPlugin>();
+        _watcher = new ListenBrainzPlugin(logger);
     }
 
     /// <inheritdoc />
