@@ -16,6 +16,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ListenBrainzPlugin.ListenBr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ListenBrainzPlugin.ListenBrainzApi.Tests", "tests\ListenBrainzPlugin.ListenBrainzApi.Tests\ListenBrainzPlugin.ListenBrainzApi.Tests.csproj", "{7C6FAEC4-5D44-4035-8590-2FCDFF1ABC2B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ListenBrainzPlugin", "src\ListenBrainzPlugin\ListenBrainzPlugin.csproj", "{5E3664B9-03C9-4357-86C5-B9B6E18C1098}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -46,6 +48,10 @@ Global
 		{7C6FAEC4-5D44-4035-8590-2FCDFF1ABC2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C6FAEC4-5D44-4035-8590-2FCDFF1ABC2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C6FAEC4-5D44-4035-8590-2FCDFF1ABC2B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E3664B9-03C9-4357-86C5-B9B6E18C1098}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E3664B9-03C9-4357-86C5-B9B6E18C1098}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E3664B9-03C9-4357-86C5-B9B6E18C1098}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E3664B9-03C9-4357-86C5-B9B6E18C1098}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{33145D22-8C66-4C69-A409-3934840EAF4C} = {BCFEC1CA-66E1-462A-BFA8-00D61DCCD970}
@@ -54,5 +60,6 @@ Global
 		{08A62589-F3AC-44B3-810C-0D69814B04AC} = {99C564F4-BF8F-4555-AAB7-3A379C784CC4}
 		{BEB89977-4825-4591-9886-0920CE9D93EC} = {BCFEC1CA-66E1-462A-BFA8-00D61DCCD970}
 		{7C6FAEC4-5D44-4035-8590-2FCDFF1ABC2B} = {99C564F4-BF8F-4555-AAB7-3A379C784CC4}
+		{5E3664B9-03C9-4357-86C5-B9B6E18C1098} = {BCFEC1CA-66E1-462A-BFA8-00D61DCCD970}
 	EndGlobalSection
 EndGlobal
