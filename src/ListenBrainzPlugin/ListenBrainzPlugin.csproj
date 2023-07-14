@@ -28,4 +28,8 @@
       <ProjectReference Include="..\ListenBrainzPlugin.MusicBrainzApi\ListenBrainzPlugin.MusicBrainzApi.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <EmbeddedResource Include="Configuration\configurationPage.html" />
+    </ItemGroup>
+
 </Project>
