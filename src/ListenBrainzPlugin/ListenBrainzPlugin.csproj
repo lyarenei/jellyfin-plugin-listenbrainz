@@ -28,8 +28,4 @@
       <ProjectReference Include="..\ListenBrainzPlugin.MusicBrainzApi\ListenBrainzPlugin.MusicBrainzApi.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Interfaces" />
-    </ItemGroup>
-
 </Project>
