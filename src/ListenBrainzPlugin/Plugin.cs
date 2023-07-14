@@ -1,4 +1,5 @@
 using ListenBrainzPlugin.Configuration;
+using ListenBrainzPlugin.Exceptions;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Plugins;
@@ -11,6 +12,8 @@ namespace ListenBrainzPlugin;
 /// </summary>
 public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 {
+    private static Plugin? _thisInstance;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="Plugin"/> class.
     /// </summary>
@@ -18,6 +21,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// <param name="xmlSerializer">XML serializer.</param>
     public Plugin(IApplicationPaths paths, IXmlSerializer xmlSerializer) : base(paths, xmlSerializer)
     {
+        _thisInstance = this;
     }
 
     /// <inheritdoc />
@@ -39,5 +43,17 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
                 MenuIcon = "music_note"
             }
         };
+    }
+
+    /// <summary>
+    /// Convenience method for getting plugin configuration.
+    /// </summary>
+    /// <returns>Plugin configuration.</returns>
+    /// <exception cref="ListenBrainzPluginException">Plugin instance is not available.</exception>
+    public static PluginConfiguration GetConfiguration()
+    {
+        var config = _thisInstance?.Configuration;
+        if (config is not null) return config;
+        throw new ListenBrainzPluginException("Plugin instance is not available");
     }
 }
