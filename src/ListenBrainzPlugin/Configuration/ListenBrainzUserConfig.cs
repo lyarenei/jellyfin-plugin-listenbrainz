@@ -11,6 +11,7 @@ public class ListenBrainzUserConfig
     public ListenBrainzUserConfig()
     {
         IsEnabled = false;
+        ApiToken = string.Empty;
     }
 
     /// <summary>
@@ -27,4 +28,9 @@ public class ListenBrainzUserConfig
     /// Gets a value indicating whether ListenBrainz submission is not enabled.
     /// </summary>
     public bool IsNotEnabled => !IsEnabled;
+
+    /// <summary>
+    /// Gets or sets ListenBrainz API token.
+    /// </summary>
+    public string ApiToken { get; set; }
 }

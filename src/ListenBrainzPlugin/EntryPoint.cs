@@ -1,4 +1,6 @@
+using ListenBrainzPlugin.Clients;
 using ListenBrainzPlugin.Interfaces;
+using ListenBrainzPlugin.ListenBrainzApi;
 using MediaBrowser.Controller.Plugins;
 using MediaBrowser.Controller.Session;
 using Microsoft.Extensions.Logging;
@@ -18,12 +20,14 @@ public class EntryPoint : IServerEntryPoint
     /// </summary>
     /// <param name="sessionManager">Session manager.</param>
     /// <param name="loggerFactory">Logger factory.</param>
-    public EntryPoint(ISessionManager sessionManager, ILoggerFactory loggerFactory)
+    /// <param name="clientFactory">HTTP client factory.</param>
+    public EntryPoint(ISessionManager sessionManager, ILoggerFactory loggerFactory, IHttpClientFactory clientFactory)
     {
         _sessionManager = sessionManager;
 
         var logger = loggerFactory.CreateLogger<ListenBrainzPlugin>();
-        _watcher = new ListenBrainzPlugin(logger);
+        var listenBrainzClient = GetListenBrainzClient(logger, clientFactory);
+        _watcher = new ListenBrainzPlugin(logger, listenBrainzClient);
     }
 
     /// <inheritdoc />
@@ -40,5 +44,12 @@ public class EntryPoint : IServerEntryPoint
     {
         _sessionManager.PlaybackStart -= _watcher.OnPlaybackStart;
         _sessionManager.PlaybackStopped -= _watcher.OnPlaybackStop;
+    }
+
+    private static IListenBrainzClient GetListenBrainzClient(ILogger logger, IHttpClientFactory clientFactory)
+    {
+        var config = Plugin.GetConfiguration();
+        var apiClient = new ListenBrainzApiClient(config.ListenBrainzApiUrl, clientFactory, logger);
+        return new ListenBrainzClient(logger, apiClient);
     }
 }

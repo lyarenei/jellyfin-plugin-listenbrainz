@@ -15,14 +15,17 @@ namespace ListenBrainzPlugin;
 public class ListenBrainzPlugin : IJellyfinPlaybackWatcher
 {
     private readonly ILogger _logger;
+    private readonly IListenBrainzClient _listenBrainzClient;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ListenBrainzPlugin"/> class.
     /// </summary>
     /// <param name="logger">Logger instance.</param>
-    public ListenBrainzPlugin(ILogger logger)
+    /// <param name="listenBrainzClient">ListenBrainz client.</param>
+    public ListenBrainzPlugin(ILogger logger, IListenBrainzClient listenBrainzClient)
     {
         _logger = logger;
+        _listenBrainzClient = listenBrainzClient;
     }
 
     /// <summary>
@@ -45,16 +48,30 @@ public class ListenBrainzPlugin : IJellyfinPlaybackWatcher
             return;
         }
 
-        ListenBrainzUserConfig config;
+        ListenBrainzUserConfig userConfig;
         try
         {
-            config = AssertListenBrainzRequirements(data.Item, data.JellyfinUser);
+            userConfig = AssertListenBrainzRequirements(data.Item, data.JellyfinUser);
         }
         catch (Exception e)
         {
             _logger.LogInformation("Cannot handle this event: {Reason}", e.Message);
             _logger.LogDebug(e, "Requirements were not met");
             return;
+        }
+
+        try
+        {
+            _listenBrainzClient.SendNowPlaying(userConfig, data.Item);
+        }
+        catch (Exception e)
+        {
+            _logger.LogInformation(
+                "Failed to send 'now playing' for user {User}: {Reason}",
+                data.JellyfinUser.Username,
+                e.Message);
+
+            _logger.LogDebug(e, "Send playing now failed");
         }
     }
 
