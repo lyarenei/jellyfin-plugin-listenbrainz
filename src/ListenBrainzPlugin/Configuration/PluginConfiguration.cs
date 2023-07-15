@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Xml.Serialization;
 using MediaBrowser.Model.Plugins;
 
 namespace ListenBrainzPlugin.Configuration;
@@ -11,6 +12,7 @@ public class PluginConfiguration : BasePluginConfiguration
     private string? _musicBrainzUrlOverride;
     private string? _listenBrainzUrlOverride;
     private bool? _isMusicBrainzEnabledOverride;
+    private bool? _isAlternativeModeEnabled;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PluginConfiguration"/> class.
@@ -19,6 +21,21 @@ public class PluginConfiguration : BasePluginConfiguration
     {
         UserConfigs = new Collection<ListenBrainzUserConfig>();
     }
+
+    /// <summary>
+    /// Gets or sets ListenBrainz API base URL.
+    /// </summary>
+    public string ListenBrainzApiUrl
+    {
+        get => _listenBrainzUrlOverride ?? ListenBrainzApi.Resources.Api.BaseUrl;
+        set => _listenBrainzUrlOverride = value;
+    }
+
+    /// <summary>
+    /// Gets a default ListenBrainz API base URL.
+    /// </summary>
+    [XmlIgnore]
+    public string DefaultListenBrainzApiUrl => ListenBrainzApi.Resources.Api.BaseUrl;
 
     /// <summary>
     /// Gets or sets MusicBrainz API base URL.
@@ -30,6 +47,12 @@ public class PluginConfiguration : BasePluginConfiguration
     }
 
     /// <summary>
+    /// Gets a default MusicBrainz API base URL.
+    /// </summary>
+    [XmlIgnore]
+    public string DefaultMusicBrainzApiUrl => MusicBrainzApi.Resources.Api.BaseUrl;
+
+    /// <summary>
     /// Gets or sets a value indicating whether MusicBrainz integration is enabled.
     /// </summary>
     public bool IsMusicBrainzEnabled
@@ -39,12 +62,12 @@ public class PluginConfiguration : BasePluginConfiguration
     }
 
     /// <summary>
-    /// Gets or sets ListenBrainz API base URL.
+    /// Gets or sets a value indicating whether alternative plugin mode is enabled.
     /// </summary>
-    public string ListenBrainzApiUrl
+    public bool IsAlternativeModeEnabled
     {
-        get => _listenBrainzUrlOverride ?? ListenBrainzApi.Resources.Api.BaseUrl;
-        set => _listenBrainzUrlOverride = value;
+        get => _isAlternativeModeEnabled ?? false;
+        set => _isAlternativeModeEnabled = value;
     }
 
     /// <summary>

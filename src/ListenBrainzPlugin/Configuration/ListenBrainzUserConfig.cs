@@ -1,3 +1,6 @@
+using System.Text.Json.Serialization;
+using System.Xml.Serialization;
+
 namespace ListenBrainzPlugin.Configuration;
 
 /// <summary>
@@ -10,7 +13,7 @@ public class ListenBrainzUserConfig
     /// </summary>
     public ListenBrainzUserConfig()
     {
-        IsEnabled = false;
+        IsListenSubmitEnabled = false;
         ApiToken = string.Empty;
     }
 
@@ -20,17 +23,24 @@ public class ListenBrainzUserConfig
     public Guid JellyfinUserId { get; set; }
 
     /// <summary>
+    /// Gets or sets ListenBrainz API token.
+    /// </summary>
+    public string ApiToken { get; set; }
+
+    /// <summary>
     /// Gets or sets a value indicating whether ListenBrainz submission is enabled.
     /// </summary>
-    public bool IsEnabled { get; set; }
+    public bool IsListenSubmitEnabled { get; set; }
 
     /// <summary>
     /// Gets a value indicating whether ListenBrainz submission is not enabled.
     /// </summary>
-    public bool IsNotEnabled => !IsEnabled;
+    [JsonIgnore]
+    [XmlIgnore]
+    public bool IsNotListenSubmitEnabled => !IsListenSubmitEnabled;
 
     /// <summary>
-    /// Gets or sets ListenBrainz API token.
+    /// Gets or sets a value indicating whether ListenBrainz favorites sync is enabled.
     /// </summary>
-    public string ApiToken { get; set; }
+    public bool IsFavoritesSyncEnabled { get; set; }
 }

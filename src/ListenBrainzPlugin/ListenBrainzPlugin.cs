@@ -82,7 +82,7 @@ public class ListenBrainzPlugin : IJellyfinPlaybackWatcher
     /// <param name="args">Event args.</param>
     public void OnPlaybackStop(object? sender, PlaybackStopEventArgs args)
     {
-        throw new NotImplementedException();
+        // throw new NotImplementedException();
     }
 
     private static EventData GetEventData(PlaybackProgressEventArgs eventArgs)
@@ -122,7 +122,7 @@ public class ListenBrainzPlugin : IJellyfinPlaybackWatcher
             throw new ListenBrainzPluginException($"No ListenBrainz configuration for user {jellyfinUser.Username}");
         }
 
-        if (userConfig.IsNotEnabled)
+        if (userConfig.IsNotListenSubmitEnabled)
         {
             throw new ListenBrainzPluginException($"ListenBrainz is disabled for user {jellyfinUser.Username}");
         }
