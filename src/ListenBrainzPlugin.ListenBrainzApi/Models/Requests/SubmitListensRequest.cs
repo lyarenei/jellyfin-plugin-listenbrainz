@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using ListenBrainzPlugin.ListenBrainzApi.Interfaces;
 using ListenBrainzPlugin.ListenBrainzApi.Resources;
 
@@ -24,9 +25,16 @@ public class SubmitListensRequest : IListenBrainzRequest
     public string Endpoint => Endpoints.SubmitListens;
 
     /// <summary>
-    /// Gets or sets listen type.
+    /// Gets listen type.
     /// </summary>
-    public ListenType ListenType { get; set; }
+    [JsonIgnore]
+    public ListenType ListenType { get; init; }
+
+    /// <summary>
+    /// Gets <see cref="ListenType"/> as a string.
+    /// </summary>
+    [JsonPropertyName("listen_type")]
+    public string ListenTypeString => ListenType.Value;
 
     /// <summary>
     /// Gets or sets request payload.
