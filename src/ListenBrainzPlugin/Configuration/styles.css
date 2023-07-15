@@ -1,0 +1,8 @@
+.vertical-center {
+    align-self: center;
+}
+
+.horizontal-center {
+    justify-content: center;
+    text-align: center;
+}

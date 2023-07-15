@@ -1,14 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>ListenBrainz Plugin configuration</title>
+    <title>ListenBrainz Plugin Settings</title>
 </head>
 <body>
 <div id="ListenBrainzSettingsPage" data-role="page" class="page type-interior pluginConfigurationPage"
      data-require="emby-input,emby-button,emby-select,emby-checkbox">
     <div data-role="content">
         <div class="content-primary">
-            ListenBrainz plugin configuration
+            <form id="ListenBrainzPluginSettingsForm">
+                <div class="sectionTitleContainer flex align-items-center">
+                    <h2 class="sectionTitle">ListenBrainz Plugin Settings</h2>
+                    <a class="raised button-alt headerHelpButton emby-button" is="emby-linkbutton"
+                       rel="noopener noreferrer" target="_blank"
+                       href="https://github.com/lyarenei/jellyfin-plugin-listenbrainz#configuration">Documentation</a>
+                </div>
+                <fieldset class="verticalSection verticalSection-extrabottompadding">
+                    <legend>
+                        <h3>User Settings</h3>
+                    </legend>
+                    <div class="bootstrap-wrapper container">
+                        <div class="selectContainer bootstrap-wrapper row no-gutters">
+                            <label class="selectLabel" for="JellyfinUser">Select Jellyfin user</label>
+                            <select is="emby-select" id="JellyfinUser" name="JellyfinUser"></select>
+                        </div>
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="ListenBrainzApiToken">
+                                ListenBrainz API token
+                            </label>
+                            <div class="bootstrap-wrapper row no-gutters">
+                                <input id="ListenBrainzApiToken" name="ListenBrainzApiToken" type="password"
+                                       is="emby-input" class="bootstrap-wrapper col-md-9 vertical-center"/>
+                                <div id="CheckListenBrainzApiToken"
+                                     class="raised button block emby-button bootstrap-wrapper col-md-2 offset-md-1 vertical-center">
+                                    Check
+                                </div>
+                            </div>
+                            <div class="fieldDescription">
+                                User API token. Can be found in
+                                <a class="inputLabel" target="_blank" href="https://listenbrainz.org/profile/">
+                                    user profile</a>.
+                            </div>
+                        </div>
+                        <div class="checkboxContainer bootstrap-wrapper row no-gutters">
+                            <label class="inputLabel inputLabelUnfocused" for="ListenSubmitEnabled">
+                                <input is="emby-checkbox" type="checkbox" id="ListenSubmitEnabled"
+                                       name="ListenSubmitEnabled"/>
+                                <span>Enable submitting listens</span>
+                            </label>
+                        </div>
+                        <div class="checkboxContainer bootstrap-wrapper row no-gutters">
+                            <label class="inputLabel inputLabelUnfocused" for="FavoritesSyncEnabled">
+                                <input is="emby-checkbox" type="checkbox" id="FavoritesSyncEnabled"
+                                       name="FavoritesSyncEnabled"/>
+                                <span>Enable syncing favorites</span>
+                            </label>
+                        </div>
+                        <div class="bootstrap-wrapper row no-gutters horizontal-center">
+                            <button is="emby-button" type="submit" id="saveUser"
+                                    class="raised button-submit block emby-button col-md-2">
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                </fieldset>
+                <fieldset class="verticalSection">
+                    <legend>
+                        <h3>General Settings</h3>
+                    </legend>
+                    <div class="bootstrap-wrapper container">
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="ListenBrainzApiUrl">
+                                ListenBrainz API URL
+                            </label>
+                            <div class="bootstrap-wrapper row no-gutters">
+                                <input id="ListenBrainzApiUrl" name="ListenBrainzApiUrl" type="text"
+                                       is="emby-input" class="bootstrap-wrapper col-md-9 vertical-center"/>
+                                <div id="ResetListenBrainzApiUrl"
+                                     class="raised button block emby-button bootstrap-wrapper col-md-2 offset-md-1 vertical-center">
+                                    Reset
+                                </div>
+                            </div>
+                            <div class="fieldDescription">Set a custom ListenBrainz API URL.</div>
+                        </div>
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="MusicBrainzApiUrl">
+                                MusicBrainz API URL
+                            </label>
+                            <div class="bootstrap-wrapper row no-gutters">
+                                <input id="MusicBrainzApiUrl" name="MusicBrainzApiUrl" type="text"
+                                       is="emby-input"
+                                       class="bootstrap-wrapper col-md-9 vertical-center"/>
+                                <div id="ResetMusicBrainzApiUrl"
+                                     class="raised button block emby-button bootstrap-wrapper col-md-2 offset-md-1 vertical-center">
+                                    Reset
+                                </div>
+                            </div>
+                            <div class="fieldDescription">Set a custom MusicBrainz API URL.</div>
+                        </div>
+                        <div class="checkboxContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="MusicBrainzEnabled">
+                                <input is="emby-checkbox" type="checkbox" id="MusicBrainzEnabled"
+                                       name="MusicBrainzEnabled"/>
+                                <span>Fetch additional metadata from MusicBrainz</span>
+                            </label>
+                        </div>
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="AltListenDetectionEnabled">
+                                <input is="emby-checkbox" type="checkbox" id="AltListenDetectionEnabled"
+                                       name="AltListenDetectionEnabled"/>
+                                <span>Use alternative event for recognizing listens</span>
+                            </label>
+                            <div class="fieldDescription">Requires clients to mark items as played.</div>
+                        </div>
+                        <div class="bootstrap-wrapper row no-gutters horizontal-center">
+                            <button is="emby-button" type="submit" id="saveGlobal"
+                                    class="raised button-submit block emby-button col-md-2">
+                                Save
+                            </button>
+                        </div>
+                        <div class="bootstrap-wrapper row no-gutters horizontal-center">
+                            <label class="fieldDescription col-md-4">
+                                Requires restart to take effect.
+                            </label>
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
         </div>
     </div>
     <script type="text/javascript">
