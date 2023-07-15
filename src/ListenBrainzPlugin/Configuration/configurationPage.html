@@ -234,7 +234,7 @@
             ApiClient.getPluginConfiguration(ListenBrainzConfig.PluginUniqueId)
                 .then((config) => {
                     let newUserConfig = getUserConfigInputs();
-                    let index = config.UserConfigs.indexOf(uc => uc.JellyfinUserId === newUserConfig.JellyfinUserId);
+                    let index = config.UserConfigs.map((uc) => uc.JellyfinUserId).indexOf(newUserConfig.JellyfinUserId);
                     if (index < 0) {
                         config.UserConfigs.push(newUserConfig);
                     } else {
