@@ -358,8 +358,8 @@
                 return ListenBrainzConfig.UserDefaults;
             }
 
-            let userConfig = config.UserConfigs.find((userConfig) => userConfig.JellyfinUserId === userId);
-            return userConfig !== undefined ? userConfig : ListenBrainzConfig.UserDefaults;
+            let index = config.UserConfigs.map((uc) => uc.JellyfinUserId).indexOf(userId);
+            return index < 0 ? ListenBrainzConfig.UserDefaults : config.UserConfigs[index];
         }
 
         function getUserConfigInputs() {
