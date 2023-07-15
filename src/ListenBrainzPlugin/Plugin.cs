@@ -29,7 +29,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     public override string Name => "ListenBrainz";
 
     /// <inheritdoc />
-    public override Guid Id => Guid.Parse("ec60dece-f76f-4996-bf2b-3c26d5ae4597");
+    public override Guid Id => Guid.Parse("59B20823-AAFE-454C-A393-17427F518631");
 
     /// <summary>
     /// Gets plugin version.
