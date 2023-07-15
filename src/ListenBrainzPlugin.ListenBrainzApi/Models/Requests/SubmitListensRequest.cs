@@ -1,6 +1,6 @@
-using System.Text.Json.Serialization;
 using ListenBrainzPlugin.ListenBrainzApi.Interfaces;
 using ListenBrainzPlugin.ListenBrainzApi.Resources;
+using Newtonsoft.Json;
 
 namespace ListenBrainzPlugin.ListenBrainzApi.Models.Requests;
 
@@ -33,7 +33,7 @@ public class SubmitListensRequest : IListenBrainzRequest
     /// <summary>
     /// Gets <see cref="ListenType"/> as a string.
     /// </summary>
-    [JsonPropertyName("listen_type")]
+    [JsonProperty("listen_type")]
     public string ListenTypeString => ListenType.Value;
 
     /// <summary>

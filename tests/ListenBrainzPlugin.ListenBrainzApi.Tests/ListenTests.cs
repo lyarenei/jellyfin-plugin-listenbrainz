@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
-using System.Text.Json;
 using ListenBrainzPlugin.ListenBrainzApi.Models;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace ListenBrainzPlugin.ListenBrainzApi.Tests;
@@ -25,18 +25,18 @@ public class ListenTests
     [Fact]
     public void Listen_Encode()
     {
-        var listenJson = JsonSerializer.Serialize(_exampleListen, BaseClient.SerializerOptions);
+        var listenJson = JsonConvert.SerializeObject(_exampleListen, BaseClient.SerializerSettings);
         Assert.NotNull(listenJson);
 
-        var expectedJSON = @"{""listened_at"":1234,""track_metadata"":{""artist_name"":""Foo Bar"",""track_name"":""Foo - Bar"",""release_name"":""Foobar"",""additional_info"":{""release_mbid"":""release-foo"",""artist_mbids"":[""artist-foo""],""recording_mbid"":""recording-foo""}}}";
+        var expectedJSON = @"{""listened_at"":1234,""track_metadata"":{""artist_name"":""Foo Bar"",""track_name"":""Foo - Bar"",""release_name"":""Foobar"",""additional_info"":{""artist_mbids"":[""artist-foo""],""release_mbid"":""release-foo"",""recording_mbid"":""recording-foo""}}}";
         Assert.Equal(expectedJSON, listenJson);
     }
 
     [Fact]
     public void Listen_EncodeAndDecode()
     {
-        var listenJson = JsonSerializer.Serialize(_exampleListen, BaseClient.SerializerOptions);
-        var deserializedListen = JsonSerializer.Deserialize<Listen>(listenJson, BaseClient.SerializerOptions);
+        var listenJson = JsonConvert.SerializeObject(_exampleListen, BaseClient.SerializerSettings);
+        var deserializedListen = JsonConvert.DeserializeObject<Listen>(listenJson, BaseClient.SerializerSettings);
         Assert.NotNull(deserializedListen);
     }
 }

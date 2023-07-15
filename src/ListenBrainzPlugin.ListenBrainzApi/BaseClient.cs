@@ -1,14 +1,13 @@
 using System.Net.Http.Headers;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using ListenBrainzPlugin.Http;
 using ListenBrainzPlugin.Http.Exceptions;
 using ListenBrainzPlugin.Http.Interfaces;
 using ListenBrainzPlugin.ListenBrainzApi.Interfaces;
-using ListenBrainzPlugin.ListenBrainzApi.Json;
 using ListenBrainzPlugin.ListenBrainzApi.Resources;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using HttpClient = ListenBrainzPlugin.Http.HttpClient;
 
 namespace ListenBrainzPlugin.ListenBrainzApi;
@@ -19,12 +18,13 @@ namespace ListenBrainzPlugin.ListenBrainzApi;
 public class BaseClient : HttpClient
 {
     /// <summary>
-    /// Serializer options.
+    /// Serializer settings.
     /// </summary>
-    public static readonly JsonSerializerOptions SerializerOptions = new()
+    public static readonly JsonSerializerSettings SerializerSettings = new()
     {
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        PropertyNamingPolicy = SnakeCaseNamingPolicy.Instance
+        NullValueHandling = NullValueHandling.Ignore,
+        DefaultValueHandling = DefaultValueHandling.Ignore,
+        ContractResolver = new DefaultContractResolver { NamingStrategy = new SnakeCaseNamingStrategy() }
     };
 
     private readonly string _baseUrl;
@@ -54,7 +54,7 @@ public class BaseClient : HttpClient
         where TRequest : IListenBrainzRequest
         where TResponse : IListenBrainzResponse
     {
-        var jsonData = JsonSerializer.Serialize(request, SerializerOptions);
+        var jsonData = JsonConvert.SerializeObject(request, SerializerSettings);
         var requestMessage = new HttpRequestMessage
         {
             Method = HttpMethod.Post,
@@ -95,8 +95,8 @@ public class BaseClient : HttpClient
         where TResponse : IListenBrainzResponse
     {
         var response = await SendRequest(requestMessage, cancellationToken);
-        var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
-        var result = await JsonSerializer.DeserializeAsync<TResponse>(responseStream, SerializerOptions, cancellationToken);
+        var stringContent = await response.Content.ReadAsStringAsync(cancellationToken);
+        var result = JsonConvert.DeserializeObject<TResponse>(stringContent, SerializerSettings);
         if (result is null) throw new InvalidResponseException("Response deserialized to NULL");
 
         result.IsOk = response.IsSuccessStatusCode;
