@@ -1,3 +1,4 @@
+using ListenBrainzPlugin.Dtos;
 using ListenBrainzPlugin.ListenBrainzApi.Models;
 using MediaBrowser.Controller.Entities.Audio;
 
@@ -25,27 +26,29 @@ public static class AudioExtensions
     /// </summary>
     /// <param name="item">Item to transform.</param>
     /// <param name="timestamp">Timestamp of the listen.</param>
+    /// <param name="itemMetadata">Additional item metadata.</param>
     /// <returns>Listen instance with data from the item.</returns>
-    public static Listen AsListen(this Audio item, long? timestamp = null)
+    public static Listen AsListen(this Audio item, long? timestamp = null, AudioItemMetadata? itemMetadata = null)
     {
+        string allArtists = string.Join(", ", item.Artists.TakeWhile(name => !string.IsNullOrEmpty(name)));
         return new Listen
         {
             ListenedAt = timestamp,
             TrackMetadata = new TrackMetadata
             {
-                ArtistName = string.Join(", ", item.Artists.TakeWhile(name => !string.IsNullOrEmpty(name))),
+                ArtistName = itemMetadata?.FullCreditString ?? allArtists,
                 ReleaseName = item.Album,
                 TrackName = item.Name,
                 AdditionalInfo = new AdditionalInfo
                 {
                     MediaPlayer = "Jellyfin",
                     MediaPlayerVersion = null,
-                    SubmissionClient = "ListenBrainz plugin for Jellyfin",
+                    SubmissionClient = Plugin.FullName,
                     SubmissionClientVersion = Plugin.Version,
                     ReleaseMbid = item.ProviderIds.GetValueOrDefault("MusicBrainzAlbum"),
                     ArtistMbids = item.ProviderIds.GetValueOrDefault("MusicBrainzArtist")?.Split(';'),
                     ReleaseGroupMbid = item.ProviderIds.GetValueOrDefault("MusicBrainzReleaseGroup"),
-                    RecordingMbid = null,
+                    RecordingMbid = itemMetadata?.Mbid,
                     TrackMbid = item.ProviderIds.GetValueOrDefault("MusicBrainzTrack"),
                     WorkMbids = null,
                     TrackNumber = item.IndexNumber,
@@ -55,4 +58,11 @@ public static class AudioExtensions
             }
         };
     }
+
+    /// <summary>
+    /// Convenience method to get a MusicBrainz track ID for this item.
+    /// </summary>
+    /// <param name="item">Audio item.</param>
+    /// <returns>Track MBID. Null if not available.</returns>
+    public static string? GetTrackMbid(this Audio item) => item.ProviderIds.GetValueOrDefault("MusicBrainzTrack");
 }

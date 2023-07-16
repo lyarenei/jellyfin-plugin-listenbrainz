@@ -1,4 +1,5 @@
 using ListenBrainzPlugin.Configuration;
+using ListenBrainzPlugin.Dtos;
 using MediaBrowser.Controller.Entities.Audio;
 
 namespace ListenBrainzPlugin.Interfaces;
@@ -13,5 +14,6 @@ public interface IListenBrainzClient
     /// </summary>
     /// <param name="config">ListenBrainz user configuration.</param>
     /// <param name="item">Audio item currently being listened to.</param>
-    public void SendNowPlaying(ListenBrainzUserConfig config, Audio item);
+    /// <param name="audioMetadata">Additional metadata for this audio item.</param>
+    public void SendNowPlaying(ListenBrainzUserConfig config, Audio item, AudioItemMetadata? audioMetadata);
 }

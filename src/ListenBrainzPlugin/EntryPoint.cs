@@ -1,6 +1,8 @@
 using ListenBrainzPlugin.Clients;
+using ListenBrainzPlugin.Extensions;
 using ListenBrainzPlugin.Interfaces;
 using ListenBrainzPlugin.ListenBrainzApi;
+using ListenBrainzPlugin.MusicBrainzApi;
 using MediaBrowser.Controller.Plugins;
 using MediaBrowser.Controller.Session;
 using Microsoft.Extensions.Logging;
@@ -27,7 +29,8 @@ public class EntryPoint : IServerEntryPoint
 
         var logger = loggerFactory.CreateLogger<ListenBrainzPlugin>();
         var listenBrainzClient = GetListenBrainzClient(logger, clientFactory);
-        _watcher = new ListenBrainzPlugin(logger, listenBrainzClient);
+        var musicBrainzClient = GetMusicBrainzClient(logger, clientFactory);
+        _watcher = new ListenBrainzPlugin(logger, listenBrainzClient, musicBrainzClient);
     }
 
     /// <inheritdoc />
@@ -51,5 +54,22 @@ public class EntryPoint : IServerEntryPoint
         var config = Plugin.GetConfiguration();
         var apiClient = new ListenBrainzApiClient(config.ListenBrainzApiUrl, clientFactory, logger);
         return new ListenBrainzClient(logger, apiClient);
+    }
+
+    private static IMetadataClient GetMusicBrainzClient(ILogger logger, IHttpClientFactory clientFactory)
+    {
+        var config = Plugin.GetConfiguration();
+        if (!config.IsMusicBrainzEnabled) return new DummyMusicBrainzClient(logger);
+
+        var clientName = string.Join(string.Empty, Plugin.FullName.Split(' ').Select(s => s.Capitalize()));
+        var apiClient = new MusicBrainzApiClient(
+            config.MusicBrainzApiUrl,
+            clientName,
+            Plugin.Version,
+            Plugin.SourceUrl,
+            clientFactory,
+            logger);
+
+        return new MusicBrainzClient(logger, apiClient);
     }
 }

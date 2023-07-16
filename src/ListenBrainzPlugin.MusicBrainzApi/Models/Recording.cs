@@ -1,4 +1,3 @@
-using System.Text;
 using System.Text.Json.Serialization;
 
 namespace ListenBrainzPlugin.MusicBrainzApi.Models;
@@ -33,23 +32,4 @@ public class Recording
     /// </summary>
     [JsonPropertyName("artist-credit")]
     public IEnumerable<ArtistCredit> ArtistCredits { get; set; }
-
-    /// <summary>
-    /// Gets full artist credit string.
-    /// </summary>
-    /// <returns>Artist credit string.</returns>
-    public string FullCreditString
-    {
-        get
-        {
-            var creditString = new StringBuilder();
-            foreach (var artistCredit in this.ArtistCredits)
-            {
-                creditString.Append(artistCredit.Name);
-                creditString.Append(artistCredit.JoinPhrase);
-            }
-
-            return creditString.ToString();
-        }
-    }
 }

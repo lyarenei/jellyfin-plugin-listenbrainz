@@ -1,5 +1,6 @@
 using Jellyfin.Data.Entities;
 using ListenBrainzPlugin.Configuration;
+using ListenBrainzPlugin.Dtos;
 using ListenBrainzPlugin.Exceptions;
 using ListenBrainzPlugin.Extensions;
 using ListenBrainzPlugin.Interfaces;
@@ -16,16 +17,19 @@ public class ListenBrainzPlugin : IJellyfinPlaybackWatcher
 {
     private readonly ILogger _logger;
     private readonly IListenBrainzClient _listenBrainzClient;
+    private readonly IMetadataClient _metadataClient;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ListenBrainzPlugin"/> class.
     /// </summary>
     /// <param name="logger">Logger instance.</param>
     /// <param name="listenBrainzClient">ListenBrainz client.</param>
-    public ListenBrainzPlugin(ILogger logger, IListenBrainzClient listenBrainzClient)
+    /// <param name="metadataClient">Client for providing additional metadata.</param>
+    public ListenBrainzPlugin(ILogger logger, IListenBrainzClient listenBrainzClient, IMetadataClient metadataClient)
     {
         _logger = logger;
         _listenBrainzClient = listenBrainzClient;
+        _metadataClient = metadataClient;
     }
 
     /// <summary>
@@ -60,9 +64,20 @@ public class ListenBrainzPlugin : IJellyfinPlaybackWatcher
             return;
         }
 
+        AudioItemMetadata? metadata = null;
         try
         {
-            _listenBrainzClient.SendNowPlaying(userConfig, data.Item);
+            metadata = _metadataClient.GetAudioItemMetadata(data.Item).Result;
+        }
+        catch (Exception e)
+        {
+            _logger.LogDebug(e, "No additional metadata available");
+            _logger.LogInformation("No additional metadata available: {Reason}", e.Message);
+        }
+
+        try
+        {
+            _listenBrainzClient.SendNowPlaying(userConfig, data.Item, metadata);
         }
         catch (Exception e)
         {

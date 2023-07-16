@@ -39,6 +39,16 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
         get => Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0.0";
     }
 
+    /// <summary>
+    /// Gets full plugin name.
+    /// </summary>
+    public static string FullName => "ListenBrainz plugin for Jellyfin";
+
+    /// <summary>
+    /// Gets plugin source URL.
+    /// </summary>
+    public static string SourceUrl => "https://github.com/lyarenei/jellyfin-plugin-listenbrainz";
+
     /// <inheritdoc />
     public IEnumerable<PluginPageInfo> GetPages()
     {
