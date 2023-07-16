@@ -3,6 +3,7 @@ using ListenBrainzPlugin.Extensions;
 using ListenBrainzPlugin.Interfaces;
 using ListenBrainzPlugin.ListenBrainzApi;
 using ListenBrainzPlugin.MusicBrainzApi;
+using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Plugins;
 using MediaBrowser.Controller.Session;
 using Microsoft.Extensions.Logging;
@@ -23,14 +24,15 @@ public sealed class EntryPoint : IServerEntryPoint
     /// <param name="sessionManager">Session manager.</param>
     /// <param name="loggerFactory">Logger factory.</param>
     /// <param name="clientFactory">HTTP client factory.</param>
-    public EntryPoint(ISessionManager sessionManager, ILoggerFactory loggerFactory, IHttpClientFactory clientFactory)
+    /// <param name="userDataManager">User data manager.</param>
+    public EntryPoint(ISessionManager sessionManager, ILoggerFactory loggerFactory, IHttpClientFactory clientFactory, IUserDataManager userDataManager)
     {
         _sessionManager = sessionManager;
 
         var logger = loggerFactory.CreateLogger("ListenBrainzPlugin");
         var listenBrainzClient = GetListenBrainzClient(logger, clientFactory);
         var musicBrainzClient = GetMusicBrainzClient(logger, clientFactory);
-        _plugin = new PluginImplementation(logger, listenBrainzClient, musicBrainzClient);
+        _plugin = new PluginImplementation(logger, listenBrainzClient, musicBrainzClient, userDataManager);
     }
 
     /// <inheritdoc />

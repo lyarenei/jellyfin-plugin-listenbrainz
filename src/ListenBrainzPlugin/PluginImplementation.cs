@@ -19,6 +19,7 @@ public class PluginImplementation
     private readonly ILogger _logger;
     private readonly IListenBrainzClient _listenBrainzClient;
     private readonly IMetadataClient _metadataClient;
+    private readonly IUserDataManager _userDataManager;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PluginImplementation"/> class.
@@ -26,11 +27,13 @@ public class PluginImplementation
     /// <param name="logger">Logger instance.</param>
     /// <param name="listenBrainzClient">ListenBrainz client.</param>
     /// <param name="metadataClient">Client for providing additional metadata.</param>
-    public PluginImplementation(ILogger logger, IListenBrainzClient listenBrainzClient, IMetadataClient metadataClient)
+    /// <param name="userDataManager">User data manager.</param>
+    public PluginImplementation(ILogger logger, IListenBrainzClient listenBrainzClient, IMetadataClient metadataClient, IUserDataManager userDataManager)
     {
         _logger = logger;
         _listenBrainzClient = listenBrainzClient;
         _metadataClient = metadataClient;
+        _userDataManager = userDataManager;
     }
 
     /// <summary>
@@ -165,6 +168,25 @@ public class PluginImplementation
 
             _logger.LogDebug(e, "Send listen failed");
         }
+
+        if (!userConfig.IsFavoritesSyncEnabled) return;
+
+        try
+        {
+            var userItemData = _userDataManager.GetUserData(data.JellyfinUser, data.Item);
+            if (metadata?.Mbid is not null)
+            {
+                _listenBrainzClient.SendFeedback(userConfig, userItemData.IsFavorite, metadata.Mbid);
+                return;
+            }
+
+            SendFeedbackUsingMsid();
+        }
+        catch (Exception e)
+        {
+            _logger.LogInformation("Favorite sync failed: {Reason}", e.Message);
+            _logger.LogDebug(e, "Favorite sync failed");
+        }
     }
 
     private static EventData GetEventData(PlaybackProgressEventArgs eventArgs)
@@ -202,6 +224,11 @@ public class PluginImplementation
         {
             throw new ListenBrainzPluginException("ListenBrainz submission is disabled for this user");
         }
+    }
+
+    private void SendFeedbackUsingMsid()
+    {
+        throw new MetadataException("Fallback to send feedback using MSID is not implemented");
     }
 
     private struct EventData
