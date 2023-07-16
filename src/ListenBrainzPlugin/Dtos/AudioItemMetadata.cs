@@ -13,7 +13,7 @@ public class AudioItemMetadata
     /// </summary>
     public AudioItemMetadata()
     {
-        Mbid = string.Empty;
+        RecordingMbid = string.Empty;
         ArtistCredits = Array.Empty<ArtistCredit>();
     }
 
@@ -23,14 +23,14 @@ public class AudioItemMetadata
     /// <param name="recording">MBID recording data.</param>
     public AudioItemMetadata(Recording recording)
     {
-        Mbid = recording.Mbid;
+        RecordingMbid = recording.Mbid;
         ArtistCredits = recording.ArtistCredits.Select(r => new ArtistCredit(r.Name, r.JoinPhrase));
     }
 
     /// <summary>
     /// Gets recording MBID for this audio item.
     /// </summary>
-    public string Mbid { get; init; }
+    public string RecordingMbid { get; init; }
 
     /// <summary>
     /// Gets all artists associated with this audio item.
