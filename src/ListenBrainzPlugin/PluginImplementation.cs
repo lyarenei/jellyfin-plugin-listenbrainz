@@ -4,6 +4,7 @@ using ListenBrainzPlugin.Dtos;
 using ListenBrainzPlugin.Exceptions;
 using ListenBrainzPlugin.Extensions;
 using ListenBrainzPlugin.Interfaces;
+using ListenBrainzPlugin.ListenBrainzApi.Resources;
 using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
 using Microsoft.Extensions.Logging;
@@ -103,7 +104,67 @@ public class PluginImplementation
     /// <param name="args">Event args.</param>
     public void OnPlaybackStop(object? sender, PlaybackStopEventArgs args)
     {
-        // throw new NotImplementedException();
+        _logger.LogDebug("Detected playback stop for item {Item}", args.Item.Name);
+        EventData data;
+        try
+        {
+            data = GetEventData(args);
+        }
+        catch (Exception e)
+        {
+            _logger.LogInformation("Cannot handle this event: {Reason}", e.Message);
+            _logger.LogDebug(e, "Event data are not valid");
+            return;
+        }
+
+        var userConfig = data.JellyfinUser.GetListenBrainzConfig();
+        if (userConfig is null)
+        {
+            _logger.LogWarning("Cannot handle this event, user {User} is not configured", data.JellyfinUser.Username);
+            return;
+        }
+
+        var position = args.PlaybackPositionTicks;
+        if (position is null)
+        {
+            _logger.LogWarning("Cannot handle this event, playback position is not set");
+            return;
+        }
+
+        try
+        {
+            Limits.AssertSubmitConditions((long)position, data.Item.RunTimeTicks ?? 0);
+        }
+        catch (Exception e)
+        {
+            throw new ListenBrainzPluginException("Submit conditions were not met", e);
+        }
+
+        AudioItemMetadata? metadata = null;
+        try
+        {
+            metadata = _metadataClient.GetAudioItemMetadata(data.Item).Result;
+        }
+        catch (Exception e)
+        {
+            _logger.LogDebug(e, "No additional metadata available");
+            _logger.LogInformation("No additional metadata available: {Reason}", e.Message);
+        }
+
+        try
+        {
+            _listenBrainzClient.SendListen(userConfig, data.Item, metadata);
+        }
+        catch (Exception e)
+        {
+            _logger.LogInformation(
+                "Failed to send listen of {Track} for user {User}: {Reason}",
+                data.Item.Name,
+                data.JellyfinUser.Username,
+                e.Message);
+
+            _logger.LogDebug(e, "Send listen failed");
+        }
     }
 
     private static EventData GetEventData(PlaybackProgressEventArgs eventArgs)
