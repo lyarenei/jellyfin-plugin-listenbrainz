@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace ListenBrainzPlugin.Extensions;
 
 /// <summary>
@@ -12,7 +14,7 @@ public static class StringExtensions
     /// <returns>Capitalized string.</returns>
     public static string Capitalize(this string s)
     {
-        if (s == string.Empty) return s;
-        return char.ToUpper(s[0]) + s[1..];
+        if (string.IsNullOrEmpty(s)) return s;
+        return char.ToUpper(s[0], CultureInfo.InvariantCulture) + s[1..];
     }
 }

@@ -12,7 +12,7 @@ namespace ListenBrainzPlugin;
 /// <summary>
 /// ListenBrainz plugin entrypoint for Jellyfin server.
 /// </summary>
-public class EntryPoint : IServerEntryPoint
+public sealed class EntryPoint : IServerEntryPoint
 {
     private readonly ISessionManager _sessionManager;
     private readonly PluginImplementation _plugin;

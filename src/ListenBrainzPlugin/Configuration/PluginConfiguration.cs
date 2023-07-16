@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Xml.Serialization;
 using MediaBrowser.Model.Plugins;
 
@@ -73,5 +74,6 @@ public class PluginConfiguration : BasePluginConfiguration
     /// <summary>
     /// Gets or sets ListenBrainz user configurations.
     /// </summary>
+    [SuppressMessage("Warning", "CA2227", Justification = "Needed for deserialization")]
     public Collection<ListenBrainzUserConfig> UserConfigs { get; set; }
 }
