@@ -43,13 +43,13 @@ public class ListenBrainzClient : IListenBrainzClient
     }
 
     /// <inheritdoc />
-    public void SendListen(ListenBrainzUserConfig config, Audio item, AudioItemMetadata? metadata)
+    public void SendListen(ListenBrainzUserConfig config, Audio item, AudioItemMetadata? metadata, long listenedAt)
     {
         var request = new SubmitListensRequest
         {
             ApiToken = config.ApiToken,
             ListenType = ListenType.Single,
-            Payload = new[] { item.AsListen(itemMetadata: metadata) }
+            Payload = new[] { item.AsListen(listenedAt, metadata) }
         };
 
         _apiClient.SubmitListens(request, CancellationToken.None);

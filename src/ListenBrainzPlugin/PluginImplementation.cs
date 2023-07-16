@@ -5,6 +5,7 @@ using ListenBrainzPlugin.Exceptions;
 using ListenBrainzPlugin.Extensions;
 using ListenBrainzPlugin.Interfaces;
 using ListenBrainzPlugin.ListenBrainzApi.Resources;
+using ListenBrainzPlugin.Utils;
 using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
 using Microsoft.Extensions.Logging;
@@ -156,7 +157,7 @@ public class PluginImplementation
 
         try
         {
-            _listenBrainzClient.SendListen(userConfig, data.Item, metadata);
+            _listenBrainzClient.SendListen(userConfig, data.Item, metadata, DateUtils.CurrentTimestamp);
         }
         catch (Exception e)
         {

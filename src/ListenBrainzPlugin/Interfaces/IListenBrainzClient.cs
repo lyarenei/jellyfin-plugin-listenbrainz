@@ -23,7 +23,8 @@ public interface IListenBrainzClient
     /// <param name="config">ListenBrainz user configuration.</param>
     /// <param name="item">Audio item of the listen.</param>
     /// <param name="metadata">Additional metadata for this audio item.</param>
-    public void SendListen(ListenBrainzUserConfig config, Audio item, AudioItemMetadata? metadata);
+    /// <param name="listenedAt">Timestamp of the listen.</param>
+    public void SendListen(ListenBrainzUserConfig config, Audio item, AudioItemMetadata? metadata, long listenedAt);
 
     /// <summary>
     /// Send a feedback for a specific recording, identified by either a MBID or MSID.
