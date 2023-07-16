@@ -188,22 +188,11 @@
             ApiClient.getUsers()
                 .then((users) => {
                     buildUsersDropdown(users);
+                    loadConfig(users[0].Id)
                 })
                 .catch((reason) => {
                     console.log("ListenBrainz plugin: Failed to load Jellyfin users: " + reason);
                     Dashboard.alert("Failed to load Jellyfin users");
-                });
-
-            ApiClient.getPluginConfiguration(ListenBrainzConfig.PluginUniqueId)
-                .then((config) => {
-                    fillGeneralConfig(config);
-                    let userId = getSelectedUserId();
-                    let userConfig = getUserConfig(config, userId);
-                    fillUserConfig(userConfig);
-                })
-                .catch((reason) => {
-                    console.log("ListenBrainz plugin: Failed to load plugin config: " + reason);
-                    Dashboard.alert("Failed to load plugin config");
                 });
 
             Dashboard.hideLoadingMsg();
@@ -388,6 +377,19 @@
                 .catch((reason) => {
                     console.log("ListenBrainz plugin: Failed to save config: " + reason);
                     Dashboard.alert("Failed to save plugin config");
+                });
+        }
+
+        function loadConfig(userId) {
+            ApiClient.getPluginConfiguration(ListenBrainzConfig.PluginUniqueId)
+                .then((config) => {
+                    fillGeneralConfig(config);
+                    let userConfig = getUserConfig(config, userId);
+                    fillUserConfig(userConfig);
+                })
+                .catch((reason) => {
+                    console.log("ListenBrainz plugin: Failed to load plugin config: " + reason);
+                    Dashboard.alert("Failed to load plugin config");
                 });
         }
     </script>
