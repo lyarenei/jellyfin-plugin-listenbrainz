@@ -54,4 +54,18 @@ public class ListenBrainzClient : IListenBrainzClient
 
         _apiClient.SubmitListens(request, CancellationToken.None);
     }
+
+    /// <inheritdoc />
+    public void SendFeedback(ListenBrainzUserConfig config, bool isFavorite, string? recordingMbid = null, string? recordingMsid = null)
+    {
+        var request = new RecordingFeedbackRequest
+        {
+            ApiToken = config.ApiToken,
+            RecordingMbid = recordingMbid,
+            RecordingMsid = recordingMsid,
+            Score = isFavorite ? FeedbackScore.Loved : FeedbackScore.Neutral
+        };
+
+        _apiClient.SubmitRecordingFeedback(request, CancellationToken.None);
+    }
 }

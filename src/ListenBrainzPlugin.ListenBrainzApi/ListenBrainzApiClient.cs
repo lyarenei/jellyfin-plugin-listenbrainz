@@ -38,4 +38,10 @@ public class ListenBrainzApiClient : BaseClient, IListenBrainzApiClient
     {
         return await Post<SubmitListensRequest, SubmitListensResponse>(request, cancellationToken);
     }
+
+    /// <inheritdoc />
+    public async Task<RecordingFeedbackResponse?> SubmitRecordingFeedback(RecordingFeedbackRequest request, CancellationToken cancellationToken)
+    {
+        return await Post<RecordingFeedbackRequest, RecordingFeedbackResponse>(request, cancellationToken);
+    }
 }
