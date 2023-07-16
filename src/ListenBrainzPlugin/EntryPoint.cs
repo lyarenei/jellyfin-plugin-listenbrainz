@@ -27,7 +27,7 @@ public class EntryPoint : IServerEntryPoint
     {
         _sessionManager = sessionManager;
 
-        var logger = loggerFactory.CreateLogger<PluginImplementation>();
+        var logger = loggerFactory.CreateLogger("ListenBrainzPlugin");
         var listenBrainzClient = GetListenBrainzClient(logger, clientFactory);
         var musicBrainzClient = GetMusicBrainzClient(logger, clientFactory);
         _plugin = new PluginImplementation(logger, listenBrainzClient, musicBrainzClient);
