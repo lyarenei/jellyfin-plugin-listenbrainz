@@ -141,7 +141,9 @@ public class PluginImplementation
         }
         catch (Exception e)
         {
-            throw new ListenBrainzPluginException("Submit conditions were not met", e);
+            _logger.LogInformation("Listen submit conditions were not met: {Reason}", e.Message);
+            _logger.LogDebug(e, "Listen submit conditions were not met");
+            return;
         }
 
         AudioItemMetadata? metadata = null;
