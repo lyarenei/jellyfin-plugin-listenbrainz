@@ -52,10 +52,16 @@ public class PluginImplementation
             return;
         }
 
-        ListenBrainzUserConfig userConfig;
+        var userConfig = data.JellyfinUser.GetListenBrainzConfig();
+        if (userConfig is null)
+        {
+            _logger.LogWarning("Cannot handle this event, user {User} is not configured", data.JellyfinUser.Username);
+            return;
+        }
+
         try
         {
-            userConfig = AssertListenBrainzRequirements(data.Item, data.JellyfinUser);
+            AssertListenBrainzRequirements(data.Item, userConfig);
         }
         catch (Exception e)
         {
@@ -120,7 +126,7 @@ public class PluginImplementation
         };
     }
 
-    private static ListenBrainzUserConfig AssertListenBrainzRequirements(Audio item, User jellyfinUser)
+    private static void AssertListenBrainzRequirements(Audio item, ListenBrainzUserConfig userConfig)
     {
         try
         {
@@ -131,18 +137,10 @@ public class PluginImplementation
             throw new ListenBrainzPluginException("Audio item metadata are not valid", e);
         }
 
-        var userConfig = jellyfinUser.GetListenBrainzConfig();
-        if (userConfig is null)
-        {
-            throw new ListenBrainzPluginException($"No ListenBrainz configuration for user {jellyfinUser.Username}");
-        }
-
         if (userConfig.IsNotListenSubmitEnabled)
         {
-            throw new ListenBrainzPluginException($"ListenBrainz is disabled for user {jellyfinUser.Username}");
+            throw new ListenBrainzPluginException("ListenBrainz submission is disabled for this user");
         }
-
-        return userConfig;
     }
 
     private struct EventData
