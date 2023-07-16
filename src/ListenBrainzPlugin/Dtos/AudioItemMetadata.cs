@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using ListenBrainzPlugin.MusicBrainzApi.Models;
 
 namespace ListenBrainzPlugin.Dtos;
@@ -41,6 +42,7 @@ public class AudioItemMetadata
     /// Gets full artist credit string using artist names and join phrases.
     /// </summary>
     /// <returns>Artist credit string.</returns>
+    [JsonIgnore]
     public string FullCreditString
     {
         get
