@@ -13,19 +13,19 @@ namespace ListenBrainzPlugin;
 /// <summary>
 /// ListenBrainz plugin implementation.
 /// </summary>
-public class ListenBrainzPlugin : IJellyfinPlaybackWatcher
+public class PluginImplementation
 {
     private readonly ILogger _logger;
     private readonly IListenBrainzClient _listenBrainzClient;
     private readonly IMetadataClient _metadataClient;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ListenBrainzPlugin"/> class.
+    /// Initializes a new instance of the <see cref="PluginImplementation"/> class.
     /// </summary>
     /// <param name="logger">Logger instance.</param>
     /// <param name="listenBrainzClient">ListenBrainz client.</param>
     /// <param name="metadataClient">Client for providing additional metadata.</param>
-    public ListenBrainzPlugin(ILogger logger, IListenBrainzClient listenBrainzClient, IMetadataClient metadataClient)
+    public PluginImplementation(ILogger logger, IListenBrainzClient listenBrainzClient, IMetadataClient metadataClient)
     {
         _logger = logger;
         _listenBrainzClient = listenBrainzClient;

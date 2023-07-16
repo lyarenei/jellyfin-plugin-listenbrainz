@@ -15,7 +15,7 @@ namespace ListenBrainzPlugin;
 public class EntryPoint : IServerEntryPoint
 {
     private readonly ISessionManager _sessionManager;
-    private readonly IJellyfinPlaybackWatcher _watcher;
+    private readonly PluginImplementation _plugin;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EntryPoint"/> class.
@@ -27,17 +27,17 @@ public class EntryPoint : IServerEntryPoint
     {
         _sessionManager = sessionManager;
 
-        var logger = loggerFactory.CreateLogger<ListenBrainzPlugin>();
+        var logger = loggerFactory.CreateLogger<PluginImplementation>();
         var listenBrainzClient = GetListenBrainzClient(logger, clientFactory);
         var musicBrainzClient = GetMusicBrainzClient(logger, clientFactory);
-        _watcher = new ListenBrainzPlugin(logger, listenBrainzClient, musicBrainzClient);
+        _plugin = new PluginImplementation(logger, listenBrainzClient, musicBrainzClient);
     }
 
     /// <inheritdoc />
     public Task RunAsync()
     {
-        _sessionManager.PlaybackStart += _watcher.OnPlaybackStart;
-        _sessionManager.PlaybackStopped += _watcher.OnPlaybackStop;
+        _sessionManager.PlaybackStart += _plugin.OnPlaybackStart;
+        _sessionManager.PlaybackStopped += _plugin.OnPlaybackStop;
 
         return Task.CompletedTask;
     }
@@ -45,8 +45,8 @@ public class EntryPoint : IServerEntryPoint
     /// <inheritdoc />
     public void Dispose()
     {
-        _sessionManager.PlaybackStart -= _watcher.OnPlaybackStart;
-        _sessionManager.PlaybackStopped -= _watcher.OnPlaybackStop;
+        _sessionManager.PlaybackStart -= _plugin.OnPlaybackStart;
+        _sessionManager.PlaybackStopped -= _plugin.OnPlaybackStop;
     }
 
     private static IListenBrainzClient GetListenBrainzClient(ILogger logger, IHttpClientFactory clientFactory)
