@@ -19,7 +19,18 @@ public class ListenBrainzClient : IListenBrainzClient
 {
     private readonly ILogger _logger;
     private readonly IListenBrainzApiClient _apiClient;
-    private readonly ILibraryManager _libraryManager;
+    private readonly ILibraryManager? _libraryManager;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ListenBrainzClient"/> class.
+    /// </summary>
+    /// <param name="logger">Logger instance.</param>
+    /// <param name="apiClient">ListenBrainz API client instance.</param>
+    public ListenBrainzClient(ILogger logger, IListenBrainzApiClient apiClient)
+    {
+        _logger = logger;
+        _apiClient = apiClient;
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ListenBrainzClient"/> class.
@@ -94,6 +105,8 @@ public class ListenBrainzClient : IListenBrainzClient
     /// <returns>Converted listens.</returns>
     private IEnumerable<Listen> ToListens(IEnumerable<StoredListen> storedListens)
     {
+        if (_libraryManager is null) throw new InvalidOperationException("Library manager is not available");
+
         var listensToConvert = storedListens.ToArray();
         return listensToConvert
             .Select(l => _libraryManager.GetItemById(l.Id))

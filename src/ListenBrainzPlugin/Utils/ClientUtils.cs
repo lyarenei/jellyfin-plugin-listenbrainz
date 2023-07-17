@@ -20,11 +20,14 @@ public static class ClientUtils
     /// <param name="clientFactory">HTTP client factory.</param>
     /// <param name="libraryManager">Library manager.</param>
     /// <returns>ListenBrainz client.</returns>
-    public static IListenBrainzClient GetListenBrainzClient(ILogger logger, IHttpClientFactory clientFactory, ILibraryManager libraryManager)
+    public static IListenBrainzClient GetListenBrainzClient(
+        ILogger logger,
+        IHttpClientFactory clientFactory,
+        ILibraryManager? libraryManager = null)
     {
         var config = Plugin.GetConfiguration();
         var apiClient = new ListenBrainzApiClient(config.ListenBrainzApiUrl, clientFactory, logger);
-        return new ListenBrainzClient(logger, apiClient, libraryManager);
+        return libraryManager is null ? new ListenBrainzClient(logger, apiClient) : new ListenBrainzClient(logger, apiClient, libraryManager);
     }
 
     /// <summary>
