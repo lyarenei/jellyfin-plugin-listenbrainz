@@ -34,4 +34,11 @@ public interface IListenBrainzClient
     /// <param name="recordingMbid">MusicBrainz ID identifying the recording.</param>
     /// <param name="recordingMsid">MessyBrainz ID identifying the recording.</param>
     public void SendFeedback(ListenBrainzUserConfig config, bool isFavorite, string? recordingMbid = null, string? recordingMsid = null);
+
+    /// <summary>
+    /// Send multiple listens ('import') to ListenBrainz.
+    /// </summary>
+    /// <param name="config">ListenBrainz user configuration.</param>
+    /// <param name="storedListens">Listens to send.</param>
+    public void SendListens(ListenBrainzUserConfig config, IEnumerable<StoredListen> storedListens);
 }

@@ -65,4 +65,21 @@ public static class AudioExtensions
     /// <param name="item">Audio item.</param>
     /// <returns>Track MBID. Null if not available.</returns>
     public static string? GetTrackMbid(this Audio item) => item.ProviderIds.GetValueOrDefault("MusicBrainzTrack");
+
+    /// <summary>
+    /// Create a <see cref="StoredListen"/> from this item.
+    /// </summary>
+    /// <param name="item">Item data source.</param>
+    /// <param name="timestamp">UNIX timestamp of the listen.</param>
+    /// <param name="metadata">Additional metadata.</param>
+    /// <returns>An instance of <see cref="StoredListen"/> corresponding to the item.</returns>
+    public static StoredListen AsStoredListen(this Audio item, long timestamp, AudioItemMetadata? metadata)
+    {
+        return new StoredListen
+        {
+            Id = item.Id,
+            ListenedAt = timestamp,
+            Metadata = metadata
+        };
+    }
 }

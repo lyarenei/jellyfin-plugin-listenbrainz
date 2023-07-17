@@ -3,9 +3,11 @@ using ListenBrainzPlugin.Dtos;
 using ListenBrainzPlugin.Extensions;
 using ListenBrainzPlugin.Interfaces;
 using ListenBrainzPlugin.ListenBrainzApi.Interfaces;
+using ListenBrainzPlugin.ListenBrainzApi.Models;
 using ListenBrainzPlugin.ListenBrainzApi.Models.Requests;
 using ListenBrainzPlugin.ListenBrainzApi.Resources;
 using MediaBrowser.Controller.Entities.Audio;
+using MediaBrowser.Controller.Library;
 using Microsoft.Extensions.Logging;
 
 namespace ListenBrainzPlugin.Clients;
@@ -17,16 +19,19 @@ public class ListenBrainzClient : IListenBrainzClient
 {
     private readonly ILogger _logger;
     private readonly IListenBrainzApiClient _apiClient;
+    private readonly ILibraryManager _libraryManager;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ListenBrainzClient"/> class.
     /// </summary>
     /// <param name="logger">Logger instance.</param>
     /// <param name="apiClient">ListenBrainz API client instance.</param>
-    public ListenBrainzClient(ILogger logger, IListenBrainzApiClient apiClient)
+    /// <param name="libraryManager">Library manager.</param>
+    public ListenBrainzClient(ILogger logger, IListenBrainzApiClient apiClient, ILibraryManager libraryManager)
     {
         _logger = logger;
         _apiClient = apiClient;
+        _libraryManager = libraryManager;
     }
 
     /// <inheritdoc />
@@ -67,5 +72,34 @@ public class ListenBrainzClient : IListenBrainzClient
         };
 
         _apiClient.SubmitRecordingFeedback(request, CancellationToken.None);
+    }
+
+    /// <inheritdoc />
+    public void SendListens(ListenBrainzUserConfig config, IEnumerable<StoredListen> storedListens)
+    {
+        var request = new SubmitListensRequest
+        {
+            ApiToken = config.ApiToken,
+            ListenType = ListenType.Single,
+            Payload = ToListens(storedListens)
+        };
+
+        _apiClient.SubmitListens(request, CancellationToken.None);
+    }
+
+    /// <summary>
+    /// Convert all <see cref="StoredListen"/>s to <see cref="Listen"/>s.
+    /// </summary>
+    /// <param name="storedListens">Stored listens to convert.</param>
+    /// <returns>Converted listens.</returns>
+    private IEnumerable<Listen> ToListens(IEnumerable<StoredListen> storedListens)
+    {
+        var listensToConvert = storedListens.ToArray();
+        return listensToConvert
+            .Select(l => _libraryManager.GetItemById(l.Id))
+            .Cast<Audio>()
+            .Select(a => a.AsListen(
+                listensToConvert.First(l => l.Id == a.Id).ListenedAt,
+                listensToConvert.First(l => l.Id == a.Id).Metadata));
     }
 }

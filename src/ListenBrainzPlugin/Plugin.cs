@@ -49,6 +49,11 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// </summary>
     public static string SourceUrl => "https://github.com/lyarenei/jellyfin-plugin-listenbrainz";
 
+    /// <summary>
+    /// Gets logger category.
+    /// </summary>
+    public static string LoggerCategory => "ListenBrainzPlugin";
+
     /// <inheritdoc />
     public IEnumerable<PluginPageInfo> GetPages()
     {
@@ -74,5 +79,17 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
         var config = _thisInstance?.Configuration;
         if (config is not null) return config;
         throw new ListenBrainzPluginException("Plugin instance is not available");
+    }
+
+    /// <summary>
+    /// Gets plugin data path.
+    /// </summary>
+    /// <returns>Path to the plugin data folder.</returns>
+    /// <exception cref="ListenBrainzPluginException">Plugin instance is not available.</exception>
+    public static string GetDataPath()
+    {
+        var path = _thisInstance?.DataFolderPath;
+        if (path is null) throw new ListenBrainzPluginException("Plugin instance is not available");
+        return path;
     }
 }

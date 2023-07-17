@@ -4,7 +4,9 @@ using ListenBrainzPlugin.Dtos;
 using ListenBrainzPlugin.Exceptions;
 using ListenBrainzPlugin.Extensions;
 using ListenBrainzPlugin.Interfaces;
+using ListenBrainzPlugin.ListenBrainzApi.Exceptions;
 using ListenBrainzPlugin.ListenBrainzApi.Resources;
+using ListenBrainzPlugin.Managers;
 using ListenBrainzPlugin.Utils;
 using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
@@ -21,6 +23,7 @@ public class PluginImplementation
     private readonly IListenBrainzClient _listenBrainzClient;
     private readonly IMetadataClient _metadataClient;
     private readonly IUserDataManager _userDataManager;
+    private readonly CacheManager _cacheManager;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PluginImplementation"/> class.
@@ -29,12 +32,17 @@ public class PluginImplementation
     /// <param name="listenBrainzClient">ListenBrainz client.</param>
     /// <param name="metadataClient">Client for providing additional metadata.</param>
     /// <param name="userDataManager">User data manager.</param>
-    public PluginImplementation(ILogger logger, IListenBrainzClient listenBrainzClient, IMetadataClient metadataClient, IUserDataManager userDataManager)
+    public PluginImplementation(
+        ILogger logger,
+        IListenBrainzClient listenBrainzClient,
+        IMetadataClient metadataClient,
+        IUserDataManager userDataManager)
     {
         _logger = logger;
         _listenBrainzClient = listenBrainzClient;
         _metadataClient = metadataClient;
         _userDataManager = userDataManager;
+        _cacheManager = CacheManager.Instance;
     }
 
     /// <summary>
@@ -157,9 +165,10 @@ public class PluginImplementation
             _logger.LogInformation("No additional metadata available: {Reason}", e.Message);
         }
 
+        var now = DateUtils.CurrentTimestamp;
         try
         {
-            _listenBrainzClient.SendListen(userConfig, data.Item, metadata, DateUtils.CurrentTimestamp);
+            _listenBrainzClient.SendListen(userConfig, data.Item, metadata, now);
         }
         catch (Exception e)
         {
@@ -170,6 +179,9 @@ public class PluginImplementation
                 e.Message);
 
             _logger.LogDebug(e, "Send listen failed");
+            _cacheManager.AddListen(data.JellyfinUser.Id, data.Item, metadata, now);
+            _cacheManager.Save();
+            return;
         }
 
         if (!userConfig.IsFavoritesSyncEnabled) return;
@@ -177,9 +189,9 @@ public class PluginImplementation
         try
         {
             var userItemData = _userDataManager.GetUserData(data.JellyfinUser, data.Item);
-            if (metadata?.Mbid is not null)
+            if (metadata?.RecordingMbid is not null)
             {
-                _listenBrainzClient.SendFeedback(userConfig, userItemData.IsFavorite, metadata.Mbid);
+                _listenBrainzClient.SendFeedback(userConfig, userItemData.IsFavorite, metadata.RecordingMbid);
                 return;
             }
 
