@@ -12,6 +12,7 @@ namespace ListenBrainzPlugin;
 public sealed class EntryPoint : IServerEntryPoint
 {
     private readonly ISessionManager _sessionManager;
+    private readonly IUserDataManager _userDataManager;
     private readonly PluginImplementation _plugin;
 
     /// <summary>
@@ -22,26 +23,37 @@ public sealed class EntryPoint : IServerEntryPoint
     /// <param name="clientFactory">HTTP client factory.</param>
     /// <param name="userDataManager">User data manager.</param>
     /// <param name="libraryManager">Library manager.</param>
+    /// <param name="userManager">User manager.</param>
     public EntryPoint(
         ISessionManager sessionManager,
         ILoggerFactory loggerFactory,
         IHttpClientFactory clientFactory,
         IUserDataManager userDataManager,
-        ILibraryManager libraryManager)
+        ILibraryManager libraryManager,
+        IUserManager userManager)
     {
         _sessionManager = sessionManager;
+        _userDataManager = userDataManager;
 
         var logger = loggerFactory.CreateLogger("ListenBrainzPlugin");
         var listenBrainzClient = ClientUtils.GetListenBrainzClient(logger, clientFactory, libraryManager);
         var musicBrainzClient = ClientUtils.GetMusicBrainzClient(logger, clientFactory);
-        _plugin = new PluginImplementation(logger, listenBrainzClient, musicBrainzClient, userDataManager);
+        _plugin = new PluginImplementation(logger, listenBrainzClient, musicBrainzClient, userDataManager, userManager);
     }
 
     /// <inheritdoc />
     public Task RunAsync()
     {
         _sessionManager.PlaybackStart += _plugin.OnPlaybackStart;
-        _sessionManager.PlaybackStopped += _plugin.OnPlaybackStop;
+
+        if (Plugin.GetConfiguration().IsAlternativeModeEnabled)
+        {
+            _userDataManager.UserDataSaved += _plugin.OnUserDataSave;
+        }
+        else
+        {
+            _sessionManager.PlaybackStopped += _plugin.OnPlaybackStop;
+        }
 
         return Task.CompletedTask;
     }
@@ -50,6 +62,13 @@ public sealed class EntryPoint : IServerEntryPoint
     public void Dispose()
     {
         _sessionManager.PlaybackStart -= _plugin.OnPlaybackStart;
-        _sessionManager.PlaybackStopped -= _plugin.OnPlaybackStop;
+        if (Plugin.GetConfiguration().IsAlternativeModeEnabled)
+        {
+            _userDataManager.UserDataSaved -= _plugin.OnUserDataSave;
+        }
+        else
+        {
+            _sessionManager.PlaybackStopped -= _plugin.OnPlaybackStop;
+        }
     }
 }

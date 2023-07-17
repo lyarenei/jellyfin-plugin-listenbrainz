@@ -4,12 +4,12 @@ using ListenBrainzPlugin.Dtos;
 using ListenBrainzPlugin.Exceptions;
 using ListenBrainzPlugin.Extensions;
 using ListenBrainzPlugin.Interfaces;
-using ListenBrainzPlugin.ListenBrainzApi.Exceptions;
 using ListenBrainzPlugin.ListenBrainzApi.Resources;
 using ListenBrainzPlugin.Managers;
 using ListenBrainzPlugin.Utils;
 using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
+using MediaBrowser.Model.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace ListenBrainzPlugin;
@@ -24,6 +24,7 @@ public class PluginImplementation
     private readonly IMetadataClient _metadataClient;
     private readonly IUserDataManager _userDataManager;
     private readonly CacheManager _cacheManager;
+    private readonly IUserManager _userManager;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PluginImplementation"/> class.
@@ -32,17 +33,20 @@ public class PluginImplementation
     /// <param name="listenBrainzClient">ListenBrainz client.</param>
     /// <param name="metadataClient">Client for providing additional metadata.</param>
     /// <param name="userDataManager">User data manager.</param>
+    /// <param name="userManager">User manager.</param>
     public PluginImplementation(
         ILogger logger,
         IListenBrainzClient listenBrainzClient,
         IMetadataClient metadataClient,
-        IUserDataManager userDataManager)
+        IUserDataManager userDataManager,
+        IUserManager userManager)
     {
         _logger = logger;
         _listenBrainzClient = listenBrainzClient;
         _metadataClient = metadataClient;
         _userDataManager = userDataManager;
         _cacheManager = CacheManager.Instance;
+        _userManager = userManager;
     }
 
     /// <summary>
@@ -204,6 +208,65 @@ public class PluginImplementation
         }
     }
 
+    /// <summary>
+    /// Sends listen of track to ListenBrainz if conditions have been met.
+    /// </summary>
+    /// <param name="sender">Event sender.</param>
+    /// <param name="args">Event args.</param>
+    public void OnUserDataSave(object? sender, UserDataSaveEventArgs args)
+    {
+        _logger.LogDebug("Detected playback stop for item {Item}", args.Item.Name);
+        EventData data;
+        try
+        {
+            data = GetEventData(args);
+        }
+        catch (Exception e)
+        {
+            _logger.LogInformation("Cannot handle this event: {Reason}", e.Message);
+            _logger.LogDebug(e, "Event data are not valid");
+            return;
+        }
+
+        var userConfig = data.JellyfinUser.GetListenBrainzConfig();
+        if (userConfig is null)
+        {
+            _logger.LogWarning("Cannot handle this event, user {User} is not configured", data.JellyfinUser.Username);
+            return;
+        }
+
+        // todo playback tracker stuff
+
+        AudioItemMetadata? metadata = null;
+        try
+        {
+            metadata = _metadataClient.GetAudioItemMetadata(data.Item).Result;
+        }
+        catch (Exception e)
+        {
+            _logger.LogDebug(e, "No additional metadata available");
+            _logger.LogInformation("No additional metadata available: {Reason}", e.Message);
+        }
+
+        var now = DateUtils.CurrentTimestamp;
+        try
+        {
+            _listenBrainzClient.SendListen(userConfig, data.Item, metadata, now);
+        }
+        catch (Exception e)
+        {
+            _logger.LogInformation(
+                "Failed to send listen of {Track} for user {User}: {Reason}",
+                data.Item.Name,
+                data.JellyfinUser.Username,
+                e.Message);
+
+            _logger.LogDebug(e, "Send listen failed");
+            _cacheManager.AddListen(data.JellyfinUser.Id, data.Item, metadata, now);
+            _cacheManager.Save();
+        }
+    }
+
     private static EventData GetEventData(PlaybackProgressEventArgs eventArgs)
     {
         if (eventArgs.Item is not Audio item)
@@ -212,6 +275,31 @@ public class PluginImplementation
         }
 
         var jellyfinUser = eventArgs.Users.FirstOrDefault();
+        if (jellyfinUser is null)
+        {
+            throw new ArgumentException("No user is associated with this event");
+        }
+
+        return new EventData
+        {
+            Item = item,
+            JellyfinUser = jellyfinUser
+        };
+    }
+
+    private EventData GetEventData(UserDataSaveEventArgs eventArgs)
+    {
+        if (eventArgs.Item is not Audio item)
+        {
+            throw new ArgumentException("This event is not for an Audio item");
+        }
+
+        if (eventArgs.SaveReason is not UserDataSaveReason.PlaybackFinished)
+        {
+            throw new ArgumentException("This event is not a playback finished event");
+        }
+
+        var jellyfinUser = _userManager.GetUserById(eventArgs.UserId);
         if (jellyfinUser is null)
         {
             throw new ArgumentException("No user is associated with this event");
