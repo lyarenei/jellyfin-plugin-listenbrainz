@@ -64,7 +64,6 @@ public class PluginImplementation
         }
         catch (Exception e)
         {
-            _logger.LogInformation("Cannot handle this event: {Reason}", e.Message);
             _logger.LogDebug(e, "Event data are not valid");
             return;
         }
@@ -128,7 +127,6 @@ public class PluginImplementation
         }
         catch (Exception e)
         {
-            _logger.LogInformation("Cannot handle this event: {Reason}", e.Message);
             _logger.LogDebug(e, "Event data are not valid");
             return;
         }
@@ -223,7 +221,6 @@ public class PluginImplementation
         }
         catch (Exception e)
         {
-            _logger.LogInformation("Cannot handle this event: {Reason}", e.Message);
             _logger.LogDebug(e, "Event data are not valid");
             return;
         }
