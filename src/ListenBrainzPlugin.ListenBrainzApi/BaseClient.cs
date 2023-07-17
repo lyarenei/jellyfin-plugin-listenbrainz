@@ -79,10 +79,11 @@ public class BaseClient : HttpClient
         where TResponse : IListenBrainzResponse
     {
         var requestUri = BuildRequestUri(request.Endpoint);
+        var queryParams = Utils.ToHttpGetQuery(request.QueryDict);
         var requestMessage = new HttpRequestMessage
         {
             Method = HttpMethod.Get,
-            RequestUri = new Uri($"{requestUri}?{Utils.ToHttpGetQuery(request.QueryDict)}")
+            RequestUri = request.QueryDict.Any() ? new Uri($"{requestUri}?{queryParams}") : new Uri(requestUri.ToString())
         };
 
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("token", request.ApiToken);
