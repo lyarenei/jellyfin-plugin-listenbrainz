@@ -1,5 +1,6 @@
 using ListenBrainzPlugin.Configuration;
 using ListenBrainzPlugin.Dtos;
+using ListenBrainzPlugin.Exceptions;
 using ListenBrainzPlugin.Extensions;
 using ListenBrainzPlugin.Interfaces;
 using ListenBrainzPlugin.ListenBrainzApi.Interfaces;
@@ -96,6 +97,19 @@ public class ListenBrainzClient : IListenBrainzClient
         };
 
         _apiClient.SubmitListens(request, CancellationToken.None);
+    }
+
+    /// <inheritdoc />
+    public async Task<ValidatedToken> ValidateToken(string apiToken)
+    {
+        var request = new ValidateTokenRequest(apiToken);
+        var response = await _apiClient.ValidateToken(request, CancellationToken.None);
+        if (response is null) throw new ListenBrainzPluginException("Did not receive response");
+        return new ValidatedToken
+        {
+            IsValid = response.Valid,
+            Reason = response.Message
+        };
     }
 
     /// <summary>

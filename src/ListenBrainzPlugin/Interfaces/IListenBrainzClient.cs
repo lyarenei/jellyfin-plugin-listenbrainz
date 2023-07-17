@@ -41,4 +41,11 @@ public interface IListenBrainzClient
     /// <param name="config">ListenBrainz user configuration.</param>
     /// <param name="storedListens">Listens to send.</param>
     public void SendListens(ListenBrainzUserConfig config, IEnumerable<StoredListen> storedListens);
+
+    /// <summary>
+    /// Validate specified API token.
+    /// </summary>
+    /// <param name="apiToken">Token to validate.</param>
+    /// <returns>Validated token.</returns>
+    public Task<ValidatedToken> ValidateToken(string apiToken);
 }

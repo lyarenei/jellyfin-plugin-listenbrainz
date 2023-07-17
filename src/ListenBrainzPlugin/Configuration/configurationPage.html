@@ -215,7 +215,27 @@
         }
 
         function onCheckApiToken() {
-            // TODO
+            let apiToken = document.querySelector('#ListenBrainzApiToken').value;
+            if (!apiToken) {
+                Dashboard.alert("No API token to verify");
+                return;
+            }
+
+            ApiClient.ValidateListenBrainzToken(apiToken)
+                .then((response) => {
+                    console.log(response)
+                    if (response.IsValid) {
+                        Dashboard.alert("Token is valid");
+                        return;
+                    }
+
+                    Dashboard.alert("Token is not valid");
+                    console.log("Token validation failed: " + response.Reason);
+                })
+                .catch((reason) => {
+                    Dashboard.alert("Token validation failed");
+                    console.log("Token validation failed: " + reason);
+                });
         }
 
         function onSaveUserConfig() {
@@ -391,6 +411,17 @@
                     console.log("ListenBrainz plugin: Failed to load plugin config: " + reason);
                     Dashboard.alert("Failed to load plugin config");
                 });
+        }
+
+        ApiClient.ValidateListenBrainzToken = function (apiToken) {
+            let url = this.getUrl('ListenBrainzPlugin/ValidateToken');
+            return this.ajax({
+                type: "POST",
+                url: url,
+                data: JSON.stringify(apiToken),
+                contentType: "application/json",
+                dataType: "json",
+            });
         }
     </script>
 </div>
