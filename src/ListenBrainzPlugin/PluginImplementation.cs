@@ -7,6 +7,7 @@ using ListenBrainzPlugin.Interfaces;
 using ListenBrainzPlugin.ListenBrainzApi.Resources;
 using ListenBrainzPlugin.Managers;
 using ListenBrainzPlugin.Utils;
+using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Entities;
@@ -25,6 +26,8 @@ public class PluginImplementation
     private readonly IUserDataManager _userDataManager;
     private readonly CacheManager _cacheManager;
     private readonly IUserManager _userManager;
+    private readonly object _lock = new();
+    private readonly PlaybackTrackingManager _playbackTracker;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PluginImplementation"/> class.
@@ -47,6 +50,7 @@ public class PluginImplementation
         _userDataManager = userDataManager;
         _cacheManager = CacheManager.Instance;
         _userManager = userManager;
+        _playbackTracker = PlaybackTrackingManager.Instance;
     }
 
     /// <summary>
@@ -109,6 +113,11 @@ public class PluginImplementation
                 e.Message);
 
             _logger.LogDebug(e, "Send playing now failed");
+        }
+
+        if (Plugin.GetConfiguration().IsAlternativeModeEnabled)
+        {
+            _playbackTracker.AddItem(data.JellyfinUser.Id.ToString(), data.Item);
         }
     }
 
@@ -213,7 +222,7 @@ public class PluginImplementation
     /// <param name="args">Event args.</param>
     public void OnUserDataSave(object? sender, UserDataSaveEventArgs args)
     {
-        _logger.LogDebug("Detected playback stop for item {Item}", args.Item.Name);
+        _logger.LogDebug("Detected user data save event for item {Item}", args.Item.Name);
         EventData data;
         try
         {
@@ -232,7 +241,21 @@ public class PluginImplementation
             return;
         }
 
-        // todo playback tracker stuff
+        try
+        {
+            Monitor.Enter(_lock);
+            EvaluateConditionsIfTracked(data.Item, data.JellyfinUser);
+        }
+        catch (Exception e)
+        {
+            _logger.LogInformation("Will not handle this event: {Reason}", e.Message);
+            _logger.LogDebug(e, "Event will not be handled");
+            return;
+        }
+        finally
+        {
+            Monitor.Exit(_lock);
+        }
 
         AudioItemMetadata? metadata = null;
         try
@@ -329,6 +352,30 @@ public class PluginImplementation
     private void SendFeedbackUsingMsid()
     {
         throw new MetadataException("Fallback to send feedback using MSID is not implemented");
+    }
+
+    private void EvaluateConditionsIfTracked(BaseItem item, User user)
+    {
+        var trackedItem = _playbackTracker.GetItem(user.Id.ToString(), item.Id.ToString());
+        if (trackedItem is null)
+        {
+            _logger.LogInformation(
+                "No playback is tracked for user {User} and track {Track}, assuming offline playback",
+                user.Username,
+                item.Name);
+        }
+        else if (!trackedItem.IsValid)
+        {
+            throw new ListenBrainzPluginException("Playback tracking is not valid for this item");
+        }
+        else
+        {
+            var delta = DateUtils.CurrentTimestamp - trackedItem.StartedAt;
+            var deltaTicks = delta * TimeSpan.TicksPerSecond;
+            var runtime = item.RunTimeTicks ?? 0;
+            Limits.AssertSubmitConditions(deltaTicks, runtime);
+            _playbackTracker.InvalidateItem(user.Id.ToString(), trackedItem);
+        }
     }
 
     private struct EventData

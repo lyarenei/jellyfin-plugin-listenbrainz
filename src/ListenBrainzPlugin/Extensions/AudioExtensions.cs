@@ -1,5 +1,6 @@
 using ListenBrainzPlugin.Dtos;
 using ListenBrainzPlugin.ListenBrainzApi.Models;
+using ListenBrainzPlugin.Utils;
 using MediaBrowser.Controller.Entities.Audio;
 
 namespace ListenBrainzPlugin.Extensions;
@@ -80,6 +81,31 @@ public static class AudioExtensions
             Id = item.Id,
             ListenedAt = timestamp,
             Metadata = metadata
+        };
+    }
+
+    /// <summary>
+    /// Item runtime in seconds.
+    /// </summary>
+    /// <param name="item">Audio item.</param>
+    /// <returns>Runtime in seconds.</returns>
+    public static long RuntimeSeconds(this Audio item) => TimeSpan.FromTicks(item.RunTimeTicks ?? 0).Seconds;
+
+    /// <summary>
+    /// Create a <see cref="TrackedItem"/> from this item.
+    /// </summary>
+    /// <param name="item">Item data source.</param>
+    /// <param name="userId">Jellyfin user ID associated with this tracked item.</param>
+    /// <returns>An instance of <see cref="TrackedItem"/>.</returns>
+    public static TrackedItem AsTrackedItem(this Audio item, string userId)
+    {
+        return new TrackedItem
+        {
+            UserId = userId,
+            ItemId = item.Id.ToString(),
+            StartedAt = DateUtils.CurrentTimestamp,
+            RemoveAfter = DateUtils.CurrentTimestamp + (5 * item.RuntimeSeconds()),
+            IsValid = true
         };
     }
 }
