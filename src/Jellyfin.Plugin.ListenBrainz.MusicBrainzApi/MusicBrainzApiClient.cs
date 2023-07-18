@@ -17,7 +17,7 @@ public class MusicBrainzApiClient : BaseClient, IMusicBrainzApiClient
     /// <param name="baseUrl">API base URL.</param>
     /// <param name="clientName">Name of the client application.</param>
     /// <param name="clientVersion">Version of the client application.</param>
-    /// <param name="clientLink">Link to additional info about the client application.</param>
+    /// <param name="contactUrl">Where the maintainer can be contacted.</param>
     /// <param name="httpClientFactory">HTTP client factory.</param>
     /// <param name="logger">Logger instance.</param>
     /// <param name="sleepService">Sleep service.</param>
@@ -25,11 +25,11 @@ public class MusicBrainzApiClient : BaseClient, IMusicBrainzApiClient
         string baseUrl,
         string clientName,
         string clientVersion,
-        string clientLink,
+        string contactUrl,
         IHttpClientFactory httpClientFactory,
         ILogger logger,
         ISleepService? sleepService = null)
-        : base(baseUrl, clientName, clientVersion, clientLink, httpClientFactory, logger, sleepService)
+        : base(baseUrl, clientName, clientVersion, contactUrl, httpClientFactory, logger, sleepService)
     {
     }
 

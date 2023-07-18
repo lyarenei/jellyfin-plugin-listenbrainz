@@ -29,7 +29,7 @@ public class BaseClient : HttpClient
     private readonly string _baseUrl;
     private readonly string _clientName;
     private readonly string _clientVersion;
-    private readonly string _clientLink;
+    private readonly string _contactUrl;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BaseClient"/> class.
@@ -37,7 +37,7 @@ public class BaseClient : HttpClient
     /// <param name="baseUrl">API base URL.</param>
     /// <param name="clientName">Name of the client.</param>
     /// <param name="clientVersion">Client version.</param>
-    /// <param name="clientLink">Link to the client.</param>
+    /// <param name="contactUrl">Link to the client.</param>
     /// <param name="httpClientFactory">HTTP client factory.</param>
     /// <param name="logger">Logger instance.</param>
     /// <param name="sleepService">Sleep service.</param>
@@ -45,7 +45,7 @@ public class BaseClient : HttpClient
         string baseUrl,
         string clientName,
         string clientVersion,
-        string clientLink,
+        string contactUrl,
         IHttpClientFactory httpClientFactory,
         ILogger logger,
         ISleepService? sleepService) : base(httpClientFactory, logger, sleepService)
@@ -53,7 +53,7 @@ public class BaseClient : HttpClient
         _baseUrl = baseUrl;
         _clientName = clientName;
         _clientVersion = clientVersion;
-        _clientLink = clientLink;
+        _contactUrl = contactUrl;
     }
 
     /// <summary>
@@ -77,7 +77,7 @@ public class BaseClient : HttpClient
         };
 
         var productValue = new ProductInfoHeaderValue(_clientName, _clientVersion);
-        var commentValue = new ProductInfoHeaderValue($"(+{_clientLink})");
+        var commentValue = new ProductInfoHeaderValue($"( {_contactUrl} )");
         var acceptHeader = new MediaTypeWithQualityHeaderValue("application/json");
 
         requestMessage.Headers.UserAgent.Add(productValue);
