@@ -73,7 +73,7 @@ public class BaseClient : HttpClient
         var requestMessage = new HttpRequestMessage
         {
             Method = HttpMethod.Get,
-            RequestUri = new Uri($"{requestUri}?query={query}")
+            RequestUri = new Uri($"{requestUri}?query={query}&limit=1")
         };
 
         var productValue = new ProductInfoHeaderValue(_clientName, _clientVersion);
