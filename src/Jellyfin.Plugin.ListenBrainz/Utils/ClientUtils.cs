@@ -37,9 +37,6 @@ public static class ClientUtils
     /// <returns>Instance of <see cref="IMetadataClient"/>.</returns>
     public static IMetadataClient GetMusicBrainzClient(ILogger logger, IHttpClientFactory clientFactory)
     {
-        var config = Plugin.GetConfiguration();
-        if (!config.IsMusicBrainzEnabled) return new DummyMusicBrainzClient(logger);
-
         var clientName = string.Join(string.Empty, Plugin.FullName.Split(' ').Select(s => s.Capitalize()));
         var apiClient = new MusicBrainzApiClient(
             clientName,

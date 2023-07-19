@@ -91,14 +91,17 @@ public class PluginImplementation
         }
 
         AudioItemMetadata? metadata = null;
-        try
+        if (Plugin.GetConfiguration().IsMusicBrainzEnabled)
         {
-            metadata = _metadataClient.GetAudioItemMetadata(data.Item).Result;
-        }
-        catch (Exception e)
-        {
-            _logger.LogDebug(e, "No additional metadata available");
-            _logger.LogInformation("No additional metadata available: {Reason}", e.Message);
+            try
+            {
+                metadata = _metadataClient.GetAudioItemMetadata(data.Item).Result;
+            }
+            catch (Exception e)
+            {
+                _logger.LogDebug(e, "No additional metadata available");
+                _logger.LogInformation("No additional metadata available: {Reason}", e.Message);
+            }
         }
 
         try
@@ -181,14 +184,17 @@ public class PluginImplementation
         }
 
         AudioItemMetadata? metadata = null;
-        try
+        if (config.IsMusicBrainzEnabled)
         {
-            metadata = _metadataClient.GetAudioItemMetadata(data.Item).Result;
-        }
-        catch (Exception e)
-        {
-            _logger.LogDebug(e, "No additional metadata available");
-            _logger.LogInformation("No additional metadata available: {Reason}", e.Message);
+            try
+            {
+                metadata = _metadataClient.GetAudioItemMetadata(data.Item).Result;
+            }
+            catch (Exception e)
+            {
+                _logger.LogDebug(e, "No additional metadata available");
+                _logger.LogInformation("No additional metadata available: {Reason}", e.Message);
+            }
         }
 
         var now = DateUtils.CurrentTimestamp;
@@ -272,14 +278,17 @@ public class PluginImplementation
         }
 
         AudioItemMetadata? metadata = null;
-        try
+        if (config.IsMusicBrainzEnabled)
         {
-            metadata = _metadataClient.GetAudioItemMetadata(data.Item).Result;
-        }
-        catch (Exception e)
-        {
-            _logger.LogDebug(e, "No additional metadata available");
-            _logger.LogInformation("No additional metadata available: {Reason}", e.Message);
+            try
+            {
+                metadata = _metadataClient.GetAudioItemMetadata(data.Item).Result;
+            }
+            catch (Exception e)
+            {
+                _logger.LogDebug(e, "No additional metadata available");
+                _logger.LogInformation("No additional metadata available: {Reason}", e.Message);
+            }
         }
 
         var now = DateUtils.CurrentTimestamp;
