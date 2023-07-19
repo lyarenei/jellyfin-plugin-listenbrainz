@@ -141,13 +141,6 @@
                 onPageShow();
             });
 
-        // Work around issue with not triggering pageshow when navigating back to the page
-        // because the page is still loaded in DOM for a few navigations in the Jellyfin app.
-        document.querySelector('#ListenBrainzConfigPage')
-            .addEventListener('pagehide', () => {
-                document.querySelector('#ListenBrainzConfigPage').remove();
-            });
-
         document.querySelector('#JellyfinUser')
             .addEventListener('change', () => {
                 onSelectUser()
