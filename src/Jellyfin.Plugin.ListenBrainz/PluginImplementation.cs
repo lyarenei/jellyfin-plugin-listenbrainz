@@ -60,7 +60,7 @@ public class PluginImplementation
     /// <param name="args">Event args.</param>
     public void OnPlaybackStart(object? sender, PlaybackProgressEventArgs args)
     {
-        _logger.LogDebug("Detected playback start for item {Item}", args.Item.Name);
+        _logger.LogDebug("Picking up playback start event for item {Item}", args.Item.Name);
         EventData data;
         try
         {
@@ -75,17 +75,18 @@ public class PluginImplementation
         var userConfig = data.JellyfinUser.GetListenBrainzConfig();
         if (userConfig is null)
         {
-            _logger.LogWarning("Cannot handle this event, user {User} is not configured", data.JellyfinUser.Username);
+            _logger.LogWarning("Dropping event, user {User} is not configured", data.JellyfinUser.Username);
             return;
         }
 
+        _logger.LogInformation("Checking required metadata and user configuration");
         try
         {
             AssertListenBrainzRequirements(data.Item, userConfig);
         }
         catch (Exception e)
         {
-            _logger.LogInformation("Cannot handle this event: {Reason}", e.Message);
+            _logger.LogInformation("Dropping event: {Reason}", e.Message);
             _logger.LogDebug(e, "Requirements were not met");
             return;
         }
@@ -93,17 +94,22 @@ public class PluginImplementation
         AudioItemMetadata? metadata = null;
         if (Plugin.GetConfiguration().IsMusicBrainzEnabled)
         {
+            _logger.LogInformation("MusicBrainz integration is enabled, attempting to fetch metadata");
             try
             {
                 metadata = _metadataClient.GetAudioItemMetadata(data.Item).Result;
             }
             catch (Exception e)
             {
-                _logger.LogDebug(e, "No additional metadata available");
                 _logger.LogInformation("No additional metadata available: {Reason}", e.Message);
+                _logger.LogDebug(e, "No additional metadata available");
             }
         }
 
+        _logger.LogInformation(
+            "All checks passed, sending 'now playing' listen of track {Track} for user {Username}",
+            data.Item.Name,
+            data.JellyfinUser.Username);
         try
         {
             _listenBrainzClient.SendNowPlaying(userConfig, data.Item, metadata);
@@ -111,7 +117,8 @@ public class PluginImplementation
         catch (Exception e)
         {
             _logger.LogInformation(
-                "Failed to send 'now playing' for user {User}: {Reason}",
+                "Failed to send 'now playing' listen of track {Track} for user {User}: {Reason}",
+                data.Item.Name,
                 data.JellyfinUser.Username,
                 e.Message);
 
@@ -333,7 +340,7 @@ public class PluginImplementation
         }
     }
 
-    private static EventData GetEventData(PlaybackProgressEventArgs eventArgs)
+    private EventData GetEventData(PlaybackProgressEventArgs eventArgs)
     {
         if (eventArgs.Item is not Audio item)
         {
