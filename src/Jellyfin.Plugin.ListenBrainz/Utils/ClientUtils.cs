@@ -42,7 +42,6 @@ public static class ClientUtils
 
         var clientName = string.Join(string.Empty, Plugin.FullName.Split(' ').Select(s => s.Capitalize()));
         var apiClient = new MusicBrainzApiClient(
-            config.MusicBrainzApiUrl,
             clientName,
             Plugin.Version,
             Plugin.SourceUrl,

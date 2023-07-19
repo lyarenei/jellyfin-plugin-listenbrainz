@@ -26,7 +26,6 @@ public class BaseClient : HttpClient
         PropertyNamingPolicy = KebabCaseNamingPolicy.Instance
     };
 
-    private readonly string _baseUrl;
     private readonly string _clientName;
     private readonly string _clientVersion;
     private readonly string _contactUrl;
@@ -34,7 +33,6 @@ public class BaseClient : HttpClient
     /// <summary>
     /// Initializes a new instance of the <see cref="BaseClient"/> class.
     /// </summary>
-    /// <param name="baseUrl">API base URL.</param>
     /// <param name="clientName">Name of the client.</param>
     /// <param name="clientVersion">Client version.</param>
     /// <param name="contactUrl">Link to the client.</param>
@@ -42,7 +40,6 @@ public class BaseClient : HttpClient
     /// <param name="logger">Logger instance.</param>
     /// <param name="sleepService">Sleep service.</param>
     protected BaseClient(
-        string baseUrl,
         string clientName,
         string clientVersion,
         string contactUrl,
@@ -50,7 +47,6 @@ public class BaseClient : HttpClient
         ILogger logger,
         ISleepService? sleepService) : base(httpClientFactory, logger, sleepService)
     {
-        _baseUrl = baseUrl;
         _clientName = clientName;
         _clientVersion = clientVersion;
         _contactUrl = contactUrl;
@@ -69,7 +65,7 @@ public class BaseClient : HttpClient
         where TResponse : IMusicBrainzResponse
     {
         var query = ToMusicbrainzQuery(request.SearchQuery);
-        var requestUri = BuildRequestUri(request.Endpoint);
+        var requestUri = BuildRequestUri(request.BaseUrl, request.Endpoint);
         var requestMessage = new HttpRequestMessage
         {
             Method = HttpMethod.Get,
@@ -86,7 +82,7 @@ public class BaseClient : HttpClient
         using (requestMessage) return await DoRequest<TResponse>(requestMessage, cancellationToken);
     }
 
-    private Uri BuildRequestUri(string endpoint) => new($"{_baseUrl}/ws/{Api.Version}/{endpoint}");
+    private Uri BuildRequestUri(string baseUrl, string endpoint) => new($"{baseUrl}/ws/{Api.Version}/{endpoint}");
 
     private async Task<TResponse?> DoRequest<TResponse>(HttpRequestMessage requestMessage, CancellationToken cancellationToken)
         where TResponse : IMusicBrainzResponse

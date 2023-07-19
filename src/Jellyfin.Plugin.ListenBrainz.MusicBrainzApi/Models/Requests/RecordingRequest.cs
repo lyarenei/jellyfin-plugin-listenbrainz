@@ -14,11 +14,15 @@ public class RecordingRequest : IMusicBrainzRequest
     /// <param name="trackMbid">Track MBID.</param>
     public RecordingRequest(string trackMbid)
     {
-        this.TrackMbid = trackMbid;
+        BaseUrl = Api.BaseUrl;
+        TrackMbid = trackMbid;
     }
 
     /// <inheritdoc />
     public string Endpoint => Endpoints.Recording;
+
+    /// <inheritdoc />
+    public string BaseUrl { get; init; }
 
     /// <summary>
     /// Gets track MBID.
