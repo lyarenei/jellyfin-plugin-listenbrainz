@@ -204,23 +204,7 @@ public class PluginImplementation
         }
 
         if (!userConfig.IsFavoritesSyncEnabled) return;
-
-        try
-        {
-            var userItemData = _userDataManager.GetUserData(data.JellyfinUser, data.Item);
-            if (metadata?.RecordingMbid is not null)
-            {
-                _listenBrainzClient.SendFeedback(userConfig, userItemData.IsFavorite, metadata.RecordingMbid);
-                return;
-            }
-
-            SendFeedbackUsingMsid();
-        }
-        catch (Exception e)
-        {
-            _logger.LogInformation("Favorite sync failed: {Reason}", e.Message);
-            _logger.LogDebug(e, "Favorite sync failed");
-        }
+        HandleFavoriteSync(data, metadata, userConfig);
     }
 
     /// <summary>
@@ -300,6 +284,29 @@ public class PluginImplementation
             _logger.LogDebug(e, "Send listen failed");
             _cacheManager.AddListen(data.JellyfinUser.Id, data.Item, metadata, now);
             _cacheManager.Save();
+        }
+
+        if (!userConfig.IsFavoritesSyncEnabled) return;
+        HandleFavoriteSync(data, metadata, userConfig);
+    }
+
+    private void HandleFavoriteSync(EventData data, AudioItemMetadata? metadata, ListenBrainzUserConfig userConfig)
+    {
+        try
+        {
+            var userItemData = _userDataManager.GetUserData(data.JellyfinUser, data.Item);
+            if (metadata?.RecordingMbid is not null)
+            {
+                _listenBrainzClient.SendFeedback(userConfig, userItemData.IsFavorite, metadata.RecordingMbid);
+                return;
+            }
+
+            SendFeedbackUsingMsid();
+        }
+        catch (Exception e)
+        {
+            _logger.LogInformation("Favorite sync failed: {Reason}", e.Message);
+            _logger.LogDebug(e, "Favorite sync failed");
         }
     }
 
