@@ -49,11 +49,13 @@ public class ListenBrainzClient : IListenBrainzClient
     /// <inheritdoc />
     public void SendNowPlaying(ListenBrainzUserConfig config, Audio item, AudioItemMetadata? audioMetadata)
     {
+        var pluginConfig = Plugin.GetConfiguration();
         var request = new SubmitListensRequest
         {
             ApiToken = config.ApiToken,
             ListenType = ListenType.PlayingNow,
-            Payload = new[] { item.AsListen(itemMetadata: audioMetadata) }
+            Payload = new[] { item.AsListen(itemMetadata: audioMetadata) },
+            BaseUrl = pluginConfig.ListenBrainzApiUrl
         };
 
         _apiClient.SubmitListens(request, CancellationToken.None);
@@ -62,11 +64,13 @@ public class ListenBrainzClient : IListenBrainzClient
     /// <inheritdoc />
     public void SendListen(ListenBrainzUserConfig config, Audio item, AudioItemMetadata? metadata, long listenedAt)
     {
+        var pluginConfig = Plugin.GetConfiguration();
         var request = new SubmitListensRequest
         {
             ApiToken = config.ApiToken,
             ListenType = ListenType.Single,
-            Payload = new[] { item.AsListen(listenedAt, metadata) }
+            Payload = new[] { item.AsListen(listenedAt, metadata) },
+            BaseUrl = pluginConfig.ListenBrainzApiUrl
         };
 
         _apiClient.SubmitListens(request, CancellationToken.None);
@@ -75,12 +79,14 @@ public class ListenBrainzClient : IListenBrainzClient
     /// <inheritdoc />
     public void SendFeedback(ListenBrainzUserConfig config, bool isFavorite, string? recordingMbid = null, string? recordingMsid = null)
     {
+        var pluginConfig = Plugin.GetConfiguration();
         var request = new RecordingFeedbackRequest
         {
             ApiToken = config.ApiToken,
             RecordingMbid = recordingMbid,
             RecordingMsid = recordingMsid,
-            Score = isFavorite ? FeedbackScore.Loved : FeedbackScore.Neutral
+            Score = isFavorite ? FeedbackScore.Loved : FeedbackScore.Neutral,
+            BaseUrl = pluginConfig.ListenBrainzApiUrl
         };
 
         _apiClient.SubmitRecordingFeedback(request, CancellationToken.None);
@@ -89,11 +95,13 @@ public class ListenBrainzClient : IListenBrainzClient
     /// <inheritdoc />
     public void SendListens(ListenBrainzUserConfig config, IEnumerable<StoredListen> storedListens)
     {
+        var pluginConfig = Plugin.GetConfiguration();
         var request = new SubmitListensRequest
         {
             ApiToken = config.ApiToken,
             ListenType = ListenType.Single,
-            Payload = ToListens(storedListens)
+            Payload = ToListens(storedListens),
+            BaseUrl = pluginConfig.ListenBrainzApiUrl
         };
 
         _apiClient.SubmitListens(request, CancellationToken.None);
@@ -102,7 +110,8 @@ public class ListenBrainzClient : IListenBrainzClient
     /// <inheritdoc />
     public async Task<ValidatedToken> ValidateToken(string apiToken)
     {
-        var request = new ValidateTokenRequest(apiToken);
+        var pluginConfig = Plugin.GetConfiguration();
+        var request = new ValidateTokenRequest(apiToken) { BaseUrl = pluginConfig.ListenBrainzApiUrl };
         var response = await _apiClient.ValidateToken(request, CancellationToken.None);
         if (response is null) throw new ListenBrainzPluginException("Did not receive response");
         return new ValidatedToken
