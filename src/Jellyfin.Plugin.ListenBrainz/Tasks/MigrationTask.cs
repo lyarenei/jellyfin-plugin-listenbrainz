@@ -28,10 +28,10 @@ public class MigrationTask : IScheduledTask
     private static string MigratedFilePath => Path.Join(Plugin.GetDataPath(), MigratedFileName);
 
     /// <inheritdoc />
-    public string Name => "Config migration from version 2.x and below";
+    public string Name => "Migrate from version 2.x and below";
 
     /// <inheritdoc />
-    public string Key => "ConfigMigration";
+    public string Key => "MigrateConfig";
 
     /// <inheritdoc />
     public string Description => "Migrate plugin configuration from plugin version 2.x and below to a new one.";
