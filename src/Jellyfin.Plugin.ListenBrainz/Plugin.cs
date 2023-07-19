@@ -92,4 +92,27 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
         if (path is null) throw new ListenBrainzPluginException("Plugin instance is not available");
         return path;
     }
+
+    /// <summary>
+    /// Gets plugin configuration directory path.
+    /// </summary>
+    /// <returns>Path to config directory.</returns>
+    /// <exception cref="ListenBrainzPluginException">Plugin instance or path is not available.</exception>
+    public static string GetConfigDirPath()
+    {
+        var path = _thisInstance?.ConfigurationFilePath;
+        if (path is null) throw new ListenBrainzPluginException("Plugin instance is not available");
+        var dirName = Path.GetDirectoryName(path);
+        if (dirName is null) throw new ListenBrainzPluginException("Could not get a config directory name");
+        return dirName;
+    }
+
+    /// <summary>
+    /// Update plugin configuration.
+    /// </summary>
+    /// <param name="newConfiguration">New plugin configuration.</param>
+    public static void UpdateConfig(BasePluginConfiguration newConfiguration)
+    {
+        _thisInstance?.UpdateConfiguration(newConfiguration);
+    }
 }
