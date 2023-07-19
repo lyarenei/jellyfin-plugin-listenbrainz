@@ -45,16 +45,8 @@ public sealed class EntryPoint : IServerEntryPoint
     public Task RunAsync()
     {
         _sessionManager.PlaybackStart += _plugin.OnPlaybackStart;
-
-        if (Plugin.GetConfiguration().IsAlternativeModeEnabled)
-        {
-            _userDataManager.UserDataSaved += _plugin.OnUserDataSave;
-        }
-        else
-        {
-            _sessionManager.PlaybackStopped += _plugin.OnPlaybackStop;
-        }
-
+        _sessionManager.PlaybackStopped += _plugin.OnPlaybackStop;
+        _userDataManager.UserDataSaved += _plugin.OnUserDataSave;
         return Task.CompletedTask;
     }
 
@@ -62,13 +54,7 @@ public sealed class EntryPoint : IServerEntryPoint
     public void Dispose()
     {
         _sessionManager.PlaybackStart -= _plugin.OnPlaybackStart;
-        if (Plugin.GetConfiguration().IsAlternativeModeEnabled)
-        {
-            _userDataManager.UserDataSaved -= _plugin.OnUserDataSave;
-        }
-        else
-        {
-            _sessionManager.PlaybackStopped -= _plugin.OnPlaybackStop;
-        }
+        _sessionManager.PlaybackStopped -= _plugin.OnPlaybackStop;
+        _userDataManager.UserDataSaved -= _plugin.OnUserDataSave;
     }
 }

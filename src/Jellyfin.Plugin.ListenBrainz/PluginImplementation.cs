@@ -140,6 +140,13 @@ public class PluginImplementation
             return;
         }
 
+        var config = Plugin.GetConfiguration();
+        if (!config.IsAlternativeModeEnabled)
+        {
+            _logger.LogDebug("Alternative mode is enabled, ignoring event");
+            return;
+        }
+
         var userConfig = data.JellyfinUser.GetListenBrainzConfig();
         if (userConfig is null)
         {
@@ -223,6 +230,13 @@ public class PluginImplementation
         catch (Exception e)
         {
             _logger.LogDebug(e, "Event data are not valid");
+            return;
+        }
+
+        var config = Plugin.GetConfiguration();
+        if (!config.IsAlternativeModeEnabled)
+        {
+            _logger.LogDebug("Alternative mode is disabled, ignoring event");
             return;
         }
 
