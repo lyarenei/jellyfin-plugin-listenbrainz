@@ -20,6 +20,12 @@ public interface IListenBrainzRequest
     public string Endpoint { get; }
 
     /// <summary>
+    /// Gets API base URL.
+    /// </summary>
+    [JsonIgnore]
+    public string BaseUrl { get; init; }
+
+    /// <summary>
     /// Gets request data as a dictionary.
     /// </summary>
     [JsonIgnore]

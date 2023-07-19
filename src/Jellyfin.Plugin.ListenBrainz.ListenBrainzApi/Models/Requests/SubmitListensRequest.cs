@@ -15,6 +15,7 @@ public class SubmitListensRequest : IListenBrainzRequest
     public SubmitListensRequest()
     {
         ListenType = ListenType.PlayingNow;
+        BaseUrl = Api.BaseUrl;
         Payload = new List<Listen>();
     }
 
@@ -23,6 +24,9 @@ public class SubmitListensRequest : IListenBrainzRequest
 
     /// <inheritdoc />
     public string Endpoint => Endpoints.SubmitListens;
+
+    /// <inheritdoc />
+    public string BaseUrl { get; init; }
 
     /// <summary>
     /// Gets listen type.

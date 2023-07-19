@@ -25,8 +25,7 @@ public static class ClientUtils
         IHttpClientFactory clientFactory,
         ILibraryManager? libraryManager = null)
     {
-        var config = Plugin.GetConfiguration();
-        var apiClient = new ListenBrainzApiClient(config.ListenBrainzApiUrl, clientFactory, logger);
+        var apiClient = new ListenBrainzApiClient(clientFactory, logger);
         return libraryManager is null ? new ListenBrainzClient(logger, apiClient) : new ListenBrainzClient(logger, apiClient, libraryManager);
     }
 

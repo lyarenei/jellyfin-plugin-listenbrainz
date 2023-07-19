@@ -15,7 +15,7 @@ public class ValidateTokenRequest : IListenBrainzRequest
     public ValidateTokenRequest(string apiToken)
     {
         ApiToken = apiToken;
-        Endpoint = Endpoints.ValidateToken;
+        BaseUrl = Api.BaseUrl;
         QueryDict = new Dictionary<string, string>();
     }
 
@@ -23,7 +23,10 @@ public class ValidateTokenRequest : IListenBrainzRequest
     public string? ApiToken { get; init; }
 
     /// <inheritdoc />
-    public string Endpoint { get; }
+    public string Endpoint => Endpoints.ValidateToken;
+
+    /// <inheritdoc />
+    public string BaseUrl { get; init; }
 
     /// <inheritdoc />
     public Dictionary<string, string> QueryDict { get; }

@@ -14,16 +14,14 @@ public class ListenBrainzApiClient : BaseClient, IListenBrainzApiClient
     /// <summary>
     /// Initializes a new instance of the <see cref="ListenBrainzApiClient"/> class.
     /// </summary>
-    /// <param name="baseUrl">API base URL.</param>
     /// <param name="httpClientFactory">HTTP client factory.</param>
     /// <param name="logger">Logger instance.</param>
     /// <param name="sleepService">Sleep service.</param>
     public ListenBrainzApiClient(
-        string baseUrl,
         IHttpClientFactory httpClientFactory,
         ILogger logger,
         ISleepService? sleepService = null)
-        : base(baseUrl, httpClientFactory, logger, sleepService)
+        : base(httpClientFactory, logger, sleepService)
     {
     }
 

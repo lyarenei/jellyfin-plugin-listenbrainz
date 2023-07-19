@@ -27,19 +27,15 @@ public class BaseClient : HttpClient
         ContractResolver = new DefaultContractResolver { NamingStrategy = new SnakeCaseNamingStrategy() }
     };
 
-    private readonly string _baseUrl;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="BaseClient"/> class.
     /// </summary>
-    /// <param name="baseUrl">API base URL.</param>
     /// <param name="httpClientFactory">HTTP client factory.</param>
     /// <param name="logger">Logger instance.</param>
     /// <param name="sleepService">Sleep service.</param>
-    protected BaseClient(string baseUrl, IHttpClientFactory httpClientFactory, ILogger logger, ISleepService? sleepService)
+    protected BaseClient(IHttpClientFactory httpClientFactory, ILogger logger, ISleepService? sleepService)
         : base(httpClientFactory, logger, sleepService)
     {
-        _baseUrl = baseUrl;
     }
 
     /// <summary>
@@ -58,7 +54,7 @@ public class BaseClient : HttpClient
         var requestMessage = new HttpRequestMessage
         {
             Method = HttpMethod.Post,
-            RequestUri = BuildRequestUri(request.Endpoint),
+            RequestUri = BuildRequestUri(request.BaseUrl, request.Endpoint),
             Content = new StringContent(jsonData, Encoding.UTF8, "application/json")
         };
 
@@ -78,7 +74,7 @@ public class BaseClient : HttpClient
         where TRequest : IListenBrainzRequest
         where TResponse : IListenBrainzResponse
     {
-        var requestUri = BuildRequestUri(request.Endpoint);
+        var requestUri = BuildRequestUri(request.BaseUrl, request.Endpoint);
         var queryParams = Utils.ToHttpGetQuery(request.QueryDict);
         var requestMessage = new HttpRequestMessage
         {
@@ -90,7 +86,7 @@ public class BaseClient : HttpClient
         using (requestMessage) return await DoRequest<TResponse>(requestMessage, cancellationToken);
     }
 
-    private Uri BuildRequestUri(string endpoint) => new($"{_baseUrl}/{Api.Version}/{endpoint}");
+    private Uri BuildRequestUri(string baseUrl, string endpoint) => new($"{baseUrl}/{Api.Version}/{endpoint}");
 
     private async Task<TResponse?> DoRequest<TResponse>(HttpRequestMessage requestMessage, CancellationToken cancellationToken)
         where TResponse : IListenBrainzResponse

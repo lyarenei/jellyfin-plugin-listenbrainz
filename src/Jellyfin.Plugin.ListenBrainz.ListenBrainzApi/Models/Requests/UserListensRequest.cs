@@ -19,6 +19,7 @@ public class UserListensRequest : IListenBrainzRequest
     public UserListensRequest(string userName, int listensNumber = 10)
     {
         _userName = userName;
+        BaseUrl = Api.BaseUrl;
         QueryDict = new Dictionary<string, string> { { "count", listensNumber.ToString(NumberFormatInfo.InvariantInfo) } };
     }
 
@@ -27,6 +28,9 @@ public class UserListensRequest : IListenBrainzRequest
 
     /// <inheritdoc />
     public string Endpoint => string.Format(CultureInfo.InvariantCulture, Endpoints.ListensEndpoint, _userName);
+
+    /// <inheritdoc />
+    public string BaseUrl { get; init; }
 
     /// <inheritdoc />
     public Dictionary<string, string> QueryDict { get; }
