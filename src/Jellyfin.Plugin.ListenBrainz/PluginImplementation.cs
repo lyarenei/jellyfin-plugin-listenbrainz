@@ -26,7 +26,7 @@ public class PluginImplementation
     private readonly IUserDataManager _userDataManager;
     private readonly CacheManager _cacheManager;
     private readonly IUserManager _userManager;
-    private readonly object _lock = new();
+    private readonly object _userDataSaveLock = new();
     private readonly PlaybackTrackingManager _playbackTracker;
 
     /// <summary>
@@ -263,7 +263,7 @@ public class PluginImplementation
 
         try
         {
-            Monitor.Enter(_lock);
+            Monitor.Enter(_userDataSaveLock);
             EvaluateConditionsIfTracked(data.Item, data.JellyfinUser);
         }
         catch (Exception e)
@@ -274,7 +274,7 @@ public class PluginImplementation
         }
         finally
         {
-            Monitor.Exit(_lock);
+            Monitor.Exit(_userDataSaveLock);
         }
 
         AudioItemMetadata? metadata = null;
