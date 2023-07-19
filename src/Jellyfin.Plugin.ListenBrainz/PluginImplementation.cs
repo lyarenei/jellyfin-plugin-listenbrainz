@@ -147,6 +147,14 @@ public class PluginImplementation
             return;
         }
 
+        if (!userConfig.IsListenSubmitEnabled)
+        {
+            _logger.LogInformation(
+                "Cannot handle this event, user {User} does not have listen submitting enabled",
+                data.JellyfinUser.Username);
+            return;
+        }
+
         var position = args.PlaybackPositionTicks;
         if (position is null)
         {
@@ -238,6 +246,14 @@ public class PluginImplementation
         if (userConfig is null)
         {
             _logger.LogWarning("Cannot handle this event, user {User} is not configured", data.JellyfinUser.Username);
+            return;
+        }
+
+        if (!userConfig.IsListenSubmitEnabled)
+        {
+            _logger.LogInformation(
+                "Cannot handle this event, user {User} does not have listen submitting enabled",
+                data.JellyfinUser.Username);
             return;
         }
 
