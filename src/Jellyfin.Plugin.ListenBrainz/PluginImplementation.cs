@@ -313,7 +313,7 @@ public class PluginImplementation
         HandleFavoriteSync(data, metadata, userConfig);
     }
 
-    private void HandleFavoriteSync(EventData data, AudioItemMetadata? metadata, ListenBrainzUserConfig userConfig)
+    private void HandleFavoriteSync(EventData data, AudioItemMetadata? metadata, UserConfig userConfig)
     {
         try
         {
@@ -378,7 +378,7 @@ public class PluginImplementation
         };
     }
 
-    private static void AssertListenBrainzRequirements(Audio item, ListenBrainzUserConfig userConfig)
+    private static void AssertListenBrainzRequirements(Audio item, UserConfig userConfig)
     {
         try
         {

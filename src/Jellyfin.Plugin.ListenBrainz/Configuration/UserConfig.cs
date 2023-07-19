@@ -6,12 +6,12 @@ namespace Jellyfin.Plugin.ListenBrainz.Configuration;
 /// <summary>
 /// ListenBrainz user configuration.
 /// </summary>
-public class ListenBrainzUserConfig
+public class UserConfig
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="ListenBrainzUserConfig"/> class.
+    /// Initializes a new instance of the <see cref="UserConfig"/> class.
     /// </summary>
-    public ListenBrainzUserConfig()
+    public UserConfig()
     {
         IsListenSubmitEnabled = false;
         ApiToken = string.Empty;

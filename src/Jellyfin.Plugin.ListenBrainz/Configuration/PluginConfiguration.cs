@@ -20,7 +20,7 @@ public class PluginConfiguration : BasePluginConfiguration
     /// </summary>
     public PluginConfiguration()
     {
-        UserConfigs = new Collection<ListenBrainzUserConfig>();
+        UserConfigs = new Collection<UserConfig>();
     }
 
     /// <summary>
@@ -75,5 +75,5 @@ public class PluginConfiguration : BasePluginConfiguration
     /// Gets or sets ListenBrainz user configurations.
     /// </summary>
     [SuppressMessage("Warning", "CA2227", Justification = "Needed for deserialization")]
-    public Collection<ListenBrainzUserConfig> UserConfigs { get; set; }
+    public Collection<UserConfig> UserConfigs { get; set; }
 }

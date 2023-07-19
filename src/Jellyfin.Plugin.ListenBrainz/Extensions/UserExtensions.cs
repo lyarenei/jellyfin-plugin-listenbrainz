@@ -13,7 +13,7 @@ public static class UserExtensions
     /// </summary>
     /// <param name="user">Jellyfin user.</param>
     /// <returns>ListenBrainz config. Null if not available.</returns>
-    public static ListenBrainzUserConfig? GetListenBrainzConfig(this User user)
+    public static UserConfig? GetListenBrainzConfig(this User user)
     {
         return Plugin.GetConfiguration().UserConfigs.FirstOrDefault(u => u.JellyfinUserId == user.Id);
     }

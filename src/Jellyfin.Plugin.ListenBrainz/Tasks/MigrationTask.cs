@@ -95,7 +95,7 @@ public class MigrationTask : IScheduledTask
         }
 
         PluginConfiguration? newConfig = null;
-        Collection<ListenBrainzUserConfig> userConfigs = new Collection<ListenBrainzUserConfig>();
+        Collection<UserConfig> userConfigs = new Collection<UserConfig>();
         foreach (var element in root.Descendants())
         {
             switch (element.Name.ToString())
@@ -139,9 +139,9 @@ public class MigrationTask : IScheduledTask
         return pluginConfig;
     }
 
-    private static Collection<ListenBrainzUserConfig> ParseUserConfigs(XContainer userConfigsArray)
+    private static Collection<UserConfig> ParseUserConfigs(XContainer userConfigsArray)
     {
-        return new Collection<ListenBrainzUserConfig>(
+        return new Collection<UserConfig>(
             userConfigsArray
                 .Descendants()
                 .Where(c => c.Name.ToString() == "LbUser")
@@ -149,9 +149,9 @@ public class MigrationTask : IScheduledTask
                 .ToList());
     }
 
-    private static ListenBrainzUserConfig ParseUserConfig(XElement config)
+    private static UserConfig ParseUserConfig(XElement config)
     {
-        var newUserConfig = new ListenBrainzUserConfig();
+        var newUserConfig = new UserConfig();
         foreach (var configField in config.Descendants())
         {
             switch (configField.Name.ToString())

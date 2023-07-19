@@ -47,7 +47,7 @@ public class ListenBrainzClient : IListenBrainzClient
     }
 
     /// <inheritdoc />
-    public void SendNowPlaying(ListenBrainzUserConfig config, Audio item, AudioItemMetadata? audioMetadata)
+    public void SendNowPlaying(UserConfig config, Audio item, AudioItemMetadata? audioMetadata)
     {
         var pluginConfig = Plugin.GetConfiguration();
         var request = new SubmitListensRequest
@@ -62,7 +62,7 @@ public class ListenBrainzClient : IListenBrainzClient
     }
 
     /// <inheritdoc />
-    public void SendListen(ListenBrainzUserConfig config, Audio item, AudioItemMetadata? metadata, long listenedAt)
+    public void SendListen(UserConfig config, Audio item, AudioItemMetadata? metadata, long listenedAt)
     {
         var pluginConfig = Plugin.GetConfiguration();
         var request = new SubmitListensRequest
@@ -77,7 +77,7 @@ public class ListenBrainzClient : IListenBrainzClient
     }
 
     /// <inheritdoc />
-    public void SendFeedback(ListenBrainzUserConfig config, bool isFavorite, string? recordingMbid = null, string? recordingMsid = null)
+    public void SendFeedback(UserConfig config, bool isFavorite, string? recordingMbid = null, string? recordingMsid = null)
     {
         var pluginConfig = Plugin.GetConfiguration();
         var request = new RecordingFeedbackRequest
@@ -93,7 +93,7 @@ public class ListenBrainzClient : IListenBrainzClient
     }
 
     /// <inheritdoc />
-    public void SendListens(ListenBrainzUserConfig config, IEnumerable<StoredListen> storedListens)
+    public void SendListens(UserConfig config, IEnumerable<StoredListen> storedListens)
     {
         var pluginConfig = Plugin.GetConfiguration();
         var request = new SubmitListensRequest
