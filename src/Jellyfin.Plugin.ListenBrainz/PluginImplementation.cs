@@ -68,14 +68,17 @@ public class PluginImplementation
         }
         catch (Exception e)
         {
-            _logger.LogDebug(e, "Event data are not valid");
+            _logger.LogDebug(e, "Invalid event");
             return;
         }
 
         var userConfig = data.JellyfinUser.GetListenBrainzConfig();
         if (userConfig is null)
         {
-            _logger.LogWarning("Dropping event, user {User} is not configured", data.JellyfinUser.Username);
+            _logger.LogWarning(
+                "Dropping event for track {Track}: User {User} is not configured",
+                data.Item.Name,
+                data.JellyfinUser.Username);
             return;
         }
 
@@ -86,7 +89,12 @@ public class PluginImplementation
         }
         catch (Exception e)
         {
-            _logger.LogInformation("Dropping event: {Reason}", e.Message);
+            _logger.LogInformation(
+                "Dropping event for track {Track} and user {User}: {Reason}",
+                data.Item.Name,
+                data.JellyfinUser.Username,
+                e.Message);
+
             _logger.LogDebug(e, "Requirements were not met");
             return;
         }
@@ -94,14 +102,20 @@ public class PluginImplementation
         AudioItemMetadata? metadata = null;
         if (Plugin.GetConfiguration().IsMusicBrainzEnabled)
         {
-            _logger.LogInformation("MusicBrainz integration is enabled, attempting to fetch metadata");
+            _logger.LogInformation(
+                "MusicBrainz integration is enabled, attempting to fetch metadata for track {Track}",
+                data.Item.Name);
             try
             {
                 metadata = _metadataClient.GetAudioItemMetadata(data.Item).Result;
             }
             catch (Exception e)
             {
-                _logger.LogInformation("No additional metadata available: {Reason}", e.Message);
+                _logger.LogInformation(
+                    "No additional metadata available for track {Track}: {Reason}",
+                    data.Item.Name,
+                    e.Message);
+
                 _logger.LogDebug(e, "No additional metadata available");
             }
         }
@@ -138,7 +152,7 @@ public class PluginImplementation
     /// <param name="args">Event args.</param>
     public void OnPlaybackStop(object? sender, PlaybackStopEventArgs args)
     {
-        _logger.LogDebug("Detected playback stop for item {Item}", args.Item.Name);
+        _logger.LogDebug("Picking up playback stop event for item {Item}", args.Item.Name);
         EventData data;
         try
         {
@@ -146,28 +160,33 @@ public class PluginImplementation
         }
         catch (Exception e)
         {
-            _logger.LogDebug(e, "Event data are not valid");
+            _logger.LogDebug(e, "Invalid event");
             return;
         }
 
         var config = Plugin.GetConfiguration();
         if (!config.IsAlternativeModeEnabled)
         {
-            _logger.LogDebug("Alternative mode is enabled, ignoring event");
+            _logger.LogDebug("Dropping event - alternative mode is enabled");
             return;
         }
 
         var userConfig = data.JellyfinUser.GetListenBrainzConfig();
         if (userConfig is null)
         {
-            _logger.LogWarning("Cannot handle this event, user {User} is not configured", data.JellyfinUser.Username);
+            _logger.LogWarning(
+                "Dropping event for track {Track}: User {User} is not configured",
+                data.Item.Name,
+                data.JellyfinUser.Username);
+
             return;
         }
 
         if (!userConfig.IsListenSubmitEnabled)
         {
             _logger.LogInformation(
-                "Cannot handle this event, user {User} does not have listen submitting enabled",
+                "Dropping event for track {Track}: User {User} does not have listen submitting enabled",
+                data.Item.Name,
                 data.JellyfinUser.Username);
             return;
         }
@@ -175,7 +194,11 @@ public class PluginImplementation
         var position = args.PlaybackPositionTicks;
         if (position is null)
         {
-            _logger.LogWarning("Cannot handle this event, playback position is not set");
+            _logger.LogWarning(
+                "Dropping event for track {Track} and user {User}: playback position is not set",
+                data.Item.Name,
+                data.JellyfinUser.Username);
+
             return;
         }
 
@@ -185,7 +208,12 @@ public class PluginImplementation
         }
         catch (Exception e)
         {
-            _logger.LogInformation("Listen submit conditions were not met: {Reason}", e.Message);
+            _logger.LogInformation(
+                "Listen submit conditions track {Track} and user {User} were not met: {Reason}",
+                data.Item.Name,
+                data.JellyfinUser.Username,
+                e.Message);
+
             _logger.LogDebug(e, "Listen submit conditions were not met");
             return;
         }
@@ -199,8 +227,12 @@ public class PluginImplementation
             }
             catch (Exception e)
             {
+                _logger.LogInformation(
+                    "No additional metadata available for track {Track}: {Reason}",
+                    data.Item.Name,
+                    e.Message);
+
                 _logger.LogDebug(e, "No additional metadata available");
-                _logger.LogInformation("No additional metadata available: {Reason}", e.Message);
             }
         }
 
@@ -234,7 +266,7 @@ public class PluginImplementation
     /// <param name="args">Event args.</param>
     public void OnUserDataSave(object? sender, UserDataSaveEventArgs args)
     {
-        _logger.LogDebug("Detected user data save event for item {Item}", args.Item.Name);
+        _logger.LogDebug("Picking up user data save event for item {Item}", args.Item.Name);
         EventData data;
         try
         {
@@ -242,28 +274,33 @@ public class PluginImplementation
         }
         catch (Exception e)
         {
-            _logger.LogDebug(e, "Event data are not valid");
+            _logger.LogDebug(e, "Invalid event");
             return;
         }
 
         var config = Plugin.GetConfiguration();
         if (!config.IsAlternativeModeEnabled)
         {
-            _logger.LogDebug("Alternative mode is disabled, ignoring event");
+            _logger.LogDebug("Dropping event - alternative mode is disabled");
             return;
         }
 
         var userConfig = data.JellyfinUser.GetListenBrainzConfig();
         if (userConfig is null)
         {
-            _logger.LogWarning("Cannot handle this event, user {User} is not configured", data.JellyfinUser.Username);
+            _logger.LogWarning(
+                "Dropping event for track {Track}: User {User} is not configured",
+                data.Item.Name,
+                data.JellyfinUser.Username);
+
             return;
         }
 
         if (!userConfig.IsListenSubmitEnabled)
         {
             _logger.LogInformation(
-                "Cannot handle this event, user {User} does not have listen submitting enabled",
+                "Dropping event for track {Track}: User {User} does not have listen submitting enabled",
+                data.Item.Name,
                 data.JellyfinUser.Username);
             return;
         }
@@ -275,7 +312,12 @@ public class PluginImplementation
         }
         catch (Exception e)
         {
-            _logger.LogInformation("Will not handle this event: {Reason}", e.Message);
+            _logger.LogInformation(
+                "Dropping event for track {Track} and user {User}: {Reason}",
+                data.Item.Name,
+                data.JellyfinUser.Username,
+                e.Message);
+
             _logger.LogDebug(e, "Event will not be handled");
             return;
         }
@@ -293,8 +335,12 @@ public class PluginImplementation
             }
             catch (Exception e)
             {
+                _logger.LogInformation(
+                    "No additional metadata available for track {Track}: {Reason}",
+                    data.Item.Name,
+                    e.Message);
+
                 _logger.LogDebug(e, "No additional metadata available");
-                _logger.LogInformation("No additional metadata available: {Reason}", e.Message);
             }
         }
 
@@ -335,7 +381,12 @@ public class PluginImplementation
         }
         catch (Exception e)
         {
-            _logger.LogInformation("Favorite sync failed: {Reason}", e.Message);
+            _logger.LogInformation(
+                "Favorite sync for track {Track} and user {User} failed: {Reason}",
+                data.Item.Name,
+                data.JellyfinUser.Username,
+                e.Message);
+
             _logger.LogDebug(e, "Favorite sync failed");
         }
     }
