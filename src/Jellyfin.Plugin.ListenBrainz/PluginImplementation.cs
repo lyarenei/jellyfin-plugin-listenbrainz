@@ -99,33 +99,13 @@ public class PluginImplementation
             return;
         }
 
-        AudioItemMetadata? metadata = null;
-        if (Plugin.GetConfiguration().IsMusicBrainzEnabled)
-        {
-            _logger.LogInformation(
-                "MusicBrainz integration is enabled, attempting to fetch metadata for track {Track}",
-                data.Item.Name);
-            try
-            {
-                metadata = _metadataClient.GetAudioItemMetadata(data.Item).Result;
-            }
-            catch (Exception e)
-            {
-                _logger.LogInformation(
-                    "No additional metadata available for track {Track}: {Reason}",
-                    data.Item.Name,
-                    e.Message);
-
-                _logger.LogDebug(e, "No additional metadata available");
-            }
-        }
-
         _logger.LogInformation(
             "All checks passed, sending 'now playing' listen of track {Track} for user {Username}",
             data.Item.Name,
             data.JellyfinUser.Username);
         try
         {
+            var metadata = GetAdditionalMetadata(data);
             _listenBrainzClient.SendNowPlaying(userConfig, data.Item, metadata);
         }
         catch (Exception e)
@@ -218,24 +198,7 @@ public class PluginImplementation
             return;
         }
 
-        AudioItemMetadata? metadata = null;
-        if (config.IsMusicBrainzEnabled)
-        {
-            try
-            {
-                metadata = _metadataClient.GetAudioItemMetadata(data.Item).Result;
-            }
-            catch (Exception e)
-            {
-                _logger.LogInformation(
-                    "No additional metadata available for track {Track}: {Reason}",
-                    data.Item.Name,
-                    e.Message);
-
-                _logger.LogDebug(e, "No additional metadata available");
-            }
-        }
-
+        var metadata = GetAdditionalMetadata(data);
         var now = DateUtils.CurrentTimestamp;
         try
         {
@@ -326,24 +289,7 @@ public class PluginImplementation
             Monitor.Exit(_userDataSaveLock);
         }
 
-        AudioItemMetadata? metadata = null;
-        if (config.IsMusicBrainzEnabled)
-        {
-            try
-            {
-                metadata = _metadataClient.GetAudioItemMetadata(data.Item).Result;
-            }
-            catch (Exception e)
-            {
-                _logger.LogInformation(
-                    "No additional metadata available for track {Track}: {Reason}",
-                    data.Item.Name,
-                    e.Message);
-
-                _logger.LogDebug(e, "No additional metadata available");
-            }
-        }
-
+        var metadata = GetAdditionalMetadata(data);
         var now = DateUtils.CurrentTimestamp;
         try
         {
@@ -389,6 +335,31 @@ public class PluginImplementation
 
             _logger.LogDebug(e, "Favorite sync failed");
         }
+    }
+
+    private AudioItemMetadata? GetAdditionalMetadata(EventData data)
+    {
+        if (!Plugin.GetConfiguration().IsMusicBrainzEnabled) return null;
+
+        _logger.LogInformation(
+            "MusicBrainz integration is enabled, fetching metadata for track {Track}",
+            data.Item.Name);
+
+        try
+        {
+            return _metadataClient.GetAudioItemMetadata(data.Item).Result;
+        }
+        catch (Exception e)
+        {
+            _logger.LogInformation(
+                "No additional metadata available for track {Track}: {Reason}",
+                data.Item.Name,
+                e.Message);
+
+            _logger.LogDebug(e, "No additional metadata available");
+        }
+
+        return null;
     }
 
     private EventData GetEventData(PlaybackProgressEventArgs eventArgs)
