@@ -42,14 +42,20 @@ public class MigrationTask : IScheduledTask
     /// <inheritdoc />
     public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
+        var configDir = Plugin.GetConfigDirPath();
+        var oldPluginConfig = Path.Join(configDir, OldPluginConfigName);
+        if (File.Exists(oldPluginConfig))
+        {
+            _logger.LogInformation("Old plugin configuration file is not available, nothing to do");
+            return;
+        }
+
         if (File.Exists(MigratedFilePath))
         {
             _logger.LogInformation("Plugin configuration has been already migrated, nothing to do");
             return;
         }
 
-        var configDir = Plugin.GetConfigDirPath();
-        var oldPluginConfig = Path.Join(configDir, OldPluginConfigName);
         var configFileContent = await File.ReadAllTextAsync(oldPluginConfig, cancellationToken);
         var newConfig = MigrateConfig(configFileContent);
         if (newConfig is null)
