@@ -165,7 +165,7 @@ public class PluginImplementation
         }
 
         var config = Plugin.GetConfiguration();
-        if (!config.IsAlternativeModeEnabled)
+        if (config.IsAlternativeModeEnabled)
         {
             _logger.LogDebug("Dropping event - alternative mode is enabled");
             return;
