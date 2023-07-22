@@ -424,7 +424,7 @@ public class PluginImplementation
         }
     }
 
-    private void SendFeedbackUsingMsid()
+    private static void SendFeedbackUsingMsid()
     {
         throw new MetadataException("Fallback to send feedback using MSID is not implemented");
     }
