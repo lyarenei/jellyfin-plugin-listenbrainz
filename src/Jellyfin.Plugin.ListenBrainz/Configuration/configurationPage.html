@@ -203,7 +203,7 @@
         }
 
         function onCheckApiToken() {
-            let apiToken = document.querySelector('#ListenBrainzApiToken').value;
+            let apiToken = getApiToken();
             if (!apiToken) {
                 Dashboard.alert("No API token to verify");
                 return;
@@ -362,7 +362,7 @@
         function getUserConfigInputs() {
             return {
                 JellyfinUserId: getSelectedUserId(),
-                ApiToken: document.querySelector('#ListenBrainzApiToken').value,
+                ApiToken: getApiToken(),
                 IsListenSubmitEnabled: document.querySelector('#IsListenSubmitEnabled').checked,
                 IsFavoritesSyncEnabled: document.querySelector('#IsFavoritesSyncEnabled').checked,
             }
@@ -399,6 +399,11 @@
                     console.log("ListenBrainz plugin: Failed to load plugin config: " + reason);
                     Dashboard.alert("Failed to load plugin config");
                 });
+        }
+
+        function getApiToken() {
+            let inputValue = document.querySelector('#ListenBrainzApiToken').value;
+            return inputValue.trim();
         }
 
         ApiClient.ValidateListenBrainzToken = function (apiToken) {
