@@ -211,7 +211,6 @@
 
             ApiClient.ValidateListenBrainzToken(apiToken)
                 .then((response) => {
-                    console.log(response)
                     if (response.IsValid) {
                         Dashboard.alert("Token is valid");
                         return;
