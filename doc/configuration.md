@@ -1,7 +1,7 @@
 # Plugin configuration
 
-The plugin has two types of configuration.
-There is the user configuration and then the plugin itself has some options available as well.
+Here are documented all plugin settings. There are two sections, the [user one](#user-configuration) and
+the [general](#general-configuration) one.
 
 ## User configuration
 
@@ -10,7 +10,7 @@ There are several options to configure:
 
 ##### ListenBrainz API token
 
-In order to send data at all, you need to set up an ListenBrainz API token for user you want to send the data to.
+In order to send data at all, you need to set up a ListenBrainz API token for user you want to send the data to.
 This token can be found at [your ListenBrainz user profile](https://listenbrainz.org/profile/).
 Simply paste it and you are good to go. You can also check/verify the token if you want to be extra sure.
 
@@ -23,16 +23,17 @@ Enables listen submitting for selected user. Pretty self-explanatory, nothing mu
 
 ##### Enable syncing favorites
 
-Enables synchronization of favorite tracks in Jellyfin with loved Listens in ListenBrainz.
+Enables synchronization of `favorite` tracks in Jellyfin with `loved` listens in ListenBrainz.
 This is currently only one-way, listens of favorite tracks in Jellyfin are marked as 'loved' in ListenBrainz.
 Marking listens as 'hated' is not supported as Jellyfin does not have such concept.
 If you unmark favorite track in Jellyfin, it will be marked as neutral in ListenBrainz.
+Favorite albums and artists are not supported as these are not supported by ListenBrainz as well.
 
 Support for the reverse direction is currently not implemented, but it is planned.
 
 ## General configuration
 
-In addition to user configuration, the plugin has some options as well.
+Options affecting the plugin behavior can be configured in this section.
 
 ##### ListenBrainz API URL
 
@@ -47,9 +48,8 @@ Same story as above, but for MusicBrainz.
 
 Some data cannot be provided by Jellyfin alone for listen submission.
 If enabled, the plugin will also pull metadata from MusicBrainz for specified track, which will be then included into
-listen submissions. This feature is completely optional and does not affect the core function of this plugin
-(listen submission) in any way. For the lookup to work, the tracks needs to have a `Track MBID` specified in its
-metadata.
+listen submission. This feature is completely optional and does not affect the core function of this plugin
+(listen submission) in any way. For the lookup to work, the tracks needs to have a `Track MBID` set in their metadata.
 
 Currently used metadata from MusicBrainz:
 
@@ -87,10 +87,10 @@ that the playback has ended. Which is obviously not possible if you are offline.
 
 Another disadvantage is that not many third party clients out there even report playback stops, leaving you with
 unrecorded listens. But, as already mentioned earlier, even if the client reports stopped playback, the parameter of
-playback position is optional. If this parameter is not filled, then the event is ignored and no listen for that track
+playback position is optional. If this parameter is not set, then the event is ignored and no listen for that track
 will be sent.
 
-After `UserDataSaved` mode has been introduced, this is also the default mode to keep the behavior consistent.
+After `UserDataSaved` mode has been introduced, this is also the default mode to keep the plugin behavior consistent.
 
 ###### UserDataSaved event mode
 
@@ -107,8 +107,8 @@ this means when the item has been fully played, but technically, any item has be
 matter the amount of playback time. This means that you can mark items as played just when the playback started
 (this is actually what Jellyfin Web client does) and from ListenBrainz point of view, this would not be a valid
 submission. The plugin tries to address this by internally tracking when and what has started playing and when an item
-is marked as played, the plugin checks if there has been at least a sufficient amount of time (from when the playback
-started) to qualify as a valid listen.
+is marked as played, the plugin checks if at least a sufficient amount of time has passed from when the playback
+started to qualify as a valid listen.
 
 The second disadvantage is related to the first one. As mentioned, it is possible to specify when the item was marked as
 played, however this field is optional. If the value is missing, the plugin would not be able to evaluate playback
