@@ -438,19 +438,20 @@ public class PluginImplementation
                 "No playback is tracked for user {User} and track {Track}, assuming offline playback",
                 user.Username,
                 item.Name);
+
+            return;
         }
-        else if (!trackedItem.IsValid)
+
+        if (!trackedItem.IsValid)
         {
             throw new ListenBrainzPluginException("Playback tracking is not valid for this item");
         }
-        else
-        {
-            var delta = DateUtils.CurrentTimestamp - trackedItem.StartedAt;
-            var deltaTicks = delta * TimeSpan.TicksPerSecond;
-            var runtime = item.RunTimeTicks ?? 0;
-            Limits.AssertSubmitConditions(deltaTicks, runtime);
-            _playbackTracker.InvalidateItem(user.Id.ToString(), trackedItem);
-        }
+
+        var delta = DateUtils.CurrentTimestamp - trackedItem.StartedAt;
+        var deltaTicks = delta * TimeSpan.TicksPerSecond;
+        var runtime = item.RunTimeTicks ?? 0;
+        Limits.AssertSubmitConditions(deltaTicks, runtime);
+        _playbackTracker.InvalidateItem(user.Id.ToString(), trackedItem);
     }
 
     private struct EventData
