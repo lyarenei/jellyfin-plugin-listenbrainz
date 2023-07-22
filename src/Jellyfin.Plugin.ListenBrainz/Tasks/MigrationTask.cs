@@ -44,7 +44,7 @@ public class MigrationTask : IScheduledTask
     {
         var configDir = Plugin.GetConfigDirPath();
         var oldPluginConfig = Path.Join(configDir, OldPluginConfigName);
-        if (File.Exists(oldPluginConfig))
+        if (!File.Exists(oldPluginConfig))
         {
             _logger.LogInformation("Old plugin configuration file is not available, nothing to do");
             return;
