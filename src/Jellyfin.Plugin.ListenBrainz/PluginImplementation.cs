@@ -362,7 +362,7 @@ public class PluginImplementation
         return null;
     }
 
-    private EventData GetEventData(PlaybackProgressEventArgs eventArgs)
+    private static EventData GetEventData(PlaybackProgressEventArgs eventArgs)
     {
         if (eventArgs.Item is not Audio item)
         {
