@@ -52,7 +52,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// <summary>
     /// Gets logger category.
     /// </summary>
-    public static string LoggerCategory => "ListenBrainzPlugin";
+    public static string LoggerCategory => "Jellyfin.Plugin.ListenBrainz";
 
     /// <inheritdoc />
     public IEnumerable<PluginPageInfo> GetPages()
