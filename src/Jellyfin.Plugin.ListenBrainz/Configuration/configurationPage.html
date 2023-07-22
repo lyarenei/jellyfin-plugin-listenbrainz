@@ -340,7 +340,7 @@
 
         function fillUserConfig(data) {
             document.querySelector("#ListenBrainzApiToken")
-                .value = data.ApiToken;
+                .value = atob(data.ApiToken);
 
             document.querySelector("#IsListenSubmitEnabled")
                 .checked = data.IsListenSubmitEnabled;

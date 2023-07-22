@@ -52,7 +52,7 @@ public class ListenBrainzClient : IListenBrainzClient
         var pluginConfig = Plugin.GetConfiguration();
         var request = new SubmitListensRequest
         {
-            ApiToken = config.ApiToken,
+            ApiToken = config.PlaintextApiToken,
             ListenType = ListenType.PlayingNow,
             Payload = new[] { item.AsListen(itemMetadata: audioMetadata) },
             BaseUrl = pluginConfig.ListenBrainzApiUrl
@@ -67,7 +67,7 @@ public class ListenBrainzClient : IListenBrainzClient
         var pluginConfig = Plugin.GetConfiguration();
         var request = new SubmitListensRequest
         {
-            ApiToken = config.ApiToken,
+            ApiToken = config.PlaintextApiToken,
             ListenType = ListenType.Single,
             Payload = new[] { item.AsListen(listenedAt, metadata) },
             BaseUrl = pluginConfig.ListenBrainzApiUrl
@@ -82,7 +82,7 @@ public class ListenBrainzClient : IListenBrainzClient
         var pluginConfig = Plugin.GetConfiguration();
         var request = new RecordingFeedbackRequest
         {
-            ApiToken = config.ApiToken,
+            ApiToken = config.PlaintextApiToken,
             RecordingMbid = recordingMbid,
             RecordingMsid = recordingMsid,
             Score = isFavorite ? FeedbackScore.Loved : FeedbackScore.Neutral,
@@ -98,7 +98,7 @@ public class ListenBrainzClient : IListenBrainzClient
         var pluginConfig = Plugin.GetConfiguration();
         var request = new SubmitListensRequest
         {
-            ApiToken = config.ApiToken,
+            ApiToken = config.PlaintextApiToken,
             ListenType = ListenType.Single,
             Payload = ToListens(storedListens),
             BaseUrl = pluginConfig.ListenBrainzApiUrl

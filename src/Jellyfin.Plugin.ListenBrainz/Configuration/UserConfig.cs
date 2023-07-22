@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json.Serialization;
 using System.Xml.Serialization;
 
@@ -26,6 +27,17 @@ public class UserConfig
     /// Gets or sets ListenBrainz API token.
     /// </summary>
     public string ApiToken { get; set; }
+
+    /// <summary>
+    /// Gets or sets ListenBrainz API token in plaintext.
+    /// </summary>
+    [JsonIgnore]
+    [XmlIgnore]
+    public string PlaintextApiToken
+    {
+        get => Encoding.UTF8.GetString(Convert.FromBase64String(ApiToken));
+        set => ApiToken = Convert.ToBase64String(Encoding.UTF8.GetBytes(value));
+    }
 
     /// <summary>
     /// Gets or sets a value indicating whether ListenBrainz submission is enabled.

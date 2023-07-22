@@ -163,7 +163,7 @@ public class MigrationTask : IScheduledTask
             switch (configField.Name.ToString())
             {
                 case "Token":
-                    newUserConfig.ApiToken = configField.Value;
+                    newUserConfig.PlaintextApiToken = configField.Value;
                     break;
                 case "MediaBrowserUserId":
                     newUserConfig.JellyfinUserId = new Guid(configField.Value);
