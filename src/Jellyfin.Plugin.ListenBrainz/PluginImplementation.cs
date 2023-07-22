@@ -162,7 +162,7 @@ public class PluginImplementation
             return;
         }
 
-        if (!userConfig.IsListenSubmitEnabled)
+        if (userConfig.IsNotListenSubmitEnabled)
         {
             _logger.LogInformation(
                 "Dropping event for track {Track}: User {User} does not have listen submitting enabled",
@@ -259,7 +259,7 @@ public class PluginImplementation
             return;
         }
 
-        if (!userConfig.IsListenSubmitEnabled)
+        if (userConfig.IsNotListenSubmitEnabled)
         {
             _logger.LogInformation(
                 "Dropping event for track {Track}: User {User} does not have listen submitting enabled",
