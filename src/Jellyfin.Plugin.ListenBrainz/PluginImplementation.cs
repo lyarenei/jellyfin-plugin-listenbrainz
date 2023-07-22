@@ -133,6 +133,13 @@ public class PluginImplementation
     public void OnPlaybackStop(object? sender, PlaybackStopEventArgs args)
     {
         _logger.LogDebug("Picking up playback stop event for item {Item}", args.Item.Name);
+        var config = Plugin.GetConfiguration();
+        if (config.IsAlternativeModeEnabled)
+        {
+            _logger.LogDebug("Dropping event - alternative mode is enabled");
+            return;
+        }
+
         EventData data;
         try
         {
@@ -141,13 +148,6 @@ public class PluginImplementation
         catch (Exception e)
         {
             _logger.LogDebug(e, "Invalid event");
-            return;
-        }
-
-        var config = Plugin.GetConfiguration();
-        if (config.IsAlternativeModeEnabled)
-        {
-            _logger.LogDebug("Dropping event - alternative mode is enabled");
             return;
         }
 
@@ -230,6 +230,13 @@ public class PluginImplementation
     public void OnUserDataSave(object? sender, UserDataSaveEventArgs args)
     {
         _logger.LogDebug("Picking up user data save event for item {Item}", args.Item.Name);
+        var config = Plugin.GetConfiguration();
+        if (!config.IsAlternativeModeEnabled)
+        {
+            _logger.LogDebug("Dropping event - alternative mode is disabled");
+            return;
+        }
+
         EventData data;
         try
         {
@@ -238,13 +245,6 @@ public class PluginImplementation
         catch (Exception e)
         {
             _logger.LogDebug(e, "Invalid event");
-            return;
-        }
-
-        var config = Plugin.GetConfiguration();
-        if (!config.IsAlternativeModeEnabled)
-        {
-            _logger.LogDebug("Dropping event - alternative mode is disabled");
             return;
         }
 
