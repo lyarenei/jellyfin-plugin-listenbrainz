@@ -28,6 +28,7 @@ public class PluginImplementation
     private readonly IUserManager _userManager;
     private readonly object _userDataSaveLock = new();
     private readonly PlaybackTrackingManager _playbackTracker;
+    private readonly ILibraryManager _libraryManager;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PluginImplementation"/> class.
@@ -37,12 +38,14 @@ public class PluginImplementation
     /// <param name="metadataClient">Client for providing additional metadata.</param>
     /// <param name="userDataManager">User data manager.</param>
     /// <param name="userManager">User manager.</param>
+    /// <param name="libraryManager">Library manager.</param>
     public PluginImplementation(
         ILogger logger,
         IListenBrainzClient listenBrainzClient,
         IMetadataClient metadataClient,
         IUserDataManager userDataManager,
-        IUserManager userManager)
+        IUserManager userManager,
+        ILibraryManager libraryManager)
     {
         _logger = logger;
         _listenBrainzClient = listenBrainzClient;
@@ -51,6 +54,7 @@ public class PluginImplementation
         _cacheManager = CacheManager.Instance;
         _userManager = userManager;
         _playbackTracker = PlaybackTrackingManager.Instance;
+        _libraryManager = libraryManager;
     }
 
     /// <summary>
@@ -69,6 +73,14 @@ public class PluginImplementation
         catch (Exception e)
         {
             _logger.LogDebug(e, "Invalid event");
+            return;
+        }
+
+        if (!IsInAllowedLibrary(data.Item))
+        {
+            _logger.LogInformation(
+                "Dropping event for item {Item}: Item is not in any allowed libraries",
+                data.Item.Name);
             return;
         }
 
@@ -148,6 +160,14 @@ public class PluginImplementation
         catch (Exception e)
         {
             _logger.LogDebug(e, "Invalid event");
+            return;
+        }
+
+        if (!IsInAllowedLibrary(data.Item))
+        {
+            _logger.LogInformation(
+                "Dropping event for item {Item}: Item is not in any allowed libraries",
+                data.Item.Name);
             return;
         }
 
@@ -245,6 +265,14 @@ public class PluginImplementation
         catch (Exception e)
         {
             _logger.LogDebug(e, "Invalid event");
+            return;
+        }
+
+        if (!IsInAllowedLibrary(data.Item))
+        {
+            _logger.LogInformation(
+                "Dropping event for item {Item}: Item is not in any allowed libraries",
+                data.Item.Name);
             return;
         }
 
@@ -452,6 +480,14 @@ public class PluginImplementation
         var runtime = item.RunTimeTicks ?? 0;
         Limits.AssertSubmitConditions(deltaTicks, runtime);
         _playbackTracker.InvalidateItem(user.Id.ToString(), trackedItem);
+    }
+
+    private bool IsInAllowedLibrary(BaseItem item)
+    {
+        // TODO exclusions from config
+        var musicLibraries = _libraryManager.GetMusicLibraries();
+        var itemLibraries = _libraryManager.GetCollectionFolders(item);
+        return musicLibraries.Intersect(itemLibraries).Any();
     }
 
     private struct EventData
