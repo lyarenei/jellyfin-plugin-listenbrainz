@@ -484,10 +484,13 @@ public class PluginImplementation
 
     private bool IsInAllowedLibrary(BaseItem item)
     {
-        // TODO exclusions from config
-        var musicLibraries = _libraryManager.GetMusicLibraries();
+        var excluded = Plugin.GetConfiguration().ExcludedLibraries;
         var itemLibraries = _libraryManager.GetCollectionFolders(item);
-        return musicLibraries.Intersect(itemLibraries).Any();
+        return _libraryManager
+            .GetMusicLibraries()
+            .Where(ml => !excluded.Contains(ml.Id))
+            .Intersect(itemLibraries)
+            .Any();
     }
 
     private struct EventData
