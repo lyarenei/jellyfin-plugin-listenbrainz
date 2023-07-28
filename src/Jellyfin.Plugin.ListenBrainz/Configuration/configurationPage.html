@@ -137,7 +137,9 @@
                 IsListenSubmitEnabled: false,
                 IsFavoritesSyncEnabled: false,
             },
-        }
+        };
+
+        var ExcludedLibraries = [];
 
         document.querySelector('#ListenBrainzConfigPage')
             .addEventListener('pageshow', () => {
@@ -336,7 +338,8 @@
             document.querySelector("#IsAlternativeModeEnabled")
                 .checked = data.IsAlternativeModeEnabled;
 
-            buildAllowedLibrariesList(data.ExcludedLibraries);
+            ExcludedLibraries = data.ExcludedLibraries;
+            buildAllowedLibrariesList();
         }
 
         function getSelectedUserId() {
@@ -378,7 +381,7 @@
                 MusicBrainzApiUrl: document.querySelector('#MusicBrainzApiUrl').value,
                 IsMusicBrainzEnabled: document.querySelector('#IsMusicBrainzEnabled').checked,
                 IsAlternativeModeEnabled: document.querySelector('#IsAlternativeModeEnabled').checked,
-                ExcludedLibraries: [],
+                "ExcludedLibraries": ExcludedLibraries,
             }
         }
 
@@ -411,20 +414,31 @@
             return inputValue.trim();
         }
 
-        function buildAllowedLibrariesList(excludedLibraries) {
+        function buildAllowedLibrariesList() {
             ApiClient.GetMusicLibraries()
                 .then((libraries) => {
                     libraries.forEach((library) => {
                         let label = document.createElement('label');
                         label.classList.add('inputLabel', 'inputLabelUnfocused');
                         label.htmlFor = getUniqueName(library);
+                        label.onclick = (_) => {
+                            let checkbox = document.getElementById(library.Id);
+                            if (checkbox.checked) {
+                                // In process of unchecking box => insert into excluded libraries
+                                ExcludedLibraries.push(library.Id);
+                            } else {
+                                ExcludedLibraries = ExcludedLibraries.filter(el => el !== library.Id);
+                            }
+
+                            checkbox.checked = !checkbox.checked;
+                        };
 
                         let input = document.createElement('input');
                         input.setAttribute('is', 'emby-checkbox');
                         input.type = 'checkbox';
                         input.id = library.Id;
                         input.name = getUniqueName(library);
-                        input.checked = !excludedLibraries.includes(library.Id);
+                        input.checked = !ExcludedLibraries.includes(library.Id);
 
                         let span = document.createElement('span');
                         span.innerText = library.Name;
@@ -441,7 +455,8 @@
         }
 
         function getUniqueName (library) {
-            return `${library.Id}_${library.Name}_IsAllowed`;
+            // String template refuses to work
+            return library.Id + '_IsAllowed';
         }
 
         ApiClient.ValidateListenBrainzToken = function (apiToken) {
