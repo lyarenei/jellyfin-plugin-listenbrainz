@@ -115,3 +115,12 @@ played, however this field is optional. If the value is missing, the plugin woul
 conditions. In such cases, the plugin will default to current time. This should be fine in most cases, however, if the
 client does not specify times when reporting playbacks retroactively, all listens reported in that time will have the
 same timestamp.
+
+##### Allowed libraries for listen submission
+
+By default, all audio files in all Jellyfin libraries are considered for listen submission. Depending on your setup, you
+may not want to record listens of audio from a certain library. Listens of audio from unselected libraries will be
+ignored and not submitted to ListenBrainz.
+
+Please note that in case of an audio file being in multiple libraries, if there is at least one library enabled for
+listen submission, the listens of that audio will be processed.
