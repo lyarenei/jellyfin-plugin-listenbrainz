@@ -72,7 +72,7 @@ jobs:
     env:
       MANIFEST_FILE: "/var/www/repos/jellyfin-dev/manifest.json"
       REPO_PATH: "/var/www/repos/jellyfin-dev"
-      REPO_URL: "https://repo.xkrivo.net/jellyfin"
+      REPO_URL: "https://repo.xkrivo.net/jellyfin-dev"
     steps:
       - name: Update Plugin Manifest
         uses: appleboy/ssh-action@334f9259f2f8eb3376d33fa4c684fff373f2c2a6 # v0.1.10
