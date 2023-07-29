@@ -42,20 +42,6 @@ jobs:
         with:
           name: build-artifact
 
-      - name: Prepare GH Release Assets
-        run: |-
-          for file in ./*; do
-            md5sum ${file#./} >> ${file%.*}.md5
-            sha256sum ${file#./} >> ${file%.*}.sha256
-          done
-          ls -l
-
-      - name: Upload GH Release Assets
-        uses: shogo82148/actions-upload-release-asset@b016af922a61601d647ff60226adadbe146b7651 # v1.6.4
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./*
-
       - name: Ensure Destination Path Exists
         uses: appleboy/ssh-action@334f9259f2f8eb3376d33fa4c684fff373f2c2a6 # v0.1.10
         if: ${{ contains(github.repository, 'lyarenei/') }}
