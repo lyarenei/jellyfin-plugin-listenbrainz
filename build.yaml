@@ -13,6 +13,6 @@ artifacts:
   - "Jellyfin.Plugin.ListenBrainz.dll"
   - "Jellyfin.Plugin.ListenBrainz.Http.dll"
   - "Jellyfin.Plugin.ListenBrainz.ListenBrainzApi.dll"
-  - "Jellyfin.Plugin.ListenBrainz.MusicBrainz.Api.dll"
+  - "Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.dll"
 changelog: >
   Maintenance - complete plugin rewrite
