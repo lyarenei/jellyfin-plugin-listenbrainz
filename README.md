@@ -22,7 +22,10 @@
 - Syncing favorite songs in Jellyfin to ListenBrainz (marked as loved)
 - Caching listens when ListenBrainz server cannot be reached
 
-...and probably some more to come
+...and probably some more to come.
+
+If you are interested in more details about how this plugin works, please check out this
+[document](doc/how-it-works.md).
 
 # Installation
 
@@ -93,7 +96,7 @@ Once the SDK is installed, you should be able to compile the plugin in either de
 ```
 
 Once the build is completed, the compiled DLLs should be available at:
-`src/Jellyfin.Plugin.Listenbrainz/bin/<Debug|Release>/net7.0/`
+`src/Jellyfin.Plugin.Listenbrainz/bin/<Debug|Release>/netX.0/`
 
 Unless you exactly know what you are doing, copy **ALL** DLL files in the directory into your
 Jellyfin `${CONFIG_DIR}/plugins/Jellyfin.Plugin.ListenBrainz` directory. Create the `Jellyfin.Plugin.ListenBrainz`
@@ -113,7 +116,7 @@ If you somehow arrived here without knowing what Jellyfin is, check out the [pro
 
 # License
 
-TL;DR: MIT + GPLv3
+TL;DR: MIT + GPLv3.
 
 This plugin has started as a reimplementation of
 the [LastFM plugin](https://github.com/jesseward/jellyfin-plugin-lastfm).
