@@ -16,10 +16,6 @@ In case of a failure, the plugin will simply start with empty config. A nice sid
 change is that the old plugin configuration is automatically left as is (backup). You can either choose to investigate
 what went wrong or do the migration manually. Of course, you can also just configure the plugin again.
 
-Additionally, if the migration fails and you only notice after some time, your listens should be saved in the cache (new
-feature in v3 version). In that case, make sure the plugin is configured and then you can either let the plugin attempt
-to resubmit the listens automatically, or you can trigger the relevant task manually.
-
 ### Changes
 
 If you want to migrate the config yourself or you just want to manually verify the configuration migration, here is a
