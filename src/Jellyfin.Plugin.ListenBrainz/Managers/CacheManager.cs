@@ -103,16 +103,21 @@ public class CacheManager : ICacheManager, IListensCache
     /// <inheritdoc />
     public IEnumerable<StoredListen> GetListens(Guid userId)
     {
-        return _listensCache.ContainsKey(userId) ? _listensCache[userId] : Array.Empty<StoredListen>();
+        if (_listensCache.TryGetValue(userId, out var listens)) return listens;
+        return Array.Empty<StoredListen>();
     }
 
     /// <inheritdoc />
     public void RemoveListens(Guid userId, IEnumerable<StoredListen> listens)
     {
+        var storedListens = listens.ToList();
         try
         {
             Monitor.Enter(_lock);
-            if (_listensCache.ContainsKey(userId)) _listensCache[userId].RemoveAll(listens.Contains);
+            if (_listensCache.TryGetValue(userId, out var userListens))
+            {
+                userListens.RemoveAll(storedListens.Contains);
+            }
         }
         finally
         {
