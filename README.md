@@ -16,16 +16,16 @@
 
 ## Features
 
-- Sending `listens` of tracks you've listened to
-- Sending 'now playing' `listens`
-- Submitting optional MusicBrainz metadata (requires relevant MusicBrainz track ID in Jellyfin metadata)
-- Syncing favorite songs in Jellyfin to ListenBrainz (marked as loved)
-- Caching listens when ListenBrainz server cannot be reached
+- Send `listens` of tracks you've listened to
+- Send 'now playing' `listens`
+- Submit optional MusicBrainz metadata (requires relevant MusicBrainz track ID in Jellyfin metadata)
+- Sync favorite songs in Jellyfin to ListenBrainz (marked as loved)
+- Cache listens when ListenBrainz server cannot be reached
 
 ...and probably some more to come.
 
-If you are interested in more details about how this plugin works, please check out this
-[document](doc/how-it-works.md).
+If you are interested in more details about how this plugin works, please check out the
+[documentation](doc/how-it-works.md).
 
 # Installation
 
@@ -57,7 +57,7 @@ Version compatibility table:
 
 The configuration documentation is available [here](doc/configuration.md).
 
-### User configuration
+### Quickstart
 
 For plugin to be able to send listens, it needs user API token to be able to authenticate.
 Unfortunately, the server admin must configure the plugin for all users as there's no way to make
