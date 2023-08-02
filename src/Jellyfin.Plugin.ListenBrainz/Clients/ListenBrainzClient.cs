@@ -99,7 +99,7 @@ public class ListenBrainzClient : IListenBrainzClient
         var request = new SubmitListensRequest
         {
             ApiToken = config.PlaintextApiToken,
-            ListenType = ListenType.Single,
+            ListenType = ListenType.Import,
             Payload = ToListens(storedListens),
             BaseUrl = pluginConfig.ListenBrainzApiUrl
         };
