@@ -23,7 +23,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Jellyfin.Plugin.ListenBrainz.ListenBrainzApi\Jellyfin.Plugin.ListenBrainz.ListenBrainzApi.csproj" />
+      <ProjectReference Include="..\Jellyfin.Plugin.ListenBrainz.Api\Jellyfin.Plugin.ListenBrainz.Api.csproj" />
       <ProjectReference Include="..\Jellyfin.Plugin.ListenBrainz.MusicBrainzApi\Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.csproj" />
     </ItemGroup>
 

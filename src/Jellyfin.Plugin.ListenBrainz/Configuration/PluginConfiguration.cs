@@ -28,7 +28,7 @@ public class PluginConfiguration : BasePluginConfiguration
     /// </summary>
     public string ListenBrainzApiUrl
     {
-        get => _listenBrainzUrlOverride ?? ListenBrainzApi.Resources.Api.BaseUrl;
+        get => _listenBrainzUrlOverride ?? Api.Resources.General.BaseUrl;
         set => _listenBrainzUrlOverride = value;
     }
 
@@ -36,7 +36,7 @@ public class PluginConfiguration : BasePluginConfiguration
     /// Gets a default ListenBrainz API base URL.
     /// </summary>
     [XmlIgnore]
-    public string DefaultListenBrainzApiUrl => ListenBrainzApi.Resources.Api.BaseUrl;
+    public string DefaultListenBrainzApiUrl => Api.Resources.General.BaseUrl;
 
     /// <summary>
     /// Gets or sets MusicBrainz API base URL.

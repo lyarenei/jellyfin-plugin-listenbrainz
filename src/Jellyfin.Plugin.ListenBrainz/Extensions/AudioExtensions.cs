@@ -1,5 +1,5 @@
 using Jellyfin.Plugin.ListenBrainz.Dtos;
-using Jellyfin.Plugin.ListenBrainz.ListenBrainzApi.Models;
+using Jellyfin.Plugin.ListenBrainz.Api.Models;
 using Jellyfin.Plugin.ListenBrainz.Utils;
 using MediaBrowser.Controller.Entities.Audio;
 

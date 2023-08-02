@@ -12,9 +12,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.ListenBrain
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.Tests", "tests\Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.Tests\Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.Tests.csproj", "{08A62589-F3AC-44B3-810C-0D69814B04AC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.ListenBrainz.ListenBrainzApi", "src\Jellyfin.Plugin.ListenBrainz.ListenBrainzApi\Jellyfin.Plugin.ListenBrainz.ListenBrainzApi.csproj", "{BEB89977-4825-4591-9886-0920CE9D93EC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.ListenBrainz.Api", "src\Jellyfin.Plugin.ListenBrainz.Api\Jellyfin.Plugin.ListenBrainz.Api.csproj", "{BEB89977-4825-4591-9886-0920CE9D93EC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.ListenBrainz.ListenBrainzApi.Tests", "tests\Jellyfin.Plugin.ListenBrainz.ListenBrainzApi.Tests\Jellyfin.Plugin.ListenBrainz.ListenBrainzApi.Tests.csproj", "{7C6FAEC4-5D44-4035-8590-2FCDFF1ABC2B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.ListenBrainz.Api.Tests", "tests\Jellyfin.Plugin.ListenBrainz.Api.Tests\Jellyfin.Plugin.ListenBrainz.Api.Tests.csproj", "{7C6FAEC4-5D44-4035-8590-2FCDFF1ABC2B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.ListenBrainz", "src\Jellyfin.Plugin.ListenBrainz\Jellyfin.Plugin.ListenBrainz.csproj", "{5E3664B9-03C9-4357-86C5-B9B6E18C1098}"
 EndProject
