@@ -55,16 +55,16 @@ Version compatibility table:
 
 ## Configuration
 
-The configuration documentation is available [here](doc/configuration.md).
+The complete configuration documentation is available [here](doc/configuration.md).
 
 ### Quickstart
 
 For plugin to be able to send listens, it needs user API token to be able to authenticate.
 Unfortunately, the server admin must configure the plugin for all users as there's no way to make
-user-configurable plugin. That means, the admin has an access to the ListenBrainz API tokens of all users on their
+user-configurable plugin. So the admin has an access to the ListenBrainz API tokens of all users on their
 server.
 
-Minimal configuration for the plugin to work:
+Minimal user configuration:
 
 1. Open plugin settings
 2. Select the user you want to configure
@@ -98,10 +98,10 @@ Once the SDK is installed, you should be able to compile the plugin in either de
 Once the build is completed, the compiled DLLs should be available at:
 `src/Jellyfin.Plugin.Listenbrainz/bin/<Debug|Release>/netX.0/`
 
-Unless you exactly know what you are doing, copy **ALL** DLL files in the directory into your
-Jellyfin `${CONFIG_DIR}/plugins/Jellyfin.Plugin.ListenBrainz` directory. Create the `Jellyfin.Plugin.ListenBrainz`
+Unless you exactly know what you are doing, copy **all** DLL files in the directory to the plugin directory in your
+Jellyfin installation (`${CONFIG_DIR}/plugins/Jellyfin.Plugin.ListenBrainz`). Create the `Jellyfin.Plugin.ListenBrainz`
 directory if it does not exist, and make sure Jellyfin has correct permissions to access it. After restarting Jellyfin,
-the plugin should be recognized and activated by the sever.
+the plugin should be recognized and activated.
 
 ## Making a plugin release
 
@@ -118,11 +118,11 @@ If you somehow arrived here without knowing what Jellyfin is, check out the [pro
 
 TL;DR: MIT + GPLv3.
 
-This plugin has started as a reimplementation of
+This plugin began its life as a reimplementation of
 the [LastFM plugin](https://github.com/jesseward/jellyfin-plugin-lastfm).
 While that one does not have a license, the plugin has been now completely rewritten to the point that I
-believe it can be no longer considered as a derivative work. For that case, I decided to license the plugin
+believe it can be no longer considered as a derivative work. As such, I decided to license the plugin
 code (except some parts as described below) under the MIT license.
 
-However, if I understand correctly, the code which depends on Jellyfin libraries which are licenced under GPLv3, must be
-also licenced under GPLv3 license. And so this plugin is also licensed under the GPLv3 license.
+However, if I understand correctly, the code which depends on Jellyfin libraries, which are licenced under GPLv3, must
+be also licenced under GPLv3 license. And so this plugin is also licensed under the GPLv3 license.
