@@ -415,12 +415,12 @@ public class PluginImplementation
         }
         catch (Exception e)
         {
-            throw new ListenBrainzPluginException("Audio item metadata are not valid", e);
+            throw new PluginException("Audio item metadata are not valid", e);
         }
 
         if (userConfig.IsNotListenSubmitEnabled)
         {
-            throw new ListenBrainzPluginException("ListenBrainz submission is disabled for this user");
+            throw new PluginException("ListenBrainz submission is disabled for this user");
         }
     }
 
@@ -444,7 +444,7 @@ public class PluginImplementation
 
         if (!trackedItem.IsValid)
         {
-            throw new ListenBrainzPluginException("Playback tracking is not valid for this item");
+            throw new PluginException("Playback tracking is not valid for this item");
         }
 
         var delta = DateUtils.CurrentTimestamp - trackedItem.StartedAt;

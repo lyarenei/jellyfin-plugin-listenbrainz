@@ -73,23 +73,23 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// Convenience method for getting plugin configuration.
     /// </summary>
     /// <returns>Plugin configuration.</returns>
-    /// <exception cref="ListenBrainzPluginException">Plugin instance is not available.</exception>
+    /// <exception cref="PluginException">Plugin instance is not available.</exception>
     public static PluginConfiguration GetConfiguration()
     {
         var config = _thisInstance?.Configuration;
         if (config is not null) return config;
-        throw new ListenBrainzPluginException("Plugin instance is not available");
+        throw new PluginException("Plugin instance is not available");
     }
 
     /// <summary>
     /// Gets plugin data path.
     /// </summary>
     /// <returns>Path to the plugin data folder.</returns>
-    /// <exception cref="ListenBrainzPluginException">Plugin instance is not available.</exception>
+    /// <exception cref="PluginException">Plugin instance is not available.</exception>
     public static string GetDataPath()
     {
         var path = _thisInstance?.DataFolderPath;
-        if (path is null) throw new ListenBrainzPluginException("Plugin instance is not available");
+        if (path is null) throw new PluginException("Plugin instance is not available");
         return path;
     }
 
@@ -97,13 +97,13 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// Gets plugin configuration directory path.
     /// </summary>
     /// <returns>Path to config directory.</returns>
-    /// <exception cref="ListenBrainzPluginException">Plugin instance or path is not available.</exception>
+    /// <exception cref="PluginException">Plugin instance or path is not available.</exception>
     public static string GetConfigDirPath()
     {
         var path = _thisInstance?.ConfigurationFilePath;
-        if (path is null) throw new ListenBrainzPluginException("Plugin instance is not available");
+        if (path is null) throw new PluginException("Plugin instance is not available");
         var dirName = Path.GetDirectoryName(path);
-        if (dirName is null) throw new ListenBrainzPluginException("Could not get a config directory name");
+        if (dirName is null) throw new PluginException("Could not get a config directory name");
         return dirName;
     }
 

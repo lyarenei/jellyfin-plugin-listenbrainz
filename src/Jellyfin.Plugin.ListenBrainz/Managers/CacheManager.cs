@@ -77,7 +77,7 @@ public class CacheManager : ICacheManager, IListensCache
             Monitor.Enter(_lock);
             using var stream = File.OpenRead(_cachePath);
             var data = JsonSerializer.Deserialize<Dictionary<Guid, List<StoredListen>>>(stream, SerializerOptions);
-            _listensCache = data ?? throw new ListenBrainzPluginException("Deserialized cache file to null");
+            _listensCache = data ?? throw new PluginException("Deserialized cache file to null");
         }
         finally
         {

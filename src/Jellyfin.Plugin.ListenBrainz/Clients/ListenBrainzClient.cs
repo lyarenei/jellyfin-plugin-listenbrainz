@@ -113,7 +113,7 @@ public class ListenBrainzClient : IListenBrainzClient
         var pluginConfig = Plugin.GetConfiguration();
         var request = new ValidateTokenRequest(apiToken) { BaseUrl = pluginConfig.ListenBrainzApiUrl };
         var response = await _apiClient.ValidateToken(request, CancellationToken.None);
-        if (response is null) throw new ListenBrainzPluginException("Did not receive response");
+        if (response is null) throw new PluginException("Did not receive response");
         return new ValidatedToken
         {
             IsValid = response.Valid,

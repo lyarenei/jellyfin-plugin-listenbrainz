@@ -115,13 +115,13 @@ public class ResubmitListensTask : IScheduledTask
     private void SubmitListensForUser(Guid userId)
     {
         var user = _userManager.GetUserById(userId);
-        if (user is null) throw new ListenBrainzPluginException("Invalid jellyfin user ID");
+        if (user is null) throw new PluginException("Invalid jellyfin user ID");
         var listenChunks = _cacheManager.GetListens(userId).Chunk(Limits.MaxListensPerRequest);
         foreach (var listenChunk in listenChunks)
         {
             var chunkToSubmit = listenChunk.Select(UpdateMetadataIfNecessary);
             var userConfig = user.GetListenBrainzConfig();
-            if (userConfig is null) throw new ListenBrainzPluginException($"No configuration for user {user.Username}");
+            if (userConfig is null) throw new PluginException($"No configuration for user {user.Username}");
 
             try
             {
