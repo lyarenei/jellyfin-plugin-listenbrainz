@@ -63,7 +63,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
             {
                 Name = Name,
                 EmbeddedResourcePath = $"{GetType().Namespace}.Configuration.configurationPage.html",
-                EnableInMainMenu = true,
+                EnableInMainMenu = false,
                 MenuIcon = "music_note"
             }
         };
