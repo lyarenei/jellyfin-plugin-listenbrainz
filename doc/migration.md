@@ -1,11 +1,11 @@
 # Upgrading from version 2.x and earlier
 
 For version 3.x, the plugin has been completely rewritten and the plugin configuration from earlier versions is not
-compatible. To make this transition as effortless as possible, the plugin provides a migration task, which takes the old
-configuration file and transforms it to the new one. This task should automatically run on server start after installing
+compatible. To make this transition as effortless as possible, the plugin provides a task, which takes the old
+configuration file and migrates it to the new one. This task should automatically run on server start after installing
 the v3 version.
 
-When the migration is done, a file in the plugin directory, named `.migrated` (hidden file) is created. If you wish to
+If the migration is successful, `.migrated` (hidden file) is created in the plugin directory named. If you wish to
 run the migration again for some reason, delete this file and either restart the server or go to the scheduled tasks and
 run the migration task manually.
 
@@ -18,8 +18,7 @@ what went wrong or do the migration manually. Of course, you can also just confi
 
 ### Changes
 
-If you want to migrate the config yourself or you just want to manually verify the configuration migration, here is a
-list of changes:
+Here are all changes between plugin version 2.x (left) and 3.x (right), excluding source code changes:
 
 #### Global configuration
 
