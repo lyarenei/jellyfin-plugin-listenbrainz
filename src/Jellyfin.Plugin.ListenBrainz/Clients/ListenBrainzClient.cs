@@ -1,12 +1,12 @@
+using Jellyfin.Plugin.ListenBrainz.Api.Interfaces;
+using Jellyfin.Plugin.ListenBrainz.Api.Models;
+using Jellyfin.Plugin.ListenBrainz.Api.Models.Requests;
+using Jellyfin.Plugin.ListenBrainz.Api.Resources;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
-using Jellyfin.Plugin.ListenBrainz.Api.Interfaces;
-using Jellyfin.Plugin.ListenBrainz.Api.Models;
-using Jellyfin.Plugin.ListenBrainz.Api.Models.Requests;
-using Jellyfin.Plugin.ListenBrainz.Api.Resources;
 using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
 using Microsoft.Extensions.Logging;
