@@ -4,7 +4,6 @@ using Jellyfin.Plugin.ListenBrainz.Api.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.Http;
 using Jellyfin.Plugin.ListenBrainz.Http.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Http.Interfaces;
-using Jellyfin.Plugin.ListenBrainz.Api.Resources;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
