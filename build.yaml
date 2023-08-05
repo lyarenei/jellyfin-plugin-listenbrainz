@@ -1,7 +1,7 @@
 ---
 name: "ListenBrainz"
 guid: "59B20823-AAFE-454C-A393-17427F518631"
-version: "2.4.0.0"
+version: "3.0.0.0"
 targetAbi: "10.8.0.0"
 framework: "net6.0"
 overview: "Track your music habits with ListenBrainz."
@@ -10,6 +10,9 @@ description: >
 category: "General"
 owner: "lyarenei"
 artifacts:
-  - "Jellyfin.Plugin.Listenbrainz.dll"
+  - "Jellyfin.Plugin.ListenBrainz.dll"
+  - "Jellyfin.Plugin.ListenBrainz.Http.dll"
+  - "Jellyfin.Plugin.ListenBrainz.Api.dll"
+  - "Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.dll"
 changelog: >
-  Cache unsuccessful listen submissions and retry submitting later
+  Maintenance - complete plugin rewrite

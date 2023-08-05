@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>ListenBrainz Plugin Config</title>
+</head>
+<body>
+<div id="ListenBrainzConfigPage" data-role="page" class="page type-interior pluginConfigurationPage"
+     data-require="emby-input,emby-button,emby-select,emby-checkbox">
+    <div data-role="content">
+        <div class="content-primary">
+            <form id="ListenBrainzPluginConfigForm">
+                <div class="sectionTitleContainer flex align-items-center">
+                    <h2 class="sectionTitle">ListenBrainz Plugin Config</h2>
+                    <a class="raised button-alt headerHelpButton emby-button" is="emby-linkbutton"
+                       rel="noopener noreferrer" target="_blank"
+                       href="https://github.com/lyarenei/jellyfin-plugin-listenbrainz#configuration">Documentation</a>
+                </div>
+                <fieldset class="verticalSection verticalSection-extrabottompadding">
+                    <legend>
+                        <h3>User Config</h3>
+                    </legend>
+                    <div class="bootstrap-wrapper container">
+                        <div class="selectContainer bootstrap-wrapper row no-gutters">
+                            <label class="selectLabel" for="JellyfinUser">Select Jellyfin user</label>
+                            <select is="emby-select" id="JellyfinUser" name="JellyfinUser"></select>
+                        </div>
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="ListenBrainzApiToken">
+                                ListenBrainz API token
+                            </label>
+                            <div class="bootstrap-wrapper row no-gutters">
+                                <input id="ListenBrainzApiToken" name="ListenBrainzApiToken" type="password"
+                                       is="emby-input" class="bootstrap-wrapper col-md-9 vertical-center"/>
+                                <div id="CheckListenBrainzApiToken"
+                                     class="raised button block emby-button bootstrap-wrapper col-md-2 offset-md-1 vertical-center">
+                                    Check
+                                </div>
+                            </div>
+                            <div class="fieldDescription">
+                                User API token. Can be found in
+                                <a class="inputLabel" target="_blank" href="https://listenbrainz.org/profile/">
+                                    user profile</a>.
+                            </div>
+                        </div>
+                        <div class="checkboxContainer bootstrap-wrapper row no-gutters">
+                            <label class="inputLabel inputLabelUnfocused" for="IsListenSubmitEnabled">
+                                <input is="emby-checkbox" type="checkbox" id="IsListenSubmitEnabled"
+                                       name="IsListenSubmitEnabled"/>
+                                <span>Enable submitting listens</span>
+                            </label>
+                        </div>
+                        <div class="checkboxContainer bootstrap-wrapper row no-gutters">
+                            <label class="inputLabel inputLabelUnfocused" for="IsFavoritesSyncEnabled">
+                                <input is="emby-checkbox" type="checkbox" id="IsFavoritesSyncEnabled"
+                                       name="IsFavoritesSyncEnabled"/>
+                                <span>Enable syncing favorites</span>
+                            </label>
+                        </div>
+                        <div class="bootstrap-wrapper row no-gutters horizontal-center">
+                            <button is="emby-button" type="submit" id="SaveUserConfig"
+                                    class="raised button-submit block emby-button col-md-2">
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                </fieldset>
+                <fieldset class="verticalSection">
+                    <legend>
+                        <h3>General Config</h3>
+                    </legend>
+                    <div class="bootstrap-wrapper container">
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="ListenBrainzApiUrl">
+                                ListenBrainz API URL
+                            </label>
+                            <div class="bootstrap-wrapper row no-gutters">
+                                <input id="ListenBrainzApiUrl" name="ListenBrainzApiUrl" type="text"
+                                       is="emby-input" class="bootstrap-wrapper col-md-9 vertical-center"/>
+                                <div id="ResetListenBrainzApiUrl"
+                                     class="raised button block emby-button bootstrap-wrapper col-md-2 offset-md-1 vertical-center">
+                                    Reset
+                                </div>
+                            </div>
+                            <div class="fieldDescription">Set a custom ListenBrainz API URL.</div>
+                        </div>
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="MusicBrainzApiUrl">
+                                MusicBrainz API URL
+                            </label>
+                            <div class="bootstrap-wrapper row no-gutters">
+                                <input id="MusicBrainzApiUrl" name="MusicBrainzApiUrl" type="text"
+                                       is="emby-input"
+                                       class="bootstrap-wrapper col-md-9 vertical-center"/>
+                                <div id="ResetMusicBrainzApiUrl"
+                                     class="raised button block emby-button bootstrap-wrapper col-md-2 offset-md-1 vertical-center">
+                                    Reset
+                                </div>
+                            </div>
+                            <div class="fieldDescription">Set a custom MusicBrainz API URL.</div>
+                        </div>
+                        <div class="checkboxContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="IsMusicBrainzEnabled">
+                                <input is="emby-checkbox" type="checkbox" id="IsMusicBrainzEnabled"
+                                       name="IsMusicBrainzEnabled"/>
+                                <span>Fetch additional metadata from MusicBrainz</span>
+                            </label>
+                        </div>
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="IsAlternativeModeEnabled">
+                                <input is="emby-checkbox" type="checkbox" id="IsAlternativeModeEnabled"
+                                       name="IsAlternativeModeEnabled"/>
+                                <span>Use alternative event for recognizing listens</span>
+                            </label>
+                            <div class="fieldDescription">Requires clients to mark items as played.</div>
+                        </div>
+                        <div class="bootstrap-wrapper row no-gutters horizontal-center">
+                            <button is="emby-button" type="submit" id="SaveGeneralConfig"
+                                    class="raised button-submit block emby-button col-md-2">
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+    <script type="text/javascript">
+        // Cannot use let because of redeclaration.
+        var ListenBrainzConfig = {
+            PluginUniqueId: "59B20823-AAFE-454C-A393-17427F518631",
+            UserDefaults: {
+                JellyfinUserId: "",
+                ApiToken: "",
+                IsListenSubmitEnabled: false,
+                IsFavoritesSyncEnabled: false,
+            },
+        }
+
+        document.querySelector('#ListenBrainzConfigPage')
+            .addEventListener('pageshow', () => {
+                onPageShow();
+            });
+
+        document.querySelector('#JellyfinUser')
+            .addEventListener('change', () => {
+                onSelectUser()
+            });
+
+        document.querySelector('#CheckListenBrainzApiToken')
+            .addEventListener('mouseup', () => {
+                onCheckApiToken();
+            });
+
+        document.querySelector('#ResetListenBrainzApiUrl')
+            .addEventListener('mouseup', () => {
+                onResetListenBrainzApiUrl();
+            });
+
+        document.querySelector('#ResetMusicBrainzApiUrl')
+            .addEventListener('mouseup', () => {
+                onResetMusicBrainzApiUrl();
+            });
+
+        document.querySelector('#ListenBrainzPluginConfigForm')
+            .addEventListener('submit', (event) => {
+                event.preventDefault();
+                onSubmitConfigForm(event.submitter.id);
+            });
+
+        function onPageShow() {
+            loadCss('bootstrap-grid.min.css');
+            loadCss('styles.css');
+
+            Dashboard.showLoadingMsg();
+
+            ApiClient.getUsers()
+                .then((users) => {
+                    buildUsersDropdown(users);
+                    loadConfig(users[0].Id)
+                })
+                .catch((reason) => {
+                    console.log("ListenBrainz plugin: Failed to load Jellyfin users: " + reason);
+                    Dashboard.alert("Failed to load Jellyfin users");
+                });
+
+            Dashboard.hideLoadingMsg();
+        }
+
+        function onSelectUser() {
+            Dashboard.showLoadingMsg();
+            let userId = getSelectedUserId();
+            ApiClient.getPluginConfiguration(ListenBrainzConfig.PluginUniqueId)
+                .then((config) => {
+                    let userConfig = getUserConfig(config, userId);
+                    fillUserConfig(userConfig);
+                })
+                .catch((reason) => {
+                    console.log("ListenBrainz plugin: Failed to load user config: " + reason);
+                    Dashboard.alert("Failed to load user config");
+                });
+
+            Dashboard.hideLoadingMsg();
+        }
+
+        function onCheckApiToken() {
+            let apiToken = getApiToken();
+            if (!apiToken) {
+                Dashboard.alert("No API token to verify");
+                return;
+            }
+
+            ApiClient.ValidateListenBrainzToken(apiToken)
+                .then((response) => {
+                    if (response.IsValid) {
+                        Dashboard.alert("Token is valid");
+                        return;
+                    }
+
+                    Dashboard.alert("Token is not valid");
+                    console.log("Token validation failed: " + response.Reason);
+                })
+                .catch((reason) => {
+                    Dashboard.alert("Token validation failed");
+                    console.log("Token validation failed: " + reason);
+                });
+        }
+
+        function onSaveUserConfig() {
+            Dashboard.showLoadingMsg();
+            ApiClient.getPluginConfiguration(ListenBrainzConfig.PluginUniqueId)
+                .then((config) => {
+                    let newUserConfig = getUserConfigInputs();
+                    let index = config.UserConfigs.map((uc) => uc.JellyfinUserId).indexOf(newUserConfig.JellyfinUserId);
+                    if (index < 0) {
+                        config.UserConfigs.push(newUserConfig);
+                    } else {
+                        config.UserConfigs[index] = newUserConfig;
+                    }
+
+                    saveConfig(config);
+                })
+                .catch((reason) => {
+                    console.log("ListenBrainz plugin: Failed to get plugin config: " + reason);
+                    Dashboard.alert("Saving user config failed");
+                });
+
+            Dashboard.hideLoadingMsg();
+        }
+
+        function onResetListenBrainzApiUrl() {
+            ApiClient.getPluginConfiguration(ListenBrainzConfig.PluginUniqueId)
+                .then((config) => {
+                    document.querySelector('#ListenBrainzApiUrl').value = config.DefaultListenBrainzApiUrl;
+                })
+                .catch((reason) => {
+                    console.log("ListenBrainz plugin: Failed to reset ListenBrainz URL: " + reason);
+                    Dashboard.alert("Reset failed");
+                });
+        }
+
+        function onResetMusicBrainzApiUrl() {
+            ApiClient.getPluginConfiguration(ListenBrainzConfig.PluginUniqueId)
+                .then((config) => {
+                    document.querySelector('#MusicBrainzApiUrl').value = config.DefaultMusicBrainzApiUrl;
+                })
+                .catch((reason) => {
+                    console.log("ListenBrainz plugin: Failed to reset MusicBrainz URL: " + reason);
+                    Dashboard.alert("Reset failed");
+                });
+        }
+
+        function onSaveGeneralConfig() {
+            Dashboard.showLoadingMsg();
+            ApiClient.getPluginConfiguration(ListenBrainzConfig.PluginUniqueId)
+                .then((config) => {
+                    let newConfig = getGeneralConfigInputs();
+                    newConfig.UserConfigs = config.UserConfigs;
+                    saveConfig(newConfig);
+                })
+                .catch((reason) => {
+                    console.log("ListenBrainz plugin: Failed to get plugin config: " + reason);
+                    Dashboard.alert("Saving config failed");
+                });
+
+            Dashboard.hideLoadingMsg();
+        }
+
+        function onSubmitConfigForm(buttonId) {
+            switch (buttonId) {
+                case 'SaveGeneralConfig':
+                    onSaveGeneralConfig();
+                    break;
+                case 'SaveUserConfig':
+                    onSaveUserConfig();
+                    break;
+                default:
+                    console.log("ListenBrainz plugin: invalid submitter ID");
+                    Dashboard.alert("Something went wrong");
+            }
+        }
+
+        function loadCss(fileName) {
+            let path = 'ListenBrainzPlugin/internal/styles/' + fileName;
+            ApiClient.ajax({
+                type: "GET",
+                url: ApiClient.getUrl(path),
+            }).then((cssValue) => {
+                let styleTag = document.createElement("style");
+                styleTag.innerText = cssValue;
+                document.getElementsByTagName("head")[0].appendChild(styleTag);
+            });
+        }
+
+        function buildUsersDropdown(jellyfinUsers) {
+            let html = "";
+            jellyfinUsers.forEach((user) => {
+                html += "<option value='" + user.Id + "'>" + user.Name + "</option>";
+            })
+
+            document.getElementById("JellyfinUser").innerHTML = html;
+        }
+
+        function fillGeneralConfig(data) {
+            document.querySelector("#ListenBrainzApiUrl")
+                .value = data.ListenBrainzApiUrl;
+
+            document.querySelector("#MusicBrainzApiUrl")
+                .value = data.MusicBrainzApiUrl;
+
+            document.querySelector("#IsMusicBrainzEnabled")
+                .checked = data.IsMusicBrainzEnabled;
+
+            document.querySelector("#IsAlternativeModeEnabled")
+                .checked = data.IsAlternativeModeEnabled;
+        }
+
+        function getSelectedUserId() {
+            return document.querySelector("#JellyfinUser").value;
+        }
+
+        function fillUserConfig(data) {
+            document.querySelector("#ListenBrainzApiToken")
+                .value = atob(data.ApiToken);
+
+            document.querySelector("#IsListenSubmitEnabled")
+                .checked = data.IsListenSubmitEnabled;
+
+            document.querySelector("#IsFavoritesSyncEnabled")
+                .checked = data.IsFavoritesSyncEnabled;
+        }
+
+        function getUserConfig(config, userId) {
+            if (config.UserConfigs === null) {
+                return ListenBrainzConfig.UserDefaults;
+            }
+
+            let index = config.UserConfigs.map((uc) => uc.JellyfinUserId).indexOf(userId);
+            return index < 0 ? ListenBrainzConfig.UserDefaults : config.UserConfigs[index];
+        }
+
+        function getUserConfigInputs() {
+            return {
+                JellyfinUserId: getSelectedUserId(),
+                ApiToken: getApiToken(),
+                IsListenSubmitEnabled: document.querySelector('#IsListenSubmitEnabled').checked,
+                IsFavoritesSyncEnabled: document.querySelector('#IsFavoritesSyncEnabled').checked,
+            }
+        }
+
+        function getGeneralConfigInputs() {
+            return {
+                ListenBrainzApiUrl: document.querySelector('#ListenBrainzApiUrl').value,
+                MusicBrainzApiUrl: document.querySelector('#MusicBrainzApiUrl').value,
+                IsMusicBrainzEnabled: document.querySelector('#IsMusicBrainzEnabled').checked,
+                IsAlternativeModeEnabled: document.querySelector('#IsAlternativeModeEnabled').checked,
+            }
+        }
+
+        function saveConfig(newConfig) {
+            ApiClient.updatePluginConfiguration(ListenBrainzConfig.PluginUniqueId, newConfig)
+                .then((result) => {
+                    Dashboard.processPluginConfigurationUpdateResult(result);
+                })
+                .catch((reason) => {
+                    console.log("ListenBrainz plugin: Failed to save config: " + reason);
+                    Dashboard.alert("Failed to save plugin config");
+                });
+        }
+
+        function loadConfig(userId) {
+            ApiClient.getPluginConfiguration(ListenBrainzConfig.PluginUniqueId)
+                .then((config) => {
+                    fillGeneralConfig(config);
+                    let userConfig = getUserConfig(config, userId);
+                    fillUserConfig(userConfig);
+                })
+                .catch((reason) => {
+                    console.log("ListenBrainz plugin: Failed to load plugin config: " + reason);
+                    Dashboard.alert("Failed to load plugin config");
+                });
+        }
+
+        function getApiToken() {
+            let inputValue = document.querySelector('#ListenBrainzApiToken').value;
+            return inputValue.trim();
+        }
+
+        ApiClient.ValidateListenBrainzToken = function (apiToken) {
+            let url = this.getUrl('ListenBrainzPlugin/ValidateToken');
+            return this.ajax({
+                type: "POST",
+                url: url,
+                data: JSON.stringify(apiToken),
+                contentType: "application/json",
+                dataType: "json",
+            });
+        }
+    </script>
+</div>
+</body>
+</html>

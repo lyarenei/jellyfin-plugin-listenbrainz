@@ -15,16 +15,13 @@ public static class Utils
     public static string ToHttpGetQuery(Dictionary<string, string> requestData)
     {
         var query = string.Empty;
-        int i = 0;
+        var i = 0;
         foreach (var d in requestData)
         {
             var encodedKey = HttpUtility.UrlEncode(d.Key);
             var encodedValue = HttpUtility.UrlEncode(d.Value);
             query += $"{encodedKey}={encodedValue}";
-            if (++i != requestData.Count)
-            {
-                query += '&';
-            }
+            if (++i != requestData.Count) query += '&';
         }
 
         return query;

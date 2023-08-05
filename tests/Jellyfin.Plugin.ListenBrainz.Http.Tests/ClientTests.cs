@@ -3,7 +3,6 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Jellyfin.Plugin.ListenBrainz.Http;
 using Jellyfin.Plugin.ListenBrainz.Http.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Http.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -11,15 +10,15 @@ using Moq;
 using Moq.Protected;
 using Xunit;
 
-namespace Jellyfin.Plugin.Listenbrainz.Http.Tests;
+namespace Jellyfin.Plugin.ListenBrainz.Http.Tests;
 
-public class TestClient : Client
+public class TestClient : HttpClient
 {
     public TestClient(IHttpClientFactory f, ILogger l, ISleepService s) : base(f, l, s) { }
 
     public Task<HttpResponseMessage> ExposedSendRequest(HttpRequestMessage request)
     {
-        return base.SendRequest(request, CancellationToken.None);
+        return SendRequest(request, CancellationToken.None);
     }
 }
 
@@ -94,8 +93,11 @@ public class ClientTests
                 "SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
                 ItExpr.IsAny<CancellationToken>()
-                )
-            .ReturnsAsync(new HttpResponseMessage { StatusCode = HttpStatusCode.ServiceUnavailable });
+            )
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.ServiceUnavailable
+            });
 
         var httpClient = new System.Net.Http.HttpClient(mockHandler.Object);
         mockFactory.Setup(_ => _.CreateClient(It.IsAny<string>())).Returns(httpClient);
@@ -119,7 +121,7 @@ public class ClientTests
                 "SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
                 ItExpr.IsAny<CancellationToken>()
-                )
+            )
             .ThrowsAsync(new TaskCanceledException());
 
         var httpClient = new System.Net.Http.HttpClient(mockHandler.Object);

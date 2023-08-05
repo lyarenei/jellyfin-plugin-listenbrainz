@@ -1,8 +1,7 @@
 using System.Collections.Generic;
-using Jellyfin.Plugin.ListenBrainz.Http;
 using Xunit;
 
-namespace Jellyfin.Plugin.Listenbrainz.Http.Tests;
+namespace Jellyfin.Plugin.ListenBrainz.Http.Tests;
 
 public class UtilsTests
 {
@@ -24,8 +23,8 @@ public class UtilsTests
             { "isOk", "false" }
         };
 
-        const string Expected = "foo=bar&abc=efg&number=42&isOk=false";
-        Assert.Equal(Expected, Utils.ToHttpGetQuery(data));
+        const string expected = "foo=bar&abc=efg&number=42&isOk=false";
+        Assert.Equal(expected, Utils.ToHttpGetQuery(data));
     }
 
     [Fact]
@@ -38,7 +37,7 @@ public class UtilsTests
             { "number", "42" }
         };
 
-        const string Expected = "space=a+b&special=%26%2f%2f&number=42";
-        Assert.Equal(Expected, Utils.ToHttpGetQuery(data));
+        const string expected = "space=a+b&special=%26%2f%2f&number=42";
+        Assert.Equal(expected, Utils.ToHttpGetQuery(data));
     }
 }
