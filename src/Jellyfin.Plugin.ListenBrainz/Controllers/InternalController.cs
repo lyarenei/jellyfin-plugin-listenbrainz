@@ -1,6 +1,7 @@
 using System.Reflection;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
+using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 using Microsoft.AspNetCore.Mvc;
 
@@ -48,6 +49,10 @@ public class InternalController : ControllerBase
     [Route("musicLibraries")]
     public Task<IEnumerable<JellyfinMediaLibrary>> GetMusicLibraries()
     {
-        return Task.FromResult(_libraryManager.GetMusicLibraries().Select(ml => new JellyfinMediaLibrary(ml)));
+        return Task.FromResult(
+            _libraryManager
+                .GetMusicLibraries()
+                .Cast<CollectionFolder>()
+                .Select(ml => new JellyfinMediaLibrary(ml)));
     }
 }

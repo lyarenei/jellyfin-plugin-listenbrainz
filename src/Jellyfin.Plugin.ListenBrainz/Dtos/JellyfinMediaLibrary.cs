@@ -13,16 +13,18 @@ public class JellyfinMediaLibrary
     public JellyfinMediaLibrary()
     {
         Name = string.Empty;
+        LibraryType = string.Empty;
     }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="JellyfinMediaLibrary"/> class.
     /// </summary>
     /// <param name="item">Jellyfin item/folder.</param>
-    public JellyfinMediaLibrary(BaseItem item)
+    public JellyfinMediaLibrary(CollectionFolder item)
     {
         Name = item.Name;
         Id = item.Id;
+        LibraryType = item.CollectionType;
     }
 
     /// <summary>
@@ -34,4 +36,9 @@ public class JellyfinMediaLibrary
     /// Gets or sets library ID.
     /// </summary>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// Gets or sets library type.
+    /// </summary>
+    public string LibraryType { get; set; }
 }
