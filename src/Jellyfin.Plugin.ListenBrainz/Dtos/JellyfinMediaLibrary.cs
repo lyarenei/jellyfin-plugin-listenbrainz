@@ -3,23 +3,23 @@ using MediaBrowser.Controller.Entities;
 namespace Jellyfin.Plugin.ListenBrainz.Dtos;
 
 /// <summary>
-/// Jellyfin music library.
+/// Jellyfin media library.
 /// </summary>
-public class JellyfinMusicLibrary
+public class JellyfinMediaLibrary
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="JellyfinMusicLibrary"/> class.
+    /// Initializes a new instance of the <see cref="JellyfinMediaLibrary"/> class.
     /// </summary>
-    public JellyfinMusicLibrary()
+    public JellyfinMediaLibrary()
     {
         Name = string.Empty;
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="JellyfinMusicLibrary"/> class.
+    /// Initializes a new instance of the <see cref="JellyfinMediaLibrary"/> class.
     /// </summary>
     /// <param name="item">Jellyfin item/folder.</param>
-    public JellyfinMusicLibrary(BaseItem item)
+    public JellyfinMediaLibrary(BaseItem item)
     {
         Name = item.Name;
         Id = item.Id;
@@ -31,7 +31,7 @@ public class JellyfinMusicLibrary
     public string Name { get; set; }
 
     /// <summary>
-    /// Gets or sets library id.
+    /// Gets or sets library ID.
     /// </summary>
     public Guid Id { get; set; }
 }

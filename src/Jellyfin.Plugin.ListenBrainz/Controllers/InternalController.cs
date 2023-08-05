@@ -46,8 +46,8 @@ public class InternalController : ControllerBase
     [HttpGet]
     [Produces("application/json")]
     [Route("musicLibraries")]
-    public Task<IEnumerable<JellyfinMusicLibrary>> GetMusicLibraries()
+    public Task<IEnumerable<JellyfinMediaLibrary>> GetMusicLibraries()
     {
-        return Task.FromResult(_libraryManager.GetMusicLibraries().Select(ml => new JellyfinMusicLibrary(ml)));
+        return Task.FromResult(_libraryManager.GetMusicLibraries().Select(ml => new JellyfinMediaLibrary(ml)));
     }
 }
