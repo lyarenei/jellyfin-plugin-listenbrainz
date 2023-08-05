@@ -41,6 +41,22 @@ public class InternalController : ControllerBase
     }
 
     /// <summary>
+    /// Get all libraries in Jellyfin.
+    /// </summary>
+    /// <returns>Collection of all music libraries.</returns>
+    [HttpGet]
+    [Produces("application/json")]
+    [Route("libraries")]
+    public Task<IEnumerable<JellyfinMediaLibrary>> GetLibraries()
+    {
+        return Task.FromResult(
+            _libraryManager
+                .GetLibraries()
+                .Cast<CollectionFolder>()
+                .Select(ml => new JellyfinMediaLibrary(ml)));
+    }
+
+    /// <summary>
     /// Get all music libraries in Jellyfin.
     /// </summary>
     /// <returns>Collection of all music libraries.</returns>
