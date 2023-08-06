@@ -139,8 +139,6 @@
             },
         };
 
-        var ExcludedLibraries = [];
-
         document.querySelector('#ListenBrainzConfigPage')
             .addEventListener('pageshow', () => {
                 onPageShow();
@@ -338,8 +336,12 @@
             document.querySelector("#IsAlternativeModeEnabled")
                 .checked = data.IsAlternativeModeEnabled;
 
-            ExcludedLibraries = data.ExcludedLibraries;
-            buildAllowedLibrariesList();
+            try {
+                buildAllowedLibrariesList(data.LibraryConfigs);
+            } catch (err) {
+                console.log("ListenBrainz plugin: Getting libraries from server failed: " + err);
+                Dashboard.alert("Failed to load Jellyfin libraries");
+            }
         }
 
         function getSelectedUserId() {
@@ -381,8 +383,18 @@
                 MusicBrainzApiUrl: document.querySelector('#MusicBrainzApiUrl').value,
                 IsMusicBrainzEnabled: document.querySelector('#IsMusicBrainzEnabled').checked,
                 IsAlternativeModeEnabled: document.querySelector('#IsAlternativeModeEnabled').checked,
-                "ExcludedLibraries": ExcludedLibraries,
+                LibraryConfigs: getLibraryConfigsInputs(),
             }
+        }
+
+        function getLibraryConfigsInputs() {
+            const checkboxes = document.querySelectorAll('[name^=library_]');
+            return [...checkboxes].map(box => {
+                return {
+                    Id: box.id,
+                    IsExcluded: box.checked,
+                };
+            });
         }
 
         function saveConfig(newConfig) {
@@ -414,49 +426,45 @@
             return inputValue.trim();
         }
 
-        function buildAllowedLibrariesList() {
-            ApiClient.GetMusicLibraries()
-                .then((libraries) => {
-                    libraries.forEach((library) => {
-                        let label = document.createElement('label');
-                        label.classList.add('inputLabel', 'inputLabelUnfocused');
-                        label.htmlFor = getUniqueName(library);
-                        label.onclick = (_) => {
-                            let checkbox = document.getElementById(library.Id);
-                            if (checkbox.checked) {
-                                // In process of unchecking box => insert into excluded libraries
-                                ExcludedLibraries.push(library.Id);
-                            } else {
-                                ExcludedLibraries = ExcludedLibraries.filter(el => el !== library.Id);
-                            }
+        async function buildAllowedLibrariesList(libraryConfigs) {
+            const allLibraries = await ApiClient.GetAllLibraries();
 
-                            checkbox.checked = !checkbox.checked;
-                        };
+            function isExcluded(libraryId) {
+                const config = libraryConfigs.find(lc => lc.Id === libraryId);
+                if (config) return config.IsExcluded;
 
-                        let input = document.createElement('input');
-                        input.setAttribute('is', 'emby-checkbox');
-                        input.type = 'checkbox';
-                        input.id = library.Id;
-                        input.name = getUniqueName(library);
-                        input.checked = !ExcludedLibraries.includes(library.Id);
+                const library = allLibraries.find(lib => lib.Id === libraryId);
+                if (library) return library.LibraryType !== 'music';
+            }
 
-                        let span = document.createElement('span');
-                        span.innerText = library.Name;
+            allLibraries.forEach((library) => {
+                let label = document.createElement('label');
+                label.classList.add('inputLabel', 'inputLabelUnfocused');
+                label.htmlFor = getUniqueName(library);
+                label.onclick = _ => {
+                    let checkbox = document.getElementById(library.Id);
+                    checkbox.checked = !checkbox.checked;
+                };
 
-                        label.appendChild(input);
-                        label.appendChild(span);
-                        document.getElementById("MusicLibraries").appendChild(label);
-                    })
-                })
-                .catch((reason) => {
-                    console.log("ListenBrainz plugin: Getting music libraries from server failed: " + reason);
-                    Dashboard.alert("Failed to load Jellyfin music libraries");
-                });
+                let input = document.createElement('input');
+                input.setAttribute('is', 'emby-checkbox');
+                input.type = 'checkbox';
+                input.id = library.Id;
+                input.name = getUniqueName(library);
+                input.checked = !isExcluded(library.Id);
+
+                let span = document.createElement('span');
+                span.innerText = library.Name;
+
+                label.appendChild(input);
+                label.appendChild(span);
+                document.getElementById("MusicLibraries").appendChild(label);
+            })
         }
 
-        function getUniqueName (library) {
+        function getUniqueName(library) {
             // String template refuses to work
-            return library.Id + '_IsAllowed';
+            return 'library_' + library.Id + '_IsAllowed';
         }
 
         ApiClient.ValidateListenBrainzToken = function (apiToken) {
@@ -466,6 +474,15 @@
                 url: url,
                 data: JSON.stringify(apiToken),
                 contentType: "application/json",
+                dataType: "json",
+            });
+        }
+
+        ApiClient.GetAllLibraries = function () {
+            let url = this.getUrl('ListenBrainzPlugin/internal/libraries');
+            return this.ajax({
+                type: "GET",
+                url: url,
                 dataType: "json",
             });
         }

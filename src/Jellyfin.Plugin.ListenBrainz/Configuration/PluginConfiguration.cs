@@ -21,7 +21,7 @@ public class PluginConfiguration : BasePluginConfiguration
     public PluginConfiguration()
     {
         UserConfigs = new Collection<UserConfig>();
-        ExcludedLibraries = new Collection<Guid>();
+        LibraryConfigs = new Collection<LibraryConfig>();
     }
 
     /// <summary>
@@ -79,8 +79,8 @@ public class PluginConfiguration : BasePluginConfiguration
     public Collection<UserConfig> UserConfigs { get; set; }
 
     /// <summary>
-    /// Gets or sets IDs of Jellyfin libraries excluded from listen submissions.
+    /// Gets or sets configurations of Jellyfin libraries for this plugin.
     /// </summary>
     [SuppressMessage("Warning", "CA2227", Justification = "Needed for deserialization")]
-    public Collection<Guid> ExcludedLibraries { get; set; }
+    public Collection<LibraryConfig> LibraryConfigs { get; set; }
 }
