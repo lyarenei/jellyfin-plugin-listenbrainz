@@ -118,9 +118,10 @@ same timestamp.
 
 ##### Allowed libraries for listen submission
 
-By default, all audio files in all Jellyfin libraries are considered for listen submission. Depending on your setup, you
-may not want to record listens of audio from a certain library. Listens of audio from unselected libraries will be
-ignored and not submitted to ListenBrainz.
+Depending on your setup, you may not want to record listens of audio from a certain library. Listens of audio from
+unchecked libraries will be ignored and not submitted to ListenBrainz.
 
-Please note that in case of an audio file being in multiple libraries, if there is at least one library enabled for
-listen submission, the listens of that audio will be processed.
+If an audio file is in multiple libraries, then all these libraries must not be excluded (checked in config) for the
+listen to be submitted.
+
+By default, all non-music libraries are excluded.
