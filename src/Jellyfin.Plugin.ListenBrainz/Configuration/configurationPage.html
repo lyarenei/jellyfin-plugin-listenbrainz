@@ -392,7 +392,7 @@
             return [...checkboxes].map(box => {
                 return {
                     Id: box.id,
-                    IsExcluded: box.checked,
+                    IsAllowed: box.checked,
                 };
             });
         }
@@ -429,12 +429,12 @@
         async function buildAllowedLibrariesList(libraryConfigs) {
             const allLibraries = await ApiClient.GetAllLibraries();
 
-            function isExcluded(libraryId) {
+            function isAllowed(libraryId) {
                 const config = libraryConfigs.find(lc => lc.Id === libraryId);
-                if (config) return config.IsExcluded;
+                if (config) return config.IsAllowed;
 
                 const library = allLibraries.find(lib => lib.Id === libraryId);
-                if (library) return library.LibraryType !== 'music';
+                if (library) return library.LibraryType === 'music';
             }
 
             allLibraries.forEach((library) => {
@@ -451,7 +451,7 @@
                 input.type = 'checkbox';
                 input.id = library.Id;
                 input.name = getUniqueName(library);
-                input.checked = !isExcluded(library.Id);
+                input.checked = isAllowed(library.Id) ?? false;
 
                 let span = document.createElement('span');
                 span.innerText = library.Name;

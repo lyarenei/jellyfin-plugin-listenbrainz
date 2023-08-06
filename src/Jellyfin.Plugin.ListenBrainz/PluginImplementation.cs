@@ -76,10 +76,10 @@ public class PluginImplementation
             return;
         }
 
-        if (IsInExcludedLibrary(data.Item))
+        if (!IsInAllowedLibrary(data.Item))
         {
             _logger.LogInformation(
-                "Dropping event for item {Item}: Item is in at least one excluded library",
+                "Dropping event for item {Item}: Item is in any allowed libraries",
                 data.Item.Name);
             return;
         }
@@ -163,10 +163,10 @@ public class PluginImplementation
             return;
         }
 
-        if (IsInExcludedLibrary(data.Item))
+        if (!IsInAllowedLibrary(data.Item))
         {
             _logger.LogInformation(
-                "Dropping event for item {Item}: Item is in at least one excluded library",
+                "Dropping event for item {Item}: Item is in any allowed libraries",
                 data.Item.Name);
             return;
         }
@@ -268,10 +268,10 @@ public class PluginImplementation
             return;
         }
 
-        if (IsInExcludedLibrary(data.Item))
+        if (!IsInAllowedLibrary(data.Item))
         {
             _logger.LogInformation(
-                "Dropping event for item {Item}: Item is in at least one excluded library",
+                "Dropping event for item {Item}: Item is in any allowed libraries",
                 data.Item.Name);
             return;
         }
@@ -482,15 +482,15 @@ public class PluginImplementation
         _playbackTracker.InvalidateItem(user.Id.ToString(), trackedItem);
     }
 
-    private bool IsInExcludedLibrary(BaseItem item)
+    private bool IsInAllowedLibrary(BaseItem item)
     {
         var itemLibraries = _libraryManager.GetCollectionFolders(item);
         var allLibraries = Plugin.GetConfiguration().LibraryConfigs;
-        var excludedLibraries = allLibraries.Where(lc => lc.IsExcluded);
+        var allowedLibraries = allLibraries.Where(lc => lc.IsAllowed);
 
         return itemLibraries
             .Select(il => il.Id)
-            .Intersect(excludedLibraries.Select(el => el.Id))
+            .Intersect(allowedLibraries.Select(el => el.Id))
             .Any();
     }
 

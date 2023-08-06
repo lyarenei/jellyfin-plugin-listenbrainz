@@ -11,7 +11,7 @@ public class LibraryConfig
     public Guid Id { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether this library should be ignored by plugin.
+    /// Gets or sets a value indicating whether this library should not be ignored by plugin.
     /// </summary>
-    public bool IsExcluded { get; set; }
+    public bool IsAllowed { get; set; }
 }

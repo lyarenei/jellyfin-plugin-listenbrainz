@@ -121,7 +121,7 @@ same timestamp.
 Depending on your setup, you may not want to record listens of audio from a certain library. Listens of audio from
 unchecked libraries will be ignored and not submitted to ListenBrainz.
 
-If an audio file is in multiple libraries, then all these libraries must not be excluded (checked in config) for the
-listen to be submitted.
+In case of an audio being in multiple libraries, listens for that audio will be sent if at least one of these libraries
+is allowed.
 
 By default, all non-music libraries are excluded.
