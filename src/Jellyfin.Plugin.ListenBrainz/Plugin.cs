@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Reflection;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
@@ -88,7 +89,10 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// <exception cref="PluginException">Plugin instance is not available.</exception>
     public static string GetDataPath()
     {
-        var path = _thisInstance?.DataFolderPath;
+        // DataFolderPath is invalid (https://github.com/jellyfin/jellyfin/issues/10091)
+        // var path = _thisInstance?.DataFolderPath;
+        var pluginDirName = string.Format(CultureInfo.InvariantCulture, "{0}_{1}", _thisInstance?.Name, Version);
+        var path = Path.Join(_thisInstance?.ApplicationPaths.PluginsPath, pluginDirName);
         if (path is null) throw new PluginException("Plugin instance is not available");
         return path;
     }
