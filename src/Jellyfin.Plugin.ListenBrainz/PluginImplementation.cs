@@ -485,13 +485,21 @@ public class PluginImplementation
     private bool IsInAllowedLibrary(BaseItem item)
     {
         var itemLibraries = _libraryManager.GetCollectionFolders(item);
-        var allLibraries = Plugin.GetConfiguration().LibraryConfigs;
-        var allowedLibraries = allLibraries.Where(lc => lc.IsAllowed);
-
         return itemLibraries
             .Select(il => il.Id)
-            .Intersect(allowedLibraries.Select(el => el.Id))
+            .Intersect(GetAllowedLibraries())
             .Any();
+    }
+
+    private IEnumerable<Guid> GetAllowedLibraries()
+    {
+        var allLibraries = Plugin.GetConfiguration().LibraryConfigs;
+        if (allLibraries.Any())
+        {
+            return allLibraries.Where(lc => lc.IsAllowed).Select(lc => lc.Id);
+        }
+
+        return _libraryManager.GetMusicLibraries().Select(ml => ml.Id);
     }
 
     private struct EventData
