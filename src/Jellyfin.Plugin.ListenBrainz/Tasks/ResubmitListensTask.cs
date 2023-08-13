@@ -1,4 +1,5 @@
 using Jellyfin.Plugin.ListenBrainz.Api.Resources;
+using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
@@ -69,7 +70,7 @@ public class ResubmitListensTask : IScheduledTask
                         "Found listens in cache for user {UserId}, will try resubmitting",
                         userConfig.JellyfinUserId);
                     cancellationToken.ThrowIfCancellationRequested();
-                    SubmitListensForUser(userConfig.JellyfinUserId);
+                    SubmitListensForUser(config, userConfig.JellyfinUserId);
                 }
                 else
                 {
@@ -112,14 +113,14 @@ public class ResubmitListensTask : IScheduledTask
         return TimeSpan.TicksPerDay + (randomMinute * TimeSpan.TicksPerMinute);
     }
 
-    private void SubmitListensForUser(Guid userId)
+    private void SubmitListensForUser(PluginConfiguration pluginConfig, Guid userId)
     {
         var user = _userManager.GetUserById(userId);
         if (user is null) throw new PluginException("Invalid jellyfin user ID");
         var listenChunks = _cacheManager.GetListens(userId).Chunk(Limits.MaxListensPerRequest);
         foreach (var listenChunk in listenChunks)
         {
-            var chunkToSubmit = listenChunk.Select(UpdateMetadataIfNecessary);
+            var chunkToSubmit = pluginConfig.IsMusicBrainzEnabled ? listenChunk.Select(UpdateMetadataIfNecessary) : listenChunk;
             var userConfig = user.GetListenBrainzConfig();
             if (userConfig is null) throw new PluginException($"No configuration for user {user.Username}");
 
