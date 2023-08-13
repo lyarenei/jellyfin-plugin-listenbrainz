@@ -117,13 +117,13 @@ public class ResubmitListensTask : IScheduledTask
     {
         var user = _userManager.GetUserById(userId);
         if (user is null) throw new PluginException("Invalid jellyfin user ID");
+        var userConfig = user.GetListenBrainzConfig();
+        if (userConfig is null) throw new PluginException($"No configuration for user {user.Username}");
+
         var listenChunks = _cacheManager.GetListens(userId).Chunk(Limits.MaxListensPerRequest);
         foreach (var listenChunk in listenChunks)
         {
             var chunkToSubmit = pluginConfig.IsMusicBrainzEnabled ? listenChunk.Select(UpdateMetadataIfNecessary) : listenChunk;
-            var userConfig = user.GetListenBrainzConfig();
-            if (userConfig is null) throw new PluginException($"No configuration for user {user.Username}");
-
             try
             {
                 _listenBrainzClient.SendListens(userConfig, chunkToSubmit);
