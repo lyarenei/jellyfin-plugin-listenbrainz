@@ -114,7 +114,14 @@
                             <div class="fieldDescription">Requires clients to mark items as played.</div>
                         </div>
                         <div class="inputContainer" id="MusicLibraries">
-                            <h4>Allowed libraries for listen submission</h4>
+                            <div class="bootstrap-wrapper row no-gutters">
+                                <h4 class="col-md-6 vertical-center">Allowed libraries for listen submission</h4>
+                                <button
+                                    class="raised button block emby-button bootstrap-wrapper col-md-2 offset-md-4 vertical-center slim-button"
+                                    id="ResetAllowedLibraries">
+                                    Reset
+                                </button>
+                            </div>
                         </div>
                         <div class="bootstrap-wrapper row no-gutters horizontal-center">
                             <button is="emby-button" type="submit" id="SaveGeneralConfig"
