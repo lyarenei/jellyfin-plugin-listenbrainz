@@ -113,6 +113,13 @@
                             </label>
                             <div class="fieldDescription">Requires clients to mark items as played.</div>
                         </div>
+                        <div class="sectionTitleContainer flex align-items-center">
+                            <h4 class="sectionTitle">Allowed libraries for listen submission</h4>
+                            <div class="raised button-alt headerHelpButton emby-button" id="ResetAllowedLibraries">
+                                Reset
+                            </div>
+                        </div>
+                        <div class="inputContainer" id="LibrariesList"></div>
                         <div class="bootstrap-wrapper row no-gutters horizontal-center">
                             <button is="emby-button" type="submit" id="SaveGeneralConfig"
                                     class="raised button-submit block emby-button col-md-2">
@@ -134,7 +141,7 @@
                 IsListenSubmitEnabled: false,
                 IsFavoritesSyncEnabled: false,
             },
-        }
+        };
 
         document.querySelector('#ListenBrainzConfigPage')
             .addEventListener('pageshow', () => {
@@ -159,6 +166,11 @@
         document.querySelector('#ResetMusicBrainzApiUrl')
             .addEventListener('mouseup', () => {
                 onResetMusicBrainzApiUrl();
+            });
+
+        document.querySelector('#ResetAllowedLibraries')
+            .addEventListener('mouseup', () => {
+                onAllowedLibrariesReset();
             });
 
         document.querySelector('#ListenBrainzPluginConfigForm')
@@ -299,6 +311,20 @@
             }
         }
 
+        async function onAllowedLibrariesReset() {
+            const allLibraries = await ApiClient.GetAllLibraries();
+
+            function isAllowed(libraryId) {
+                const library = allLibraries.find(lib => lib.Id === libraryId);
+                if (library) return library.LibraryType === 'music';
+            }
+
+            allLibraries.forEach((library) => {
+                let checkbox = document.getElementById(library.Id);
+                checkbox.checked = isAllowed(library.Id) ?? false;
+            });
+        }
+
         function loadCss(fileName) {
             let path = 'ListenBrainzPlugin/internal/styles/' + fileName;
             ApiClient.ajax({
@@ -332,6 +358,13 @@
 
             document.querySelector("#IsAlternativeModeEnabled")
                 .checked = data.IsAlternativeModeEnabled;
+
+            try {
+                buildAllowedLibrariesList(data.LibraryConfigs);
+            } catch (err) {
+                console.log("ListenBrainz plugin: Getting libraries from server failed: " + err);
+                Dashboard.alert("Failed to load Jellyfin libraries");
+            }
         }
 
         function getSelectedUserId() {
@@ -373,7 +406,18 @@
                 MusicBrainzApiUrl: document.querySelector('#MusicBrainzApiUrl').value,
                 IsMusicBrainzEnabled: document.querySelector('#IsMusicBrainzEnabled').checked,
                 IsAlternativeModeEnabled: document.querySelector('#IsAlternativeModeEnabled').checked,
+                LibraryConfigs: getLibraryConfigsInputs(),
             }
+        }
+
+        function getLibraryConfigsInputs() {
+            const checkboxes = document.querySelectorAll('[name^=library_]');
+            return [...checkboxes].map(box => {
+                return {
+                    Id: box.id,
+                    IsAllowed: box.checked,
+                };
+            });
         }
 
         function saveConfig(newConfig) {
@@ -405,6 +449,47 @@
             return inputValue.trim();
         }
 
+        async function buildAllowedLibrariesList(libraryConfigs) {
+            const allLibraries = await ApiClient.GetAllLibraries();
+
+            function isAllowed(libraryId) {
+                const config = libraryConfigs.find(lc => lc.Id === libraryId);
+                if (config) return config.IsAllowed;
+
+                const library = allLibraries.find(lib => lib.Id === libraryId);
+                if (library) return library.LibraryType === 'music';
+            }
+
+            allLibraries.forEach((library) => {
+                let label = document.createElement('label');
+                label.classList.add('inputLabel', 'inputLabelUnfocused');
+                label.htmlFor = getUniqueName(library);
+                label.onclick = _ => {
+                    let checkbox = document.getElementById(library.Id);
+                    checkbox.checked = !checkbox.checked;
+                };
+
+                let input = document.createElement('input');
+                input.setAttribute('is', 'emby-checkbox');
+                input.type = 'checkbox';
+                input.id = library.Id;
+                input.name = getUniqueName(library);
+                input.checked = isAllowed(library.Id) ?? false;
+
+                let span = document.createElement('span');
+                span.innerText = library.Name;
+
+                label.appendChild(input);
+                label.appendChild(span);
+                document.getElementById('LibrariesList').appendChild(label);
+            })
+        }
+
+        function getUniqueName(library) {
+            // String template refuses to work
+            return 'library_' + library.Id + '_IsAllowed';
+        }
+
         ApiClient.ValidateListenBrainzToken = function (apiToken) {
             let url = this.getUrl('ListenBrainzPlugin/ValidateToken');
             return this.ajax({
@@ -412,6 +497,24 @@
                 url: url,
                 data: JSON.stringify(apiToken),
                 contentType: "application/json",
+                dataType: "json",
+            });
+        }
+
+        ApiClient.GetAllLibraries = function () {
+            let url = this.getUrl('ListenBrainzPlugin/internal/libraries');
+            return this.ajax({
+                type: "GET",
+                url: url,
+                dataType: "json",
+            });
+        }
+
+        ApiClient.GetMusicLibraries = function () {
+            let url = this.getUrl('ListenBrainzPlugin/internal/musicLibraries');
+            return this.ajax({
+                type: "GET",
+                url: url,
                 dataType: "json",
             });
         }

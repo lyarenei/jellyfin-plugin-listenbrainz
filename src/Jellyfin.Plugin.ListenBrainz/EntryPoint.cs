@@ -38,7 +38,13 @@ public sealed class EntryPoint : IServerEntryPoint
         var logger = loggerFactory.CreateLogger(Plugin.LoggerCategory);
         var listenBrainzClient = ClientUtils.GetListenBrainzClient(logger, clientFactory, libraryManager);
         var musicBrainzClient = ClientUtils.GetMusicBrainzClient(logger, clientFactory);
-        _plugin = new PluginImplementation(logger, listenBrainzClient, musicBrainzClient, userDataManager, userManager);
+        _plugin = new PluginImplementation(
+            logger,
+            listenBrainzClient,
+            musicBrainzClient,
+            userDataManager,
+            userManager,
+            libraryManager);
     }
 
     /// <inheritdoc />

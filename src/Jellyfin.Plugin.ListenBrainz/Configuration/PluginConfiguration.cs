@@ -21,6 +21,7 @@ public class PluginConfiguration : BasePluginConfiguration
     public PluginConfiguration()
     {
         UserConfigs = new Collection<UserConfig>();
+        LibraryConfigs = new Collection<LibraryConfig>();
     }
 
     /// <summary>
@@ -76,4 +77,10 @@ public class PluginConfiguration : BasePluginConfiguration
     /// </summary>
     [SuppressMessage("Warning", "CA2227", Justification = "Needed for deserialization")]
     public Collection<UserConfig> UserConfigs { get; set; }
+
+    /// <summary>
+    /// Gets or sets configurations of Jellyfin libraries for this plugin.
+    /// </summary>
+    [SuppressMessage("Warning", "CA2227", Justification = "Needed for deserialization")]
+    public Collection<LibraryConfig> LibraryConfigs { get; set; }
 }

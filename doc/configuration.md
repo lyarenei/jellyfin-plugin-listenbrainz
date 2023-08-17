@@ -115,3 +115,13 @@ played, however this field is optional. If the value is missing, the plugin woul
 conditions. In such cases, the plugin will default to current time. This should be fine in most cases, however, if the
 client does not specify times when reporting playbacks retroactively, all listens reported in that time will have the
 same timestamp.
+
+##### Allowed libraries for listen submission
+
+Depending on your setup, you may not want to record listens of audio from a certain library. Listens of audio from
+unchecked libraries will be ignored and not submitted to ListenBrainz.
+
+In case of an audio being in multiple libraries, listens for that audio will be sent if at least one of these libraries
+is allowed.
+
+By default, all non-music libraries are excluded.
