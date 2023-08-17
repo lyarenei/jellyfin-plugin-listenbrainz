@@ -394,7 +394,7 @@
         function getUserConfigInputs() {
             return {
                 JellyfinUserId: getSelectedUserId(),
-                ApiToken: getApiToken(),
+                ApiToken: btoa(getApiToken()),
                 IsListenSubmitEnabled: document.querySelector('#IsListenSubmitEnabled').checked,
                 IsFavoritesSyncEnabled: document.querySelector('#IsFavoritesSyncEnabled').checked,
             }

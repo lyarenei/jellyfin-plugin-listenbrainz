@@ -218,8 +218,8 @@ public class PluginImplementation
             return;
         }
 
-        var metadata = GetAdditionalMetadata(data);
         var now = DateUtils.CurrentTimestamp;
+        var metadata = GetAdditionalMetadata(data);
         try
         {
             _listenBrainzClient.SendListen(userConfig, data.Item, metadata, now);
@@ -317,8 +317,8 @@ public class PluginImplementation
             Monitor.Exit(_userDataSaveLock);
         }
 
-        var metadata = GetAdditionalMetadata(data);
         var now = DateUtils.CurrentTimestamp;
+        var metadata = GetAdditionalMetadata(data);
         try
         {
             _listenBrainzClient.SendListen(userConfig, data.Item, metadata, now);
