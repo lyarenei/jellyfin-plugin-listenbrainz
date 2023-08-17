@@ -15,7 +15,8 @@ artifacts:
   - "Jellyfin.Plugin.ListenBrainz.Api.dll"
   - "Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.dll"
 changelog: >
-  - New
+  New
     - Select which libraries to exclude from submitting listens (#41 @lyarenei)
-  - Maintenance
+
+  Maintenance
     - Improvements to submit and resubmit process (#46 @Maxr1998)
