@@ -49,7 +49,15 @@ public class CacheManager : ICacheManager, IListensCache
     {
         get
         {
-            if (_instance is null) _instance = new CacheManager(Path.Join(Plugin.GetDataPath(), CacheFileName));
+            if (_instance is not null) return _instance;
+
+            var path = Path.Join(Plugin.GetDataPath(), CacheFileName);
+            _instance = new CacheManager(path);
+            if (!File.Exists(path))
+            {
+                _instance.Save();
+            }
+
             return _instance;
         }
     }
