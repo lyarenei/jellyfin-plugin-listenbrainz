@@ -47,7 +47,7 @@ public static class AudioExtensions
                     SubmissionClient = Plugin.FullName,
                     SubmissionClientVersion = Plugin.Version,
                     ReleaseMbid = item.ProviderIds.GetValueOrDefault("MusicBrainzAlbum"),
-                    ArtistMbids = item.ProviderIds.GetValueOrDefault("MusicBrainzArtist")?.Split(';'),
+                    ArtistMbids = item.ProviderIds.GetValueOrDefault("MusicBrainzArtist")?.Split(';', '/'),
                     ReleaseGroupMbid = item.ProviderIds.GetValueOrDefault("MusicBrainzReleaseGroup"),
                     RecordingMbid = itemMetadata?.RecordingMbid,
                     TrackMbid = item.ProviderIds.GetValueOrDefault("MusicBrainzTrack"),
