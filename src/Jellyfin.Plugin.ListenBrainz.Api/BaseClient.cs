@@ -30,10 +30,10 @@ public class BaseClient : HttpClient
         ContractResolver = new DefaultContractResolver { NamingStrategy = new SnakeCaseNamingStrategy() }
     };
 
+    private const int RateLimitAttempts = 50;
     private readonly object _lock = new();
     private readonly ILogger _logger;
     private readonly ISleepService _sleepService;
-    private const int RateLimitAttempts = 50;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BaseClient"/> class.
