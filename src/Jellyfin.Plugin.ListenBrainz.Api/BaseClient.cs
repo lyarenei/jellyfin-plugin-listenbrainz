@@ -33,6 +33,7 @@ public class BaseClient : HttpClient
     private readonly object _lock = new();
     private readonly ILogger _logger;
     private readonly ISleepService _sleepService;
+    private const int RateLimitAttempts = 50;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BaseClient"/> class.
@@ -100,11 +101,12 @@ public class BaseClient : HttpClient
     private async Task<TResponse?> DoRequest<TResponse>(HttpRequestMessage requestMessage, CancellationToken cancellationToken)
         where TResponse : IListenBrainzResponse
     {
-        HttpResponseMessage response;
+        // Compiler complains that the variable won't be initialized in the loop, so here we go
+        HttpResponseMessage? response = null;
         try
         {
             Monitor.Enter(_lock);
-            while (true)
+            for (int i = 0; i < RateLimitAttempts; i++)
             {
                 response = await SendRequest(requestMessage, cancellationToken);
                 if (response.StatusCode == HttpStatusCode.TooManyRequests)
@@ -122,6 +124,8 @@ public class BaseClient : HttpClient
         {
             Monitor.Exit(_lock);
         }
+
+        if (response is null) throw new InvalidResponseException("Response is NULL");
 
         var stringContent = await response.Content.ReadAsStringAsync(cancellationToken);
         var result = JsonConvert.DeserializeObject<TResponse>(stringContent, SerializerSettings);
