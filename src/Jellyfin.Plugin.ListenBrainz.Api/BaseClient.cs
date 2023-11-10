@@ -137,7 +137,6 @@ public class BaseClient : HttpClient
 
     private void HandleRateLimit(HttpResponseMessage response)
     {
-        // X-RateLimit-Reset-In: Number of seconds when current time window expires
         var header = response.Headers.FirstOrDefault(h => h.Key == Headers.RateLimitResetIn);
         var resetIn = header.Value.FirstOrDefault();
         if (resetIn is null)
