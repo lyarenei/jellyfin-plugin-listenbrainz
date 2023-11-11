@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
 using Jellyfin.Plugin.ListenBrainz.Api.Models;
+using Jellyfin.Plugin.ListenBrainz.Api.Models.Requests;
+using Jellyfin.Plugin.ListenBrainz.Api.Resources;
 using Newtonsoft.Json;
 using Xunit;
 
@@ -38,5 +40,22 @@ public class ListenTests
         var listenJson = JsonConvert.SerializeObject(_exampleListen, BaseClient.SerializerSettings);
         var deserializedListen = JsonConvert.DeserializeObject<Listen>(listenJson, BaseClient.SerializerSettings);
         Assert.NotNull(deserializedListen);
+    }
+}
+
+public class RecordingFeedbackTests
+{
+    [Theory]
+    [InlineData(FeedbackScore.Hated)]
+    [InlineData(FeedbackScore.Loved)]
+    [InlineData(FeedbackScore.Neutral)]
+    public void FeedbackValues_Encode(FeedbackScore score)
+    {
+        var request = new RecordingFeedbackRequest { Score = score };
+        var actualJson = JsonConvert.SerializeObject(request, BaseClient.SerializerSettings);
+        Assert.NotNull(actualJson);
+
+        var expectedJson = @"{""score"":" + (int)score + "}";
+        Assert.Equal(expectedJson, actualJson);
     }
 }
