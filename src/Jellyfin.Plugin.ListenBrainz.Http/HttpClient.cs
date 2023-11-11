@@ -34,7 +34,7 @@ public class HttpClient
     /// <param name="httpClientFactory">HTTP client factory.</param>
     /// <param name="logger">Logger instance.</param>
     /// <param name="sleepService">Sleep service.</param>
-    protected HttpClient(IHttpClientFactory httpClientFactory, ILogger logger, ISleepService? sleepService)
+    public HttpClient(IHttpClientFactory httpClientFactory, ILogger logger, ISleepService? sleepService)
     {
         _httpClientFactory = httpClientFactory;
         _logger = logger;
@@ -49,7 +49,7 @@ public class HttpClient
     /// <returns>Request response.</returns>
     /// <exception cref="RetryException">Number of retries has been reached.</exception>
     /// <exception cref="InvalidResponseException">Response is not available.</exception>
-    protected async Task<HttpResponseMessage> SendRequest(
+    public async Task<HttpResponseMessage> SendRequest(
         HttpRequestMessage requestMessage,
         CancellationToken cancellationToken)
     {

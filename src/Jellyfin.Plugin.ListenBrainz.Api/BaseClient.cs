@@ -3,18 +3,16 @@ using System.Text;
 using Jellyfin.Plugin.ListenBrainz.Api.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.Http;
 using Jellyfin.Plugin.ListenBrainz.Http.Exceptions;
-using Jellyfin.Plugin.ListenBrainz.Http.Interfaces;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using HttpClient = Jellyfin.Plugin.ListenBrainz.Http.HttpClient;
 
 namespace Jellyfin.Plugin.ListenBrainz.Api;
 
 /// <summary>
 /// Base ListenBrainz API client.
 /// </summary>
-public class BaseClient : HttpClient
+public class BaseClient
 {
     /// <summary>
     /// Serializer settings.
@@ -26,15 +24,18 @@ public class BaseClient : HttpClient
         ContractResolver = new DefaultContractResolver { NamingStrategy = new SnakeCaseNamingStrategy() }
     };
 
+    private readonly IHttpClient _client;
+    private readonly ILogger _logger;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="BaseClient"/> class.
     /// </summary>
-    /// <param name="httpClientFactory">HTTP client factory.</param>
+    /// <param name="client">Underlying HTTP client.</param>
     /// <param name="logger">Logger instance.</param>
-    /// <param name="sleepService">Sleep service.</param>
-    protected BaseClient(IHttpClientFactory httpClientFactory, ILogger logger, ISleepService? sleepService)
-        : base(httpClientFactory, logger, sleepService)
+    public BaseClient(IHttpClient client, ILogger logger)
     {
+        _client = client;
+        _logger = logger;
     }
 
     /// <summary>
@@ -45,7 +46,7 @@ public class BaseClient : HttpClient
     /// <typeparam name="TRequest">Data type of the request.</typeparam>
     /// <typeparam name="TResponse">Data type of the response.</typeparam>
     /// <returns>Request response.</returns>
-    protected async Task<TResponse?> Post<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
+    public async Task<TResponse?> Post<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
         where TRequest : IListenBrainzRequest
         where TResponse : IListenBrainzResponse
     {
@@ -69,7 +70,7 @@ public class BaseClient : HttpClient
     /// <typeparam name="TRequest">Data type of the request.</typeparam>
     /// <typeparam name="TResponse">Data type of the response.</typeparam>
     /// <returns>Request response.</returns>
-    protected async Task<TResponse?> Get<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
+    public async Task<TResponse?> Get<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
         where TRequest : IListenBrainzRequest
         where TResponse : IListenBrainzResponse
     {
@@ -90,7 +91,7 @@ public class BaseClient : HttpClient
     private async Task<TResponse?> DoRequest<TResponse>(HttpRequestMessage requestMessage, CancellationToken cancellationToken)
         where TResponse : IListenBrainzResponse
     {
-        var response = await SendRequest(requestMessage, cancellationToken);
+        var response = await _client.SendRequest(requestMessage, cancellationToken);
         var stringContent = await response.Content.ReadAsStringAsync(cancellationToken);
         var result = JsonConvert.DeserializeObject<TResponse>(stringContent, SerializerSettings);
         if (result is null) throw new InvalidResponseException("Response deserialized to NULL");

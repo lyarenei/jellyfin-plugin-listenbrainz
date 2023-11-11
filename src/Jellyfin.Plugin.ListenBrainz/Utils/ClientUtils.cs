@@ -5,6 +5,8 @@ using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.MusicBrainzApi;
 using MediaBrowser.Controller.Library;
 using Microsoft.Extensions.Logging;
+using BaseClient = Jellyfin.Plugin.ListenBrainz.Api.BaseClient;
+using UnderlyingClient = Jellyfin.Plugin.ListenBrainz.Http.HttpClient;
 
 namespace Jellyfin.Plugin.ListenBrainz.Utils;
 
@@ -25,7 +27,9 @@ public static class ClientUtils
         IHttpClientFactory clientFactory,
         ILibraryManager? libraryManager = null)
     {
-        var apiClient = new ListenBrainzApiClient(clientFactory, logger);
+        var httpClient = new UnderlyingClient(clientFactory, logger, null);
+        var baseClient = new BaseClient(new HttpClientWrapper(httpClient), logger);
+        var apiClient = new ListenBrainzApiClient(baseClient, logger);
         return libraryManager is null ? new ListenBrainzClient(logger, apiClient) : new ListenBrainzClient(logger, apiClient, libraryManager);
     }
 
