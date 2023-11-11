@@ -22,7 +22,7 @@ public class BaseClient : HttpClient
     public static readonly JsonSerializerSettings SerializerSettings = new()
     {
         NullValueHandling = NullValueHandling.Ignore,
-        DefaultValueHandling = DefaultValueHandling.Ignore,
+        DefaultValueHandling = DefaultValueHandling.Include,
         ContractResolver = new DefaultContractResolver { NamingStrategy = new SnakeCaseNamingStrategy() }
     };
 
