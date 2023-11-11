@@ -12,7 +12,7 @@ namespace Jellyfin.Plugin.ListenBrainz.Api;
 /// <summary>
 /// Base ListenBrainz API client.
 /// </summary>
-public class BaseClient
+public class BaseApiClient : IBaseApiClient
 {
     /// <summary>
     /// Serializer settings.
@@ -28,25 +28,18 @@ public class BaseClient
     private readonly ILogger _logger;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="BaseClient"/> class.
+    /// Initializes a new instance of the <see cref="BaseApiClient"/> class.
     /// </summary>
     /// <param name="client">Underlying HTTP client.</param>
     /// <param name="logger">Logger instance.</param>
-    public BaseClient(IHttpClient client, ILogger logger)
+    public BaseApiClient(IHttpClient client, ILogger logger)
     {
         _client = client;
         _logger = logger;
     }
 
-    /// <summary>
-    /// Send a POST request to the ListenBrainz server.
-    /// </summary>
-    /// <param name="request">The request to send.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <typeparam name="TRequest">Data type of the request.</typeparam>
-    /// <typeparam name="TResponse">Data type of the response.</typeparam>
-    /// <returns>Request response.</returns>
-    public async Task<TResponse?> Post<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
+    /// <inheritdoc />
+    public async Task<TResponse?> SendPostRequest<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
         where TRequest : IListenBrainzRequest
         where TResponse : IListenBrainzResponse
     {
@@ -62,15 +55,8 @@ public class BaseClient
         using (requestMessage) return await DoRequest<TResponse>(requestMessage, cancellationToken);
     }
 
-    /// <summary>
-    /// Send a GET request to the ListenBrainz server.
-    /// </summary>
-    /// <param name="request">The request to send.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <typeparam name="TRequest">Data type of the request.</typeparam>
-    /// <typeparam name="TResponse">Data type of the response.</typeparam>
-    /// <returns>Request response.</returns>
-    public async Task<TResponse?> Get<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
+    /// <inheritdoc />
+    public async Task<TResponse?> SendGetRequest<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
         where TRequest : IListenBrainzRequest
         where TResponse : IListenBrainzResponse
     {

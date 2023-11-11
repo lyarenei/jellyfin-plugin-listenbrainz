@@ -10,35 +10,35 @@ namespace Jellyfin.Plugin.ListenBrainz.Api;
 /// </summary>
 public class ListenBrainzApiClient : IListenBrainzApiClient
 {
-    private readonly BaseClient _client;
+    private readonly IBaseApiClient _apiClient;
     private readonly ILogger _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ListenBrainzApiClient"/> class.
     /// </summary>
-    /// <param name="client">Underlying base client.</param>
+    /// <param name="apiClient">Underlying base client.</param>
     /// <param name="logger">Logger instance.</param>
-    public ListenBrainzApiClient(BaseClient client, ILogger logger)
+    public ListenBrainzApiClient(IBaseApiClient apiClient, ILogger logger)
     {
-        _client = client;
+        _apiClient = apiClient;
         _logger = logger;
     }
 
     /// <inheritdoc />
     public async Task<ValidateTokenResponse?> ValidateToken(ValidateTokenRequest request, CancellationToken cancellationToken)
     {
-        return await _client.Get<ValidateTokenRequest, ValidateTokenResponse>(request, cancellationToken);
+        return await _apiClient.SendGetRequest<ValidateTokenRequest, ValidateTokenResponse>(request, cancellationToken);
     }
 
     /// <inheritdoc />
     public async Task<SubmitListensResponse?> SubmitListens(SubmitListensRequest request, CancellationToken cancellationToken)
     {
-        return await _client.Post<SubmitListensRequest, SubmitListensResponse>(request, cancellationToken);
+        return await _apiClient.SendPostRequest<SubmitListensRequest, SubmitListensResponse>(request, cancellationToken);
     }
 
     /// <inheritdoc />
     public async Task<RecordingFeedbackResponse?> SubmitRecordingFeedback(RecordingFeedbackRequest request, CancellationToken cancellationToken)
     {
-        return await _client.Post<RecordingFeedbackRequest, RecordingFeedbackResponse>(request, cancellationToken);
+        return await _apiClient.SendPostRequest<RecordingFeedbackRequest, RecordingFeedbackResponse>(request, cancellationToken);
     }
 }
