@@ -27,7 +27,7 @@ public class ListenTests
     [Fact]
     public void Listen_Encode()
     {
-        var listenJson = JsonConvert.SerializeObject(_exampleListen, BaseClient.SerializerSettings);
+        var listenJson = JsonConvert.SerializeObject(_exampleListen, BaseApiClient.SerializerSettings);
         Assert.NotNull(listenJson);
 
         var expectedJSON = @"{""listened_at"":1234,""track_metadata"":{""artist_name"":""Foo Bar"",""track_name"":""Foo - Bar"",""release_name"":""Foobar"",""additional_info"":{""artist_mbids"":[""artist-foo""],""release_mbid"":""release-foo"",""recording_mbid"":""recording-foo""}}}";
@@ -37,8 +37,8 @@ public class ListenTests
     [Fact]
     public void Listen_EncodeAndDecode()
     {
-        var listenJson = JsonConvert.SerializeObject(_exampleListen, BaseClient.SerializerSettings);
-        var deserializedListen = JsonConvert.DeserializeObject<Listen>(listenJson, BaseClient.SerializerSettings);
+        var listenJson = JsonConvert.SerializeObject(_exampleListen, BaseApiClient.SerializerSettings);
+        var deserializedListen = JsonConvert.DeserializeObject<Listen>(listenJson, BaseApiClient.SerializerSettings);
         Assert.NotNull(deserializedListen);
     }
 }
@@ -52,7 +52,7 @@ public class RecordingFeedbackTests
     public void FeedbackValues_Encode(FeedbackScore score)
     {
         var request = new RecordingFeedbackRequest { Score = score };
-        var actualJson = JsonConvert.SerializeObject(request, BaseClient.SerializerSettings);
+        var actualJson = JsonConvert.SerializeObject(request, BaseApiClient.SerializerSettings);
         Assert.NotNull(actualJson);
 
         var expectedJson = @"{""score"":" + (int)score + "}";

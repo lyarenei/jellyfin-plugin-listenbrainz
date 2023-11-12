@@ -3,18 +3,16 @@ using System.Text;
 using Jellyfin.Plugin.ListenBrainz.Api.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.Http;
 using Jellyfin.Plugin.ListenBrainz.Http.Exceptions;
-using Jellyfin.Plugin.ListenBrainz.Http.Interfaces;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using HttpClient = Jellyfin.Plugin.ListenBrainz.Http.HttpClient;
 
 namespace Jellyfin.Plugin.ListenBrainz.Api;
 
 /// <summary>
 /// Base ListenBrainz API client.
 /// </summary>
-public class BaseClient : HttpClient
+public class BaseApiClient : IBaseApiClient
 {
     /// <summary>
     /// Serializer settings.
@@ -26,26 +24,22 @@ public class BaseClient : HttpClient
         ContractResolver = new DefaultContractResolver { NamingStrategy = new SnakeCaseNamingStrategy() }
     };
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="BaseClient"/> class.
-    /// </summary>
-    /// <param name="httpClientFactory">HTTP client factory.</param>
-    /// <param name="logger">Logger instance.</param>
-    /// <param name="sleepService">Sleep service.</param>
-    protected BaseClient(IHttpClientFactory httpClientFactory, ILogger logger, ISleepService? sleepService)
-        : base(httpClientFactory, logger, sleepService)
-    {
-    }
+    private readonly IHttpClient _client;
+    private readonly ILogger _logger;
 
     /// <summary>
-    /// Send a POST request to the ListenBrainz server.
+    /// Initializes a new instance of the <see cref="BaseApiClient"/> class.
     /// </summary>
-    /// <param name="request">The request to send.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <typeparam name="TRequest">Data type of the request.</typeparam>
-    /// <typeparam name="TResponse">Data type of the response.</typeparam>
-    /// <returns>Request response.</returns>
-    protected async Task<TResponse?> Post<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
+    /// <param name="client">Underlying HTTP client.</param>
+    /// <param name="logger">Logger instance.</param>
+    public BaseApiClient(IHttpClient client, ILogger logger)
+    {
+        _client = client;
+        _logger = logger;
+    }
+
+    /// <inheritdoc />
+    public async Task<TResponse?> SendPostRequest<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
         where TRequest : IListenBrainzRequest
         where TResponse : IListenBrainzResponse
     {
@@ -61,15 +55,8 @@ public class BaseClient : HttpClient
         using (requestMessage) return await DoRequest<TResponse>(requestMessage, cancellationToken);
     }
 
-    /// <summary>
-    /// Send a GET request to the ListenBrainz server.
-    /// </summary>
-    /// <param name="request">The request to send.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <typeparam name="TRequest">Data type of the request.</typeparam>
-    /// <typeparam name="TResponse">Data type of the response.</typeparam>
-    /// <returns>Request response.</returns>
-    protected async Task<TResponse?> Get<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
+    /// <inheritdoc />
+    public async Task<TResponse?> SendGetRequest<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
         where TRequest : IListenBrainzRequest
         where TResponse : IListenBrainzResponse
     {
@@ -90,7 +77,7 @@ public class BaseClient : HttpClient
     private async Task<TResponse?> DoRequest<TResponse>(HttpRequestMessage requestMessage, CancellationToken cancellationToken)
         where TResponse : IListenBrainzResponse
     {
-        var response = await SendRequest(requestMessage, cancellationToken);
+        var response = await _client.SendRequest(requestMessage, cancellationToken);
         var stringContent = await response.Content.ReadAsStringAsync(cancellationToken);
         var result = JsonConvert.DeserializeObject<TResponse>(stringContent, SerializerSettings);
         if (result is null) throw new InvalidResponseException("Response deserialized to NULL");
