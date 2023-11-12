@@ -19,6 +19,12 @@ namespace Jellyfin.Plugin.ListenBrainz.Api;
 /// </summary>
 public class BaseApiClient : IBaseApiClient
 {
+    private const int RateLimitAttempts = 50;
+    private readonly object _lock = new();
+    private readonly IHttpClient _client;
+    private readonly ILogger _logger;
+    private readonly ISleepService _sleepService;
+
     /// <summary>
     /// Serializer settings.
     /// </summary>
@@ -28,12 +34,6 @@ public class BaseApiClient : IBaseApiClient
         DefaultValueHandling = DefaultValueHandling.Include,
         ContractResolver = new DefaultContractResolver { NamingStrategy = new SnakeCaseNamingStrategy() }
     };
-
-    private const int RateLimitAttempts = 50;
-    private readonly object _lock = new();
-    private readonly IHttpClient _client;
-    private readonly ILogger _logger;
-    private readonly ISleepService _sleepService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BaseApiClient"/> class.
