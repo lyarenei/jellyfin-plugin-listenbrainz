@@ -99,6 +99,11 @@ public class BaseApiClient : IBaseApiClient
                 {
                     _logger.LogDebug("Rate limit reached, will retry after new window opens");
                     HandleRateLimit(response);
+                    if (i + 1 == RateLimitAttempts)
+                    {
+                        throw new ListenBrainzException($"Could not fit into a rate limit window {RateLimitAttempts} times");
+                    }
+
                     continue;
                 }
 
