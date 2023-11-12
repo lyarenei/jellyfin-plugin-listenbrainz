@@ -1,7 +1,7 @@
 ---
 name: "ListenBrainz"
 guid: "59B20823-AAFE-454C-A393-17427F518631"
-version: "3.1.1.0"
+version: "3.1.2.0"
 targetAbi: "10.8.0.0"
 framework: "net6.0"
 overview: "Track your music habits with ListenBrainz."
@@ -16,4 +16,4 @@ artifacts:
   - "Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.dll"
 changelog: >
   Fix
-    - Failing resubmit job (create cache file on first ever init) (#48 @lyarenei)
+    - Missing score field in JSON when the feedback was neutral (#55 @lyarenei)

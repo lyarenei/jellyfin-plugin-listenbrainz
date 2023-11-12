@@ -11,14 +11,13 @@ using Jellyfin.Plugin.ListenBrainz.Http.Services;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using HttpClient = Jellyfin.Plugin.ListenBrainz.Http.HttpClient;
 
 namespace Jellyfin.Plugin.ListenBrainz.Api;
 
 /// <summary>
 /// Base ListenBrainz API client.
 /// </summary>
-public class BaseClient : HttpClient
+public class BaseApiClient : IBaseApiClient
 {
     /// <summary>
     /// Serializer settings.
@@ -26,37 +25,31 @@ public class BaseClient : HttpClient
     public static readonly JsonSerializerSettings SerializerSettings = new()
     {
         NullValueHandling = NullValueHandling.Ignore,
-        DefaultValueHandling = DefaultValueHandling.Ignore,
+        DefaultValueHandling = DefaultValueHandling.Include,
         ContractResolver = new DefaultContractResolver { NamingStrategy = new SnakeCaseNamingStrategy() }
     };
 
     private const int RateLimitAttempts = 50;
     private readonly object _lock = new();
+    private readonly IHttpClient _client;
     private readonly ILogger _logger;
     private readonly ISleepService _sleepService;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="BaseClient"/> class.
+    /// Initializes a new instance of the <see cref="BaseApiClient"/> class.
     /// </summary>
-    /// <param name="httpClientFactory">HTTP client factory.</param>
+    /// <param name="client">Underlying HTTP client.</param>
     /// <param name="logger">Logger instance.</param>
     /// <param name="sleepService">Sleep service.</param>
-    protected BaseClient(IHttpClientFactory httpClientFactory, ILogger logger, ISleepService? sleepService)
-        : base(httpClientFactory, logger, sleepService)
+    public BaseApiClient(IHttpClient client, ILogger logger, ISleepService? sleepService)
     {
+        _client = client;
         _logger = logger;
         _sleepService = sleepService ?? new DefaultSleepService();
     }
 
-    /// <summary>
-    /// Send a POST request to the ListenBrainz server.
-    /// </summary>
-    /// <param name="request">The request to send.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <typeparam name="TRequest">Data type of the request.</typeparam>
-    /// <typeparam name="TResponse">Data type of the response.</typeparam>
-    /// <returns>Request response.</returns>
-    protected async Task<TResponse?> Post<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
+    /// <inheritdoc />
+    public async Task<TResponse?> SendPostRequest<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
         where TRequest : IListenBrainzRequest
         where TResponse : IListenBrainzResponse
     {
@@ -72,15 +65,8 @@ public class BaseClient : HttpClient
         using (requestMessage) return await DoRequest<TResponse>(requestMessage, cancellationToken);
     }
 
-    /// <summary>
-    /// Send a GET request to the ListenBrainz server.
-    /// </summary>
-    /// <param name="request">The request to send.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <typeparam name="TRequest">Data type of the request.</typeparam>
-    /// <typeparam name="TResponse">Data type of the response.</typeparam>
-    /// <returns>Request response.</returns>
-    protected async Task<TResponse?> Get<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
+    /// <inheritdoc />
+    public async Task<TResponse?> SendGetRequest<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
         where TRequest : IListenBrainzRequest
         where TResponse : IListenBrainzResponse
     {
@@ -108,7 +94,7 @@ public class BaseClient : HttpClient
             Monitor.Enter(_lock);
             for (int i = 0; i < RateLimitAttempts; i++)
             {
-                response = await SendRequest(requestMessage, cancellationToken);
+                response = await _client.SendRequest(requestMessage, cancellationToken);
                 if (response.StatusCode == HttpStatusCode.TooManyRequests)
                 {
                     _logger.LogDebug("Rate limit reached, will retry after new window opens");
