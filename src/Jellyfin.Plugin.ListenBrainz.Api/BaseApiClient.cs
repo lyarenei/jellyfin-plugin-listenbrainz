@@ -97,13 +97,13 @@ public class BaseApiClient : IBaseApiClient
                 response = await _client.SendRequest(requestMessage, cancellationToken);
                 if (response.StatusCode == HttpStatusCode.TooManyRequests)
                 {
-                    _logger.LogDebug("Rate limit reached, will retry after new window opens");
-                    HandleRateLimit(response);
                     if (i + 1 == RateLimitAttempts)
                     {
                         throw new ListenBrainzException($"Could not fit into a rate limit window {RateLimitAttempts} times");
                     }
 
+                    _logger.LogDebug("Rate limit reached, will retry after new window opens");
+                    HandleRateLimit(response);
                     continue;
                 }
 
