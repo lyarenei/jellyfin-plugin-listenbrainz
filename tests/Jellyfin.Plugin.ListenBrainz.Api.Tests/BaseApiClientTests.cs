@@ -14,10 +14,10 @@ using Xunit;
 
 namespace Jellyfin.Plugin.ListenBrainz.Api.Tests;
 
-public class BaseClientTests
+public class BaseApiClientTests
 {
     [Fact]
-    public async Task BaseClient_SendRequest_RetryException()
+    public async Task BaseApiClient_RateLimitHandling()
     {
         var mockClient = new Mock<IHttpClient>();
         mockClient
