@@ -121,6 +121,13 @@ public class ListenBrainzClient : IListenBrainzClient
         };
     }
 
+    /// <inheritdoc />
+    public async Task<string?> GetRecordingMsidByListenTs(UserConfig config, long ts)
+    {
+        // TODO: implement
+        return null;
+    }
+
     /// <summary>
     /// Convert all <see cref="StoredListen"/>s to <see cref="Listen"/>s.
     /// </summary>

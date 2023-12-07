@@ -239,7 +239,7 @@ public class PluginImplementation
         }
 
         if (!userConfig.IsFavoritesSyncEnabled) return;
-        HandleFavoriteSync(data, metadata, userConfig);
+        HandleFavoriteSync(data, metadata, userConfig, now);
     }
 
     /// <summary>
@@ -337,10 +337,10 @@ public class PluginImplementation
         }
 
         if (!userConfig.IsFavoritesSyncEnabled) return;
-        HandleFavoriteSync(data, metadata, userConfig);
+        HandleFavoriteSync(data, metadata, userConfig, now);
     }
 
-    private void HandleFavoriteSync(EventData data, AudioItemMetadata? metadata, UserConfig userConfig)
+    private void HandleFavoriteSync(EventData data, AudioItemMetadata? metadata, UserConfig userConfig, long listenTs)
     {
         _logger.LogInformation(
             "Attempting to sync favorite status for track {Track} and user {User}",
@@ -358,7 +358,8 @@ public class PluginImplementation
             }
 
             _logger.LogInformation("No MBID is available, will attempt to sync favorite status using MSID");
-            SendFeedbackUsingMsid();
+            SendFeedbackUsingMsid(userConfig, userItemData.IsFavorite, listenTs);
+            _logger.LogInformation("Favorite sync for track {Track} has been successful", data.Item.Name);
         }
         catch (Exception e)
         {
@@ -459,9 +460,24 @@ public class PluginImplementation
         }
     }
 
-    private static void SendFeedbackUsingMsid()
+    private async void SendFeedbackUsingMsid(UserConfig userConfig, bool isFavorite, long listenTs)
     {
-        throw new MetadataException("Fallback to send feedback using MSID is not implemented");
+        const int MaxAttempts = 5;
+        const int SleepSecs = 5;
+        for (int i = 0; i < MaxAttempts; i++)
+        {
+            var msid = await _listenBrainzClient.GetRecordingMsidByListenTs(userConfig, listenTs);
+            if (msid is not null)
+            {
+                _listenBrainzClient.SendFeedback(userConfig, isFavorite, recordingMsid: msid);
+                return;
+            }
+
+            _logger.LogDebug("Recording MSID with listen timestamp {Ts} not found, will retry in {Secs} seconds", listenTs, SleepSecs);
+            Thread.Sleep(SleepSecs * 1000);
+        }
+
+        throw new PluginException($"No recording MSID is associated with timestamp {listenTs}");
     }
 
     private void EvaluateConditionsIfTracked(BaseItem item, User user)

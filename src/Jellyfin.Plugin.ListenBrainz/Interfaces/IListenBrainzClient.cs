@@ -48,4 +48,12 @@ public interface IListenBrainzClient
     /// <param name="apiToken">Token to validate.</param>
     /// <returns>Validated token.</returns>
     public Task<ValidatedToken> ValidateToken(string apiToken);
+
+    /// <summary>
+    /// Get a recording MSID (MessyBrainz ID) of associated with a listen submitted to ListenBrainz.
+    /// </summary>
+    /// <param name="config">ListenBrainz user configuration.</param>
+    /// <param name="ts">Timestamp of the submitted listen.</param>
+    /// <returns>Recording MSID associated with a specified listen timestamp. Null if not found.</returns>
+    public Task<string?> GetRecordingMsidByListenTs(UserConfig config, long ts);
 }
