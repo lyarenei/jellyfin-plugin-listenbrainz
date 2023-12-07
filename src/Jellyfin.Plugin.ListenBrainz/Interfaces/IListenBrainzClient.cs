@@ -50,7 +50,7 @@ public interface IListenBrainzClient
     public Task<ValidatedToken> ValidateToken(string apiToken);
 
     /// <summary>
-    /// Get a recording MSID (MessyBrainz ID) of associated with a listen submitted to ListenBrainz.
+    /// Get a recording MSID (MessyBrainz ID) associated with a listen submitted to ListenBrainz.
     /// </summary>
     /// <param name="config">ListenBrainz user configuration.</param>
     /// <param name="ts">Timestamp of the submitted listen.</param>
