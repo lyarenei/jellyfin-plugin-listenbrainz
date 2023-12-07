@@ -342,15 +342,22 @@ public class PluginImplementation
 
     private void HandleFavoriteSync(EventData data, AudioItemMetadata? metadata, UserConfig userConfig)
     {
+        _logger.LogInformation(
+            "Attempting to sync favorite status for track {Track} and user {User}",
+            data.Item.Name,
+            data.JellyfinUser.Username);
+
         try
         {
             var userItemData = _userDataManager.GetUserData(data.JellyfinUser, data.Item);
             if (metadata?.RecordingMbid is not null)
             {
                 _listenBrainzClient.SendFeedback(userConfig, userItemData.IsFavorite, metadata.RecordingMbid);
+                _logger.LogInformation("Favorite sync for track {Track} has been successful", data.Item.Name);
                 return;
             }
 
+            _logger.LogInformation("No MBID is available, will attempt to sync favorite status using MSID");
             SendFeedbackUsingMsid();
         }
         catch (Exception e)
