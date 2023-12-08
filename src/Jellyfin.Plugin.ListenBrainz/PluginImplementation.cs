@@ -463,7 +463,7 @@ public class PluginImplementation
     private async void SendFeedbackUsingMsid(UserConfig userConfig, bool isFavorite, long listenTs)
     {
         const int MaxAttempts = 5;
-        const int SleepSecs = 5;
+        const int SleepSecs = 3;
         for (int i = 0; i < MaxAttempts; i++)
         {
             var msid = await _listenBrainzClient.GetRecordingMsidByListenTs(userConfig, listenTs);
