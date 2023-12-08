@@ -7,16 +7,16 @@ namespace Jellyfin.Plugin.ListenBrainz.Api.Models.Requests;
 /// <summary>
 /// User listens request.
 /// </summary>
-public class UserListensRequest : IListenBrainzRequest
+public class GetUserListensRequest : IListenBrainzRequest
 {
     private readonly string _userName;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="UserListensRequest"/> class.
+    /// Initializes a new instance of the <see cref="GetUserListensRequest"/> class.
     /// </summary>
     /// <param name="userName">Name of the user's listens.</param>
     /// <param name="listensNumber">Number of listens to fetch.</param>
-    public UserListensRequest(string userName, int listensNumber = 10)
+    public GetUserListensRequest(string userName, int listensNumber = 10)
     {
         _userName = userName;
         BaseUrl = Resources.General.BaseUrl;
