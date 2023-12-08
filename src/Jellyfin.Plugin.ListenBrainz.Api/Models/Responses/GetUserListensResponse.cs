@@ -5,12 +5,12 @@ namespace Jellyfin.Plugin.ListenBrainz.Api.Models.Responses;
 /// <summary>
 /// User listens response.
 /// </summary>
-public class UserListensResponse : IListenBrainzResponse
+public class GetUserListensResponse : IListenBrainzResponse
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="UserListensResponse"/> class.
+    /// Initializes a new instance of the <see cref="GetUserListensResponse"/> class.
     /// </summary>
-    public UserListensResponse()
+    public GetUserListensResponse()
     {
         Payload = new UserListensPayload();
     }
