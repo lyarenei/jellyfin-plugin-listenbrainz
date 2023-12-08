@@ -480,7 +480,7 @@ public class PluginImplementation
             Thread.Sleep(SleepSecs * 1000);
         }
 
-        throw new PluginException($"No recording MSID is associated with timestamp {listenTs}");
+        throw new PluginException($"No recording MSID is associated with listen timestamp {listenTs}");
     }
 
     private void EvaluateConditionsIfTracked(BaseItem item, User user)
