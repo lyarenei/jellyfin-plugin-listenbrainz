@@ -19,7 +19,7 @@ public class GetUserListensRequest : IListenBrainzRequest
     public GetUserListensRequest(string userName, int listensNumber = 10)
     {
         _userName = userName;
-        BaseUrl = Resources.General.BaseUrl;
+        BaseUrl = General.BaseUrl;
         QueryDict = new Dictionary<string, string> { { "count", listensNumber.ToString(NumberFormatInfo.InvariantInfo) } };
     }
 
