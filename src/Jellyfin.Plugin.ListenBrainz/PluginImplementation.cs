@@ -464,6 +464,9 @@ public class PluginImplementation
     {
         const int MaxAttempts = 5;
         const int SleepSecs = 3;
+
+        // Delay to maximize the chance of getting it on first try
+        Thread.Sleep(500);
         for (int i = 0; i < MaxAttempts; i++)
         {
             var msid = await _listenBrainzClient.GetRecordingMsidByListenTs(userConfig, listenTs);
