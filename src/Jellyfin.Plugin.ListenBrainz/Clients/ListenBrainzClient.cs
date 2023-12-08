@@ -124,8 +124,16 @@ public class ListenBrainzClient : IListenBrainzClient
     /// <inheritdoc />
     public async Task<string?> GetRecordingMsidByListenTs(UserConfig config, long ts)
     {
-        // TODO: implement
-        return null;
+        var pluginConfig = Plugin.GetConfiguration();
+        var tokenRequest = new ValidateTokenRequest(config.PlaintextApiToken) { BaseUrl = pluginConfig.ListenBrainzApiUrl };
+        var tokenResponse = await _apiClient.ValidateToken(tokenRequest, CancellationToken.None);
+        if (tokenResponse is null) throw new PluginException("Did not receive response for token validate request");
+        if (tokenResponse.UserName is null) throw new PluginException("Did not receive username");
+
+        var request = new GetUserListensRequest(tokenResponse.UserName);
+        var response = await _apiClient.GetUserListens(request, CancellationToken.None);
+        if (response is null) throw new PluginException("Did not receive response for user listens request");
+        return response.Payload.Listens.FirstOrDefault(l => l.ListenedAt == ts)?.RecordingMsid;
     }
 
     /// <summary>
