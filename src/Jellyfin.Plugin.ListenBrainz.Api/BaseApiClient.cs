@@ -20,8 +20,8 @@ namespace Jellyfin.Plugin.ListenBrainz.Api;
 public class BaseApiClient : IBaseApiClient
 {
     private const int RateLimitAttempts = 50;
-    private readonly object _lock = new();
     private readonly IHttpClient _client;
+    private readonly SemaphoreSlim _gateway;
     private readonly ILogger _logger;
     private readonly ISleepService _sleepService;
 
@@ -46,6 +46,7 @@ public class BaseApiClient : IBaseApiClient
         _client = client;
         _logger = logger;
         _sleepService = sleepService ?? new DefaultSleepService();
+        _gateway = new SemaphoreSlim(1, 1);
     }
 
     /// <inheritdoc />
@@ -88,9 +89,9 @@ public class BaseApiClient : IBaseApiClient
         where TResponse : IListenBrainzResponse
     {
         HttpResponseMessage? response = null;
+        await _gateway.WaitAsync(cancellationToken);
         try
         {
-            Monitor.Enter(_lock);
             for (int i = 0; i < RateLimitAttempts; i++)
             {
                 response = await _client.SendRequest(requestMessage, cancellationToken);
@@ -112,7 +113,7 @@ public class BaseApiClient : IBaseApiClient
         }
         finally
         {
-            Monitor.Exit(_lock);
+            _gateway.Release();
         }
 
         if (response is null) throw new InvalidResponseException("Response is NULL");
