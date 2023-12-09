@@ -89,9 +89,15 @@ public class BaseApiClient : IBaseApiClient
         where TResponse : IListenBrainzResponse
     {
         HttpResponseMessage? response = null;
+
+        // TODO: update client to pass this around => have it unified
+        var correlationId = Guid.NewGuid().ToString("N")[..7];
+
+        _logger.LogDebug("({Id}) Waiting for previous request to complete (if any)", correlationId);
         await _gateway.WaitAsync(cancellationToken);
         try
         {
+            _logger.LogDebug("({Id}) Sending request...", correlationId);
             for (int i = 0; i < RateLimitAttempts; i++)
             {
                 response = await _client.SendRequest(requestMessage, cancellationToken);
@@ -99,20 +105,22 @@ public class BaseApiClient : IBaseApiClient
                 {
                     if (i + 1 == RateLimitAttempts)
                     {
-                        throw new ListenBrainzException($"Could not fit into a rate limit window {RateLimitAttempts} times");
+                        throw new ListenBrainzException(
+                            $"Could not fit into a rate limit window {RateLimitAttempts} times, ({correlationId})");
                     }
 
-                    _logger.LogDebug("Rate limit reached, will retry after new window opens");
+                    _logger.LogDebug("({Id}) Rate limit reached, will retry after new window opens", correlationId);
                     HandleRateLimit(response);
                     continue;
                 }
 
-                _logger.LogDebug("Did not hit any rate limits, all OK");
+                _logger.LogDebug("({Id}) Did not hit any rate limits, all OK", correlationId);
                 break;
             }
         }
         finally
         {
+            _logger.LogDebug("({Id}) Request has been processed, freeing up resources", correlationId);
             _gateway.Release();
         }
 
