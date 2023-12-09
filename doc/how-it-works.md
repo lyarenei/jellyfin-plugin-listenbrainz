@@ -47,8 +47,9 @@ cache for that user.
 In addition to listen submission, this plugin also offers favorite sync. Or, more exactly, marking favorite tracks in
 Jellyfin as `loved` in ListenBrainz. The syncing takes place right away after successfully submitting a listen.
 Primarily, a recording MBID is used for the sync process, but if it's not available, the process falls back to MSID.
-In the MSID case, there will be an additional request made for API token verification.
-This is to get a ListenBrainz username associated with the API token since the plugin does not store it.
+In the MSID case, there will be an additional request made for API token verification. This is to get a ListenBrainz
+username associated with the API token since the plugin does not store it. Please note it may take some time for
+the hearts to be updated in the ListenBrainz UI.
 
 For now, the process in only one-way, from Jellyfin to ListenBrainz. The other direction is not currently implemented,
 but it is planned.
