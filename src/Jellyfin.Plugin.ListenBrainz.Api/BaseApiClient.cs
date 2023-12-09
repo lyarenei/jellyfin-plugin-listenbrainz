@@ -87,7 +87,6 @@ public class BaseApiClient : IBaseApiClient
     private async Task<TResponse?> DoRequest<TResponse>(HttpRequestMessage requestMessage, CancellationToken cancellationToken)
         where TResponse : IListenBrainzResponse
     {
-        // Compiler complains that the variable won't be initialized in the loop, so here we go
         HttpResponseMessage? response = null;
         try
         {
