@@ -20,8 +20,8 @@ namespace Jellyfin.Plugin.ListenBrainz.Api;
 public class BaseApiClient : IBaseApiClient
 {
     private const int RateLimitAttempts = 50;
-    private readonly object _lock = new();
     private readonly IHttpClient _client;
+    private readonly SemaphoreSlim _gateway;
     private readonly ILogger _logger;
     private readonly ISleepService _sleepService;
 
@@ -46,6 +46,7 @@ public class BaseApiClient : IBaseApiClient
         _client = client;
         _logger = logger;
         _sleepService = sleepService ?? new DefaultSleepService();
+        _gateway = new SemaphoreSlim(1, 1);
     }
 
     /// <inheritdoc />
@@ -87,11 +88,16 @@ public class BaseApiClient : IBaseApiClient
     private async Task<TResponse?> DoRequest<TResponse>(HttpRequestMessage requestMessage, CancellationToken cancellationToken)
         where TResponse : IListenBrainzResponse
     {
-        // Compiler complains that the variable won't be initialized in the loop, so here we go
         HttpResponseMessage? response = null;
+
+        // TODO: update client to pass this around => have it unified
+        var correlationId = Guid.NewGuid().ToString("N")[..7];
+
+        _logger.LogDebug("({Id}) Waiting for previous request to complete (if any)", correlationId);
+        await _gateway.WaitAsync(cancellationToken);
         try
         {
-            Monitor.Enter(_lock);
+            _logger.LogDebug("({Id}) Sending request...", correlationId);
             for (int i = 0; i < RateLimitAttempts; i++)
             {
                 response = await _client.SendRequest(requestMessage, cancellationToken);
@@ -99,21 +105,23 @@ public class BaseApiClient : IBaseApiClient
                 {
                     if (i + 1 == RateLimitAttempts)
                     {
-                        throw new ListenBrainzException($"Could not fit into a rate limit window {RateLimitAttempts} times");
+                        throw new ListenBrainzException(
+                            $"Could not fit into a rate limit window {RateLimitAttempts} times, ({correlationId})");
                     }
 
-                    _logger.LogDebug("Rate limit reached, will retry after new window opens");
+                    _logger.LogDebug("({Id}) Rate limit reached, will retry after new window opens", correlationId);
                     HandleRateLimit(response);
                     continue;
                 }
 
-                _logger.LogDebug("Did not hit any rate limits, all OK");
+                _logger.LogDebug("({Id}) Did not hit any rate limits, all OK", correlationId);
                 break;
             }
         }
         finally
         {
-            Monitor.Exit(_lock);
+            _logger.LogDebug("({Id}) Request has been processed, freeing up resources", correlationId);
+            _gateway.Release();
         }
 
         if (response is null) throw new InvalidResponseException("Response is NULL");
