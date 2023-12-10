@@ -1,14 +1,13 @@
 name: Bug Report
-description: Something is not working as it should
+description: Report an issue in the plugin.
 title: "[Bug]: "
 labels: ["bug"]
 body:
   - type: markdown
     attributes:
       value: |
-        Please take your time to fill out this bug report.
+        Please take your time to fill out this bug report, thank you.
         Reports filled with obvious little to no effort are likely to be closed without further comments.
-        Thank you.
   - type: textarea
     id: what-happened
     attributes:
@@ -23,7 +22,7 @@ body:
       label: Steps to reproduce
       description: Steps to reproduce the bug.
       placeholder: |
-        1. Play item '....'
+        1. Play item
         2. Wait for '....'
         3. See error
     validations:

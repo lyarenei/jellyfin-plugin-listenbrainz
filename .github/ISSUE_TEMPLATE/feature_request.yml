@@ -1,5 +1,5 @@
 name: Feature request
-description: Suggest a new feature or an improvement
+description: Suggest a new feature or an improvement for the plugin.
 title: "[Request]: "
 labels: ["enhancement"]
 body:
@@ -7,9 +7,7 @@ body:
     id: description
     attributes:
       label: Description
-      description: |
-        A clear and concise description of your suggestion.
-      placeholder: It would be better if this worked like this.
+      description: A clear and concise description of your suggestion.
     validations:
       required: true
   - type: textarea
