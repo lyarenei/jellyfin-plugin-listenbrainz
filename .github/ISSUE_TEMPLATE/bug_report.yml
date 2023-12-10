@@ -55,7 +55,7 @@ body:
     validations:
       required: true
   - type: input
-    id: plugin-version
+    id: jellyfin-version
     attributes:
       label: Jellyfin Version
       description: What Jellyfin version are you running?
