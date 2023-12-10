@@ -62,3 +62,8 @@ body:
         placeholder: 10.a.b
       validations:
         required: true
+  - type: textarea
+      id: additional-ctx
+      attributes:
+        label: Additional context
+        description: Add any other context or screenshots about the bug.
