@@ -14,4 +14,9 @@ public class ValidatedToken
     /// Gets the reason of token being invalid.
     /// </summary>
     public string? Reason { get; init; }
+
+    /// <summary>
+    /// Gets a username associated with the token.
+    /// </summary>
+    public string? UserName { get; init; }
 }

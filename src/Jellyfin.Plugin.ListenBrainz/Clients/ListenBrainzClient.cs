@@ -117,7 +117,8 @@ public class ListenBrainzClient : IListenBrainzClient
         return new ValidatedToken
         {
             IsValid = response.Valid,
-            Reason = response.Message
+            Reason = response.Message,
+            UserName = response.UserName
         };
     }
 
