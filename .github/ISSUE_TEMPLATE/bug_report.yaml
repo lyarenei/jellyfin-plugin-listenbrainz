@@ -13,7 +13,9 @@ body:
       id: what-happened
       attributes:
         label: Bug description
-        description: A clear and concise description of what happened.
+        description: |
+          A clear and concise description of what happened.
+          Please include screenshots as well if it's relevant.
         placeholder: It worked before and now it's broken.
       validations:
         required: true
