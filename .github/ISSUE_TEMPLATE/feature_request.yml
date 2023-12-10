@@ -4,21 +4,21 @@ title: "[Request]: "
 labels: ["enhancement"]
 body:
   - type: textarea
-      id: description
-      attributes:
-        label: Description
-        description: |
-          A clear and concise description of your suggestion.
-        placeholder: It would be better if this worked like this.
-      validations:
-        required: true
+    id: description
+    attributes:
+      label: Description
+      description: |
+        A clear and concise description of your suggestion.
+      placeholder: It would be better if this worked like this.
+    validations:
+      required: true
   - type: textarea
-      id: suggested-solution
-      attributes:
-        label: Proposed solution
-        description: Describe possible solution(s).
+    id: suggested-solution
+    attributes:
+      label: Proposed solution
+      description: Describe possible solution(s).
   - type: textarea
-      id: additional-ctx
-      attributes:
-        label: Additional context
-        description: Add any other context or screenshots about the feature request.
+    id: additional-ctx
+    attributes:
+      label: Additional context
+      description: Add any other context or screenshots about the feature request.
