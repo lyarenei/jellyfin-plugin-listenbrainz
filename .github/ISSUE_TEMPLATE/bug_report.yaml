@@ -1,0 +1,64 @@
+name: Bug Report
+description: Something is not working as it should
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+      attributes:
+        value: |
+          Please take your time to fill out this bug report.
+          Reports filled with obvious little to no effort are likely to be closed without further comments.
+          Thank you.
+  - type: textarea
+      id: what-happened
+      attributes:
+        label: Bug description
+        description: A clear and concise description of what happened.
+        placeholder: It worked before and now it's broken.
+      validations:
+        required: true
+  - type: textarea
+      id: steps-to-reproduce
+      attributes:
+        label: Steps to reproduce
+        description: Steps to reproduce the bug.
+        placeholder: |
+          1. Play item '....'
+          2. Wait for '....'
+          3. See error
+      validations:
+        required: true
+  - type: textarea
+      id: expected-behavior
+      attributes:
+        label: Expected behavior
+        description: What should happen if the feature worked correctly?
+  - type: textarea
+      id: actual-behavior
+      attributes:
+        label: Actual behavior
+        description: What happens instead?
+  - type: textarea
+      id: logs
+      attributes:
+        label: Relevant log output
+        description: |
+          Please copy and paste any relevant log output.
+          Debug logs are preferred as much more info is logged.
+        render: shell
+  - type: input
+      id: plugin-version
+      attributes:
+        label: Plugin version
+        description: What plugin version do you have currently installed?
+        placeholder: 3.x.y.z
+      validations:
+        required: true
+  - type: input
+      id: plugin-version
+      attributes:
+        label: Jellyfin Version
+        description: What Jellyfin version are you running?
+        placeholder: 10.a.b
+      validations:
+        required: true
