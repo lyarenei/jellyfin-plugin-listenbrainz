@@ -6,11 +6,13 @@ on:
       - main
     paths-ignore:
       - '**/*.md'
+      - '**/*.yaml'
   pull_request:
     branches:
       - main
     paths-ignore:
       - '**/*.md'
+      - '**/*.yaml'
   workflow_dispatch:
 
 jobs:
