@@ -16,5 +16,5 @@ artifacts:
   - "Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.dll"
 changelog: >
   New
-    - Plugin should now respect ListenBrainz API rate limits (#54 @lyarenei)
+    - Respect ListenBrainz API rate limits (#54 @lyarenei)
     - Implement MSID fallback for syncing favorites if MBID is not available (#59 @lyarenei)
