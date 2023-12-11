@@ -1,7 +1,7 @@
 ---
 name: "ListenBrainz"
 guid: "59B20823-AAFE-454C-A393-17427F518631"
-version: "3.1.2.0"
+version: "3.2.0.0"
 targetAbi: "10.8.0.0"
 framework: "net6.0"
 overview: "Track your music habits with ListenBrainz."
@@ -15,5 +15,6 @@ artifacts:
   - "Jellyfin.Plugin.ListenBrainz.Api.dll"
   - "Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.dll"
 changelog: >
-  Fix
-    - Missing score field in JSON when the feedback was neutral (#55 @lyarenei)
+  New
+    - Respect ListenBrainz API rate limits (#54 @lyarenei)
+    - Implement MSID fallback for syncing favorites if MBID is not available (#59 @lyarenei)
