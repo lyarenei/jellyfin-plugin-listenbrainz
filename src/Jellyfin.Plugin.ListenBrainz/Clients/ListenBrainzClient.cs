@@ -117,8 +117,46 @@ public class ListenBrainzClient : IListenBrainzClient
         return new ValidatedToken
         {
             IsValid = response.Valid,
-            Reason = response.Message
+            Reason = response.Message,
+            UserName = response.UserName
         };
+    }
+
+    /// <inheritdoc />
+    public async Task<string?> GetRecordingMsidByListenTs(UserConfig config, long ts)
+    {
+        var pluginConfig = Plugin.GetConfiguration();
+        var tokenRequest = new ValidateTokenRequest(config.PlaintextApiToken) { BaseUrl = pluginConfig.ListenBrainzApiUrl };
+
+        // Earlier 3.x plugin configurations did not store the username
+        var userName = config.UserName;
+        if (string.IsNullOrEmpty(userName))
+        {
+            _logger.LogDebug("ListenBrainz username is not available, getting it via token validation");
+            var tokenResponse = await _apiClient.ValidateToken(tokenRequest, CancellationToken.None);
+            if (tokenResponse is null)
+            {
+                _logger.LogDebug("Did not receive response for token validate request, giving up");
+                return null;
+            }
+
+            if (tokenResponse.UserName is null)
+            {
+                _logger.LogDebug("ValidateToken response does not contain username, cannot continue");
+                return null;
+            }
+
+            userName = tokenResponse.UserName;
+        }
+
+        var request = new GetUserListensRequest(userName);
+        var response = await _apiClient.GetUserListens(request, CancellationToken.None);
+        if (response is null)
+        {
+            throw new PluginException("Did not receive response for user listens request");
+        }
+
+        return response.Payload.Listens.FirstOrDefault(l => l.ListenedAt == ts)?.RecordingMsid;
     }
 
     /// <summary>

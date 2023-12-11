@@ -29,6 +29,11 @@ public class Listen
     public long? ListenedAt { get; set; }
 
     /// <summary>
+    /// Gets or sets recording MSID.
+    /// </summary>
+    public string? RecordingMsid { get; set; }
+
+    /// <summary>
     /// Gets or sets track metadata.
     /// </summary>
     public TrackMetadata TrackMetadata { get; set; }

@@ -241,15 +241,21 @@
             Dashboard.showLoadingMsg();
             ApiClient.getPluginConfiguration(ListenBrainzConfig.PluginUniqueId)
                 .then((config) => {
-                    let newUserConfig = getUserConfigInputs();
-                    let index = config.UserConfigs.map((uc) => uc.JellyfinUserId).indexOf(newUserConfig.JellyfinUserId);
-                    if (index < 0) {
-                        config.UserConfigs.push(newUserConfig);
-                    } else {
-                        config.UserConfigs[index] = newUserConfig;
-                    }
+                    getUserConfigInputs()
+                        .then((newUserConfig) => {
+                            let index = config.UserConfigs.map((uc) => uc.JellyfinUserId).indexOf(newUserConfig.JellyfinUserId);
+                            if (index < 0) {
+                                config.UserConfigs.push(newUserConfig);
+                            } else {
+                                config.UserConfigs[index] = newUserConfig;
+                            }
 
-                    saveConfig(config);
+                            saveConfig(config);
+                        })
+                        .catch((err) => {
+                            console.log("ListenBrainz plugin: Failed to get plugin config: " + err);
+                            Dashboard.alert("Saving user config failed");
+                        })
                 })
                 .catch((reason) => {
                     console.log("ListenBrainz plugin: Failed to get plugin config: " + reason);
@@ -391,12 +397,14 @@
             return index < 0 ? ListenBrainzConfig.UserDefaults : config.UserConfigs[index];
         }
 
-        function getUserConfigInputs() {
+        async function getUserConfigInputs() {
+            const userName = await tryGetListenBrainzUserName(getApiToken());
             return {
                 JellyfinUserId: getSelectedUserId(),
                 ApiToken: btoa(getApiToken()),
                 IsListenSubmitEnabled: document.querySelector('#IsListenSubmitEnabled').checked,
                 IsFavoritesSyncEnabled: document.querySelector('#IsFavoritesSyncEnabled').checked,
+                UserName: userName,
             }
         }
 
@@ -447,6 +455,11 @@
         function getApiToken() {
             let inputValue = document.querySelector('#ListenBrainzApiToken').value;
             return inputValue.trim();
+        }
+
+        async function tryGetListenBrainzUserName(apiToken) {
+            const resp = await ApiClient.ValidateListenBrainzToken(apiToken);
+            return resp.UserName;
         }
 
         async function buildAllowedLibrariesList(libraryConfigs) {

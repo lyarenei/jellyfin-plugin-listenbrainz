@@ -16,6 +16,7 @@ public class UserConfig
     {
         IsListenSubmitEnabled = false;
         ApiToken = string.Empty;
+        UserName = string.Empty;
     }
 
     /// <summary>
@@ -55,4 +56,9 @@ public class UserConfig
     /// Gets or sets a value indicating whether ListenBrainz favorites sync is enabled.
     /// </summary>
     public bool IsFavoritesSyncEnabled { get; set; }
+
+    /// <summary>
+    /// Gets or sets a ListenBrainz username.
+    /// </summary>
+    public string UserName { get; set; }
 }

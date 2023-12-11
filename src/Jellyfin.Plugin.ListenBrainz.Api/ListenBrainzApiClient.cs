@@ -41,4 +41,10 @@ public class ListenBrainzApiClient : IListenBrainzApiClient
     {
         return await _apiClient.SendPostRequest<RecordingFeedbackRequest, RecordingFeedbackResponse>(request, cancellationToken);
     }
+
+    /// <inheritdoc />
+    public async Task<GetUserListensResponse?> GetUserListens(GetUserListensRequest request, CancellationToken cancellationToken)
+    {
+        return await _apiClient.SendGetRequest<GetUserListensRequest, GetUserListensResponse>(request, cancellationToken);
+    }
 }

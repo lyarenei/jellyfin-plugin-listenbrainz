@@ -31,4 +31,12 @@ public interface IListenBrainzApiClient
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Request response.</returns>
     public Task<RecordingFeedbackResponse?> SubmitRecordingFeedback(RecordingFeedbackRequest request, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Get listens of a specified user.
+    /// </summary>
+    /// <param name="request">User listens request.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Request response.</returns>
+    public Task<GetUserListensResponse?> GetUserListens(GetUserListensRequest request, CancellationToken cancellationToken);
 }

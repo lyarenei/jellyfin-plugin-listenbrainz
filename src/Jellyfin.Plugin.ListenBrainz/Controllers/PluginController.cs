@@ -31,7 +31,7 @@ public class PluginController : ControllerBase
     /// Validate ListenBrainz API token.
     /// </summary>
     /// <param name="apiToken">Token to verify.</param>
-    /// <returns>CSS stylesheet file response.</returns>
+    /// <returns><see cref="ValidatedToken"/> response.</returns>
     [HttpPost]
     [Route("ValidateToken")]
     [Consumes("application/json")]
