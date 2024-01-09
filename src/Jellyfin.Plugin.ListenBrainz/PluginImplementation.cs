@@ -462,8 +462,8 @@ public class PluginImplementation
 
     private async void SendFeedbackUsingMsid(UserConfig userConfig, bool isFavorite, long listenTs)
     {
-        const int MaxAttempts = 5;
-        const int SleepSecs = 3;
+        const int MaxAttempts = 10;
+        const int SleepSecs = 5;
 
         // Delay to maximize the chance of getting it on first try
         Thread.Sleep(500);
