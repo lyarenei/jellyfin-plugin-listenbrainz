@@ -461,10 +461,11 @@ public class PluginImplementation
 
     private async Task<bool> SendFeedbackUsingMsid(UserConfig userConfig, bool isFavorite, long listenTs)
     {
-        const int MaxAttempts = 10;
-        const int SleepSecs = 5;
+        const int MaxAttempts = 4;
+        const int BackOffSecs = 5;
+        var sleepSecs = 1;
 
-        // TODO: add specific info
+        // TODO: Improve logging
 
         // Delay to maximize the chance of getting it on first try
         Thread.Sleep(500);
@@ -478,8 +479,14 @@ public class PluginImplementation
                 return true;
             }
 
-            _logger.LogDebug("Recording MSID with listen timestamp {Ts} not found, will retry in {Secs} seconds", listenTs, SleepSecs);
-            Thread.Sleep(SleepSecs * 1000);
+            sleepSecs *= BackOffSecs;
+            sleepSecs += new Random().Next(20);
+            _logger.LogDebug(
+                "Recording MSID with listen timestamp {Ts} not found, will retry in {Secs} seconds",
+                listenTs,
+                sleepSecs);
+
+            Thread.Sleep(sleepSecs * 1000);
         }
 
         _logger.LogInformation("Favorite sync for track failed - maximum retry attempts have been reached");
