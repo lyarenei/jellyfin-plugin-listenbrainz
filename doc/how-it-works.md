@@ -54,5 +54,8 @@ username associated with the API token as the plugin did not store the username 
 avoid this, go to plugin settings and save the user configuration, no changes are necessary. Upon saving, the plugin
 will try getting the username and save it in the configuration.
 
+When using MSID for the sync, the plugin tries to find the correct MSID at exponential intervals, up to 4 attempts
+(around 10 minutes). If the MSID is still not found, then the sync is cancelled.
+
 For now, the sync is only one-way, from Jellyfin to ListenBrainz. The other direction is not currently implemented, but
 it is planned.

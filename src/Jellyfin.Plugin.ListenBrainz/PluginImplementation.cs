@@ -340,7 +340,7 @@ public class PluginImplementation
         HandleFavoriteSync(data, metadata, userConfig, now);
     }
 
-    private void HandleFavoriteSync(EventData data, AudioItemMetadata? metadata, UserConfig userConfig, long listenTs)
+    private async void HandleFavoriteSync(EventData data, AudioItemMetadata? metadata, UserConfig userConfig, long listenTs)
     {
         _logger.LogInformation(
             "Attempting to sync favorite status for track {Track} and user {User}",
@@ -358,8 +358,7 @@ public class PluginImplementation
             }
 
             _logger.LogInformation("No MBID is available, will attempt to sync favorite status using MSID");
-            SendFeedbackUsingMsid(userConfig, userItemData.IsFavorite, listenTs);
-            _logger.LogInformation("Favorite sync for track {Track} has been successful", data.Item.Name);
+            await SendFeedbackUsingMsid(userConfig, userItemData.IsFavorite, listenTs);
         }
         catch (Exception e)
         {
@@ -460,10 +459,13 @@ public class PluginImplementation
         }
     }
 
-    private async void SendFeedbackUsingMsid(UserConfig userConfig, bool isFavorite, long listenTs)
+    private async Task<bool> SendFeedbackUsingMsid(UserConfig userConfig, bool isFavorite, long listenTs)
     {
-        const int MaxAttempts = 5;
-        const int SleepSecs = 3;
+        const int MaxAttempts = 4;
+        const int BackOffSecs = 5;
+        var sleepSecs = 1;
+
+        // TODO: Improve logging
 
         // Delay to maximize the chance of getting it on first try
         Thread.Sleep(500);
@@ -473,14 +475,22 @@ public class PluginImplementation
             if (msid is not null)
             {
                 _listenBrainzClient.SendFeedback(userConfig, isFavorite, recordingMsid: msid);
-                return;
+                _logger.LogInformation("Favorite sync has been successful");
+                return true;
             }
 
-            _logger.LogDebug("Recording MSID with listen timestamp {Ts} not found, will retry in {Secs} seconds", listenTs, SleepSecs);
-            Thread.Sleep(SleepSecs * 1000);
+            sleepSecs *= BackOffSecs;
+            sleepSecs += new Random().Next(20);
+            _logger.LogDebug(
+                "Recording MSID with listen timestamp {Ts} not found, will retry in {Secs} seconds",
+                listenTs,
+                sleepSecs);
+
+            Thread.Sleep(sleepSecs * 1000);
         }
 
-        throw new PluginException($"No recording MSID is associated with listen timestamp {listenTs}");
+        _logger.LogInformation("Favorite sync for track failed - maximum retry attempts have been reached");
+        return false;
     }
 
     private void EvaluateConditionsIfTracked(BaseItem item, User user)
