@@ -20,7 +20,7 @@ public class CacheManager : ICacheManager, IListensCache
     /// <summary>
     /// JSON serializer options.
     /// </summary>
-    public static readonly JsonSerializerOptions SerializerOptions = new()
+    private static readonly JsonSerializerOptions _serializerOptions = new()
     {
         WriteIndented = true,
     };
@@ -69,7 +69,7 @@ public class CacheManager : ICacheManager, IListensCache
         {
             Monitor.Enter(_lock);
             using var stream = File.Create(_cachePath);
-            JsonSerializer.Serialize(stream, _listensCache, SerializerOptions);
+            JsonSerializer.Serialize(stream, _listensCache, _serializerOptions);
         }
         finally
         {
@@ -84,7 +84,7 @@ public class CacheManager : ICacheManager, IListensCache
         {
             Monitor.Enter(_lock);
             using var stream = File.OpenRead(_cachePath);
-            var data = JsonSerializer.Deserialize<Dictionary<Guid, List<StoredListen>>>(stream, SerializerOptions);
+            var data = JsonSerializer.Deserialize<Dictionary<Guid, List<StoredListen>>>(stream, _serializerOptions);
             _listensCache = data ?? throw new PluginException("Deserialized cache file to null");
         }
         finally
