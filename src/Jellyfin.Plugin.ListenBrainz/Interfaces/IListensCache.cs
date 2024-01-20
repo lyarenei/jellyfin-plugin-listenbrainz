@@ -18,6 +18,16 @@ public interface IListensCache
     public void AddListen(Guid userId, Audio item, AudioItemMetadata? metadata, long listenedAt);
 
     /// <summary>
+    /// Add specified listen to cache.
+    /// </summary>
+    /// <param name="userId">Jellyfin user ID associated with the listen.</param>
+    /// <param name="item">Audio item associated with the listen.</param>
+    /// <param name="metadata">Additional metadata for the item.</param>
+    /// <param name="listenedAt">UNIX timestamp when the listens occured.</param>
+    /// <returns>Task representing asynchronous operation.</returns>
+    public Task AddListenAsync(Guid userId, Audio item, AudioItemMetadata? metadata, long listenedAt);
+
+    /// <summary>
     /// Get all listens in cache for specified user.
     /// </summary>
     /// <param name="userId">Jellyfin user ID associated with the listens.</param>
@@ -30,4 +40,12 @@ public interface IListensCache
     /// <param name="userId">Jellyfin user ID associated with the listens.</param>
     /// <param name="listens">Listens to remove.</param>
     public void RemoveListens(Guid userId, IEnumerable<StoredListen> listens);
+
+    /// <summary>
+    /// Remove specified listens from cache for specified user.
+    /// </summary>
+    /// <param name="userId">Jellyfin user ID associated with the listens.</param>
+    /// <param name="listens">Listens to remove.</param>
+    /// <returns>Task representing asynchronous operation.</returns>
+    public Task RemoveListensAsync(Guid userId, IEnumerable<StoredListen> listens);
 }

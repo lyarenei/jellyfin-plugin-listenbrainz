@@ -79,6 +79,21 @@ public class CacheManager : ICacheManager, IListensCache
     }
 
     /// <inheritdoc />
+    public async Task SaveAsync()
+    {
+        await _lock.WaitAsync();
+        try
+        {
+            await using var stream = File.Create(_cachePath);
+            await JsonSerializer.SerializeAsync(stream, _listensCache, _serializerOptions);
+        }
+        finally
+        {
+            _lock.Release();
+        }
+    }
+
+    /// <inheritdoc />
     public void Restore()
     {
         _lock.Wait();
@@ -86,6 +101,22 @@ public class CacheManager : ICacheManager, IListensCache
         {
             using var stream = File.OpenRead(_cachePath);
             var data = JsonSerializer.Deserialize<Dictionary<Guid, List<StoredListen>>>(stream, _serializerOptions);
+            _listensCache = data ?? throw new PluginException("Deserialized cache file to null");
+        }
+        finally
+        {
+            _lock.Release();
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task RestoreAsync()
+    {
+        await _lock.WaitAsync();
+        try
+        {
+            await using var stream = File.OpenRead(_cachePath);
+            var data = await JsonSerializer.DeserializeAsync<Dictionary<Guid, List<StoredListen>>>(stream, _serializerOptions);
             _listensCache = data ?? throw new PluginException("Deserialized cache file to null");
         }
         finally
@@ -110,6 +141,21 @@ public class CacheManager : ICacheManager, IListensCache
     }
 
     /// <inheritdoc />
+    public async Task AddListenAsync(Guid userId, Audio item, AudioItemMetadata? metadata, long listenedAt)
+    {
+        await _lock.WaitAsync();
+        try
+        {
+            if (!_listensCache.ContainsKey(userId)) _listensCache.Add(userId, new List<StoredListen>());
+            _listensCache[userId].Add(item.AsStoredListen(listenedAt, metadata));
+        }
+        finally
+        {
+            _lock.Release();
+        }
+    }
+
+    /// <inheritdoc />
     public IEnumerable<StoredListen> GetListens(Guid userId)
     {
         if (_listensCache.TryGetValue(userId, out var listens)) return listens;
@@ -120,6 +166,24 @@ public class CacheManager : ICacheManager, IListensCache
     public void RemoveListens(Guid userId, IEnumerable<StoredListen> listens)
     {
         _lock.Wait();
+        var storedListens = listens.ToList();
+        try
+        {
+            if (_listensCache.TryGetValue(userId, out var userListens))
+            {
+                userListens.RemoveAll(storedListens.Contains);
+            }
+        }
+        finally
+        {
+            _lock.Release();
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task RemoveListensAsync(Guid userId, IEnumerable<StoredListen> listens)
+    {
+        await _lock.WaitAsync();
         var storedListens = listens.ToList();
         try
         {
