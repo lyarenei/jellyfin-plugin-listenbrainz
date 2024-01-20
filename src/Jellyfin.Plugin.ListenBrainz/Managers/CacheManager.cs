@@ -26,7 +26,7 @@ public class CacheManager : ICacheManager, IListensCache
     };
 
     private readonly string _cachePath;
-    private readonly object _lock = new();
+    private readonly SemaphoreSlim _lock;
     private static CacheManager? _instance;
     private Dictionary<Guid, List<StoredListen>> _listensCache;
 
@@ -38,6 +38,7 @@ public class CacheManager : ICacheManager, IListensCache
     {
         _cachePath = cacheFilePath;
         _listensCache = new Dictionary<Guid, List<StoredListen>>();
+        _lock = new SemaphoreSlim(1, 1);
 
         if (File.Exists(_cachePath)) Restore();
     }
@@ -65,46 +66,46 @@ public class CacheManager : ICacheManager, IListensCache
     /// <inheritdoc />
     public void Save()
     {
+        _lock.Wait();
         try
         {
-            Monitor.Enter(_lock);
             using var stream = File.Create(_cachePath);
             JsonSerializer.Serialize(stream, _listensCache, _serializerOptions);
         }
         finally
         {
-            Monitor.Exit(_lock);
+            _lock.Release();
         }
     }
 
     /// <inheritdoc />
     public void Restore()
     {
+        _lock.Wait();
         try
         {
-            Monitor.Enter(_lock);
             using var stream = File.OpenRead(_cachePath);
             var data = JsonSerializer.Deserialize<Dictionary<Guid, List<StoredListen>>>(stream, _serializerOptions);
             _listensCache = data ?? throw new PluginException("Deserialized cache file to null");
         }
         finally
         {
-            Monitor.Exit(_lock);
+            _lock.Release();
         }
     }
 
     /// <inheritdoc />
     public void AddListen(Guid userId, Audio item, AudioItemMetadata? metadata, long listenedAt)
     {
+        _lock.Wait();
         try
         {
-            Monitor.Enter(_lock);
             if (!_listensCache.ContainsKey(userId)) _listensCache.Add(userId, new List<StoredListen>());
             _listensCache[userId].Add(item.AsStoredListen(listenedAt, metadata));
         }
         finally
         {
-            Monitor.Exit(_lock);
+            _lock.Release();
         }
     }
 
@@ -118,10 +119,10 @@ public class CacheManager : ICacheManager, IListensCache
     /// <inheritdoc />
     public void RemoveListens(Guid userId, IEnumerable<StoredListen> listens)
     {
+        _lock.Wait();
         var storedListens = listens.ToList();
         try
         {
-            Monitor.Enter(_lock);
             if (_listensCache.TryGetValue(userId, out var userListens))
             {
                 userListens.RemoveAll(storedListens.Contains);
@@ -129,7 +130,7 @@ public class CacheManager : ICacheManager, IListensCache
         }
         finally
         {
-            Monitor.Exit(_lock);
+            _lock.Release();
         }
     }
 }
