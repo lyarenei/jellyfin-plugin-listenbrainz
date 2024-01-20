@@ -15,7 +15,7 @@ public class CacheManager : ICacheManager, IListensCache
     /// <summary>
     /// Cache file name.
     /// </summary>
-    public const string CacheFileName = "cache.json";
+    private const string CacheFileName = "cache.json";
 
     /// <summary>
     /// JSON serializer options.
