@@ -55,10 +55,10 @@ public class ResubmitListensTask : IScheduledTask
     public string Category => "ListenBrainz";
 
     /// <inheritdoc />
-    public Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
+    public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
         var config = Plugin.GetConfiguration();
-        _cacheManager.Restore();
+        await _cacheManager.RestoreAsync();
 
         try
         {
@@ -89,8 +89,6 @@ public class ResubmitListensTask : IScheduledTask
             _logger.LogWarning("Listen resubmitting failed: {Reason}", ex.Message);
             _logger.LogDebug(ex, "Listen resubmitting failed");
         }
-
-        return Task.CompletedTask;
     }
 
     /// <inheritdoc />
