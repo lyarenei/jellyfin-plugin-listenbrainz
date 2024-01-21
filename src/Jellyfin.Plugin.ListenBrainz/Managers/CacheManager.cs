@@ -34,13 +34,14 @@ public class CacheManager : ICacheManager, IListensCache
     /// Initializes a new instance of the <see cref="CacheManager"/> class.
     /// </summary>
     /// <param name="cacheFilePath">Path to the cache file.</param>
-    private CacheManager(string cacheFilePath)
+    /// <param name="restore">Restore state from cache file.</param>
+    public CacheManager(string cacheFilePath, bool restore = true)
     {
         _cachePath = cacheFilePath;
         _listensCache = new Dictionary<Guid, List<StoredListen>>();
         _lock = new SemaphoreSlim(1, 1);
 
-        if (File.Exists(_cachePath)) Restore();
+        if (restore && File.Exists(_cachePath)) Restore();
     }
 
     /// <summary>
@@ -166,12 +167,12 @@ public class CacheManager : ICacheManager, IListensCache
     public void RemoveListens(Guid userId, IEnumerable<StoredListen> listens)
     {
         _lock.Wait();
-        var storedListens = listens.ToList();
+        var storedListens = listens.Select(sl => sl.ListenedAt).ToList();
         try
         {
-            if (_listensCache.TryGetValue(userId, out var userListens))
+            if (_listensCache.ContainsKey(userId))
             {
-                userListens.RemoveAll(storedListens.Contains);
+                _listensCache[userId].RemoveAll(sl => storedListens.Contains(sl.ListenedAt));
             }
         }
         finally
