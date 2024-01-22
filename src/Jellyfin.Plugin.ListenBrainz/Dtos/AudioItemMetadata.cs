@@ -15,7 +15,8 @@ public class AudioItemMetadata
     public AudioItemMetadata()
     {
         RecordingMbid = string.Empty;
-        ArtistCredits = Array.Empty<ArtistCredit>();
+        ArtistCredits = new List<ArtistCredit>();
+        Isrcs = new List<string>();
     }
 
     /// <summary>
@@ -26,6 +27,7 @@ public class AudioItemMetadata
     {
         RecordingMbid = recording.Mbid;
         ArtistCredits = recording.ArtistCredits.Select(r => new ArtistCredit(r.Name, r.JoinPhrase));
+        Isrcs = recording.Isrcs;
     }
 
     /// <summary>
@@ -57,4 +59,9 @@ public class AudioItemMetadata
             return creditString.ToString();
         }
     }
+
+    /// <summary>
+    /// Gets or sets ISRCs associated with this audio item.
+    /// </summary>
+    public IEnumerable<string> Isrcs { get; set; }
 }
