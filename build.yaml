@@ -15,5 +15,5 @@ artifacts:
   - "Jellyfin.Plugin.ListenBrainz.Api.dll"
   - "Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.dll"
 changelog: >
-  Fixed
-    - Server crash when syncing favorite uses MSID and fails (#67 @lyarenei)
+  New
+    - Send ISRC in the additional metadata (#67 @lyarenei)
