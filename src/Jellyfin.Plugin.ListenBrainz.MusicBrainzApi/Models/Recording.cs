@@ -14,6 +14,7 @@ public class Recording
     {
         Mbid = string.Empty;
         ArtistCredits = new List<ArtistCredit>();
+        Isrcs = new List<string>();
     }
 
     /// <summary>
@@ -32,4 +33,9 @@ public class Recording
     /// </summary>
     [JsonPropertyName("artist-credit")]
     public IEnumerable<ArtistCredit> ArtistCredits { get; set; }
+
+    /// <summary>
+    /// Gets or sets ISRCs associated with this recording.
+    /// </summary>
+    public IEnumerable<string> Isrcs { get; set; }
 }
