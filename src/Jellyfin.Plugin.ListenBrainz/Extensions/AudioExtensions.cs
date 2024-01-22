@@ -53,6 +53,7 @@ public static class AudioExtensions
                     TrackMbid = item.ProviderIds.GetValueOrDefault("MusicBrainzTrack"),
                     WorkMbids = null,
                     TrackNumber = item.IndexNumber,
+                    Isrc = itemMetadata?.Isrcs.FirstOrDefault(),
                     Tags = item.Tags,
                     DurationMs = (item.RunTimeTicks / TimeSpan.TicksPerSecond) * 1000
                 }
