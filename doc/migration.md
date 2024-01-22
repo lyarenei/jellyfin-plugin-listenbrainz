@@ -5,7 +5,7 @@ compatible. To make this transition as effortless as possible, the plugin provid
 configuration file and migrates it to the new one. This task should automatically run on server start after installing
 the v3 version.
 
-If the migration is successful, `.migrated` (hidden file) is created in the plugin directory named. If you wish to
+If the migration is successful, `.migrated` (hidden) file is created in the plugin directory. If you wish to
 run the migration again for some reason, delete this file and either restart the server or go to the scheduled tasks and
 run the migration task manually.
 
