@@ -73,8 +73,9 @@ Currently used metadata from MusicBrainz:
 
 - **ISRCs**
   ISRC stands for `International Standard Recording Code` and is a code uniquely identifying a specific recording.
-  There is not much to add. Jellyfin does not store this code, so the only option is to ask MusicBrainz.
-  In some cases, there are multiple ISRCs stored in MusicBrainz. In these cases, the plugin simply chooses the first one.
+  There is not much to add here. Jellyfin does not store this code, so the only option is to ask MusicBrainz.
+  In some cases, there may be multiple ISRCs stored in MusicBrainz for a specific recording. In these cases, the plugin
+  simply chooses the first one.
 
 ##### Use alternative event for recognizing listens
 
