@@ -16,4 +16,4 @@ artifacts:
   - "Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.dll"
 changelog: >
   New
-    - Send ISRC in the additional metadata (#67 @lyarenei)
+    - Send ISRC in the additional metadata (#69 @lyarenei)
