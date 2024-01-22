@@ -54,7 +54,7 @@ public static class AudioExtensions
                     WorkMbids = null,
                     TrackNumber = item.IndexNumber,
                     Tags = item.Tags,
-                    DurationMs = (item.RunTimeTicks / TimeSpan.TicksPerSecond) * 1000,
+                    DurationMs = (item.RunTimeTicks / TimeSpan.TicksPerSecond) * 1000
                 }
             }
         };
