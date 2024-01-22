@@ -12,8 +12,8 @@ public class Recording
     /// </summary>
     public Recording()
     {
-        this.Mbid = string.Empty;
-        this.ArtistCredits = new List<ArtistCredit>();
+        Mbid = string.Empty;
+        ArtistCredits = new List<ArtistCredit>();
     }
 
     /// <summary>
