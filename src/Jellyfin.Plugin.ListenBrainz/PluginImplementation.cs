@@ -24,7 +24,7 @@ public class PluginImplementation
     private readonly IListenBrainzClient _listenBrainzClient;
     private readonly IMetadataClient _metadataClient;
     private readonly IUserDataManager _userDataManager;
-    private readonly CacheManager _cacheManager;
+    private readonly ListensCacheManager _listensCache;
     private readonly IUserManager _userManager;
     private readonly object _userDataSaveLock = new();
     private readonly PlaybackTrackingManager _playbackTracker;
@@ -51,7 +51,7 @@ public class PluginImplementation
         _listenBrainzClient = listenBrainzClient;
         _metadataClient = metadataClient;
         _userDataManager = userDataManager;
-        _cacheManager = CacheManager.Instance;
+        _listensCache = ListensCacheManager.Instance;
         _userManager = userManager;
         _playbackTracker = PlaybackTrackingManager.Instance;
         _libraryManager = libraryManager;
@@ -233,8 +233,8 @@ public class PluginImplementation
                 e.Message);
 
             _logger.LogDebug(e, "Send listen failed");
-            _cacheManager.AddListen(data.JellyfinUser.Id, data.Item, metadata, now);
-            _cacheManager.Save();
+            _listensCache.AddListen(data.JellyfinUser.Id, data.Item, metadata, now);
+            _listensCache.Save();
             return;
         }
 
@@ -332,8 +332,8 @@ public class PluginImplementation
                 e.Message);
 
             _logger.LogDebug(e, "Send listen failed");
-            _cacheManager.AddListen(data.JellyfinUser.Id, data.Item, metadata, now);
-            _cacheManager.Save();
+            _listensCache.AddListen(data.JellyfinUser.Id, data.Item, metadata, now);
+            _listensCache.Save();
         }
 
         if (!userConfig.IsFavoritesSyncEnabled) return;

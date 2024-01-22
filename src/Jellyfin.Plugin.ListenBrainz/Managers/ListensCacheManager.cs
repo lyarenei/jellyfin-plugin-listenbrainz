@@ -10,7 +10,7 @@ namespace Jellyfin.Plugin.ListenBrainz.Managers;
 /// <summary>
 /// Cache manager.
 /// </summary>
-public class CacheManager : ICacheManager, IListensCache
+public class ListensCacheManager : ICacheManager, IListensCache
 {
     /// <summary>
     /// Cache file name.
@@ -27,15 +27,15 @@ public class CacheManager : ICacheManager, IListensCache
 
     private readonly string _cachePath;
     private readonly SemaphoreSlim _lock;
-    private static CacheManager? _instance;
+    private static ListensCacheManager? _instance;
     private Dictionary<Guid, List<StoredListen>> _listensCache;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="CacheManager"/> class.
+    /// Initializes a new instance of the <see cref="ListensCacheManager"/> class.
     /// </summary>
     /// <param name="cacheFilePath">Path to the cache file.</param>
     /// <param name="restore">Restore state from cache file.</param>
-    public CacheManager(string cacheFilePath, bool restore = true)
+    public ListensCacheManager(string cacheFilePath, bool restore = true)
     {
         _cachePath = cacheFilePath;
         _listensCache = new Dictionary<Guid, List<StoredListen>>();
@@ -47,14 +47,14 @@ public class CacheManager : ICacheManager, IListensCache
     /// <summary>
     /// Gets instance of the cache manager.
     /// </summary>
-    public static CacheManager Instance
+    public static ListensCacheManager Instance
     {
         get
         {
             if (_instance is not null) return _instance;
 
             var path = Path.Join(Plugin.GetDataPath(), CacheFileName);
-            _instance = new CacheManager(path);
+            _instance = new ListensCacheManager(path);
             if (!File.Exists(path))
             {
                 _instance.Save();

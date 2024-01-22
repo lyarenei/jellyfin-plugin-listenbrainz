@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Jellyfin.Plugin.ListenBrainz.Tests;
 
-public class ListenCacheTests
+public class ListensCacheTests
 {
     private static readonly UserConfig _exampleUser = new()
     {
@@ -17,11 +17,11 @@ public class ListenCacheTests
     };
 
     private static readonly Audio _exampleAudio = new();
-    private readonly CacheManager _cache;
+    private readonly ListensCacheManager _cache;
 
-    public ListenCacheTests()
+    public ListensCacheTests()
     {
-        _cache = new CacheManager(string.Empty, false);
+        _cache = new ListensCacheManager(string.Empty, false);
     }
 
     [Fact]
