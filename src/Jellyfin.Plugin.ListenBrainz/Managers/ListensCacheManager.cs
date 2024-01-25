@@ -189,9 +189,9 @@ public class ListensCacheManager : ICacheManager, IListensCache, IDisposable
         var storedListens = listens.Select(sl => sl.ListenedAt).ToList();
         try
         {
-            if (_listensCache.ContainsKey(userId))
+            if (_listensCache.TryGetValue(userId, out var userListens))
             {
-                _listensCache[userId].RemoveAll(sl => storedListens.Contains(sl.ListenedAt));
+                userListens.RemoveAll(sl => storedListens.Contains(sl.ListenedAt));
             }
         }
         finally
