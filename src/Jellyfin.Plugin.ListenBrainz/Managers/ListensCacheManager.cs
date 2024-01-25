@@ -10,7 +10,7 @@ namespace Jellyfin.Plugin.ListenBrainz.Managers;
 /// <summary>
 /// Cache manager.
 /// </summary>
-public class ListensCacheManager : ICacheManager, IListensCache
+public class ListensCacheManager : ICacheManager, IListensCache, IDisposable
 {
     /// <summary>
     /// Cache file name.
@@ -62,6 +62,25 @@ public class ListensCacheManager : ICacheManager, IListensCache
 
             return _instance;
         }
+    }
+
+    /// <summary>
+    /// Disposes managed and native resources.
+    /// </summary>
+    /// <param name="disposing">Dispose managed resources.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _lock.Dispose();
+        }
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
     }
 
     /// <inheritdoc />
