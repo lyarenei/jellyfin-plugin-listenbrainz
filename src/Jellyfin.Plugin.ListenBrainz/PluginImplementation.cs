@@ -468,7 +468,7 @@ public class PluginImplementation
         // TODO: Improve logging
 
         // Delay to maximize the chance of getting it on first try
-        Thread.Sleep(500);
+        await Task.Delay(500);
         for (int i = 0; i < MaxAttempts; i++)
         {
             var msid = await _listenBrainzClient.GetRecordingMsidByListenTs(userConfig, listenTs);
@@ -486,7 +486,7 @@ public class PluginImplementation
                 listenTs,
                 sleepSecs);
 
-            Thread.Sleep(sleepSecs * 1000);
+            await Task.Delay(sleepSecs * 1000);
         }
 
         _logger.LogInformation("Favorite sync for track failed - maximum retry attempts have been reached");
