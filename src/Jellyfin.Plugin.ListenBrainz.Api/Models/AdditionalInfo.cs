@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace Jellyfin.Plugin.ListenBrainz.Api.Models;
 
@@ -41,7 +41,7 @@ public class AdditionalInfo
     /// Gets or sets track number in a release (album).
     /// Starts from 1.
     /// </summary>
-    [JsonPropertyName("tracknumber")]
+    [JsonProperty("tracknumber")]
     public int? TrackNumber { get; set; }
 
     /// <summary>
@@ -52,7 +52,7 @@ public class AdditionalInfo
     /// <summary>
     /// Gets or sets Spotify URL associated with the recording.
     /// </summary>
-    [JsonPropertyName("spotify_id")]
+    [JsonProperty("spotify_id")]
     public string? SpotifyUrl { get; set; }
 
     /// <summary>
