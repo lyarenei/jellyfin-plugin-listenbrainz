@@ -15,6 +15,7 @@ public interface IListenBrainzClient
     /// <param name="config">ListenBrainz user configuration.</param>
     /// <param name="item">Audio item currently being listened to.</param>
     /// <param name="audioMetadata">Additional metadata for this audio item.</param>
+    /// <exception cref="AggregateException">Sending failed.</exception>
     public void SendNowPlaying(UserConfig config, Audio item, AudioItemMetadata? audioMetadata);
 
     /// <summary>
@@ -24,6 +25,7 @@ public interface IListenBrainzClient
     /// <param name="item">Audio item of the listen.</param>
     /// <param name="metadata">Additional metadata for this audio item.</param>
     /// <param name="listenedAt">Timestamp of the listen.</param>
+    /// <exception cref="AggregateException">Sending failed.</exception>
     public void SendListen(UserConfig config, Audio item, AudioItemMetadata? metadata, long listenedAt);
 
     /// <summary>
@@ -33,6 +35,7 @@ public interface IListenBrainzClient
     /// <param name="isFavorite">The recording is marked as favorite.</param>
     /// <param name="recordingMbid">MusicBrainz ID identifying the recording.</param>
     /// <param name="recordingMsid">MessyBrainz ID identifying the recording.</param>
+    /// <exception cref="AggregateException">Sending failed.</exception>
     public void SendFeedback(UserConfig config, bool isFavorite, string? recordingMbid = null, string? recordingMsid = null);
 
     /// <summary>
@@ -40,6 +43,7 @@ public interface IListenBrainzClient
     /// </summary>
     /// <param name="config">ListenBrainz user configuration.</param>
     /// <param name="storedListens">Listens to send.</param>
+    /// <exception cref="AggregateException">Sending failed.</exception>
     public void SendListens(UserConfig config, IEnumerable<StoredListen> storedListens);
 
     /// <summary>
