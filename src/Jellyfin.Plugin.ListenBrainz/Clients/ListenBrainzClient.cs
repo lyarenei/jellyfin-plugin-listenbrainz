@@ -145,10 +145,11 @@ public class ListenBrainzClient : IListenBrainzClient
     /// <inheritdoc />
     public async Task<string?> GetRecordingMsidByListenTs(UserConfig config, long ts)
     {
-        // Earlier 3.x plugin configurations did not store the username
         var userName = config.UserName;
         if (string.IsNullOrEmpty(userName))
         {
+            // Earlier 3.x plugin configurations did not store the username
+            _logger.LogDebug("ListenBrainz username is not available, getting it via token validation");
             userName = await GetListenBrainzUsername(config.PlaintextApiToken);
         }
 
@@ -189,8 +190,6 @@ public class ListenBrainzClient : IListenBrainzClient
     private async Task<string> GetListenBrainzUsername(string userApiToken)
     {var pluginConfig = Plugin.GetConfiguration();
         var tokenRequest = new ValidateTokenRequest(userApiToken) { BaseUrl = pluginConfig.ListenBrainzApiUrl };
-        _logger.LogDebug("ListenBrainz username is not available, getting it via token validation");
-
         var tokenResponse = await _apiClient.ValidateToken(tokenRequest, CancellationToken.None);
         if (tokenResponse is null)
         {
