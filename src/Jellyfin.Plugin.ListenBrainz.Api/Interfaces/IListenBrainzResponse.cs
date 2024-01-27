@@ -17,5 +17,5 @@ public interface IListenBrainzResponse
     /// Gets a value indicating whether response is not OK.
     /// </summary>
     [JsonIgnore]
-    public virtual bool IsNotOk => !IsOk;
+    public bool IsNotOk => !IsOk;
 }
