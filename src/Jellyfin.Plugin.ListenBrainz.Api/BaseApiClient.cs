@@ -17,7 +17,7 @@ namespace Jellyfin.Plugin.ListenBrainz.Api;
 /// <summary>
 /// Base ListenBrainz API client.
 /// </summary>
-public class BaseApiClient : IBaseApiClient
+public class BaseApiClient : IBaseApiClient, IDisposable
 {
     private const int RateLimitAttempts = 50;
     private readonly IHttpClient _client;
@@ -47,6 +47,25 @@ public class BaseApiClient : IBaseApiClient
         _logger = logger;
         _sleepService = sleepService ?? new DefaultSleepService();
         _gateway = new SemaphoreSlim(1, 1);
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Disposes managed and native resources.
+    /// </summary>
+    /// <param name="disposing">Dispose managed resources.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _gateway.Dispose();
+        }
     }
 
     /// <inheritdoc />
