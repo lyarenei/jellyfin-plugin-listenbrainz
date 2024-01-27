@@ -124,11 +124,17 @@ public class BaseApiClient : IBaseApiClient
             _gateway.Release();
         }
 
-        if (response is null) throw new InvalidResponseException("Response is NULL");
+        if (response is null)
+        {
+            throw new InvalidResponseException("No response is available");
+        }
 
         var stringContent = await response.Content.ReadAsStringAsync(cancellationToken);
         var result = JsonConvert.DeserializeObject<TResponse>(stringContent, SerializerSettings);
-        if (result is null) throw new InvalidResponseException("Response deserialized to NULL");
+        if (result is null)
+        {
+            throw new InvalidResponseException("Failed to parse JSON data from response");
+        }
 
         result.IsOk = response.IsSuccessStatusCode;
         return result;
