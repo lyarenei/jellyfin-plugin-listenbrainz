@@ -13,7 +13,7 @@ public interface IBaseApiClient
     /// <typeparam name="TRequest">Data type of the request.</typeparam>
     /// <typeparam name="TResponse">Data type of the response.</typeparam>
     /// <returns>Request response.</returns>
-    public Task<TResponse?> SendPostRequest<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
+    public Task<TResponse> SendPostRequest<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
         where TRequest : IListenBrainzRequest
         where TResponse : IListenBrainzResponse;
 
@@ -25,7 +25,7 @@ public interface IBaseApiClient
     /// <typeparam name="TRequest">Data type of the request.</typeparam>
     /// <typeparam name="TResponse">Data type of the response.</typeparam>
     /// <returns>Request response.</returns>
-    public Task<TResponse?> SendGetRequest<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
+    public Task<TResponse> SendGetRequest<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
         where TRequest : IListenBrainzRequest
         where TResponse : IListenBrainzResponse;
 }

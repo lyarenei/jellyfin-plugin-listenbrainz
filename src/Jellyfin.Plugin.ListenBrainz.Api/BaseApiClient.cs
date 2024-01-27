@@ -50,7 +50,7 @@ public class BaseApiClient : IBaseApiClient
     }
 
     /// <inheritdoc />
-    public async Task<TResponse?> SendPostRequest<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
+    public async Task<TResponse> SendPostRequest<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
         where TRequest : IListenBrainzRequest
         where TResponse : IListenBrainzResponse
     {
@@ -67,7 +67,7 @@ public class BaseApiClient : IBaseApiClient
     }
 
     /// <inheritdoc />
-    public async Task<TResponse?> SendGetRequest<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
+    public async Task<TResponse> SendGetRequest<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
         where TRequest : IListenBrainzRequest
         where TResponse : IListenBrainzResponse
     {
@@ -85,7 +85,7 @@ public class BaseApiClient : IBaseApiClient
 
     private static Uri BuildRequestUri(string baseUrl, string endpoint) => new($"{baseUrl}/{General.Version}/{endpoint}");
 
-    private async Task<TResponse?> DoRequest<TResponse>(HttpRequestMessage requestMessage, CancellationToken cancellationToken)
+    private async Task<TResponse> DoRequest<TResponse>(HttpRequestMessage requestMessage, CancellationToken cancellationToken)
         where TResponse : IListenBrainzResponse
     {
         HttpResponseMessage? response = null;
