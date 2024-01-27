@@ -153,7 +153,6 @@ public class ListenBrainzClient : IListenBrainzClient
         var pluginConfig = Plugin.GetConfiguration();
         var request = new ValidateTokenRequest(apiToken) { BaseUrl = pluginConfig.ListenBrainzApiUrl };
         var response = await _apiClient.ValidateToken(request, CancellationToken.None);
-        if (response is null) throw new PluginException("Did not receive response");
         return new ValidatedToken
         {
             IsValid = response.Valid,
@@ -175,11 +174,6 @@ public class ListenBrainzClient : IListenBrainzClient
 
         var request = new GetUserListensRequest(userName);
         var response = await _apiClient.GetUserListens(request, CancellationToken.None);
-        if (response is null)
-        {
-            throw new PluginException("Did not receive response for user listens request");
-        }
-
         return response.Payload.Listens.FirstOrDefault(l => l.ListenedAt == ts)?.RecordingMsid;
     }
 
@@ -208,14 +202,10 @@ public class ListenBrainzClient : IListenBrainzClient
     /// <returns>ListenBrainz username associated with the API token.</returns>
     /// <exception cref="PluginException">Username could not be obtained.</exception>
     private async Task<string> GetListenBrainzUsername(string userApiToken)
-    {var pluginConfig = Plugin.GetConfiguration();
+    {
+        var pluginConfig = Plugin.GetConfiguration();
         var tokenRequest = new ValidateTokenRequest(userApiToken) { BaseUrl = pluginConfig.ListenBrainzApiUrl };
         var tokenResponse = await _apiClient.ValidateToken(tokenRequest, CancellationToken.None);
-        if (tokenResponse is null)
-        {
-            throw new PluginException("Did not receive response for token validate request");
-        }
-
         if (tokenResponse.UserName is null)
         {
             throw new PluginException("ValidateToken response does not contain username");
