@@ -58,7 +58,12 @@ public class ListenBrainzClient : IListenBrainzClient
             BaseUrl = pluginConfig.ListenBrainzApiUrl
         };
 
-        _apiClient.SubmitListens(request, CancellationToken.None);
+        var task = _apiClient.SubmitListens(request, CancellationToken.None);
+        task.Wait();
+        if (task.Exception is not null)
+        {
+            throw task.Exception;
+        }
     }
 
     /// <inheritdoc />
@@ -73,7 +78,12 @@ public class ListenBrainzClient : IListenBrainzClient
             BaseUrl = pluginConfig.ListenBrainzApiUrl
         };
 
-        _apiClient.SubmitListens(request, CancellationToken.None);
+        var task = _apiClient.SubmitListens(request, CancellationToken.None);
+        task.Wait();
+        if (task.Exception is not null)
+        {
+            throw task.Exception;
+        }
     }
 
     /// <inheritdoc />
@@ -89,7 +99,12 @@ public class ListenBrainzClient : IListenBrainzClient
             BaseUrl = pluginConfig.ListenBrainzApiUrl
         };
 
-        _apiClient.SubmitRecordingFeedback(request, CancellationToken.None);
+        var task = _apiClient.SubmitRecordingFeedback(request, CancellationToken.None);
+        task.Wait();
+        if (task.Exception is not null)
+        {
+            throw task.Exception;
+        }
     }
 
     /// <inheritdoc />
@@ -104,7 +119,12 @@ public class ListenBrainzClient : IListenBrainzClient
             BaseUrl = pluginConfig.ListenBrainzApiUrl
         };
 
-        _apiClient.SubmitListens(request, CancellationToken.None);
+        var task = _apiClient.SubmitListens(request, CancellationToken.None);
+        task.Wait();
+        if (task.Exception is not null)
+        {
+            throw task.Exception;
+        }
     }
 
     /// <inheritdoc />
