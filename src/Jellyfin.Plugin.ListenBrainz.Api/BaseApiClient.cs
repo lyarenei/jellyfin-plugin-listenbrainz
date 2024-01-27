@@ -98,7 +98,7 @@ public class BaseApiClient : IBaseApiClient
         try
         {
             _logger.LogDebug("({Id}) Sending request...", correlationId);
-            response = await DoRequestWithRetry(requestMessage, cancellationToken, correlationId);
+            response = await DoRequestWithRetry(requestMessage, correlationId, cancellationToken);
         }
         finally
         {
@@ -122,7 +122,7 @@ public class BaseApiClient : IBaseApiClient
         return result;
     }
 
-    private async Task<HttpResponseMessage?> DoRequestWithRetry(HttpRequestMessage requestMessage, CancellationToken cancellationToken, string correlationId)
+    private async Task<HttpResponseMessage?> DoRequestWithRetry(HttpRequestMessage requestMessage, string correlationId, CancellationToken cancellationToken)
     {
         HttpResponseMessage? response = null;
         for (int i = 0; i < RateLimitAttempts; i++)
