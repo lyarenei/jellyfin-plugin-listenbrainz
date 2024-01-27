@@ -88,7 +88,7 @@ public class BaseApiClient : IBaseApiClient
     private async Task<TResponse> DoRequest<TResponse>(HttpRequestMessage requestMessage, CancellationToken cancellationToken)
         where TResponse : IListenBrainzResponse
     {
-        HttpResponseMessage? response = null;
+        HttpResponseMessage? response;
 
         // TODO: update client to pass this around => have it unified
         var correlationId = Guid.NewGuid().ToString("N")[..7];
@@ -98,25 +98,7 @@ public class BaseApiClient : IBaseApiClient
         try
         {
             _logger.LogDebug("({Id}) Sending request...", correlationId);
-            for (int i = 0; i < RateLimitAttempts; i++)
-            {
-                response = await _client.SendRequest(requestMessage, cancellationToken);
-                if (response.StatusCode == HttpStatusCode.TooManyRequests)
-                {
-                    if (i + 1 == RateLimitAttempts)
-                    {
-                        throw new ListenBrainzException(
-                            $"Could not fit into a rate limit window {RateLimitAttempts} times, ({correlationId})");
-                    }
-
-                    _logger.LogDebug("({Id}) Rate limit reached, will retry after new window opens", correlationId);
-                    HandleRateLimit(response);
-                    continue;
-                }
-
-                _logger.LogDebug("({Id}) Did not hit any rate limits, all OK", correlationId);
-                break;
-            }
+            response = await DoRequestWithRetry(requestMessage, cancellationToken, correlationId);
         }
         finally
         {
@@ -138,6 +120,32 @@ public class BaseApiClient : IBaseApiClient
 
         result.IsOk = response.IsSuccessStatusCode;
         return result;
+    }
+
+    private async Task<HttpResponseMessage?> DoRequestWithRetry(HttpRequestMessage requestMessage, CancellationToken cancellationToken, string correlationId)
+    {
+        HttpResponseMessage? response = null;
+        for (int i = 0; i < RateLimitAttempts; i++)
+        {
+            response = await _client.SendRequest(requestMessage, cancellationToken);
+            if (response.StatusCode == HttpStatusCode.TooManyRequests)
+            {
+                if (i + 1 == RateLimitAttempts)
+                {
+                    throw new ListenBrainzException(
+                        $"Could not fit into a rate limit window {RateLimitAttempts} times, ({correlationId})");
+                }
+
+                _logger.LogDebug("({Id}) Rate limit reached, will retry after new window opens", correlationId);
+                HandleRateLimit(response);
+                continue;
+            }
+
+            _logger.LogDebug("({Id}) Did not hit any rate limits, all OK", correlationId);
+            break;
+        }
+
+        return response;
     }
 
     private void HandleRateLimit(HttpResponseMessage response)
