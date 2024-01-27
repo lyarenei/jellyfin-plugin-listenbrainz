@@ -64,6 +64,11 @@ public class ListenBrainzClient : IListenBrainzClient
         {
             throw task.Exception;
         }
+
+        if (task.Result.IsNotOk)
+        {
+            throw new PluginException("Sending now playing failed");
+        }
     }
 
     /// <inheritdoc />
@@ -83,6 +88,11 @@ public class ListenBrainzClient : IListenBrainzClient
         if (task.Exception is not null)
         {
             throw task.Exception;
+        }
+
+        if (task.Result.IsNotOk)
+        {
+            throw new PluginException("Sending listen failed");
         }
     }
 
@@ -105,6 +115,11 @@ public class ListenBrainzClient : IListenBrainzClient
         {
             throw task.Exception;
         }
+
+        if (task.Result.IsNotOk)
+        {
+            throw new PluginException("Sending feedback failed");
+        }
     }
 
     /// <inheritdoc />
@@ -124,6 +139,11 @@ public class ListenBrainzClient : IListenBrainzClient
         if (task.Exception is not null)
         {
             throw task.Exception;
+        }
+
+        if (task.Result.IsNotOk)
+        {
+            throw new PluginException("Sending listens failed");
         }
     }
 
