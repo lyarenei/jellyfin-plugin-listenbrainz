@@ -98,6 +98,10 @@ public class ListensCacheManager : ICacheManager, IListensCache, IDisposable
             using var stream = File.Create(_cachePath);
             JsonSerializer.Serialize(stream, _listensCache, _serializerOptions);
         }
+        catch (Exception ex)
+        {
+            throw new PluginException("Saving cache failed", ex);
+        }
         finally
         {
             _lock.Release();
@@ -112,6 +116,10 @@ public class ListensCacheManager : ICacheManager, IListensCache, IDisposable
         {
             await using var stream = File.Create(_cachePath);
             await JsonSerializer.SerializeAsync(stream, _listensCache, _serializerOptions);
+        }
+        catch (Exception ex)
+        {
+            throw new PluginException("Saving cache failed", ex);
         }
         finally
         {
