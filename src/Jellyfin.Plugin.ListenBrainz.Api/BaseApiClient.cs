@@ -167,12 +167,12 @@ public class BaseApiClient : IBaseApiClient, IDisposable
         var resetIn = header.Value.FirstOrDefault();
         if (resetIn is null)
         {
-            throw new ListenBrainzException("No 'rate limit reset in' value available, cannot continue");
+            throw new ListenBrainzException("No 'rate limit reset in' header value available");
         }
 
         if (!int.TryParse(resetIn, out var resetInSec))
         {
-            throw new ListenBrainzException("Invalid value for 'rate limit reset in', cannot continue");
+            throw new ListenBrainzException("Invalid value for 'rate limit reset in' header");
         }
 
         _logger.LogDebug("Waiting for {Seconds} seconds before trying again", resetInSec);
