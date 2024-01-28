@@ -262,12 +262,12 @@ public sealed class ListensCacheManager : ICacheManager, IListensCache, IDisposa
     public async Task RemoveListensAsync(Guid userId, IEnumerable<StoredListen> listens)
     {
         await _lock.WaitAsync();
-        var storedListens = listens.ToList();
+        var storedListens = listens.Select(sl => sl.ListenedAt).ToList();
         try
         {
             if (_listensCache.TryGetValue(userId, out var userListens))
             {
-                userListens.RemoveAll(storedListens.Contains);
+                userListens.RemoveAll(sl => storedListens.Contains(sl.ListenedAt));
             }
         }
         finally

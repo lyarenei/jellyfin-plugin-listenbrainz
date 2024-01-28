@@ -92,6 +92,23 @@ public class ListensCacheTests
     }
 
     [Fact]
+    public async void ListenCache_RemoveListenAsync()
+    {
+        const int Ts = 10;
+        await _cache.AddListenAsync(_exampleUser.JellyfinUserId, _exampleAudio, null, Ts);
+
+        var storedListen = new StoredListen
+        {
+            Id = _exampleAudio.Id,
+            ListenedAt = Ts
+        };
+        await _cache.RemoveListensAsync(_exampleUser.JellyfinUserId, new[] { storedListen });
+
+        var gotListens = _cache.GetListens(_exampleUser.JellyfinUserId);
+        Assert.Empty(gotListens);
+    }
+
+    [Fact]
     public void ListenCache_RemoveListenNotExists()
     {
         _cache.AddListen(_exampleUser.JellyfinUserId, _exampleAudio, null, 10);
@@ -102,6 +119,22 @@ public class ListensCacheTests
             ListenedAt = 11
         };
         _cache.RemoveListens(_exampleUser.JellyfinUserId, new[] { storedListen });
+
+        var gotListens = _cache.GetListens(_exampleUser.JellyfinUserId);
+        Assert.NotEmpty(gotListens);
+    }
+
+    [Fact]
+    public async void ListenCache_RemoveListenNotExistsAsync()
+    {
+        await _cache.AddListenAsync(_exampleUser.JellyfinUserId, _exampleAudio, null, 10);
+
+        var storedListen = new StoredListen
+        {
+            Id = _exampleAudio.Id,
+            ListenedAt = 11
+        };
+        await _cache.RemoveListensAsync(_exampleUser.JellyfinUserId, new[] { storedListen });
 
         var gotListens = _cache.GetListens(_exampleUser.JellyfinUserId);
         Assert.NotEmpty(gotListens);
@@ -121,6 +154,25 @@ public class ListensCacheTests
             ListenedAt = Ts2
         };
         _cache.RemoveListens(_exampleUser.JellyfinUserId, new[] { storedListen });
+
+        var gotListens = _cache.GetListens(_exampleUser.JellyfinUserId).ToList();
+        Assert.Collection(gotListens, listen => Assert.Equal(Ts1, listen.ListenedAt));
+    }
+
+    [Fact]
+    public async void ListenCache_RemoveListenWithDifferentTsAsync()
+    {
+        const int Ts1 = 10;
+        const int Ts2 = 11;
+        await _cache.AddListenAsync(_exampleUser.JellyfinUserId, _exampleAudio, null, Ts1);
+        await _cache.AddListenAsync(_exampleUser.JellyfinUserId, _exampleAudio, null, Ts2);
+
+        var storedListen = new StoredListen
+        {
+            Id = _exampleAudio.Id,
+            ListenedAt = Ts2
+        };
+        await _cache.RemoveListensAsync(_exampleUser.JellyfinUserId, new[] { storedListen });
 
         var gotListens = _cache.GetListens(_exampleUser.JellyfinUserId).ToList();
         Assert.Collection(gotListens, listen => Assert.Equal(Ts1, listen.ListenedAt));
