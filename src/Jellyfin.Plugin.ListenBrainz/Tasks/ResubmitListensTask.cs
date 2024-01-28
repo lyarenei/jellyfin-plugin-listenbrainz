@@ -19,7 +19,7 @@ namespace Jellyfin.Plugin.ListenBrainz.Tasks;
 public class ResubmitListensTask : IScheduledTask
 {
     private readonly ILogger _logger;
-    private readonly CacheManager _cacheManager;
+    private readonly ListensCacheManager _listensCache;
     private readonly IListenBrainzClient _listenBrainzClient;
     private readonly IMetadataClient _metadataClient;
     private readonly IUserManager _userManager;
@@ -35,7 +35,7 @@ public class ResubmitListensTask : IScheduledTask
     public ResubmitListensTask(ILoggerFactory loggerFactory, IHttpClientFactory clientFactory, IUserManager userManager, ILibraryManager libraryManager)
     {
         _logger = loggerFactory.CreateLogger($"{Plugin.LoggerCategory}.ResubmitListensTask");
-        _cacheManager = CacheManager.Instance;
+        _listensCache = ListensCacheManager.Instance;
         _listenBrainzClient = ClientUtils.GetListenBrainzClient(_logger, clientFactory, libraryManager);
         _metadataClient = ClientUtils.GetMusicBrainzClient(_logger, clientFactory);
         _userManager = userManager;
@@ -55,16 +55,16 @@ public class ResubmitListensTask : IScheduledTask
     public string Category => "ListenBrainz";
 
     /// <inheritdoc />
-    public Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
+    public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
         var config = Plugin.GetConfiguration();
-        _cacheManager.Restore();
+        await _listensCache.RestoreAsync();
 
         try
         {
             foreach (var userConfig in config.UserConfigs)
             {
-                if (_cacheManager.GetListens(userConfig.JellyfinUserId).Any())
+                if (_listensCache.GetListens(userConfig.JellyfinUserId).Any())
                 {
                     _logger.LogInformation(
                         "Found listens in cache for user {UserId}, will try resubmitting",
@@ -89,8 +89,6 @@ public class ResubmitListensTask : IScheduledTask
             _logger.LogWarning("Listen resubmitting failed: {Reason}", ex.Message);
             _logger.LogDebug(ex, "Listen resubmitting failed");
         }
-
-        return Task.CompletedTask;
     }
 
     /// <inheritdoc />
@@ -120,15 +118,15 @@ public class ResubmitListensTask : IScheduledTask
         var userConfig = user.GetListenBrainzConfig();
         if (userConfig is null) throw new PluginException($"No configuration for user {user.Username}");
 
-        var listenChunks = _cacheManager.GetListens(userId).Chunk(Limits.MaxListensPerRequest);
+        var listenChunks = _listensCache.GetListens(userId).Chunk(Limits.MaxListensPerRequest);
         foreach (var listenChunk in listenChunks)
         {
             var chunkToSubmit = pluginConfig.IsMusicBrainzEnabled ? listenChunk.Select(UpdateMetadataIfNecessary) : listenChunk;
             try
             {
                 _listenBrainzClient.SendListens(userConfig, chunkToSubmit);
-                _cacheManager.RemoveListens(userId, listenChunk);
-                _cacheManager.Save();
+                _listensCache.RemoveListens(userId, listenChunk);
+                _listensCache.Save();
             }
             catch (Exception ex)
             {

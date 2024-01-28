@@ -8,7 +8,7 @@ namespace Jellyfin.Plugin.ListenBrainz.Dtos;
 public class StoredListen
 {
     /// <summary>
-    /// Gets or sets ID of an item associated with this listen.
+    /// Gets or sets ID of an <see cref="Audio"/> item associated with this listen.
     /// </summary>
     public Guid Id { get; set; }
 
