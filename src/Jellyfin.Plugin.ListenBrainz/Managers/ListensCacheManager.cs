@@ -214,7 +214,11 @@ public class ListensCacheManager : ICacheManager, IListensCache, IDisposable
     /// <inheritdoc />
     public IEnumerable<StoredListen> GetListens(Guid userId)
     {
-        if (_listensCache.TryGetValue(userId, out var listens)) return listens;
+        if (_listensCache.TryGetValue(userId, out var listens))
+        {
+            return listens;
+        }
+
         return Array.Empty<StoredListen>();
     }
 
