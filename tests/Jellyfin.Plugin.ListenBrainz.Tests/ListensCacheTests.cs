@@ -35,12 +35,37 @@ public class ListensCacheTests
     }
 
     [Fact]
+    public async void ListenCache_AddListenAsync()
+    {
+        const int Ts = 10;
+        await _cache.AddListenAsync(_exampleUser.JellyfinUserId, _exampleAudio, null, Ts);
+
+        var gotListens = _cache.GetListens(_exampleUser.JellyfinUserId).ToList();
+        Assert.Collection(gotListens, listen => Assert.Equal(Ts, listen.ListenedAt));
+    }
+
+    [Fact]
     public void ListenCache_AddListenDuplicate()
     {
         const int Ts = 10;
 
         _cache.AddListen(_exampleUser.JellyfinUserId, _exampleAudio, null, Ts);
         _cache.AddListen(_exampleUser.JellyfinUserId, _exampleAudio, null, Ts);
+
+        var gotListens = _cache.GetListens(_exampleUser.JellyfinUserId).ToList();
+        Assert.Collection(
+            gotListens,
+            listen => Assert.Equal(Ts, listen.ListenedAt), listen => Assert.Equal(Ts, listen.ListenedAt));
+        Assert.Equal(2, gotListens.Count());
+    }
+
+    [Fact]
+    public async void ListenCache_AddListenDuplicateAsync()
+    {
+        const int Ts = 10;
+
+        await _cache.AddListenAsync(_exampleUser.JellyfinUserId, _exampleAudio, null, Ts);
+        await _cache.AddListenAsync(_exampleUser.JellyfinUserId, _exampleAudio, null, Ts);
 
         var gotListens = _cache.GetListens(_exampleUser.JellyfinUserId).ToList();
         Assert.Collection(
