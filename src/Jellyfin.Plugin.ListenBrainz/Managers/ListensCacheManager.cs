@@ -10,7 +10,7 @@ namespace Jellyfin.Plugin.ListenBrainz.Managers;
 /// <summary>
 /// Cache manager.
 /// </summary>
-public class ListensCacheManager : ICacheManager, IListensCache, IDisposable
+public sealed class ListensCacheManager : ICacheManager, IListensCache, IDisposable
 {
     /// <summary>
     /// Cache file name.
@@ -29,6 +29,7 @@ public class ListensCacheManager : ICacheManager, IListensCache, IDisposable
     private readonly SemaphoreSlim _lock;
     private static ListensCacheManager? _instance;
     private Dictionary<Guid, List<StoredListen>> _listensCache;
+    private bool _isDisposed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ListensCacheManager"/> class.
@@ -40,11 +41,40 @@ public class ListensCacheManager : ICacheManager, IListensCache, IDisposable
         _cachePath = cacheFilePath;
         _listensCache = new Dictionary<Guid, List<StoredListen>>();
         _lock = new SemaphoreSlim(1, 1);
+        _isDisposed = false;
 
         if (restore && File.Exists(_cachePath))
         {
             Restore();
         }
+    }
+
+    ~ListensCacheManager() => Dispose(false);
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Dispose managed and unmanaged (own) resources.
+    /// </summary>
+    /// <param name="disposing">Dispose managed resources.</param>
+    private void Dispose(bool disposing)
+    {
+        if (_isDisposed)
+        {
+            return;
+        }
+
+        if (disposing)
+        {
+            _lock.Dispose();
+        }
+
+        _isDisposed = true;
     }
 
     /// <summary>
@@ -68,25 +98,6 @@ public class ListensCacheManager : ICacheManager, IListensCache, IDisposable
 
             return _instance;
         }
-    }
-
-    /// <summary>
-    /// Disposes managed and native resources.
-    /// </summary>
-    /// <param name="disposing">Dispose managed resources.</param>
-    protected virtual void Dispose(bool disposing)
-    {
-        if (disposing)
-        {
-            _lock.Dispose();
-        }
-    }
-
-    /// <inheritdoc />
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
     }
 
     /// <inheritdoc />
