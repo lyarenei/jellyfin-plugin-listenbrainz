@@ -120,35 +120,49 @@ public class ListensCacheManager : ICacheManager, IListensCache, IDisposable
     }
 
     /// <inheritdoc />
+    /// <exception cref="PluginException">Restore failed.</exception>
     public void Restore()
     {
         _lock.Wait();
+        Dictionary<Guid, List<StoredListen>>? data;
         try
         {
             using var stream = File.OpenRead(_cachePath);
-            var data = JsonSerializer.Deserialize<Dictionary<Guid, List<StoredListen>>>(stream, _serializerOptions);
-            _listensCache = data ?? throw new PluginException("Deserialized cache file to null");
+            data = JsonSerializer.Deserialize<Dictionary<Guid, List<StoredListen>>>(stream, _serializerOptions);
+        }
+        catch (Exception ex)
+        {
+            throw new PluginException("Cache restore failed", ex);
         }
         finally
         {
             _lock.Release();
         }
+
+        _listensCache = data ?? throw new PluginException("Failed to deserialize data from cache file");
     }
 
     /// <inheritdoc />
+    /// <exception cref="PluginException">Restore failed.</exception>
     public async Task RestoreAsync()
     {
         await _lock.WaitAsync();
+        Dictionary<Guid, List<StoredListen>>? data;
         try
         {
             await using var stream = File.OpenRead(_cachePath);
-            var data = await JsonSerializer.DeserializeAsync<Dictionary<Guid, List<StoredListen>>>(stream, _serializerOptions);
-            _listensCache = data ?? throw new PluginException("Deserialized cache file to null");
+            data = await JsonSerializer.DeserializeAsync<Dictionary<Guid, List<StoredListen>>>(stream, _serializerOptions);
+        }
+        catch (Exception ex)
+        {
+            throw new PluginException("Cache restore failed", ex);
         }
         finally
         {
             _lock.Release();
         }
+
+        _listensCache = data ?? throw new PluginException("Failed to deserialize data from cache file");
     }
 
     /// <inheritdoc />
