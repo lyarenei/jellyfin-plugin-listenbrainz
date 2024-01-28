@@ -107,7 +107,7 @@ public class BaseApiClient : IBaseApiClient, IDisposable
     private async Task<TResponse> DoRequest<TResponse>(HttpRequestMessage requestMessage, CancellationToken cancellationToken)
         where TResponse : IListenBrainzResponse
     {
-        HttpResponseMessage? response;
+        HttpResponseMessage response;
 
         // TODO: update client to pass this around => have it unified
         var correlationId = Guid.NewGuid().ToString("N")[..7];
@@ -125,11 +125,6 @@ public class BaseApiClient : IBaseApiClient, IDisposable
             _gateway.Release();
         }
 
-        if (response is null)
-        {
-            throw new InvalidResponseException("No response is available");
-        }
-
         var stringContent = await response.Content.ReadAsStringAsync(cancellationToken);
         var result = JsonConvert.DeserializeObject<TResponse>(stringContent, SerializerSettings);
         if (result is null)
@@ -141,12 +136,11 @@ public class BaseApiClient : IBaseApiClient, IDisposable
         return result;
     }
 
-    private async Task<HttpResponseMessage?> DoRequestWithRetry(HttpRequestMessage requestMessage, string correlationId, CancellationToken cancellationToken)
+    private async Task<HttpResponseMessage> DoRequestWithRetry(HttpRequestMessage requestMessage, string correlationId, CancellationToken cancellationToken)
     {
-        HttpResponseMessage? response = null;
         for (int i = 0; i < RateLimitAttempts; i++)
         {
-            response = await _client.SendRequest(requestMessage, cancellationToken);
+            var response = await _client.SendRequest(requestMessage, cancellationToken);
             if (response.StatusCode == HttpStatusCode.TooManyRequests)
             {
                 if (i + 1 == RateLimitAttempts)
@@ -161,10 +155,10 @@ public class BaseApiClient : IBaseApiClient, IDisposable
             }
 
             _logger.LogDebug("({Id}) Did not hit any rate limits, all OK", correlationId);
-            break;
+            return response;
         }
 
-        return response;
+        throw new ListenBrainzException("No response available from the server");
     }
 
     private void HandleRateLimit(HttpResponseMessage response)
