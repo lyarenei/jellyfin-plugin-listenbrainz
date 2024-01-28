@@ -193,12 +193,14 @@ public sealed class ListensCacheManager : ICacheManager, IListensCache, IDisposa
         _lock.Wait();
         try
         {
-            if (!_listensCache.ContainsKey(userId))
-            {
-                _listensCache.Add(userId, new List<StoredListen>());
-            }
-
             _listensCache[userId].Add(item.AsStoredListen(listenedAt, metadata));
+        }
+        catch (KeyNotFoundException)
+        {
+            _listensCache[userId] = new List<StoredListen>
+            {
+                item.AsStoredListen(listenedAt, metadata)
+            };
         }
         finally
         {
@@ -212,12 +214,14 @@ public sealed class ListensCacheManager : ICacheManager, IListensCache, IDisposa
         await _lock.WaitAsync();
         try
         {
-            if (!_listensCache.ContainsKey(userId))
-            {
-                _listensCache.Add(userId, new List<StoredListen>());
-            }
-
             _listensCache[userId].Add(item.AsStoredListen(listenedAt, metadata));
+        }
+        catch (KeyNotFoundException)
+        {
+            _listensCache[userId] = new List<StoredListen>
+            {
+                item.AsStoredListen(listenedAt, metadata)
+            };
         }
         finally
         {
