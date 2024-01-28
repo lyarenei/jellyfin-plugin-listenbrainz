@@ -49,7 +49,33 @@ public sealed class ListensCacheManager : ICacheManager, IListensCache, IDisposa
         }
     }
 
+    /// <summary>
+    /// Finalizes an instance of the <see cref="ListensCacheManager"/> class.
+    /// </summary>
     ~ListensCacheManager() => Dispose(false);
+
+    /// <summary>
+    /// Gets instance of the cache manager.
+    /// </summary>
+    public static ListensCacheManager Instance
+    {
+        get
+        {
+            if (_instance is not null)
+            {
+                return _instance;
+            }
+
+            var path = Path.Join(Plugin.GetDataPath(), CacheFileName);
+            _instance = new ListensCacheManager(path);
+            if (!File.Exists(path))
+            {
+                _instance.Save();
+            }
+
+            return _instance;
+        }
+    }
 
     /// <inheritdoc />
     public void Dispose()
@@ -75,29 +101,6 @@ public sealed class ListensCacheManager : ICacheManager, IListensCache, IDisposa
         }
 
         _isDisposed = true;
-    }
-
-    /// <summary>
-    /// Gets instance of the cache manager.
-    /// </summary>
-    public static ListensCacheManager Instance
-    {
-        get
-        {
-            if (_instance is not null)
-            {
-                return _instance;
-            }
-
-            var path = Path.Join(Plugin.GetDataPath(), CacheFileName);
-            _instance = new ListensCacheManager(path);
-            if (!File.Exists(path))
-            {
-                _instance.Save();
-            }
-
-            return _instance;
-        }
     }
 
     /// <inheritdoc />
