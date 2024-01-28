@@ -41,7 +41,10 @@ public class ListensCacheManager : ICacheManager, IListensCache, IDisposable
         _listensCache = new Dictionary<Guid, List<StoredListen>>();
         _lock = new SemaphoreSlim(1, 1);
 
-        if (restore && File.Exists(_cachePath)) Restore();
+        if (restore && File.Exists(_cachePath))
+        {
+            Restore();
+        }
     }
 
     /// <summary>
@@ -51,7 +54,10 @@ public class ListensCacheManager : ICacheManager, IListensCache, IDisposable
     {
         get
         {
-            if (_instance is not null) return _instance;
+            if (_instance is not null)
+            {
+                return _instance;
+            }
 
             var path = Path.Join(Plugin.GetDataPath(), CacheFileName);
             _instance = new ListensCacheManager(path);
@@ -151,7 +157,11 @@ public class ListensCacheManager : ICacheManager, IListensCache, IDisposable
         _lock.Wait();
         try
         {
-            if (!_listensCache.ContainsKey(userId)) _listensCache.Add(userId, new List<StoredListen>());
+            if (!_listensCache.ContainsKey(userId))
+            {
+                _listensCache.Add(userId, new List<StoredListen>());
+            }
+
             _listensCache[userId].Add(item.AsStoredListen(listenedAt, metadata));
         }
         finally
@@ -166,7 +176,11 @@ public class ListensCacheManager : ICacheManager, IListensCache, IDisposable
         await _lock.WaitAsync();
         try
         {
-            if (!_listensCache.ContainsKey(userId)) _listensCache.Add(userId, new List<StoredListen>());
+            if (!_listensCache.ContainsKey(userId))
+            {
+                _listensCache.Add(userId, new List<StoredListen>());
+            }
+
             _listensCache[userId].Add(item.AsStoredListen(listenedAt, metadata));
         }
         finally
