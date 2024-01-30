@@ -442,7 +442,12 @@ public class PluginImplementation
         };
     }
 
-    private static void AssertListenBrainzRequirements(Audio item, UserConfig userConfig)
+    /// <summary>
+    /// Check if the item meets general requirements for ListenBrainz submission.
+    /// </summary>
+    /// <param name="item">Item to be checked.</param>
+    /// <exception cref="PluginException">Item does not meet requirements.</exception>
+    private static void AssertListenBrainzRequirements(Audio item)
     {
         try
         {
@@ -452,8 +457,16 @@ public class PluginImplementation
         {
             throw new PluginException("Audio item metadata are not valid", e);
         }
+    }
 
-        if (userConfig.IsNotListenSubmitEnabled)
+    /// <summary>
+    /// Assert user has enabled listen submission.
+    /// </summary>
+    /// <param name="config">User configuration.</param>
+    /// <exception cref="PluginException">User has disabled listen submission.</exception>
+    private static void AssertSubmissionEnabled(UserConfig config)
+    {
+        if (config.IsNotListenSubmitEnabled)
         {
             throw new PluginException("ListenBrainz submission is disabled for this user");
         }
