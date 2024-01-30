@@ -376,12 +376,15 @@ public class PluginImplementation
     /// Assert MusicBrainz integration is enabled.
     /// </summary>
     /// <exception cref="PluginException">MusicBrainz integration is not enabled.</exception>
-    private static void AssertMusicBrainzIsEnabled()
+    private void AssertMusicBrainzIsEnabled()
     {
+        _logger.LogDebug("Checking if MusicBrainz integration is enabled");
         if (!Plugin.GetConfiguration().IsMusicBrainzEnabled)
         {
             throw new PluginException("MusicBrainz integration is disabled");
         }
+
+        _logger.LogDebug("MusicBrainz integration is enabled");
     }
 
     private AudioItemMetadata? GetAdditionalMetadata(EventData data)
@@ -461,20 +464,23 @@ public class PluginImplementation
     }
 
     /// <summary>
-    /// Check if the item meets general requirements for ListenBrainz submission.
+    /// Check if the item has basic metadata.
     /// </summary>
     /// <param name="item">Item to be checked.</param>
     /// <exception cref="PluginException">Item does not meet requirements.</exception>
-    private static void AssertListenBrainzRequirements(Audio item)
+    private void AssertBasicMetadataRequirements(Audio item)
     {
+        _logger.LogDebug("Checking item basic metadata");
         try
         {
             item.AssertHasMetadata();
         }
         catch (Exception e)
         {
-            throw new PluginException("Audio item metadata are not valid", e);
+            throw new PluginException("Item metadata are not valid", e);
         }
+
+        _logger.LogDebug("Item has basic metadata");
     }
 
     /// <summary>
@@ -482,12 +488,15 @@ public class PluginImplementation
     /// </summary>
     /// <param name="config">User configuration.</param>
     /// <exception cref="PluginException">User has disabled listen submission.</exception>
-    private static void AssertSubmissionEnabled(UserConfig config)
+    private void AssertSubmissionEnabled(UserConfig config)
     {
+        _logger.LogDebug("Checking if ListenBrainz submission is enabled for the user");
         if (config.IsNotListenSubmitEnabled)
         {
-            throw new PluginException("ListenBrainz submission is disabled for this user");
+            throw new PluginException("ListenBrainz submission is disabled for the user");
         }
+
+        _logger.LogDebug("ListenBrainz submission is enabled for the user");
     }
 
     private async Task<bool> SendFeedbackUsingMsid(UserConfig userConfig, bool isFavorite, long listenTs)
@@ -556,6 +565,7 @@ public class PluginImplementation
     /// <exception cref="PluginException">Item is not in any allowed library.</exception>
     private void AssertInAllowedLibrary(BaseItem item)
     {
+        _logger.LogDebug("Checking if item is in any allowed libraries");
         var isInAllowed = _libraryManager
             .GetCollectionFolders(item)
             .Select(il => il.Id)
@@ -566,6 +576,8 @@ public class PluginImplementation
         {
             throw new PluginException("Item is not in any allowed library");
         }
+
+        _logger.LogDebug("Item is in at least one allowed library");
     }
 
     private bool IsInAllowedLibrary(BaseItem item)
