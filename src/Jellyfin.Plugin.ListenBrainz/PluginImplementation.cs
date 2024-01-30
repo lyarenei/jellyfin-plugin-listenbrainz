@@ -519,17 +519,18 @@ public class PluginImplementation
         return false;
     }
 
+    /// <summary>
+    /// Evaluate listen submit conditions if the played item is tracked.
+    /// </summary>
+    /// <param name="item">Item to be tracked.</param>
+    /// <param name="user">User associated with the listen.</param>
+    /// <exception cref="PluginException">Item is not tracked or tracking is not valid.</exception>
     private void EvaluateConditionsIfTracked(BaseItem item, User user)
     {
         var trackedItem = _playbackTracker.GetItem(user.Id.ToString(), item.Id.ToString());
         if (trackedItem is null)
         {
-            _logger.LogInformation(
-                "No playback is tracked for user {User} and track {Track}, assuming offline playback",
-                user.Username,
-                item.Name);
-
-            return;
+            throw new PluginException("Playback is not tracked for this item");
         }
 
         if (!trackedItem.IsValid)
