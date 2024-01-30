@@ -315,7 +315,7 @@ public class PluginImplementation
         }
     }
 
-    private async void HandleFavoriteSync(EventData data, AudioItemMetadata? metadata, UserConfig userConfig, long listenTs)
+    private void HandleFavoriteSync(EventData data, AudioItemMetadata? metadata, UserConfig userConfig, long listenTs)
     {
         _logger.LogInformation(
             "Attempting to sync favorite status for track {Track} and user {User}",
@@ -327,22 +327,19 @@ public class PluginImplementation
             var userItemData = _userDataManager.GetUserData(data.JellyfinUser, data.Item);
             if (metadata?.RecordingMbid is not null)
             {
+                _logger.LogInformation("Recording MBID is available, using it for favorite sync");
                 _listenBrainzClient.SendFeedback(userConfig, userItemData.IsFavorite, metadata.RecordingMbid);
-                _logger.LogInformation("Favorite sync for track {Track} has been successful", data.Item.Name);
+                _logger.LogInformation("Favorite sync has been successful");
                 return;
             }
 
-            _logger.LogInformation("No MBID is available, will attempt to sync favorite status using MSID");
-            await SendFeedbackUsingMsid(userConfig, userItemData.IsFavorite, listenTs);
+            _logger.LogInformation("No recording MBID is available, will attempt to sync favorite status using MSID");
+            SendFeedbackUsingMsid(userConfig, userItemData.IsFavorite, listenTs);
+            _logger.LogInformation("Favorite sync has been successful");
         }
         catch (Exception e)
         {
-            _logger.LogInformation(
-                "Favorite sync for track {Track} and user {User} failed: {Reason}",
-                data.Item.Name,
-                data.JellyfinUser.Username,
-                e.Message);
-
+            _logger.LogInformation("Favorite sync failed: {Reason}", e.Message);
             _logger.LogDebug(e, "Favorite sync failed");
         }
     }
