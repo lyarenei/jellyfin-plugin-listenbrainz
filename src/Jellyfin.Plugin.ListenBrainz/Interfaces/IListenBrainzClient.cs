@@ -58,6 +58,14 @@ public interface IListenBrainzClient
     /// </summary>
     /// <param name="config">ListenBrainz user configuration.</param>
     /// <param name="ts">Timestamp of the submitted listen.</param>
+    /// <returns>Recording MSID associated with a specified listen timestamp.</returns>
+    public string GetRecordingMsidByListenTs(UserConfig config, long ts);
+
+    /// <summary>
+    /// Get a recording MSID (MessyBrainz ID) associated with a listen submitted to ListenBrainz.
+    /// </summary>
+    /// <param name="config">ListenBrainz user configuration.</param>
+    /// <param name="ts">Timestamp of the submitted listen.</param>
     /// <returns>Recording MSID associated with a specified listen timestamp. Null if not found.</returns>
-    public Task<string?> GetRecordingMsidByListenTs(UserConfig config, long ts);
+    public Task<string?> GetRecordingMsidByListenTsAsync(UserConfig config, long ts);
 }

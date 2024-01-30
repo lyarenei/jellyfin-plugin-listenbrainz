@@ -452,7 +452,7 @@ public class PluginImplementation
         _logger.LogDebug("ListenBrainz submission is enabled for the user");
     }
 
-    private async Task<bool> SendFeedbackUsingMsid(UserConfig userConfig, bool isFavorite, long listenTs)
+    private void SendFeedbackUsingMsid(UserConfig userConfig, bool isFavorite, long listenTs)
     {
         const int MaxAttempts = 4;
         const int BackOffSecs = 5;
@@ -461,15 +461,18 @@ public class PluginImplementation
         // TODO: Improve logging
 
         // Delay to maximize the chance of getting it on first try
-        await Task.Delay(500);
+        Thread.Sleep(500);
+        string? recordingMsid = null;
         for (int i = 0; i < MaxAttempts; i++)
         {
-            var msid = await _listenBrainzClient.GetRecordingMsidByListenTs(userConfig, listenTs);
-            if (msid is not null)
+            try
             {
-                _listenBrainzClient.SendFeedback(userConfig, isFavorite, recordingMsid: msid);
-                _logger.LogInformation("Favorite sync has been successful");
-                return true;
+                recordingMsid = _listenBrainzClient.GetRecordingMsidByListenTs(userConfig, listenTs);
+                break;
+            }
+            catch (Exception e)
+            {
+                _logger.LogDebug(e, "Failed to get recording MSID");
             }
 
             sleepSecs *= BackOffSecs;
@@ -479,11 +482,15 @@ public class PluginImplementation
                 listenTs,
                 sleepSecs);
 
-            await Task.Delay(sleepSecs * 1000);
+            Thread.Sleep(sleepSecs * 1000);
         }
 
-        _logger.LogInformation("Favorite sync for track failed - maximum retry attempts have been reached");
-        return false;
+        if (recordingMsid is null)
+        {
+            throw new PluginException("Maximum retry attempts have been reached");
+        }
+
+        _listenBrainzClient.SendFeedback(userConfig, isFavorite, recordingMsid: recordingMsid);
     }
 
     /// <summary>
