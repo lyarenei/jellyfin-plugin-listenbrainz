@@ -418,6 +418,12 @@ public class PluginImplementation
         };
     }
 
+    /// <summary>
+    /// Verifies the event.
+    /// </summary>
+    /// <param name="eventArgs">Event arguments.</param>
+    /// <returns>Event data.</returns>
+    /// <exception cref="ArgumentException">Event data are not valid.</exception>
     private EventData GetEventData(UserDataSaveEventArgs eventArgs)
     {
         if (eventArgs.Item is not Audio item)
