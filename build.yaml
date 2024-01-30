@@ -1,7 +1,7 @@
 ---
 name: "ListenBrainz"
 guid: "59B20823-AAFE-454C-A393-17427F518631"
-version: "3.3.1.0"
+version: "3.3.2.0"
 targetAbi: "10.8.0.0"
 framework: "net6.0"
 overview: "Track your music habits with ListenBrainz."
@@ -16,4 +16,5 @@ artifacts:
   - "Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.dll"
 changelog: >
   Fix
-    - Fix json property names (#72 @lyarenei)
+    - Various fixes for listens cache (#68 @lyarenei)
+    - Fix error propagation, so listen cache works as intended (#73 @lyarenei)
