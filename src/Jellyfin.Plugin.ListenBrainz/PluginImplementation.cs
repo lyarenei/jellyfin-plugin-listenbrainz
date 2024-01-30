@@ -422,12 +422,12 @@ public class PluginImplementation
     {
         if (eventArgs.Item is not Audio item)
         {
-            throw new ArgumentException("This event is not for an Audio item");
+            throw new ArgumentException("Event item is not an Audio item");
         }
 
         if (eventArgs.SaveReason is not UserDataSaveReason.PlaybackFinished)
         {
-            throw new ArgumentException("This event is not a playback finished event");
+            throw new ArgumentException("Not a playback finished event");
         }
 
         var jellyfinUser = _userManager.GetUserById(eventArgs.UserId);
