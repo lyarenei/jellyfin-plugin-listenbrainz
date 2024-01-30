@@ -16,4 +16,5 @@ artifacts:
   - "Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.dll"
 changelog: >
   Fix
-    - Fix json property names (#72 @lyarenei)
+    - Various fixes for listens cache (#68 @lyarenei)
+    - Fix error propagation, so listen cache works as intended (#73 @lyarenei)
