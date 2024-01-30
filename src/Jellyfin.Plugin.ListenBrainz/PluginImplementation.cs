@@ -384,6 +384,25 @@ public class PluginImplementation
         }
     }
 
+    /// <summary>
+    /// Get additional metadata for specified item.
+    /// </summary>
+    /// <param name="item">Audio item to fetch metadata for.</param>
+    /// <returns>Additional metadata.</returns>
+    /// <exception cref="AggregateException">Failed to fetch metadata.</exception>
+    private AudioItemMetadata GetAdditionalMetadata(Audio item)
+    {
+        _logger.LogDebug("Fetching metadata for item");
+        var task = _metadataClient.GetAudioItemMetadata(item);
+        task.Wait();
+        if (task.Exception is not null)
+        {
+            throw task.Exception;
+        }
+
+        return task.Result;
+    }
+
     private AudioItemMetadata? GetAdditionalMetadata(EventData data)
     {
         if (!Plugin.GetConfiguration().IsMusicBrainzEnabled) return null;
