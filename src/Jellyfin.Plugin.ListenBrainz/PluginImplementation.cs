@@ -397,6 +397,12 @@ public class PluginImplementation
         return null;
     }
 
+    /// <summary>
+    /// Verifies the event.
+    /// </summary>
+    /// <param name="eventArgs">Event arguments.</param>
+    /// <returns>Event data.</returns>
+    /// <exception cref="ArgumentException">Event data are not valid.</exception>
     private static EventData GetEventData(PlaybackProgressEventArgs eventArgs)
     {
         if (eventArgs.Item is not Audio item)
