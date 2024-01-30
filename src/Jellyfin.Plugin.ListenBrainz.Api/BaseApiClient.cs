@@ -24,6 +24,7 @@ public class BaseApiClient : IBaseApiClient, IDisposable
     private readonly SemaphoreSlim _gateway;
     private readonly ILogger _logger;
     private readonly ISleepService _sleepService;
+    private bool _isDisposed;
 
     /// <summary>
     /// Serializer settings.
@@ -47,6 +48,7 @@ public class BaseApiClient : IBaseApiClient, IDisposable
         _logger = logger;
         _sleepService = sleepService ?? new DefaultSleepService();
         _gateway = new SemaphoreSlim(1, 1);
+        _isDisposed = false;
     }
 
     /// <summary>
@@ -62,15 +64,22 @@ public class BaseApiClient : IBaseApiClient, IDisposable
     }
 
     /// <summary>
-    /// Disposes managed and native resources.
+    /// Disposes managed and unmanaged (own) resources.
     /// </summary>
     /// <param name="disposing">Dispose managed resources.</param>
     protected virtual void Dispose(bool disposing)
     {
+        if (_isDisposed)
+        {
+            return;
+        }
+
         if (disposing)
         {
             _gateway.Dispose();
         }
+
+        _isDisposed = true;
     }
 
     /// <inheritdoc />
