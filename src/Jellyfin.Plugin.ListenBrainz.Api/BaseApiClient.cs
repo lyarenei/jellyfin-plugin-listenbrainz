@@ -49,6 +49,11 @@ public class BaseApiClient : IBaseApiClient, IDisposable
         _gateway = new SemaphoreSlim(1, 1);
     }
 
+    /// <summary>
+    /// Finalizes an instance of the <see cref="BaseApiClient"/> class.
+    /// </summary>
+    ~BaseApiClient() => Dispose(false);
+
     /// <inheritdoc />
     public void Dispose()
     {
