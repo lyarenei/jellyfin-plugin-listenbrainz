@@ -143,7 +143,7 @@ public class ResubmitListensTask : IScheduledTask
         try
         {
             if (_libraryManager.GetItemById(listen.Id) is not Audio item) return listen;
-            var metadata = _metadataClient.GetAudioItemMetadata(item).Result;
+            var metadata = _metadataClient.GetAudioItemMetadataAsync(item).Result;
             listen.Metadata = metadata;
         }
         catch (Exception e)

@@ -13,5 +13,5 @@ public interface IMetadataClient
     /// </summary>
     /// <param name="item">Audio item.</param>
     /// <returns>MusicBrainz recording.</returns>
-    public Task<AudioItemMetadata> GetAudioItemMetadata(Audio item);
+    public Task<AudioItemMetadata> GetAudioItemMetadataAsync(Audio item);
 }

@@ -29,7 +29,7 @@ public class MusicBrainzClient : IMetadataClient
     }
 
     /// <inheritdoc />
-    public async Task<AudioItemMetadata> GetAudioItemMetadata(Audio item)
+    public async Task<AudioItemMetadata> GetAudioItemMetadataAsync(Audio item)
     {
         var trackMbid = item.GetTrackMbid();
         if (trackMbid is null) throw new ArgumentException("Audio item does not have a track MBID");

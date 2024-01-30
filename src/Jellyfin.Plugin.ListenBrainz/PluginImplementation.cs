@@ -393,7 +393,7 @@ public class PluginImplementation
     private AudioItemMetadata GetAdditionalMetadata(Audio item)
     {
         _logger.LogDebug("Fetching metadata for item");
-        var task = _metadataClient.GetAudioItemMetadata(item);
+        var task = _metadataClient.GetAudioItemMetadataAsync(item);
         task.Wait();
         if (task.Exception is not null)
         {
@@ -413,7 +413,7 @@ public class PluginImplementation
 
         try
         {
-            return _metadataClient.GetAudioItemMetadata(data.Item).Result;
+            return _metadataClient.GetAudioItemMetadataAsync(data.Item).Result;
         }
         catch (Exception e)
         {
