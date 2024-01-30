@@ -372,6 +372,18 @@ public class PluginImplementation
         }
     }
 
+    /// <summary>
+    /// Assert MusicBrainz integration is enabled.
+    /// </summary>
+    /// <exception cref="PluginException">MusicBrainz integration is not enabled.</exception>
+    private static void AssertMusicBrainzIsEnabled()
+    {
+        if (!Plugin.GetConfiguration().IsMusicBrainzEnabled)
+        {
+            throw new PluginException("MusicBrainz integration is disabled");
+        }
+    }
+
     private AudioItemMetadata? GetAdditionalMetadata(EventData data)
     {
         if (!Plugin.GetConfiguration().IsMusicBrainzEnabled) return null;
