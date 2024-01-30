@@ -362,31 +362,6 @@ public class PluginImplementation
         _logger.LogDebug("MusicBrainz integration is enabled");
     }
 
-    private AudioItemMetadata? GetAdditionalMetadata(EventData data)
-    {
-        if (!Plugin.GetConfiguration().IsMusicBrainzEnabled) return null;
-
-        _logger.LogInformation(
-            "MusicBrainz integration is enabled, fetching metadata for track {Track}",
-            data.Item.Name);
-
-        try
-        {
-            return _metadataClient.GetAudioItemMetadataAsync(data.Item).Result;
-        }
-        catch (Exception e)
-        {
-            _logger.LogInformation(
-                "No additional metadata available for track {Track}: {Reason}",
-                data.Item.Name,
-                e.Message);
-
-            _logger.LogDebug(e, "No additional metadata available");
-        }
-
-        return null;
-    }
-
     /// <summary>
     /// Verifies the event.
     /// </summary>
@@ -560,15 +535,6 @@ public class PluginImplementation
         }
 
         _logger.LogDebug("Item is in at least one allowed library");
-    }
-
-    private bool IsInAllowedLibrary(BaseItem item)
-    {
-        var itemLibraries = _libraryManager.GetCollectionFolders(item);
-        return itemLibraries
-            .Select(il => il.Id)
-            .Intersect(GetAllowedLibraries())
-            .Any();
     }
 
     private IEnumerable<Guid> GetAllowedLibraries()
