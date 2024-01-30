@@ -64,6 +64,7 @@ public class PluginImplementation
     /// <param name="args">Event args.</param>
     public void OnPlaybackStart(object? sender, PlaybackProgressEventArgs args)
     {
+        // TODO: event ID logger scope
         _logger.LogDebug("Picking up playback start event for item {Item}", args.Item.Name);
         EventData data;
         try
@@ -72,69 +73,65 @@ public class PluginImplementation
         }
         catch (Exception e)
         {
-            _logger.LogDebug(e, "Invalid event");
-            return;
-        }
-
-        if (!IsInAllowedLibrary(data.Item))
-        {
-            _logger.LogInformation(
-                "Dropping event for item {Item}: Item is in any allowed libraries",
-                data.Item.Name);
-            return;
-        }
-
-        var userConfig = data.JellyfinUser.GetListenBrainzConfig();
-        if (userConfig is null)
-        {
-            _logger.LogWarning(
-                "Dropping event for track {Track}: User {User} is not configured",
-                data.Item.Name,
-                data.JellyfinUser.Username);
-            return;
-        }
-
-        _logger.LogInformation("Checking required metadata and user configuration");
-        try
-        {
-            AssertListenBrainzRequirements(data.Item, userConfig);
-        }
-        catch (Exception e)
-        {
-            _logger.LogInformation(
-                "Dropping event for track {Track} and user {User}: {Reason}",
-                data.Item.Name,
-                data.JellyfinUser.Username,
-                e.Message);
-
-            _logger.LogDebug(e, "Requirements were not met");
+            _logger.LogDebug(e, "Dropping event");
             return;
         }
 
         _logger.LogInformation(
-            "All checks passed, sending 'now playing' listen of track {Track} for user {Username}",
+            "Processing playback start event for item {Item} associated with user {Username}",
             data.Item.Name,
             data.JellyfinUser.Username);
+
+        UserConfig userConfig;
         try
         {
-            var metadata = GetAdditionalMetadata(data);
-            _listenBrainzClient.SendNowPlaying(userConfig, data.Item, metadata);
+            AssertInAllowedLibrary(data.Item);
+            userConfig = data.JellyfinUser.GetListenBrainzConfig();
+            AssertSubmissionEnabled(userConfig);
+            AssertBasicMetadataRequirements(data.Item);
         }
         catch (Exception e)
         {
-            _logger.LogInformation(
-                "Failed to send 'now playing' listen of track {Track} for user {User}: {Reason}",
-                data.Item.Name,
-                data.JellyfinUser.Username,
-                e.Message);
+            _logger.LogInformation("Dropping event: {Reason}", e.Message);
+            _logger.LogDebug(e, "Dropping event");
+            return;
+        }
 
-            _logger.LogDebug(e, "Send playing now failed");
+        _logger.LogDebug("All checks passed, preparing for sending listen");
+
+        AudioItemMetadata? metadata = null;
+        try
+        {
+            AssertMusicBrainzIsEnabled();
+            _logger.LogInformation("Getting additional metadata...");
+            metadata = _metadataClient.GetAudioItemMetadata(data.Item);
+            _logger.LogInformation("Additional metadata successfully received");
+        }
+        catch (Exception e)
+        {
+            _logger.LogInformation("Additional metadata are not available: {Reason}", e.Message);
+            _logger.LogDebug(e, "Additional metadata are not available");
+        }
+
+        try
+        {
+            _logger.LogInformation("Sending 'playing now' listen...");
+            _listenBrainzClient.SendNowPlaying(userConfig, data.Item, metadata);
+            _logger.LogInformation("Successfully sent 'playing now' listen");
+        }
+        catch (Exception e)
+        {
+            _logger.LogInformation("Failed to send 'playing now' listen: {Reason}", e.Message);
+            _logger.LogDebug(e, "Failed to send 'playing now' listen");
         }
 
         if (Plugin.GetConfiguration().IsAlternativeModeEnabled)
         {
+            _logger.LogDebug("Alternative mode is enabled, adding item to playback tracker");
             _playbackTracker.AddItem(data.JellyfinUser.Id.ToString(), data.Item);
         }
+
+        _logger.LogDebug("Event has been successfully processed");
     }
 
     /// <summary>
