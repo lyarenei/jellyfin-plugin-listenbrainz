@@ -401,7 +401,7 @@ public class PluginImplementation
     {
         if (eventArgs.Item is not Audio item)
         {
-            throw new ArgumentException("This event is not for an Audio item");
+            throw new ArgumentException("Event item is not an Audio item");
         }
 
         var jellyfinUser = eventArgs.Users.FirstOrDefault();
