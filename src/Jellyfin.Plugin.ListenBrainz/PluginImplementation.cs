@@ -597,6 +597,27 @@ public class PluginImplementation
         return _libraryManager.GetMusicLibraries().Select(ml => ml.Id);
     }
 
+    private void AssertListenBrainzRequirements(PlaybackStopEventArgs args, EventData data)
+    {
+        _logger.LogDebug("Checking ListenBrainz requirements");
+        var position = args.PlaybackPositionTicks;
+        if (position is null)
+        {
+            throw new PluginException("Playback position is not set");
+        }
+
+        try
+        {
+            Limits.AssertSubmitConditions((long)position, data.Item.RunTimeTicks ?? 0);
+        }
+        catch (Exception e)
+        {
+            throw new PluginException("Requirements were not met", e);
+        }
+
+        _logger.LogDebug("Requirements were met");
+    }
+
     private struct EventData
     {
         public Audio Item { get; init; }
