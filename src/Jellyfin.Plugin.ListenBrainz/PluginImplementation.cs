@@ -244,52 +244,30 @@ public class PluginImplementation
         }
         catch (Exception e)
         {
-            _logger.LogDebug(e, "Invalid event");
+            _logger.LogDebug(e, "Dropping event");
             return;
         }
 
-        if (!IsInAllowedLibrary(data.Item))
-        {
-            _logger.LogInformation(
-                "Dropping event for item {Item}: Item is in any allowed libraries",
-                data.Item.Name);
-            return;
-        }
+        _logger.LogInformation(
+            "Processing playback finished event for item {Item} associated with user {Username}",
+            data.Item.Name,
+            data.JellyfinUser.Username);
 
-        var userConfig = data.JellyfinUser.GetListenBrainzConfig();
-        if (userConfig is null)
-        {
-            _logger.LogWarning(
-                "Dropping event for track {Track}: User {User} is not configured",
-                data.Item.Name,
-                data.JellyfinUser.Username);
-
-            return;
-        }
-
-        if (userConfig.IsNotListenSubmitEnabled)
-        {
-            _logger.LogInformation(
-                "Dropping event for track {Track}: User {User} does not have listen submitting enabled",
-                data.Item.Name,
-                data.JellyfinUser.Username);
-            return;
-        }
-
+        UserConfig userConfig;
         try
         {
+            AssertInAllowedLibrary(data.Item);
+            userConfig = data.JellyfinUser.GetListenBrainzConfig();
+            AssertSubmissionEnabled(userConfig);
+            AssertBasicMetadataRequirements(data.Item);
+
             Monitor.Enter(_userDataSaveLock);
             EvaluateConditionsIfTracked(data.Item, data.JellyfinUser);
         }
         catch (Exception e)
         {
-            _logger.LogInformation(
-                "Dropping event for track {Track} and user {User}: {Reason}",
-                data.Item.Name,
-                data.JellyfinUser.Username,
-                e.Message);
-
-            _logger.LogDebug(e, "Event will not be handled");
+            _logger.LogInformation("Dropping event: {Reason}", e.Message);
+            _logger.LogDebug(e, "Dropping event");
             return;
         }
         finally
@@ -297,27 +275,44 @@ public class PluginImplementation
             Monitor.Exit(_userDataSaveLock);
         }
 
+        _logger.LogDebug("All checks passed, preparing for sending listen");
         var now = DateUtils.CurrentTimestamp;
-        var metadata = GetAdditionalMetadata(data);
+
+        AudioItemMetadata? metadata = null;
         try
         {
-            _listenBrainzClient.SendListen(userConfig, data.Item, metadata, now);
+            AssertMusicBrainzIsEnabled();
+            _logger.LogInformation("Getting additional metadata...");
+            metadata = _metadataClient.GetAudioItemMetadata(data.Item);
+            _logger.LogInformation("Additional metadata successfully received");
         }
         catch (Exception e)
         {
-            _logger.LogInformation(
-                "Failed to send listen of {Track} for user {User}: {Reason}",
-                data.Item.Name,
-                data.JellyfinUser.Username,
-                e.Message);
-
-            _logger.LogDebug(e, "Send listen failed");
-            _listensCache.AddListen(data.JellyfinUser.Id, data.Item, metadata, now);
-            _listensCache.Save();
+            _logger.LogInformation("Additional metadata are not available: {Reason}", e.Message);
+            _logger.LogDebug(e, "Additional metadata are not available");
         }
 
-        if (!userConfig.IsFavoritesSyncEnabled) return;
-        HandleFavoriteSync(data, metadata, userConfig, now);
+        try
+        {
+            _logger.LogInformation("Sending listen...");
+            _listenBrainzClient.SendNowPlaying(userConfig, data.Item, metadata);
+            _logger.LogInformation("Listen successfully sent");
+        }
+        catch (Exception e)
+        {
+            _logger.LogInformation("Failed to send listen: {Reason}", e.Message);
+            _logger.LogDebug(e, "Failed to send listen");
+
+            _listensCache.AddListen(data.JellyfinUser.Id, data.Item, metadata, now);
+            _listensCache.Save();
+            _logger.LogInformation("Listen has been added to the cache");
+            return;
+        }
+
+        if (userConfig.IsFavoritesSyncEnabled)
+        {
+            HandleFavoriteSync(data, metadata, userConfig, now);
+        }
     }
 
     private async void HandleFavoriteSync(EventData data, AudioItemMetadata? metadata, UserConfig userConfig, long listenTs)
