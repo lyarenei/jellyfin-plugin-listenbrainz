@@ -518,6 +518,25 @@ public class PluginImplementation
         _playbackTracker.InvalidateItem(user.Id.ToString(), trackedItem);
     }
 
+    /// <summary>
+    /// Verifies if the specified item is in any allowed library.
+    /// </summary>
+    /// <param name="item">Item to verify.</param>
+    /// <exception cref="PluginException">Item is not in any allowed library.</exception>
+    private void AssertInAllowedLibrary(BaseItem item)
+    {
+        var isInAllowed = _libraryManager
+            .GetCollectionFolders(item)
+            .Select(il => il.Id)
+            .Intersect(GetAllowedLibraries())
+            .Any();
+
+        if (!isInAllowed)
+        {
+            throw new PluginException("Item is not in any allowed library");
+        }
+    }
+
     private bool IsInAllowedLibrary(BaseItem item)
     {
         var itemLibraries = _libraryManager.GetCollectionFolders(item);
