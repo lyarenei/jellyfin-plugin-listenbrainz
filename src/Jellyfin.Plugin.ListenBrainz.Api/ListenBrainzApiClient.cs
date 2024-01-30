@@ -25,25 +25,25 @@ public class ListenBrainzApiClient : IListenBrainzApiClient
     }
 
     /// <inheritdoc />
-    public async Task<ValidateTokenResponse?> ValidateToken(ValidateTokenRequest request, CancellationToken cancellationToken)
+    public async Task<ValidateTokenResponse> ValidateToken(ValidateTokenRequest request, CancellationToken cancellationToken)
     {
         return await _apiClient.SendGetRequest<ValidateTokenRequest, ValidateTokenResponse>(request, cancellationToken);
     }
 
     /// <inheritdoc />
-    public async Task<SubmitListensResponse?> SubmitListens(SubmitListensRequest request, CancellationToken cancellationToken)
+    public async Task<SubmitListensResponse> SubmitListens(SubmitListensRequest request, CancellationToken cancellationToken)
     {
         return await _apiClient.SendPostRequest<SubmitListensRequest, SubmitListensResponse>(request, cancellationToken);
     }
 
     /// <inheritdoc />
-    public async Task<RecordingFeedbackResponse?> SubmitRecordingFeedback(RecordingFeedbackRequest request, CancellationToken cancellationToken)
+    public async Task<RecordingFeedbackResponse> SubmitRecordingFeedback(RecordingFeedbackRequest request, CancellationToken cancellationToken)
     {
         return await _apiClient.SendPostRequest<RecordingFeedbackRequest, RecordingFeedbackResponse>(request, cancellationToken);
     }
 
     /// <inheritdoc />
-    public async Task<GetUserListensResponse?> GetUserListens(GetUserListensRequest request, CancellationToken cancellationToken)
+    public async Task<GetUserListensResponse> GetUserListens(GetUserListensRequest request, CancellationToken cancellationToken)
     {
         return await _apiClient.SendGetRequest<GetUserListensRequest, GetUserListensResponse>(request, cancellationToken);
     }

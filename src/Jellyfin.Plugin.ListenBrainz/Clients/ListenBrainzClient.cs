@@ -58,7 +58,17 @@ public class ListenBrainzClient : IListenBrainzClient
             BaseUrl = pluginConfig.ListenBrainzApiUrl
         };
 
-        _apiClient.SubmitListens(request, CancellationToken.None);
+        var task = _apiClient.SubmitListens(request, CancellationToken.None);
+        task.Wait();
+        if (task.Exception is not null)
+        {
+            throw task.Exception;
+        }
+
+        if (task.Result.IsNotOk)
+        {
+            throw new PluginException("Sending now playing failed");
+        }
     }
 
     /// <inheritdoc />
@@ -73,7 +83,17 @@ public class ListenBrainzClient : IListenBrainzClient
             BaseUrl = pluginConfig.ListenBrainzApiUrl
         };
 
-        _apiClient.SubmitListens(request, CancellationToken.None);
+        var task = _apiClient.SubmitListens(request, CancellationToken.None);
+        task.Wait();
+        if (task.Exception is not null)
+        {
+            throw task.Exception;
+        }
+
+        if (task.Result.IsNotOk)
+        {
+            throw new PluginException("Sending listen failed");
+        }
     }
 
     /// <inheritdoc />
@@ -89,7 +109,17 @@ public class ListenBrainzClient : IListenBrainzClient
             BaseUrl = pluginConfig.ListenBrainzApiUrl
         };
 
-        _apiClient.SubmitRecordingFeedback(request, CancellationToken.None);
+        var task = _apiClient.SubmitRecordingFeedback(request, CancellationToken.None);
+        task.Wait();
+        if (task.Exception is not null)
+        {
+            throw task.Exception;
+        }
+
+        if (task.Result.IsNotOk)
+        {
+            throw new PluginException("Sending feedback failed");
+        }
     }
 
     /// <inheritdoc />
@@ -104,7 +134,17 @@ public class ListenBrainzClient : IListenBrainzClient
             BaseUrl = pluginConfig.ListenBrainzApiUrl
         };
 
-        _apiClient.SubmitListens(request, CancellationToken.None);
+        var task = _apiClient.SubmitListens(request, CancellationToken.None);
+        task.Wait();
+        if (task.Exception is not null)
+        {
+            throw task.Exception;
+        }
+
+        if (task.Result.IsNotOk)
+        {
+            throw new PluginException("Sending listens failed");
+        }
     }
 
     /// <inheritdoc />
@@ -113,7 +153,6 @@ public class ListenBrainzClient : IListenBrainzClient
         var pluginConfig = Plugin.GetConfiguration();
         var request = new ValidateTokenRequest(apiToken) { BaseUrl = pluginConfig.ListenBrainzApiUrl };
         var response = await _apiClient.ValidateToken(request, CancellationToken.None);
-        if (response is null) throw new PluginException("Did not receive response");
         return new ValidatedToken
         {
             IsValid = response.Valid,
@@ -125,37 +164,16 @@ public class ListenBrainzClient : IListenBrainzClient
     /// <inheritdoc />
     public async Task<string?> GetRecordingMsidByListenTs(UserConfig config, long ts)
     {
-        var pluginConfig = Plugin.GetConfiguration();
-        var tokenRequest = new ValidateTokenRequest(config.PlaintextApiToken) { BaseUrl = pluginConfig.ListenBrainzApiUrl };
-
-        // Earlier 3.x plugin configurations did not store the username
         var userName = config.UserName;
         if (string.IsNullOrEmpty(userName))
         {
+            // Earlier 3.x plugin configurations did not store the username
             _logger.LogDebug("ListenBrainz username is not available, getting it via token validation");
-            var tokenResponse = await _apiClient.ValidateToken(tokenRequest, CancellationToken.None);
-            if (tokenResponse is null)
-            {
-                _logger.LogDebug("Did not receive response for token validate request, giving up");
-                return null;
-            }
-
-            if (tokenResponse.UserName is null)
-            {
-                _logger.LogDebug("ValidateToken response does not contain username, cannot continue");
-                return null;
-            }
-
-            userName = tokenResponse.UserName;
+            userName = await GetListenBrainzUsername(config.PlaintextApiToken);
         }
 
         var request = new GetUserListensRequest(userName);
         var response = await _apiClient.GetUserListens(request, CancellationToken.None);
-        if (response is null)
-        {
-            throw new PluginException("Did not receive response for user listens request");
-        }
-
         return response.Payload.Listens.FirstOrDefault(l => l.ListenedAt == ts)?.RecordingMsid;
     }
 
@@ -175,5 +193,24 @@ public class ListenBrainzClient : IListenBrainzClient
             .Select(a => a.AsListen(
                 listensToConvert.First(l => l.Id == a.Id).ListenedAt,
                 listensToConvert.First(l => l.Id == a.Id).Metadata));
+    }
+
+    /// <summary>
+    /// Fetch ListenBrainz username using the API token.
+    /// </summary>
+    /// <param name="userApiToken">ListenBrainz API token.</param>
+    /// <returns>ListenBrainz username associated with the API token.</returns>
+    /// <exception cref="PluginException">Username could not be obtained.</exception>
+    private async Task<string> GetListenBrainzUsername(string userApiToken)
+    {
+        var pluginConfig = Plugin.GetConfiguration();
+        var tokenRequest = new ValidateTokenRequest(userApiToken) { BaseUrl = pluginConfig.ListenBrainzApiUrl };
+        var tokenResponse = await _apiClient.ValidateToken(tokenRequest, CancellationToken.None);
+        if (tokenResponse.UserName is null)
+        {
+            throw new PluginException("ValidateToken response does not contain username");
+        }
+
+        return tokenResponse.UserName;
     }
 }

@@ -20,6 +20,9 @@ public class ValidateTokenResponse : IListenBrainzResponse
     /// <inheritdoc />
     public bool IsOk { get; set; }
 
+    /// <inheritdoc />
+    public bool IsNotOk => !IsOk;
+
     /// <summary>
     /// Gets or sets status code.
     /// </summary>

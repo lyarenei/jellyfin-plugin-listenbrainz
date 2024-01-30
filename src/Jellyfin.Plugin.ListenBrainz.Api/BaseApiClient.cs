@@ -17,13 +17,14 @@ namespace Jellyfin.Plugin.ListenBrainz.Api;
 /// <summary>
 /// Base ListenBrainz API client.
 /// </summary>
-public class BaseApiClient : IBaseApiClient
+public class BaseApiClient : IBaseApiClient, IDisposable
 {
     private const int RateLimitAttempts = 50;
     private readonly IHttpClient _client;
     private readonly SemaphoreSlim _gateway;
     private readonly ILogger _logger;
     private readonly ISleepService _sleepService;
+    private bool _isDisposed;
 
     /// <summary>
     /// Serializer settings.
@@ -47,10 +48,42 @@ public class BaseApiClient : IBaseApiClient
         _logger = logger;
         _sleepService = sleepService ?? new DefaultSleepService();
         _gateway = new SemaphoreSlim(1, 1);
+        _isDisposed = false;
+    }
+
+    /// <summary>
+    /// Finalizes an instance of the <see cref="BaseApiClient"/> class.
+    /// </summary>
+    ~BaseApiClient() => Dispose(false);
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Disposes managed and unmanaged (own) resources.
+    /// </summary>
+    /// <param name="disposing">Dispose managed resources.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_isDisposed)
+        {
+            return;
+        }
+
+        if (disposing)
+        {
+            _gateway.Dispose();
+        }
+
+        _isDisposed = true;
     }
 
     /// <inheritdoc />
-    public async Task<TResponse?> SendPostRequest<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
+    public async Task<TResponse> SendPostRequest<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
         where TRequest : IListenBrainzRequest
         where TResponse : IListenBrainzResponse
     {
@@ -67,7 +100,7 @@ public class BaseApiClient : IBaseApiClient
     }
 
     /// <inheritdoc />
-    public async Task<TResponse?> SendGetRequest<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
+    public async Task<TResponse> SendGetRequest<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
         where TRequest : IListenBrainzRequest
         where TResponse : IListenBrainzResponse
     {
@@ -85,10 +118,10 @@ public class BaseApiClient : IBaseApiClient
 
     private static Uri BuildRequestUri(string baseUrl, string endpoint) => new($"{baseUrl}/{General.Version}/{endpoint}");
 
-    private async Task<TResponse?> DoRequest<TResponse>(HttpRequestMessage requestMessage, CancellationToken cancellationToken)
+    private async Task<TResponse> DoRequest<TResponse>(HttpRequestMessage requestMessage, CancellationToken cancellationToken)
         where TResponse : IListenBrainzResponse
     {
-        HttpResponseMessage? response = null;
+        HttpResponseMessage response;
 
         // TODO: update client to pass this around => have it unified
         var correlationId = Guid.NewGuid().ToString("N")[..7];
@@ -98,25 +131,7 @@ public class BaseApiClient : IBaseApiClient
         try
         {
             _logger.LogDebug("({Id}) Sending request...", correlationId);
-            for (int i = 0; i < RateLimitAttempts; i++)
-            {
-                response = await _client.SendRequest(requestMessage, cancellationToken);
-                if (response.StatusCode == HttpStatusCode.TooManyRequests)
-                {
-                    if (i + 1 == RateLimitAttempts)
-                    {
-                        throw new ListenBrainzException(
-                            $"Could not fit into a rate limit window {RateLimitAttempts} times, ({correlationId})");
-                    }
-
-                    _logger.LogDebug("({Id}) Rate limit reached, will retry after new window opens", correlationId);
-                    HandleRateLimit(response);
-                    continue;
-                }
-
-                _logger.LogDebug("({Id}) Did not hit any rate limits, all OK", correlationId);
-                break;
-            }
+            response = await DoRequestWithRetry(requestMessage, correlationId, cancellationToken);
         }
         finally
         {
@@ -124,14 +139,40 @@ public class BaseApiClient : IBaseApiClient
             _gateway.Release();
         }
 
-        if (response is null) throw new InvalidResponseException("Response is NULL");
-
         var stringContent = await response.Content.ReadAsStringAsync(cancellationToken);
         var result = JsonConvert.DeserializeObject<TResponse>(stringContent, SerializerSettings);
-        if (result is null) throw new InvalidResponseException("Response deserialized to NULL");
+        if (result is null)
+        {
+            throw new InvalidResponseException("Failed to parse JSON data from response");
+        }
 
         result.IsOk = response.IsSuccessStatusCode;
         return result;
+    }
+
+    private async Task<HttpResponseMessage> DoRequestWithRetry(HttpRequestMessage requestMessage, string correlationId, CancellationToken cancellationToken)
+    {
+        for (int i = 0; i < RateLimitAttempts; i++)
+        {
+            var response = await _client.SendRequest(requestMessage, cancellationToken);
+            if (response.StatusCode == HttpStatusCode.TooManyRequests)
+            {
+                if (i + 1 == RateLimitAttempts)
+                {
+                    throw new ListenBrainzException(
+                        $"Could not fit into a rate limit window {RateLimitAttempts} times, ({correlationId})");
+                }
+
+                _logger.LogDebug("({Id}) Rate limit reached, will retry after new window opens", correlationId);
+                HandleRateLimit(response);
+                continue;
+            }
+
+            _logger.LogDebug("({Id}) Did not hit any rate limits, all OK", correlationId);
+            return response;
+        }
+
+        throw new ListenBrainzException("No response available from the server");
     }
 
     private void HandleRateLimit(HttpResponseMessage response)
@@ -140,12 +181,12 @@ public class BaseApiClient : IBaseApiClient
         var resetIn = header.Value.FirstOrDefault();
         if (resetIn is null)
         {
-            throw new ListenBrainzException("No 'rate limit reset in' value available, cannot continue");
+            throw new ListenBrainzException("No 'rate limit reset in' header value available");
         }
 
         if (!int.TryParse(resetIn, out var resetInSec))
         {
-            throw new ListenBrainzException("Invalid value for 'rate limit reset in', cannot continue");
+            throw new ListenBrainzException("Invalid value for 'rate limit reset in' header");
         }
 
         _logger.LogDebug("Waiting for {Seconds} seconds before trying again", resetInSec);
