@@ -14,12 +14,19 @@ public static class AudioExtensions
     /// Assert this item has required metadata for ListenBrainz submission.
     /// </summary>
     /// <param name="item">Audio item.</param>
+    /// <exception cref="ArgumentException">Item does not have required data.</exception>
     public static void AssertHasMetadata(this Audio item)
     {
         var artistNames = item.Artists.TakeWhile(name => !string.IsNullOrEmpty(name));
-        if (!artistNames.Any()) throw new ArgumentException("Item has no valid artists");
+        if (!artistNames.Any())
+        {
+            throw new ArgumentException("Item has no artists");
+        }
 
-        if (string.IsNullOrWhiteSpace(item.Name)) throw new ArgumentException("Item name is empty");
+        if (string.IsNullOrWhiteSpace(item.Name))
+        {
+            throw new ArgumentException("Item name is empty");
+        }
     }
 
     /// <summary>
