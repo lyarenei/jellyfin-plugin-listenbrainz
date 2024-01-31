@@ -47,6 +47,15 @@ public interface IListenBrainzClient
     public void SendListens(UserConfig config, IEnumerable<StoredListen> storedListens);
 
     /// <summary>
+    /// Send multiple listens ('import') to ListenBrainz.
+    /// </summary>
+    /// <param name="config">ListenBrainz user configuration.</param>
+    /// <param name="storedListens">Listens to send.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Task representing asynchronous operation.</returns>
+    public Task SendListensAsync(UserConfig config, IEnumerable<StoredListen> storedListens, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Validate specified API token.
     /// </summary>
     /// <param name="apiToken">Token to validate.</param>

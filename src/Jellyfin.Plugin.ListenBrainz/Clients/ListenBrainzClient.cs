@@ -1,6 +1,7 @@
 using Jellyfin.Plugin.ListenBrainz.Api.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.Api.Models;
 using Jellyfin.Plugin.ListenBrainz.Api.Models.Requests;
+using Jellyfin.Plugin.ListenBrainz.Api.Models.Responses;
 using Jellyfin.Plugin.ListenBrainz.Api.Resources;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
@@ -142,6 +143,35 @@ public class ListenBrainzClient : IListenBrainzClient
         }
 
         if (task.Result.IsNotOk)
+        {
+            throw new PluginException("Sending listens failed");
+        }
+    }
+
+    /// <inheritdoc />
+    /// <exception cref="PluginException">Sending listens failed.</exception>
+    public async Task SendListensAsync(UserConfig config, IEnumerable<StoredListen> storedListens, CancellationToken cancellationToken)
+    {
+        var pluginConfig = Plugin.GetConfiguration();
+        var request = new SubmitListensRequest
+        {
+            ApiToken = config.PlaintextApiToken,
+            ListenType = ListenType.Import,
+            Payload = ToListens(storedListens),
+            BaseUrl = pluginConfig.ListenBrainzApiUrl
+        };
+
+        SubmitListensResponse resp;
+        try
+        {
+            resp = await _apiClient.SubmitListens(request, cancellationToken);
+        }
+        catch (Exception e)
+        {
+            throw new PluginException("SendListensAsync failed", e);
+        }
+
+        if (resp.IsNotOk)
         {
             throw new PluginException("Sending listens failed");
         }
