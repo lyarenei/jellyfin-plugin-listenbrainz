@@ -139,7 +139,11 @@ public class ResubmitListensTask : IScheduledTask
 
     private StoredListen UpdateMetadataIfNecessary(StoredListen listen)
     {
-        if (listen.Metadata is not null && !string.IsNullOrEmpty(listen.Metadata.RecordingMbid)) return listen;
+        if (listen.Metadata is not null && !string.IsNullOrEmpty(listen.Metadata.RecordingMbid))
+        {
+            return listen;
+        }
+
         try
         {
             if (_libraryManager.GetItemById(listen.Id) is not Audio item) return listen;
