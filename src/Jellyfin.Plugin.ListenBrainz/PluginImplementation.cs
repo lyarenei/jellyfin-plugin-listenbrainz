@@ -202,7 +202,7 @@ public class PluginImplementation
         try
         {
             _logger.LogInformation("Sending listen...");
-            _listenBrainzClient.SendNowPlaying(userConfig, data.Item, metadata);
+            _listenBrainzClient.SendListen(userConfig, data.Item, metadata, now);
             _logger.LogInformation("Listen successfully sent");
         }
         catch (Exception e)
@@ -295,7 +295,7 @@ public class PluginImplementation
         try
         {
             _logger.LogInformation("Sending listen...");
-            _listenBrainzClient.SendNowPlaying(userConfig, data.Item, metadata);
+            _listenBrainzClient.SendListen(userConfig, data.Item, metadata, now);
             _logger.LogInformation("Listen successfully sent");
         }
         catch (Exception e)
