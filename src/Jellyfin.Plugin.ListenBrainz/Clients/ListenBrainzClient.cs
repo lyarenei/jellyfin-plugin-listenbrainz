@@ -180,8 +180,8 @@ public class ListenBrainzClient : IListenBrainzClient
             throw task.Exception;
         }
 
-        var listen = task.Result.Payload.Listens.FirstOrDefault(l => l.ListenedAt == ts)?.RecordingMsid;
-        return listen ?? throw new PluginException("Did not receive listen");
+        var recordingMsid = task.Result.Payload.Listens.FirstOrDefault(l => l.ListenedAt == ts)?.RecordingMsid;
+        return recordingMsid ?? throw new PluginException("Did not receive listen");
     }
 
     /// <inheritdoc />
