@@ -211,7 +211,7 @@ public class ListenBrainzClient : IListenBrainzClient
         }
 
         var recordingMsid = task.Result.Payload.Listens.FirstOrDefault(l => l.ListenedAt == ts)?.RecordingMsid;
-        return recordingMsid ?? throw new PluginException("Did not receive listen");
+        return recordingMsid ?? throw new PluginException("No listen matching the timestamp found");
     }
 
     /// <inheritdoc />
