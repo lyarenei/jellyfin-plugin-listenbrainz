@@ -124,31 +124,6 @@ public class ListenBrainzClient : IListenBrainzClient
     }
 
     /// <inheritdoc />
-    public void SendListens(UserConfig config, IEnumerable<StoredListen> storedListens)
-    {
-        var pluginConfig = Plugin.GetConfiguration();
-        var request = new SubmitListensRequest
-        {
-            ApiToken = config.PlaintextApiToken,
-            ListenType = ListenType.Import,
-            Payload = ToListens(storedListens),
-            BaseUrl = pluginConfig.ListenBrainzApiUrl
-        };
-
-        var task = _apiClient.SubmitListens(request, CancellationToken.None);
-        task.Wait();
-        if (task.Exception is not null)
-        {
-            throw task.Exception;
-        }
-
-        if (task.Result.IsNotOk)
-        {
-            throw new PluginException("Sending listens failed");
-        }
-    }
-
-    /// <inheritdoc />
     /// <exception cref="PluginException">Sending listens failed.</exception>
     public async Task SendListensAsync(UserConfig config, IEnumerable<StoredListen> storedListens, CancellationToken cancellationToken)
     {
@@ -214,22 +189,6 @@ public class ListenBrainzClient : IListenBrainzClient
         return recordingMsid ?? throw new PluginException("No listen matching the timestamp found");
     }
 
-    /// <inheritdoc />
-    public async Task<string?> GetRecordingMsidByListenTsAsync(UserConfig config, long ts)
-    {
-        var userName = config.UserName;
-        if (string.IsNullOrEmpty(userName))
-        {
-            // Earlier 3.x plugin configurations did not store the username
-            _logger.LogDebug("ListenBrainz username is not available, getting it via token validation");
-            userName = await GetListenBrainzUsernameAsync(config.PlaintextApiToken);
-        }
-
-        var request = new GetUserListensRequest(userName);
-        var response = await _apiClient.GetUserListens(request, CancellationToken.None);
-        return response.Payload.Listens.FirstOrDefault(l => l.ListenedAt == ts)?.RecordingMsid;
-    }
-
     /// <summary>
     /// Convert all <see cref="StoredListen"/>s to <see cref="Listen"/>s.
     /// </summary>
@@ -271,24 +230,5 @@ public class ListenBrainzClient : IListenBrainzClient
         }
 
         return task.Result.UserName;
-    }
-
-    /// <summary>
-    /// Fetch ListenBrainz username using the API token.
-    /// </summary>
-    /// <param name="userApiToken">ListenBrainz API token.</param>
-    /// <returns>ListenBrainz username associated with the API token.</returns>
-    /// <exception cref="PluginException">Username could not be obtained.</exception>
-    private async Task<string> GetListenBrainzUsernameAsync(string userApiToken)
-    {
-        var pluginConfig = Plugin.GetConfiguration();
-        var tokenRequest = new ValidateTokenRequest(userApiToken) { BaseUrl = pluginConfig.ListenBrainzApiUrl };
-        var tokenResponse = await _apiClient.ValidateToken(tokenRequest, CancellationToken.None);
-        if (tokenResponse.UserName is null)
-        {
-            throw new PluginException("ValidateToken response does not contain username");
-        }
-
-        return tokenResponse.UserName;
     }
 }

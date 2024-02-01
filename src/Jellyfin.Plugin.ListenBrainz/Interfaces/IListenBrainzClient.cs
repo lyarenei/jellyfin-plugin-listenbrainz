@@ -43,14 +43,6 @@ public interface IListenBrainzClient
     /// </summary>
     /// <param name="config">ListenBrainz user configuration.</param>
     /// <param name="storedListens">Listens to send.</param>
-    /// <exception cref="AggregateException">Sending failed.</exception>
-    public void SendListens(UserConfig config, IEnumerable<StoredListen> storedListens);
-
-    /// <summary>
-    /// Send multiple listens ('import') to ListenBrainz.
-    /// </summary>
-    /// <param name="config">ListenBrainz user configuration.</param>
-    /// <param name="storedListens">Listens to send.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Task representing asynchronous operation.</returns>
     public Task SendListensAsync(UserConfig config, IEnumerable<StoredListen> storedListens, CancellationToken cancellationToken);
@@ -69,12 +61,4 @@ public interface IListenBrainzClient
     /// <param name="ts">Timestamp of the submitted listen.</param>
     /// <returns>Recording MSID associated with a specified listen timestamp.</returns>
     public string GetRecordingMsidByListenTs(UserConfig config, long ts);
-
-    /// <summary>
-    /// Get a recording MSID (MessyBrainz ID) associated with a listen submitted to ListenBrainz.
-    /// </summary>
-    /// <param name="config">ListenBrainz user configuration.</param>
-    /// <param name="ts">Timestamp of the submitted listen.</param>
-    /// <returns>Recording MSID associated with a specified listen timestamp. Null if not found.</returns>
-    public Task<string?> GetRecordingMsidByListenTsAsync(UserConfig config, long ts);
 }
