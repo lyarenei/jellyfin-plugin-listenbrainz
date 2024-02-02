@@ -224,11 +224,6 @@ public class ListenBrainzClient : IListenBrainzClient
             throw task.Exception;
         }
 
-        if (task.Result.UserName is null)
-        {
-            throw new PluginException("No username received");
-        }
-
-        return task.Result.UserName;
+        return task.Result.UserName ?? throw new PluginException("No username received");
     }
 }
