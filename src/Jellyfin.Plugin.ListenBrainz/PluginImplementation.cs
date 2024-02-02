@@ -574,6 +574,12 @@ public class PluginImplementation
         _logger.LogDebug("Requirements were met");
     }
 
+    private IDisposable? BeginLogScope()
+    {
+        var eventId = Guid.NewGuid().ToString("N")[..7];
+        return _logger.BeginScope(new Dictionary<string, object> { { "EventId", eventId } });
+    }
+
     private struct EventData
     {
         public Audio Item { get; init; }
