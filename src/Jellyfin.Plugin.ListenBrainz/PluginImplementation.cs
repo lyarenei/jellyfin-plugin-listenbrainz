@@ -64,7 +64,7 @@ public class PluginImplementation
     /// <param name="args">Event args.</param>
     public void OnPlaybackStart(object? sender, PlaybackProgressEventArgs args)
     {
-        // TODO: event ID logger scope
+        using var logScope = BeginLogScope();
         _logger.LogDebug("Picking up playback start event for item {Item}", args.Item.Name);
         EventData data;
         try
@@ -141,7 +141,7 @@ public class PluginImplementation
     /// <param name="args">Event args.</param>
     public void OnPlaybackStop(object? sender, PlaybackStopEventArgs args)
     {
-        // TODO: event ID logger scope
+        using var logScope = BeginLogScope();
         _logger.LogDebug("Picking up playback stop event for item {Item}", args.Item.Name);
         var config = Plugin.GetConfiguration();
         if (config.IsAlternativeModeEnabled)
@@ -229,6 +229,7 @@ public class PluginImplementation
     /// <param name="args">Event args.</param>
     public void OnUserDataSave(object? sender, UserDataSaveEventArgs args)
     {
+        using var logScope = BeginLogScope();
         _logger.LogDebug("Picking up user data save event for item {Item}", args.Item.Name);
         var config = Plugin.GetConfiguration();
         if (!config.IsAlternativeModeEnabled)
