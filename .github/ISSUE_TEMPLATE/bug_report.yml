@@ -22,7 +22,7 @@ body:
       label: Steps to reproduce
       description: Steps to reproduce the bug.
       placeholder: |
-        1. Play item
+        1. Do something
         2. Wait for '....'
         3. See error
     validations:
@@ -42,8 +42,9 @@ body:
     attributes:
       label: Relevant log output
       description: |
-        Please copy and paste any relevant log output.
-        Debug logs are preferred as much more info is logged.
+        Copy and paste any relevant log output here.
+        Please make sure to enable debug logging as there will be much more information available.
+        Also please check out the Debug logging section in README on how to properly set up debug logging for the plugin.
       render: shell
   - type: input
     id: plugin-version
