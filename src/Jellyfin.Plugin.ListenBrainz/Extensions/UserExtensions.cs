@@ -1,5 +1,6 @@
 using Jellyfin.Data.Entities;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
+using Jellyfin.Plugin.ListenBrainz.Exceptions;
 
 namespace Jellyfin.Plugin.ListenBrainz.Extensions;
 
@@ -13,8 +14,18 @@ public static class UserExtensions
     /// </summary>
     /// <param name="user">Jellyfin user.</param>
     /// <returns>ListenBrainz config. Null if not available.</returns>
-    public static UserConfig? GetListenBrainzConfig(this User user)
+    public static UserConfig GetListenBrainzConfig(this User user)
     {
-        return Plugin.GetConfiguration().UserConfigs.FirstOrDefault(u => u.JellyfinUserId == user.Id);
+        var userConfig = Plugin
+            .GetConfiguration()
+            .UserConfigs
+            .FirstOrDefault(u => u.JellyfinUserId == user.Id);
+
+        if (userConfig is null)
+        {
+            throw new PluginException("User configuration is not available (unconfigured user?)");
+        }
+
+        return userConfig;
     }
 }

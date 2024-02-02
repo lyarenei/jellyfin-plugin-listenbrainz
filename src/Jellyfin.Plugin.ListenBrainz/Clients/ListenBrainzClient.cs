@@ -1,6 +1,7 @@
 using Jellyfin.Plugin.ListenBrainz.Api.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.Api.Models;
 using Jellyfin.Plugin.ListenBrainz.Api.Models.Requests;
+using Jellyfin.Plugin.ListenBrainz.Api.Models.Responses;
 using Jellyfin.Plugin.ListenBrainz.Api.Resources;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
@@ -123,7 +124,8 @@ public class ListenBrainzClient : IListenBrainzClient
     }
 
     /// <inheritdoc />
-    public void SendListens(UserConfig config, IEnumerable<StoredListen> storedListens)
+    /// <exception cref="PluginException">Sending listens failed.</exception>
+    public async Task SendListensAsync(UserConfig config, IEnumerable<StoredListen> storedListens, CancellationToken cancellationToken)
     {
         var pluginConfig = Plugin.GetConfiguration();
         var request = new SubmitListensRequest
@@ -134,14 +136,17 @@ public class ListenBrainzClient : IListenBrainzClient
             BaseUrl = pluginConfig.ListenBrainzApiUrl
         };
 
-        var task = _apiClient.SubmitListens(request, CancellationToken.None);
-        task.Wait();
-        if (task.Exception is not null)
+        SubmitListensResponse resp;
+        try
         {
-            throw task.Exception;
+            resp = await _apiClient.SubmitListens(request, cancellationToken);
+        }
+        catch (Exception e)
+        {
+            throw new PluginException("SendListensAsync failed", e);
         }
 
-        if (task.Result.IsNotOk)
+        if (resp.IsNotOk)
         {
             throw new PluginException("Sending listens failed");
         }
@@ -162,19 +167,26 @@ public class ListenBrainzClient : IListenBrainzClient
     }
 
     /// <inheritdoc />
-    public async Task<string?> GetRecordingMsidByListenTs(UserConfig config, long ts)
+    public string GetRecordingMsidByListenTs(UserConfig config, long ts)
     {
         var userName = config.UserName;
         if (string.IsNullOrEmpty(userName))
         {
             // Earlier 3.x plugin configurations did not store the username
             _logger.LogDebug("ListenBrainz username is not available, getting it via token validation");
-            userName = await GetListenBrainzUsername(config.PlaintextApiToken);
+            userName = GetListenBrainzUsername(config.PlaintextApiToken);
         }
 
         var request = new GetUserListensRequest(userName);
-        var response = await _apiClient.GetUserListens(request, CancellationToken.None);
-        return response.Payload.Listens.FirstOrDefault(l => l.ListenedAt == ts)?.RecordingMsid;
+        var task = _apiClient.GetUserListens(request, CancellationToken.None);
+        task.Wait();
+        if (task.Exception is not null)
+        {
+            throw task.Exception;
+        }
+
+        var recordingMsid = task.Result.Payload.Listens.FirstOrDefault(l => l.ListenedAt == ts)?.RecordingMsid;
+        return recordingMsid ?? throw new PluginException("No listen matching the timestamp found");
     }
 
     /// <summary>
@@ -201,16 +213,17 @@ public class ListenBrainzClient : IListenBrainzClient
     /// <param name="userApiToken">ListenBrainz API token.</param>
     /// <returns>ListenBrainz username associated with the API token.</returns>
     /// <exception cref="PluginException">Username could not be obtained.</exception>
-    private async Task<string> GetListenBrainzUsername(string userApiToken)
+    private string GetListenBrainzUsername(string userApiToken)
     {
         var pluginConfig = Plugin.GetConfiguration();
         var tokenRequest = new ValidateTokenRequest(userApiToken) { BaseUrl = pluginConfig.ListenBrainzApiUrl };
-        var tokenResponse = await _apiClient.ValidateToken(tokenRequest, CancellationToken.None);
-        if (tokenResponse.UserName is null)
+        var task = _apiClient.ValidateToken(tokenRequest, CancellationToken.None);
+        task.Wait();
+        if (task.Exception is not null)
         {
-            throw new PluginException("ValidateToken response does not contain username");
+            throw task.Exception;
         }
 
-        return tokenResponse.UserName;
+        return task.Result.UserName ?? throw new PluginException("No username received");
     }
 }

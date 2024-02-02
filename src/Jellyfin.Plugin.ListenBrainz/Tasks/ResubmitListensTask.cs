@@ -70,7 +70,7 @@ public class ResubmitListensTask : IScheduledTask
                         "Found listens in cache for user {UserId}, will try resubmitting",
                         userConfig.JellyfinUserId);
                     cancellationToken.ThrowIfCancellationRequested();
-                    SubmitListensForUser(config, userConfig.JellyfinUserId);
+                    await SubmitListensForUser(config, userConfig.JellyfinUserId, cancellationToken);
                 }
                 else
                 {
@@ -111,22 +111,30 @@ public class ResubmitListensTask : IScheduledTask
         return TimeSpan.TicksPerDay + (randomMinute * TimeSpan.TicksPerMinute);
     }
 
-    private void SubmitListensForUser(PluginConfiguration pluginConfig, Guid userId)
+    private async Task SubmitListensForUser(PluginConfiguration pluginConfig, Guid userId, CancellationToken cancellationToken)
     {
         var user = _userManager.GetUserById(userId);
-        if (user is null) throw new PluginException("Invalid jellyfin user ID");
+        if (user is null)
+        {
+            throw new PluginException("Invalid Jellyfin user ID");
+        }
+
         var userConfig = user.GetListenBrainzConfig();
-        if (userConfig is null) throw new PluginException($"No configuration for user {user.Username}");
+        if (userConfig is null)
+        {
+            throw new PluginException($"No configuration for user {user.Username}");
+        }
 
         var listenChunks = _listensCache.GetListens(userId).Chunk(Limits.MaxListensPerRequest);
         foreach (var listenChunk in listenChunks)
         {
             var chunkToSubmit = pluginConfig.IsMusicBrainzEnabled ? listenChunk.Select(UpdateMetadataIfNecessary) : listenChunk;
+            cancellationToken.ThrowIfCancellationRequested();
             try
             {
-                _listenBrainzClient.SendListens(userConfig, chunkToSubmit);
-                _listensCache.RemoveListens(userId, listenChunk);
-                _listensCache.Save();
+                await _listenBrainzClient.SendListensAsync(userConfig, chunkToSubmit, cancellationToken);
+                await _listensCache.RemoveListensAsync(userId, listenChunk);
+                await _listensCache.SaveAsync();
             }
             catch (Exception ex)
             {
@@ -139,17 +147,24 @@ public class ResubmitListensTask : IScheduledTask
 
     private StoredListen UpdateMetadataIfNecessary(StoredListen listen)
     {
-        if (listen.Metadata is not null && !string.IsNullOrEmpty(listen.Metadata.RecordingMbid)) return listen;
+        if (listen.Metadata is not null && !string.IsNullOrEmpty(listen.Metadata.RecordingMbid))
+        {
+            return listen;
+        }
+
         try
         {
-            if (_libraryManager.GetItemById(listen.Id) is not Audio item) return listen;
-            var metadata = _metadataClient.GetAudioItemMetadata(item).Result;
-            listen.Metadata = metadata;
+            if (_libraryManager.GetItemById(listen.Id) is not Audio item)
+            {
+                return listen;
+            }
+
+            listen.Metadata = _metadataClient.GetAudioItemMetadata(item);
         }
         catch (Exception e)
         {
-            _logger.LogDebug(e, "No additional metadata available");
             _logger.LogInformation("No additional metadata available: {Reason}", e.Message);
+            _logger.LogDebug(e, "No additional metadata available");
         }
 
         return listen;

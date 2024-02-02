@@ -43,8 +43,9 @@ public interface IListenBrainzClient
     /// </summary>
     /// <param name="config">ListenBrainz user configuration.</param>
     /// <param name="storedListens">Listens to send.</param>
-    /// <exception cref="AggregateException">Sending failed.</exception>
-    public void SendListens(UserConfig config, IEnumerable<StoredListen> storedListens);
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Task representing asynchronous operation.</returns>
+    public Task SendListensAsync(UserConfig config, IEnumerable<StoredListen> storedListens, CancellationToken cancellationToken);
 
     /// <summary>
     /// Validate specified API token.
@@ -58,6 +59,6 @@ public interface IListenBrainzClient
     /// </summary>
     /// <param name="config">ListenBrainz user configuration.</param>
     /// <param name="ts">Timestamp of the submitted listen.</param>
-    /// <returns>Recording MSID associated with a specified listen timestamp. Null if not found.</returns>
-    public Task<string?> GetRecordingMsidByListenTs(UserConfig config, long ts);
+    /// <returns>Recording MSID associated with a specified listen timestamp.</returns>
+    public string GetRecordingMsidByListenTs(UserConfig config, long ts);
 }
