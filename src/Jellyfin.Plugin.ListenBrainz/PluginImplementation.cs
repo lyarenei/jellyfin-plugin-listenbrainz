@@ -378,11 +378,7 @@ public class PluginImplementation
             throw new ArgumentException("No user is associated with this event");
         }
 
-        return new EventData
-        {
-            Item = item,
-            JellyfinUser = jellyfinUser
-        };
+        return new EventData { Item = item, JellyfinUser = jellyfinUser };
     }
 
     /// <summary>
@@ -409,11 +405,7 @@ public class PluginImplementation
             throw new ArgumentException("No user is associated with this event");
         }
 
-        return new EventData
-        {
-            Item = item,
-            JellyfinUser = jellyfinUser
-        };
+        return new EventData { Item = item, JellyfinUser = jellyfinUser };
     }
 
     /// <summary>
