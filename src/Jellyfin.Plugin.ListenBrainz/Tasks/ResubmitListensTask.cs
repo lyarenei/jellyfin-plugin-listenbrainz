@@ -160,8 +160,8 @@ public class ResubmitListensTask : IScheduledTask
         }
         catch (Exception e)
         {
-            _logger.LogDebug(e, "No additional metadata available");
             _logger.LogInformation("No additional metadata available: {Reason}", e.Message);
+            _logger.LogDebug(e, "No additional metadata available");
         }
 
         return listen;
