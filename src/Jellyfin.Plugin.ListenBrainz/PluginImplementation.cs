@@ -504,7 +504,8 @@ public class PluginImplementation
         var trackedItem = _playbackTracker.GetItem(user.Id.ToString(), item.Id.ToString());
         if (trackedItem is null)
         {
-            throw new PluginException("Playback is not tracked for this item");
+            _logger.LogDebug("Playback is not tracked for this item, assuming offline playback");
+            return;
         }
 
         if (!trackedItem.IsValid)
