@@ -9,13 +9,6 @@ namespace Jellyfin.Plugin.ListenBrainz.Interfaces;
 public interface IMetadataClient
 {
     /// <summary>
-    /// Get additional metadata from MusicBrainz for specified audio item.
-    /// </summary>
-    /// <param name="item">Audio item.</param>
-    /// <returns>MusicBrainz recording.</returns>
-    public Task<AudioItemMetadata> GetAudioItemMetadataAsync(Audio item);
-
-    /// <summary>
     /// Get additional metadata for specified audio item.
     /// </summary>
     /// <param name="item">Audio item.</param>

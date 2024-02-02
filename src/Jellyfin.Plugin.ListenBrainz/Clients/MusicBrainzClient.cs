@@ -29,20 +29,6 @@ public class MusicBrainzClient : IMetadataClient
     }
 
     /// <inheritdoc />
-    public async Task<AudioItemMetadata> GetAudioItemMetadataAsync(Audio item)
-    {
-        var trackMbid = item.GetTrackMbid();
-        if (trackMbid is null) throw new ArgumentException("Audio item does not have a track MBID");
-
-        var config = Plugin.GetConfiguration();
-        var request = new RecordingRequest(trackMbid) { BaseUrl = config.MusicBrainzApiUrl };
-        var response = await _apiClient.GetRecording(request, CancellationToken.None);
-        if (response is null) throw new MetadataException("No response received");
-        if (!response.Recordings.Any()) throw new MetadataException("No metadata in response");
-        return new AudioItemMetadata(response.Recordings.First());
-    }
-
-    /// <inheritdoc />
     /// <exception cref="AggregateException">Getting metadata failed.</exception>
     /// <exception cref="ArgumentException">Invalid audio item data.</exception>
     /// <exception cref="MetadataException">Metadata not available.</exception>
