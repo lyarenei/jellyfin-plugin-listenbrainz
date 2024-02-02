@@ -164,7 +164,7 @@ public class BaseApiClient : IBaseApiClient, IDisposable
                 }
 
                 _logger.LogDebug("({Id}) Rate limit reached, will retry after new window opens", correlationId);
-                HandleRateLimit(response);
+                await HandleRateLimit(response);
                 continue;
             }
 
@@ -175,7 +175,7 @@ public class BaseApiClient : IBaseApiClient, IDisposable
         throw new ListenBrainzException("No response available from the server");
     }
 
-    private void HandleRateLimit(HttpResponseMessage response)
+    private async Task HandleRateLimit(HttpResponseMessage response)
     {
         var header = response.Headers.FirstOrDefault(h => h.Key == Headers.RateLimitResetIn);
         var resetIn = header.Value.FirstOrDefault();
@@ -190,6 +190,6 @@ public class BaseApiClient : IBaseApiClient, IDisposable
         }
 
         _logger.LogDebug("Waiting for {Seconds} seconds before trying again", resetInSec);
-        _sleepService.Sleep(resetInSec);
+        await _sleepService.SleepAsync(resetInSec);
     }
 }

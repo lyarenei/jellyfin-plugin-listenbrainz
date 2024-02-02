@@ -12,4 +12,10 @@ public class DefaultSleepService : ISleepService
     {
         Thread.Sleep(interval * 1000);
     }
+
+    /// <inheritdoc />
+    public async Task SleepAsync(int interval)
+    {
+        await Task.Delay(interval * 1000);
+    }
 }

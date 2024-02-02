@@ -89,7 +89,7 @@ public class HttpClient
 
             retrySecs *= RetryBackoffSeconds;
             _logger.LogWarning("Request failed, will retry after {Num} seconds", retrySecs);
-            _sleepService.Sleep(retrySecs);
+            await _sleepService.SleepAsync(retrySecs);
         }
 
         if (responseMessage is null)
