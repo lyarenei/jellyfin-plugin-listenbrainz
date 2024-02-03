@@ -22,7 +22,7 @@ body:
       label: Steps to reproduce
       description: Steps to reproduce the bug.
       placeholder: |
-        1. Play item
+        1. Do something
         2. Wait for '....'
         3. See error
     validations:
@@ -40,10 +40,12 @@ body:
   - type: textarea
     id: logs
     attributes:
-      label: Relevant log output
+      label: Jellyfin logs
       description: |
-        Please copy and paste any relevant log output.
-        Debug logs are preferred as much more info is logged.
+        Paste any relevant log output here. In case of listen processing issues, ideally from the point of picking up
+        the event by plugin, up until the error. Please make sure to enable debug logging as there will be much more
+        information available. Check out the Debug logging section in the plugin README to learn how to properly set up
+        debug logging.
       render: shell
   - type: input
     id: plugin-version
@@ -64,5 +66,5 @@ body:
   - type: textarea
     id: additional-ctx
     attributes:
-      label: Additional context
-      description: Add any other context or screenshots about the bug.
+      label: Additional info
+      description: Add any other info or screenshots you think would help to investigate and/or fix the issue.

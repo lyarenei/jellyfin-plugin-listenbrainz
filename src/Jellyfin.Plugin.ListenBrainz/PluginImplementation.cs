@@ -64,7 +64,7 @@ public class PluginImplementation
     /// <param name="args">Event args.</param>
     public void OnPlaybackStart(object? sender, PlaybackProgressEventArgs args)
     {
-        // TODO: event ID logger scope
+        using var logScope = BeginLogScope();
         _logger.LogDebug("Picking up playback start event for item {Item}", args.Item.Name);
         EventData data;
         try
@@ -141,7 +141,7 @@ public class PluginImplementation
     /// <param name="args">Event args.</param>
     public void OnPlaybackStop(object? sender, PlaybackStopEventArgs args)
     {
-        // TODO: event ID logger scope
+        using var logScope = BeginLogScope();
         _logger.LogDebug("Picking up playback stop event for item {Item}", args.Item.Name);
         var config = Plugin.GetConfiguration();
         if (config.IsAlternativeModeEnabled)
@@ -229,6 +229,7 @@ public class PluginImplementation
     /// <param name="args">Event args.</param>
     public void OnUserDataSave(object? sender, UserDataSaveEventArgs args)
     {
+        using var logScope = BeginLogScope();
         _logger.LogDebug("Picking up user data save event for item {Item}", args.Item.Name);
         var config = Plugin.GetConfiguration();
         if (!config.IsAlternativeModeEnabled)
@@ -378,11 +379,7 @@ public class PluginImplementation
             throw new ArgumentException("No user is associated with this event");
         }
 
-        return new EventData
-        {
-            Item = item,
-            JellyfinUser = jellyfinUser
-        };
+        return new EventData { Item = item, JellyfinUser = jellyfinUser };
     }
 
     /// <summary>
@@ -409,11 +406,7 @@ public class PluginImplementation
             throw new ArgumentException("No user is associated with this event");
         }
 
-        return new EventData
-        {
-            Item = item,
-            JellyfinUser = jellyfinUser
-        };
+        return new EventData { Item = item, JellyfinUser = jellyfinUser };
     }
 
     /// <summary>
@@ -572,6 +565,12 @@ public class PluginImplementation
         }
 
         _logger.LogDebug("Requirements were met");
+    }
+
+    private IDisposable? BeginLogScope()
+    {
+        var eventId = Guid.NewGuid().ToString("N")[..7];
+        return _logger.BeginScope(new Dictionary<string, object> { { "EventId", eventId } });
     }
 
     private struct EventData

@@ -54,14 +54,15 @@ public class HttpClient
         CancellationToken cancellationToken)
     {
         using var httpClient = _httpClientFactory.CreateClient();
-        var correlationId = Guid.NewGuid().ToString("N")[..7];
+        var requestId = Guid.NewGuid().ToString("N")[..7];
+        using var scope = _logger.BeginScope(new Dictionary<string, object> { { "HttpRequestId", requestId } });
         var retrySecs = 1;
 
         HttpResponseMessage? responseMessage = null;
         for (var retries = 0; retries < MaxRetries; retries++)
         {
             using var request = await Clone(requestMessage);
-            await LogRequest(request, correlationId);
+            await LogRequest(request);
 
             try
             {
@@ -98,7 +99,7 @@ public class HttpClient
             throw new InvalidResponseException("Response is null");
         }
 
-        await LogResponse(responseMessage, correlationId);
+        await LogResponse(responseMessage);
         return responseMessage;
     }
 
@@ -132,25 +133,23 @@ public class HttpClient
         return clonedRequest;
     }
 
-    private async Task LogRequest(HttpRequestMessage requestMessage, string id)
+    private async Task LogRequest(HttpRequestMessage requestMessage)
     {
         var requestData = "null";
         if (requestMessage.Content is not null) requestData = await requestMessage.Content.ReadAsStringAsync();
 
         _logger.LogDebug(
-            "Sending request ({RequestId}):\nMethod: {Method}\nURI: {Uri}\nData: {Data}",
-            id,
+            "Sending request:\nMethod: {Method}\nURI: {Uri}\nData: {Data}",
             requestMessage.Method,
             requestMessage.RequestUri,
             requestData);
     }
 
-    private async Task LogResponse(HttpResponseMessage responseMessage, string correlationId)
+    private async Task LogResponse(HttpResponseMessage responseMessage)
     {
         var responseData = await responseMessage.Content.ReadAsStringAsync();
         _logger.LogDebug(
-            "Got response ({CorrelationId}):\nStatus: {Status}\nData: {Data}",
-            correlationId,
+            "Got response:\nStatus: {Status}\nData: {Data}",
             responseMessage.StatusCode,
             responseData);
     }
