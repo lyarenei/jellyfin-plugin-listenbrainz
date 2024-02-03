@@ -16,12 +16,11 @@ public class MetadataClient : IMetadataClient
     private readonly Query _query;
 
     /// <summary>
-    ///
+    /// Initializes a new instance of the <see cref="MetadataClient"/> class.
     /// </summary>
-    /// <param name="clientName"></param>
-    /// <param name="version"></param>
-    /// <param name="sourceUrl"></param>
-    /// <exception cref="NotImplementedException"></exception>
+    /// <param name="clientName">Name of the client application..</param>
+    /// <param name="version">Version of the client application.</param>
+    /// <param name="sourceUrl">Contact URL for the maintainer of the application.</param>
     public MetadataClient(string clientName, string version, string sourceUrl)
     {
         _query = new Query(clientName, version, sourceUrl);
