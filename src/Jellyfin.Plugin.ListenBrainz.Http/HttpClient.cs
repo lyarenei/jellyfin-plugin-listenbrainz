@@ -55,7 +55,7 @@ public class HttpClient
     {
         using var httpClient = _httpClientFactory.CreateClient();
         var requestId = Guid.NewGuid().ToString("N")[..7];
-        using var scope = _logger.BeginScope(new Dictionary<string, string> { { "httpRequestId", requestId } });
+        using var scope = _logger.BeginScope(new Dictionary<string, object> { { "HttpRequestId", requestId } });
         var retrySecs = 1;
 
         HttpResponseMessage? responseMessage = null;

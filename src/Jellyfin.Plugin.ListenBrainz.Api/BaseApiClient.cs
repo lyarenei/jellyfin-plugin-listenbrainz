@@ -122,7 +122,7 @@ public class BaseApiClient : IBaseApiClient, IDisposable
         where TResponse : IListenBrainzResponse
     {
         var requestId = Guid.NewGuid().ToString("N")[..7];
-        using var scope = _logger.BeginScope(new Dictionary<string, string> { { "clientRequestId", requestId } });
+        using var scope = _logger.BeginScope(new Dictionary<string, object> { { "ClientRequestId", requestId } });
         HttpResponseMessage response;
 
         _logger.LogDebug("Waiting for previous request to complete (if any)");
