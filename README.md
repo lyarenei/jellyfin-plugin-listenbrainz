@@ -81,10 +81,10 @@ In addition to changing the logging level, it is also necessary to update the lo
 
 To set up debug logging:
 1. Follow the steps described [here](https://jellyfin.org/docs/general/administration/troubleshooting/#debug-logging) to enable debug logging
-2. In the same configuration file, find the template for log messages and modify it:
+2. In the same configuration file, find the template for log messages and modify the `outputTemplate`:
 ```diff
-- "outputTemplate": "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u3}] [{ThreadId}] {SourceContext}: {Message}{NewLine}{Exception}"
-+ "outputTemplate": "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u3}] [{ThreadId}] {SourceContext} [{EventId}] [{clientRequestId}] [{httpRequestId}]: {Message}{NewLine}{Exception}"
+- "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u3}] [{ThreadId}] {SourceContext}: {Message}{NewLine}{Exception}"
++ "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u3}] [{ThreadId}] {SourceContext} {EventId} {clientRequestId} {httpRequestId}: {Message}{NewLine}{Exception}"
 ```
 
 You will find two templates in the logging configuration. The first one is for console log, the second one for file log.
