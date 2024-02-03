@@ -124,10 +124,18 @@ Once the SDK is installed, you should be able to compile the plugin in either de
 Once the build is completed, the compiled DLLs should be available at:
 `src/Jellyfin.Plugin.Listenbrainz/bin/<Debug|Release>/netX.0/`
 
-Unless you exactly know what you are doing, copy **all** DLL files in the directory to the plugin directory in your
+To install the plugin for the first time, copy the following **DLL** files to the plugin directory in your
 Jellyfin installation (`${CONFIG_DIR}/plugins/Jellyfin.Plugin.ListenBrainz`). Create the `Jellyfin.Plugin.ListenBrainz`
-directory if it does not exist, and make sure Jellyfin has correct permissions to access it. After restarting Jellyfin,
-the plugin should be recognized and activated.
+directory if it does not exist, and make sure Jellyfin has correct permissions to access it.
+
+- All files starting with `Jellyfin.Plugin.ListenBrainz`
+- All files starting with `MetaBrainz`
+
+After restarting Jellyfin, the plugin should be recognized and activated. If you forgot any of these files, then the
+plugin will crash during initialization and in the log, you should see which DLL is missing.
+
+It is not necessary to copy all the files every time. For subsequent builds of the plugin it is enough to copy only the
+recompiled files.
 
 ## Making a plugin release
 
