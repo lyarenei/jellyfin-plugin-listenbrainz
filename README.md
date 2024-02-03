@@ -92,9 +92,9 @@ It is not necessary to change both, but please keep in mind, that if you change 
 the logfile won't reflect this template (and vice-versa). If you are not sure which template to modify, just modify both.
 
 **Note**: After modifying the template, you will see extra whitespace (before the `:`) in the log like this:
-<code>... [INF] [1] Main&nbsp;&nbsp;&nbsp;: Jellyfin version: "10.8.13"</code>
-This is totally expected, as the `{EventId} {ClientRequestId} {HttpRequestId}` fields are only defined in this plugin,
-while the template affects all logging. Unfortunately, Jellyfin does not use logging extension which allows dynamic log templates.
+<code>... &#91;INF] &#91;1] Main&nbsp;&nbsp;&nbsp;: Jellyfin version: "10.8.13"</code>
+This is expected, as the three new fields you added earlier are only defined in this plugin, while the template affects
+all log messages. Unfortunately, Jellyfin does not use logging extension which allows dynamic log templates.
 
 Do not forget to revert these changes after you are done with capturing the logs. It is discouraged to run debug logging
 for prolonged periods of time as not only the logs are much bigger, there can also be a performance impact.
