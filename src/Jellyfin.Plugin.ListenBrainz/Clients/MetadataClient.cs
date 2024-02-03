@@ -11,9 +11,10 @@ namespace Jellyfin.Plugin.ListenBrainz.Clients;
 /// An implementation of <see cref="IMetadataClient"/>.
 /// Wrapper for <see cref="Query"/> methods.
 /// </summary>
-public class MetadataClient : IMetadataClient
+public sealed class MetadataClient : IMetadataClient, IDisposable
 {
     private readonly Query _query;
+    private bool _isDisposed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MetadataClient"/> class.
@@ -24,6 +25,38 @@ public class MetadataClient : IMetadataClient
     public MetadataClient(string clientName, string version, string sourceUrl)
     {
         _query = new Query(clientName, version, sourceUrl);
+        _isDisposed = false;
+    }
+
+    /// <summary>
+    /// Finalizes an instance of the <see cref="MetadataClient"/> class.
+    /// </summary>
+    ~MetadataClient() => Dispose(false);
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Dispose managed and unmanaged (own) resources.
+    /// </summary>
+    /// <param name="isDisposing">Dispose managed resources.</param>
+    private void Dispose(bool isDisposing)
+    {
+        if (_isDisposed)
+        {
+            return;
+        }
+
+        if (isDisposing)
+        {
+            _query.Dispose();
+        }
+
+        _isDisposed = true;
     }
 
     /// <inheritdoc />
