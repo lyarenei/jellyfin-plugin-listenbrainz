@@ -74,7 +74,7 @@ public sealed class MetadataClient : IMetadataClient, IDisposable
             throw new PluginException("No results matching the track MBID");
         }
 
-        var recording = recordings.Results.First().Item;
+        var recording = recordings.Results[0].Item;
         return new AudioItemMetadata(recording);
     }
 }
