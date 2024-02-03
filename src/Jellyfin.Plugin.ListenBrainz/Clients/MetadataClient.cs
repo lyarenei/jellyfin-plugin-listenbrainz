@@ -36,7 +36,7 @@ public class MetadataClient : IMetadataClient
             throw new ArgumentException("Audio item does not have a track MBID");
         }
 
-        var recordings = _query.FindRecordings($"tid={trackMbid}", 3);
+        var recordings = _query.FindRecordings($"tid:{trackMbid}", 3);
         if (recordings.TotalResults < 1)
         {
             throw new PluginException("No results matching the track MBID");
