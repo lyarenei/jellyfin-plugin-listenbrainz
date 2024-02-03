@@ -73,6 +73,27 @@ Minimal user configuration:
 5. Check `Enable submitting listens`
 6. Save configuration
 
+### Debug logging
+
+Please always make sure to provide debug logs when reporting a plugin issue.
+To set up debug logging, you need to modify the logging configuration of the Jellyfin server.
+In addition to changing the logging level, it is also necessary to update the log template, to properly display logged data.
+
+To set up debug logging:
+1. Follow the steps described [here](https://jellyfin.org/docs/general/administration/troubleshooting/#debug-logging) to enable debug logging
+2. In the same configuration file, find the template for log messages and modify it:
+```diff
+- "outputTemplate": "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u3}] [{ThreadId}] {SourceContext}: {Message}{NewLine}{Exception}"
++ "outputTemplate": "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u3}] [{ThreadId}] {SourceContext} [{EventId}]: {Message}{NewLine}{Exception}"
+```
+
+You will find two templates in the logging configuration. The first one is for console log, the second one for file log.
+It is not necessary to change both, but please keep in mind, that if you change the console logging template, then the logs in
+the logfile won't reflect this template (and vice-versa). If you are not sure which template to modify, just modify both.
+
+Do not forget to revert these changes after you are done with capturing the logs. It is discouraged to run debug logging
+for prolonged periods of time as not only the logs are much bigger, there can also be a performance impact.
+
 # Development
 
 This should be somewhat similar to standard .NET project development.
