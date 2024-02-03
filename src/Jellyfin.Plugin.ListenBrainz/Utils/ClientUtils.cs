@@ -41,13 +41,6 @@ public static class ClientUtils
     public static IMetadataClient GetMusicBrainzClient(ILogger logger, IHttpClientFactory clientFactory)
     {
         var clientName = string.Join(string.Empty, Plugin.FullName.Split(' ').Select(s => s.Capitalize()));
-        var apiClient = new MusicBrainzApiClient(
-            clientName,
-            Plugin.Version,
-            Plugin.SourceUrl,
-            clientFactory,
-            logger);
-
-        return new MusicBrainzClient(logger, apiClient);
+        return new MetadataClient(clientName, Plugin.Version, Plugin.SourceUrl);
     }
 }
