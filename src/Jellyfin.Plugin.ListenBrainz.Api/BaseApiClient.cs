@@ -121,21 +121,20 @@ public class BaseApiClient : IBaseApiClient, IDisposable
     private async Task<TResponse> DoRequest<TResponse>(HttpRequestMessage requestMessage, CancellationToken cancellationToken)
         where TResponse : IListenBrainzResponse
     {
+        var requestId = Guid.NewGuid().ToString("N")[..7];
+        using var scope = _logger.BeginScope(new Dictionary<string, string> { { "clientRequestId", requestId } });
         HttpResponseMessage response;
 
-        // TODO: update client to pass this around => have it unified
-        var correlationId = Guid.NewGuid().ToString("N")[..7];
-
-        _logger.LogDebug("({Id}) Waiting for previous request to complete (if any)", correlationId);
+        _logger.LogDebug("Waiting for previous request to complete (if any)");
         await _gateway.WaitAsync(cancellationToken);
         try
         {
-            _logger.LogDebug("({Id}) Sending request...", correlationId);
-            response = await DoRequestWithRetry(requestMessage, correlationId, cancellationToken);
+            _logger.LogDebug("Sending request...");
+            response = await DoRequestWithRetry(requestMessage, cancellationToken);
         }
         finally
         {
-            _logger.LogDebug("({Id}) Request has been processed, freeing up resources", correlationId);
+            _logger.LogDebug("Request has been processed, freeing up resources");
             _gateway.Release();
         }
 
@@ -150,7 +149,7 @@ public class BaseApiClient : IBaseApiClient, IDisposable
         return result;
     }
 
-    private async Task<HttpResponseMessage> DoRequestWithRetry(HttpRequestMessage requestMessage, string correlationId, CancellationToken cancellationToken)
+    private async Task<HttpResponseMessage> DoRequestWithRetry(HttpRequestMessage requestMessage, CancellationToken cancellationToken)
     {
         for (int i = 0; i < RateLimitAttempts; i++)
         {
@@ -159,16 +158,15 @@ public class BaseApiClient : IBaseApiClient, IDisposable
             {
                 if (i + 1 == RateLimitAttempts)
                 {
-                    throw new ListenBrainzException(
-                        $"Could not fit into a rate limit window {RateLimitAttempts} times, ({correlationId})");
+                    throw new ListenBrainzException($"Could not fit into a rate limit window {RateLimitAttempts} times");
                 }
 
-                _logger.LogDebug("({Id}) Rate limit reached, will retry after new window opens", correlationId);
+                _logger.LogDebug("Rate limit reached, will retry after new window opens");
                 await HandleRateLimit(response);
                 continue;
             }
 
-            _logger.LogDebug("({Id}) Did not hit any rate limits, all OK", correlationId);
+            _logger.LogDebug("Did not hit any rate limits, all OK");
             return response;
         }
 
