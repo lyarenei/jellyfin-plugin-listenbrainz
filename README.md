@@ -47,11 +47,11 @@ Continue with plugin [configuration](doc/configuration.md).
 
 Version compatibility table:
 
-| Plugin  | Jellyfin |
-|---------|----------|
-| 1.x.y.z | 10.7.a   |
-| 2.x.y.z | 10.8.a   |
-| 3.x.y.z | 10.8.a   |
+| Plugin  | Jellyfin | Status      |
+|---------|----------|-------------|
+| 1.x.y.z | 10.7.a   | Unsupported |
+| 2.x.y.z | 10.8.a   | Unsupported |
+| 3.x.y.z | 10.8.a   | Supported   |
 
 ## Configuration
 
