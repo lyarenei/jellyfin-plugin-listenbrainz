@@ -44,8 +44,8 @@ body:
       description: |
         Paste any relevant log output here. In case of listen processing issues, ideally from the point of picking up
         the event by plugin, up until the error. Please make sure to enable debug logging as there will be much more
-        information available. Check out the Debug logging section in the plugin README to learn how to properly set up
-        debug logging.
+        information available which may speed up investigating and fixing the issue. Check out the Debug logging section
+        in the plugin README to learn how to properly set up debug logging.
       render: shell
   - type: input
     id: plugin-version
