@@ -26,6 +26,11 @@ public static class Endpoints
     public const string RecordingFeedback = FeedbackEndpointBase + "/recording-feedback";
 
     /// <summary>
+    /// Endpoint for user feedback.
+    /// </summary>
+    public const string UserFeedback = FeedbackEndpointBase + "/user/{0}/get-feedback";
+
+    /// <summary>
     /// User endpoint base.
     /// </summary>
     private const string UserEndpointBase = "user";
