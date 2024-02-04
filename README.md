@@ -47,11 +47,11 @@ Continue with plugin [configuration](doc/configuration.md).
 
 Version compatibility table:
 
-| Plugin  | Jellyfin |
-|---------|----------|
-| 1.x.y.z | 10.7.a   |
-| 2.x.y.z | 10.8.a   |
-| 3.x.y.z | 10.8.a   |
+| Plugin  | Jellyfin | Status      |
+|---------|----------|-------------|
+| 1.x.y.z | 10.7.a   | Unsupported |
+| 2.x.y.z | 10.8.a   | Unsupported |
+| 3.x.y.z | 10.8.a   | Supported   |
 
 ## Configuration
 
@@ -80,24 +80,29 @@ To set up debug logging, you need to modify the logging configuration of the Jel
 In addition to changing the logging level, it is also necessary to update the log template, to properly display logged data.
 
 To set up debug logging:
-1. Follow the steps described [here](https://jellyfin.org/docs/general/administration/troubleshooting/#debug-logging) to enable debug logging
-2. In the same configuration file, find the template for log messages and modify the `outputTemplate`:
+
+First, follow the steps described [here](https://jellyfin.org/docs/general/administration/troubleshooting/#debug-logging)
+to enable debug logging. Then, in the same file, you will see two log templates (`outputTemplate`). One template is for
+a console output, the other one is for a file output. If you are using the Jellyfin UI to collect the logs, then modify
+the **File** template by adding `{EventId}`, `{ClientRequestId}` and `{HttpRequestId}` fields.
+- `EventId` identifies the event which is being processed (playback start/stop, user data save)
+- `ClientRequestId` identifies a ListenBrainz API request being processed
+- `HttpRequestId` identifies a specific HTTP request being processed
+
+The modified template should look like this:
+
 ```diff
 - "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u3}] [{ThreadId}] {SourceContext}: {Message}{NewLine}{Exception}"
 + "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u3}] [{ThreadId}] {SourceContext} {EventId} {ClientRequestId} {HttpRequestId}: {Message}{NewLine}{Exception}"
 ```
-
-You will find two templates in the logging configuration. The first one is for console log, the second one for file log.
-It is not necessary to change both, but please keep in mind, that if you change the console logging template, then the logs in
-the logfile won't reflect this template (and vice-versa). If you are not sure which template to modify, just modify both.
-
-**Note**: After modifying the template, you will see extra whitespace (before the `:`) in the log like this:
-<code>... &#91;INF] &#91;1] Main&nbsp;&nbsp;&nbsp;: Jellyfin version: "10.8.13"</code>
+After modifying the template, restart Jellyfin server and you should see extra whitespace (before the `:`) in the log
+like this: <code>... &#91;INF] &#91;1] Main&nbsp;&nbsp;&nbsp;: Jellyfin version: "10.8.13"</code>
 This is expected, as the three new fields you added earlier are only defined in this plugin, while the template affects
-all log messages. Unfortunately, Jellyfin does not use logging extension which allows dynamic log templates.
+all log messages. Unfortunately, Jellyfin does not seem to be using a logging extension which allows dynamic log templates.
 
-Do not forget to revert these changes after you are done with capturing the logs. It is discouraged to run debug logging
-for prolonged periods of time as not only the logs are much bigger, there can also be a performance impact.
+Do not forget to revert these changes after you are done with capturing the logs. You can keep the template if you don't
+mind the additional IDs, but make sure you change the log level back to `Information` as debug logging can in general
+have an impact on the application performance.
 
 # Development
 
