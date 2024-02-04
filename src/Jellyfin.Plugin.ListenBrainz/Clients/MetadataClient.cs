@@ -26,6 +26,11 @@ public sealed class MetadataClient : IMetadataClient, IDisposable
     {
         _query = new Query(clientName, version, contactUrl);
         _isDisposed = false;
+
+        var uri = new Uri(Plugin.GetConfiguration().MusicBrainzApiUrl);
+        _query.Server = uri.Host;
+        _query.Port = uri.Port;
+        _query.UrlScheme = uri.Scheme;
     }
 
     /// <summary>
