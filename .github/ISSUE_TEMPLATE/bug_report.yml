@@ -6,8 +6,8 @@ body:
   - type: markdown
     attributes:
       value: |
-        Please take your time to fill out this bug report, thank you.
-        Reports filled with obvious little to no effort are likely to be closed without further comments.
+        Please take your time to fill out this bug report. Reports filled with obvious little to no effort are likely
+        to be closed without further comments. Thank you.
   - type: textarea
     id: what-happened
     attributes:
