@@ -7,6 +7,8 @@ namespace Jellyfin.Plugin.ListenBrainz.Api.Resources;
 /// </summary>
 public static class Limits
 {
+    // TODO: these are configurable and should be a part of a config if connecting to a custom LB-compatible server.
+
     /// <summary>
     /// Maximum accepted duration of a listen.
     /// </summary>
