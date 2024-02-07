@@ -231,12 +231,6 @@ public class PluginImplementation
     {
         using var logScope = BeginLogScope();
         _logger.LogDebug("Picking up user data save event for item {Item}", args.Item.Name);
-        var config = Plugin.GetConfiguration();
-        if (!config.IsAlternativeModeEnabled)
-        {
-            _logger.LogDebug("Dropping event - alternative mode is disabled");
-            return;
-        }
 
         EventData data;
         try
@@ -246,6 +240,28 @@ public class PluginImplementation
         catch (Exception e)
         {
             _logger.LogDebug(e, "Dropping event");
+            return;
+        }
+
+        switch (args.SaveReason)
+        {
+            case UserDataSaveReason.UpdateUserRating:
+                _logger.LogDebug("Reason is user rating update, attempting favorite sync");
+                HandleFavoriteSyncUsingMbid(data);
+                return;
+            case UserDataSaveReason.PlaybackFinished:
+                _logger.LogDebug("Reason is playback finished, evaluating listen conditions");
+                // TODO: split
+                break;
+            default:
+                _logger.LogDebug("Dropping event - unsupported data save reason");
+                return;
+        }
+
+        var config = Plugin.GetConfiguration();
+        if (!config.IsAlternativeModeEnabled)
+        {
+            _logger.LogDebug("Dropping event - alternative mode is disabled");
             return;
         }
 
@@ -345,6 +361,40 @@ public class PluginImplementation
         }
     }
 
+    private void HandleFavoriteSyncUsingMbid(EventData data)
+    {
+        try
+        {
+            _logger.LogDebug("Getting user configuration");
+            var userConfig = data.JellyfinUser.GetListenBrainzConfig();
+            if (!userConfig.IsFavoritesSyncEnabled)
+            {
+                _logger.LogDebug("Favorite sync is disabled");
+                return;
+            }
+
+            _logger.LogInformation("Getting additional metadata...");
+            var metadata = _metadataClient.GetAudioItemMetadata(data.Item);
+            _logger.LogInformation("Additional metadata successfully received");
+
+            var userItemData = _userDataManager.GetUserData(data.JellyfinUser, data.Item);
+            if (string.IsNullOrEmpty(metadata.RecordingMbid))
+            {
+                _logger.LogInformation("No recording MBID is available, cannot sync favorite");
+                return;
+            }
+
+            _logger.LogInformation("Attempting to sync favorite status");
+            _listenBrainzClient.SendFeedback(userConfig, userItemData.IsFavorite, metadata.RecordingMbid);
+            _logger.LogInformation("Favorite sync has been successful");
+        }
+        catch (Exception e)
+        {
+            _logger.LogInformation("Favorite sync failed: {Reason}", e.Message);
+            _logger.LogDebug(e, "Favorite sync failed");
+        }
+    }
+
     /// <summary>
     /// Assert MusicBrainz integration is enabled.
     /// </summary>
@@ -393,11 +443,6 @@ public class PluginImplementation
         if (eventArgs.Item is not Audio item)
         {
             throw new ArgumentException("Event item is not an Audio item");
-        }
-
-        if (eventArgs.SaveReason is not UserDataSaveReason.PlaybackFinished)
-        {
-            throw new ArgumentException("Not a playback finished event");
         }
 
         var jellyfinUser = _userManager.GetUserById(eventArgs.UserId);
