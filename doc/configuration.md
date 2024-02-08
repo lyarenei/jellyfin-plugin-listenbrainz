@@ -122,6 +122,13 @@ conditions. In such cases, the plugin will default to current time. This should 
 client does not specify times when reporting playbacks retroactively, all listens reported in that time will have the
 same timestamp.
 
+##### Immediate favorite sync
+
+Controls the behavior of favorite sync feature. If enabled, the favorite status of a track is synced immediately to
+ListenBrainz, in addition to syncing after playback of the track is finished.
+
+This feature also requires the MusicBrainz integration as this is only possible by sending a `Recording MBID` of the track.
+
 ##### Allowed libraries for listen submission
 
 Depending on your setup, you may not want to record listens of audio from a certain library. Listens of audio from
