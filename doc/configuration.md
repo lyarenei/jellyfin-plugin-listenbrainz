@@ -77,6 +77,9 @@ Currently used metadata from MusicBrainz:
   In some cases, there may be multiple ISRCs stored in MusicBrainz for a specific recording. In these cases, the plugin
   simply chooses the first one.
 
+- **Immediate favorite sync**
+  Enabling this integration allows you to use this feature, as it relies on the `Recording MBID`.
+
 ##### Use alternative event for recognizing listens
 
 The plugin can work in two distinct modes of listen recognition.
@@ -124,10 +127,9 @@ same timestamp.
 
 ##### Immediate favorite sync
 
-Controls the behavior of favorite sync feature. If enabled, the favorite status of a track is synced immediately to
-ListenBrainz, in addition to syncing after playback of the track is finished.
-
-This feature also requires the MusicBrainz integration as this is only possible by sending a `Recording MBID` of the track.
+Modifies the behavior of favorite sync feature. If enabled, the favorite status of a track is synced immediately to
+ListenBrainz. Standard favorite sync (after playback of track finishes) is not affected. This feature only works if
+track has required metadata (track MBID) and the MusicBrainz integration is enabled.
 
 ##### Allowed libraries for listen submission
 
