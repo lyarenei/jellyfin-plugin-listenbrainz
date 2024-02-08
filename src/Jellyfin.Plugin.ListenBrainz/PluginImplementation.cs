@@ -251,13 +251,20 @@ public class PluginImplementation
                 return;
             case UserDataSaveReason.PlaybackFinished:
                 _logger.LogDebug("Reason is playback finished, evaluating listen conditions");
-                // TODO: split
-                break;
+                HandlePlaybackFinished(data);
+                return;
             default:
                 _logger.LogDebug("Dropping event - unsupported data save reason");
                 return;
         }
+    }
 
+    /// <summary>
+    /// Handle playback finished event (alternative recognition of listens).
+    /// </summary>
+    /// <param name="data">Event data.</param>
+    private void HandlePlaybackFinished(EventData data)
+    {
         var config = Plugin.GetConfiguration();
         if (!config.IsAlternativeModeEnabled)
         {
