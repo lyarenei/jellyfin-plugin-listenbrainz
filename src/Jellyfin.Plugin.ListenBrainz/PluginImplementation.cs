@@ -367,15 +367,9 @@ public class PluginImplementation
     /// <param name="data">Event data.</param>
     private void HandleFavoriteSyncUsingMbid(EventData data)
     {
-        var config = Plugin.GetConfiguration();
-        if (!config.IsImmediateFavoriteSyncEnabled)
-        {
-            _logger.LogDebug("Immediate sync is disabled");
-            return;
-        }
-
         try
         {
+            AssertImmediateFavoriteSyncIsEnabled();
             _logger.LogDebug("Checking if favorite sync is enabled");
             var userConfig = data.JellyfinUser.GetListenBrainzConfig();
             if (!userConfig.IsFavoritesSyncEnabled)
@@ -421,6 +415,21 @@ public class PluginImplementation
         }
 
         _logger.LogDebug("MusicBrainz integration is enabled");
+    }
+
+    /// <summary>
+    /// Asser immediate favorite sync is enabled.
+    /// </summary>
+    /// <exception cref="PluginException">Immediate favorite sync is disabled.</exception>
+    private void AssertImmediateFavoriteSyncIsEnabled()
+    {
+        _logger.LogDebug("Checking if immediate favorite sync is enabled");
+        if (!Plugin.GetConfiguration().IsImmediateFavoriteSyncEnabled)
+        {
+            throw new PluginException("Immediate favorite sync is disabled");
+        }
+
+        _logger.LogDebug("Immediate favorite sync is enabled");
     }
 
     /// <summary>
