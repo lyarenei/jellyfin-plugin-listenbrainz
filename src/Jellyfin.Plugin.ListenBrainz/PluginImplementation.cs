@@ -363,6 +363,13 @@ public class PluginImplementation
 
     private void HandleFavoriteSyncUsingMbid(EventData data)
     {
+        var config = Plugin.GetConfiguration();
+        if (!config.IsImmediateFavoriteSyncEnabled)
+        {
+            _logger.LogDebug("Immediate sync is not enabled");
+            return;
+        }
+
         try
         {
             _logger.LogDebug("Getting user configuration");
