@@ -366,7 +366,7 @@ public class PluginImplementation
         var config = Plugin.GetConfiguration();
         if (!config.IsImmediateFavoriteSyncEnabled)
         {
-            _logger.LogDebug("Immediate sync is not enabled");
+            _logger.LogDebug("Immediate sync is disabled");
             return;
         }
 
