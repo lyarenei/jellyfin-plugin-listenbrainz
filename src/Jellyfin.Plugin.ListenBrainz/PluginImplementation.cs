@@ -370,6 +370,8 @@ public class PluginImplementation
         try
         {
             AssertImmediateFavoriteSyncIsEnabled();
+            AssertMusicBrainzIsEnabled();
+
             _logger.LogDebug("Checking if favorite sync is enabled");
             var userConfig = data.JellyfinUser.GetListenBrainzConfig();
             if (!userConfig.IsFavoritesSyncEnabled)
