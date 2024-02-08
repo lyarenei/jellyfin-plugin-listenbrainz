@@ -372,13 +372,15 @@ public class PluginImplementation
 
         try
         {
-            _logger.LogDebug("Getting user configuration");
+            _logger.LogDebug("Checking if favorite sync is enabled");
             var userConfig = data.JellyfinUser.GetListenBrainzConfig();
             if (!userConfig.IsFavoritesSyncEnabled)
             {
                 _logger.LogDebug("Favorite sync is disabled");
                 return;
             }
+
+            _logger.LogDebug("Favorite sync is enabled");
 
             _logger.LogInformation("Getting additional metadata...");
             var metadata = _metadataClient.GetAudioItemMetadata(data.Item);
