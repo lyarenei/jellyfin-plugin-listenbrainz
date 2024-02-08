@@ -361,6 +361,10 @@ public class PluginImplementation
         }
     }
 
+    /// <summary>
+    /// Handle favorite sync using MBID. Does not fall back to using MSID.
+    /// </summary>
+    /// <param name="data">Event data.</param>
     private void HandleFavoriteSyncUsingMbid(EventData data)
     {
         var config = Plugin.GetConfiguration();
