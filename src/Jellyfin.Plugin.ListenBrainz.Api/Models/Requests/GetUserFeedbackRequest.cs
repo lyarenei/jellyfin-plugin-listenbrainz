@@ -36,7 +36,7 @@ public class GetUserFeedbackRequest : IListenBrainzRequest
 
         if (score is not null)
         {
-            QueryDict.Add("score", score.ToString()!);
+            QueryDict.Add("score", score.Value.ToString(NumberFormatInfo.InvariantInfo));
         }
 
         if (metadata is not null)

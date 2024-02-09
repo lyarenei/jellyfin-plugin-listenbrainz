@@ -1,5 +1,6 @@
 using Jellyfin.Plugin.ListenBrainz.Api.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.Api.Resources;
+using Newtonsoft.Json;
 
 namespace Jellyfin.Plugin.ListenBrainz.Api.Models.Requests;
 
@@ -38,5 +39,12 @@ public class RecordingFeedbackRequest : IListenBrainzRequest
     /// <summary>
     /// Gets or sets feedback score.
     /// </summary>
+    [JsonIgnore]
     public FeedbackScore Score { get; set; }
+
+    /// <summary>
+    /// Gets <see cref="Score"/> as an integer.
+    /// </summary>
+    [JsonProperty("score")]
+    public int ScoreInt => Score.Value;
 }

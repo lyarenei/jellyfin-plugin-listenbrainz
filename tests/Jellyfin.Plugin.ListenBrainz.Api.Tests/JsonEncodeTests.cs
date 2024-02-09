@@ -1,9 +1,11 @@
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Jellyfin.Plugin.ListenBrainz.Api.Models;
 using Jellyfin.Plugin.ListenBrainz.Api.Models.Requests;
 using Jellyfin.Plugin.ListenBrainz.Api.Resources;
 using Newtonsoft.Json;
 using Xunit;
+using static Jellyfin.Plugin.ListenBrainz.Api.Resources.FeedbackScore;
 
 namespace Jellyfin.Plugin.ListenBrainz.Api.Tests;
 
@@ -45,17 +47,22 @@ public class ListenTests
 
 public class RecordingFeedbackTests
 {
+    public static IEnumerable<FeedbackScore[]> GetFeedbackScores()
+    {
+        yield return new [] { Hated };
+        yield return new [] { Loved };
+        yield return new [] { Neutral };
+    }
+
     [Theory]
-    [InlineData(FeedbackScore.Hated)]
-    [InlineData(FeedbackScore.Loved)]
-    [InlineData(FeedbackScore.Neutral)]
+    [MemberData(nameof(GetFeedbackScores))]
     public void FeedbackValues_Encode(FeedbackScore score)
     {
         var request = new RecordingFeedbackRequest { Score = score };
         var actualJson = JsonConvert.SerializeObject(request, BaseApiClient.SerializerSettings);
         Assert.NotNull(actualJson);
 
-        var expectedJson = @"{""score"":" + (int)score + "}";
+        var expectedJson = @"{""score"":" + score.Value + "}";
         Assert.Equal(expectedJson, actualJson);
     }
 }
