@@ -189,6 +189,40 @@ public class ListenBrainzClient : IListenBrainzClient
         return recordingMsid ?? throw new PluginException("No listen matching the timestamp found");
     }
 
+    /// <inheritdoc />
+    public async Task<IEnumerable<string>> GetLovedTracksAsync(UserConfig config, CancellationToken cancellationToken)
+    {
+        var recordingMbids = new List<string>();
+        int offset = 0;
+        GetUserFeedbackResponse response;
+        do
+        {
+            var request = new GetUserFeedbackRequest(config.UserName, FeedbackScore.Loved, Limits.MaxItemsPerGet, offset);
+            try
+            {
+                response = await _apiClient.GetUserFeedback(request, cancellationToken);
+            }
+            catch (Exception e)
+            {
+                throw new PluginException("GetUserFeedback failed", e);
+            }
+
+            if (response.IsNotOk)
+            {
+                throw new PluginException("Getting user loved tracks failed");
+            }
+
+            recordingMbids.AddRange(response.Payload.Feedback
+                .Where(f => f.RecordingMbid is not null)
+                .Select(f => f.RecordingMbid!));
+
+            offset += response.Payload.Offset;
+        }
+        while (response.Payload.Count + offset < response.Payload.TotalCount);
+
+        return recordingMbids;
+    }
+
     /// <summary>
     /// Convert all <see cref="StoredListen"/>s to <see cref="Listen"/>s.
     /// </summary>

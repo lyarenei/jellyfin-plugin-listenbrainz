@@ -61,4 +61,12 @@ public interface IListenBrainzClient
     /// <param name="ts">Timestamp of the submitted listen.</param>
     /// <returns>Recording MSID associated with a specified listen timestamp.</returns>
     public string GetRecordingMsidByListenTs(UserConfig config, long ts);
+
+    /// <summary>
+    /// Get a collection of recording MBIDs which are loved by the user.
+    /// </summary>
+    /// <param name="config">ListenBrainz user configuration.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>List of recording MBIDs identifying loved tracks by the user.</returns>
+    public Task<IEnumerable<string>> GetLovedTracksAsync(UserConfig config, CancellationToken cancellationToken);
 }
