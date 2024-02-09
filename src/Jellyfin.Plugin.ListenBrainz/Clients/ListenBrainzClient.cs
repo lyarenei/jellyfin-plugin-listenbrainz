@@ -212,13 +212,13 @@ public class ListenBrainzClient : IListenBrainzClient
                 throw new PluginException("Getting user loved tracks failed");
             }
 
-            recordingMbids.AddRange(response.Payload.Feedback
+            recordingMbids.AddRange(response.Feedback
                 .Where(f => f.RecordingMbid is not null)
                 .Select(f => f.RecordingMbid!));
 
-            offset += response.Payload.Offset;
+            offset += response.Count;
         }
-        while (response.Payload.Count + offset < response.Payload.TotalCount);
+        while (offset < response.TotalCount);
 
         return recordingMbids;
     }

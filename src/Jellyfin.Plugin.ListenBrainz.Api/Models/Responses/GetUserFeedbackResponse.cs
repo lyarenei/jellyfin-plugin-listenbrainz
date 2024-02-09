@@ -12,7 +12,7 @@ public class GetUserFeedbackResponse : IListenBrainzResponse
     /// </summary>
     public GetUserFeedbackResponse()
     {
-        Payload = new UserFeedbackPayload();
+        Feedback = new List<Feedback>();
     }
 
     /// <inheritdoc />
@@ -22,7 +22,22 @@ public class GetUserFeedbackResponse : IListenBrainzResponse
     public bool IsNotOk => !IsOk;
 
     /// <summary>
-    /// Gets or sets response payload.
+    /// Gets or sets count of feedbacks in this payload.
     /// </summary>
-    public UserFeedbackPayload Payload { get; set; }
+    public int Count { get; set; }
+
+    /// <summary>
+    /// Gets or sets results count offset.
+    /// </summary>
+    public int Offset { get; set; }
+
+    /// <summary>
+    /// Gets or sets the feedback total count.
+    /// </summary>
+    public int TotalCount { get; set; }
+
+    /// <summary>
+    /// Gets or sets user's listens.
+    /// </summary>
+    public IEnumerable<Feedback> Feedback { get; set; }
 }
