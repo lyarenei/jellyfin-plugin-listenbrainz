@@ -113,6 +113,14 @@
                             </label>
                             <div class="fieldDescription">Requires clients to mark items as played.</div>
                         </div>
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="IsImmediateFavoriteSyncEnabled">
+                                <input is="emby-checkbox" type="checkbox" id="IsImmediateFavoriteSyncEnabled"
+                                       name="IsImmediateFavoriteSyncEnabled"/>
+                                <span>Immediate favorite sync</span>
+                            </label>
+                            <div class="fieldDescription">Sync favorite status immediately. Requires MusicBrainz metadata and integration to be enabled.</div>
+                        </div>
                         <div class="sectionTitleContainer flex align-items-center">
                             <h4 class="sectionTitle">Allowed libraries for listen submission</h4>
                             <div class="raised button-alt headerHelpButton emby-button" id="ResetAllowedLibraries">
@@ -365,6 +373,9 @@
             document.querySelector("#IsAlternativeModeEnabled")
                 .checked = data.IsAlternativeModeEnabled;
 
+            document.querySelector("#IsImmediateFavoriteSyncEnabled")
+                .checked = data.IsImmediateFavoriteSyncEnabled;
+
             try {
                 buildAllowedLibrariesList(data.LibraryConfigs);
             } catch (err) {
@@ -414,6 +425,7 @@
                 MusicBrainzApiUrl: document.querySelector('#MusicBrainzApiUrl').value,
                 IsMusicBrainzEnabled: document.querySelector('#IsMusicBrainzEnabled').checked,
                 IsAlternativeModeEnabled: document.querySelector('#IsAlternativeModeEnabled').checked,
+                IsImmediateFavoriteSyncEnabled: document.querySelector('#IsImmediateFavoriteSyncEnabled').checked,
                 LibraryConfigs: getLibraryConfigsInputs(),
             }
         }
