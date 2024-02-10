@@ -1,3 +1,4 @@
+using Jellyfin.Data.Entities;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
@@ -5,6 +6,7 @@ using Jellyfin.Plugin.ListenBrainz.Utils;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Persistence;
+using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Tasks;
 using Microsoft.Extensions.Logging;
 
@@ -94,22 +96,30 @@ public class LovedTracksSyncTask : IScheduledTask
 
         var allowedLibraries = GetAllowedLibraries().Select(al => _libraryManager.GetItemById(al));
         var q = new InternalItemsQuery(user);
-        var items = _libraryManager
+        var itemsWithRecordingId = _libraryManager
             .GetItemList(q, allowedLibraries.ToList())
             .Where(i => i.ProviderIds.GetValueOrDefault("MusicBrainzTrack") is not null)
-            .Select(i => (i.Id, _metadataClient.GetAudioItemMetadata(i).RecordingMbid))
-            .Where(i => userFeedback.Contains(i.RecordingMbid)).ToList();
+            .Select(i => (i, _metadataClient.GetAudioItemMetadata(i).RecordingMbid))
+            .Where(i => userFeedback.Contains(i.RecordingMbid));
 
-        var itemIds = items.Select(i => i.Id.ToString()).ToList();
-        var updatedUserData = userData
-            .Where(ud => itemIds.Contains(KeyToGuidString(ud.Key)))
-            .Select(ud =>
+        // TODO: plugin option
+        if (false)
+        {
+            // This spams UpdateUserRating events, which will feed into Immediate favorite sync feature.
+            // But there might be other plugins reacting on this event, so there should be an option to produce them.
+            // TODO: internal flag to disable immediate sync during this
+            foreach (var tuple in itemsWithRecordingId)
             {
-                ud.IsFavorite = true;
-                return ud;
-            });
+                var data = _userDataManager.GetUserData(user, tuple.i);
+                data.IsFavorite = true;
+                _userDataManager.SaveUserData(user, tuple.i, data, UserDataSaveReason.UpdateUserRating, cancellationToken);
+            }
 
-        _repository.SaveAllUserData(user.InternalId, updatedUserData.ToArray(), cancellationToken);
+            return;
+        }
+
+        // TODO: solution without user rating event spam
+
     }
 
     private IEnumerable<Guid> GetAllowedLibraries()
