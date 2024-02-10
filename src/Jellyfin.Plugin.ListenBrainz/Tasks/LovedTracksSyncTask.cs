@@ -24,6 +24,7 @@ public class LovedTracksSyncTask : IScheduledTask
     private readonly IUserManager _userManager;
     private readonly IUserDataRepository _repository;
     private readonly IUserDataManager _userDataManager;
+    private bool _reenableImmediateSync;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LovedTracksSyncTask"/> class.
@@ -69,18 +70,23 @@ public class LovedTracksSyncTask : IScheduledTask
     /// <inheritdoc />
     public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
-        if (!Plugin.GetConfiguration().IsMusicBrainzEnabled)
+        var conf = Plugin.GetConfiguration();
+        if (!conf.IsMusicBrainzEnabled)
         {
             _logger.LogInformation("MusicBrainz integration is disabled, cannot sync favorites");
             return;
         }
 
+        if (conf.IsImmediateFavoriteSyncEnabled)
+        {
+            _logger.LogInformation("Immediate favorite sync is enabled, disabling it temporarily");
+            _reenableImmediateSync = true;
+            SetImmediateFavSyncEnabled(false);
+        }
+
         try
         {
             _logger.LogInformation("Starting favorite sync from ListenBrainz...");
-
-            SetImmediateFavSyncEnabled(false);
-            var conf = Plugin.GetConfiguration();
             foreach (var userConfig in conf.UserConfigs)
             {
                 _logger.LogInformation("Syncing favorites for user {Username}", userConfig.UserName);
@@ -95,15 +101,22 @@ public class LovedTracksSyncTask : IScheduledTask
         }
         finally
         {
-            SetImmediateFavSyncEnabled(true);
+            if (_reenableImmediateSync)
+            {
+                _logger.LogInformation("Re-enabling Immediate favorite sync");
+                SetImmediateFavSyncEnabled(true);
+            }
         }
     }
 
     private static void SetImmediateFavSyncEnabled(bool isEnabled)
     {
         var conf = Plugin.GetConfiguration();
-        conf.IsImmediateFavoriteSyncEnabled = isEnabled;
-        Plugin.UpdateConfig(conf);
+        if (conf.IsImmediateFavoriteSyncEnabled)
+        {
+            conf.IsImmediateFavoriteSyncEnabled = isEnabled;
+            Plugin.UpdateConfig(conf);
+        }
     }
 
     private async Task HandleFavoriteSync(UserConfig userConfig, CancellationToken cancellationToken)
