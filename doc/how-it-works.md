@@ -37,7 +37,7 @@ cache to retry later.
 In case of listen submit failures, the listens are saved into a cache, so the data are not lost and the plugin can retry
 sending them in the future. The retry window is randomized on every server startup, with the window being no less than
 24 hours and no more than 25 hours. If you wish to try resubmitting the listens right away, you can do so by triggering
-the scheduled task in the server admin interface. When resubmitting listens, the favorites are not synced.
+the scheduled task in the server admin interface. Favorites are not synced during this process.
 
 If a user does not have a valid configuration or has listen submitting disabled, no listens will be recorded in the
 cache for that user.

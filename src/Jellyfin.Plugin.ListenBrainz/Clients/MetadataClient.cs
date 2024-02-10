@@ -22,11 +22,16 @@ public sealed class MetadataClient : IMetadataClient, IDisposable
     /// </summary>
     /// <param name="clientName">Name of the client application..</param>
     /// <param name="version">Version of the client application.</param>
-    /// <param name="sourceUrl">Contact URL for the maintainer of the application.</param>
-    public MetadataClient(string clientName, string version, string sourceUrl)
+    /// <param name="contactUrl">Contact URL for the maintainer of the application.</param>
+    public MetadataClient(string clientName, string version, string contactUrl)
     {
-        _query = new Query(clientName, version, sourceUrl);
+        _query = new Query(clientName, version, contactUrl);
         _isDisposed = false;
+
+        var uri = new Uri(Plugin.GetConfiguration().MusicBrainzApiUrl);
+        _query.Server = uri.Host;
+        _query.Port = uri.Port;
+        _query.UrlScheme = uri.Scheme;
     }
 
     /// <summary>

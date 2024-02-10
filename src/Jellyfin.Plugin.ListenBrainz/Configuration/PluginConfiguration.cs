@@ -15,6 +15,7 @@ public class PluginConfiguration : BasePluginConfiguration
     private string? _listenBrainzUrlOverride;
     private bool? _isMusicBrainzEnabledOverride;
     private bool? _isAlternativeModeEnabled;
+    private bool? _isImmediateFavoriteSyncEnabled;
     private bool? _shouldEmitUserRatingEvent;
 
     /// <summary>
@@ -72,6 +73,15 @@ public class PluginConfiguration : BasePluginConfiguration
     {
         get => _isAlternativeModeEnabled ?? false;
         set => _isAlternativeModeEnabled = value;
+    }
+
+    /// <summary>
+    /// Gets or set a value indicating whether immediate favorite sync is enabled.
+    /// </summary>
+    public bool IsImmediateFavoriteSyncEnabled
+    {
+        get => _isImmediateFavoriteSyncEnabled ?? true;
+        set => _isImmediateFavoriteSyncEnabled = value;
     }
 
     /// <summary>

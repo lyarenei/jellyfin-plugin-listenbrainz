@@ -231,12 +231,6 @@ public class PluginImplementation
     {
         using var logScope = BeginLogScope();
         _logger.LogDebug("Picking up user data save event for item {Item}", args.Item.Name);
-        var config = Plugin.GetConfiguration();
-        if (!config.IsAlternativeModeEnabled)
-        {
-            _logger.LogDebug("Dropping event - alternative mode is disabled");
-            return;
-        }
 
         EventData data;
         try
@@ -246,6 +240,35 @@ public class PluginImplementation
         catch (Exception e)
         {
             _logger.LogDebug(e, "Dropping event");
+            return;
+        }
+
+        switch (args.SaveReason)
+        {
+            case UserDataSaveReason.UpdateUserRating:
+                _logger.LogDebug("Reason is user rating update, attempting favorite sync");
+                HandleFavoriteSyncUsingMbid(data);
+                return;
+            case UserDataSaveReason.PlaybackFinished:
+                _logger.LogDebug("Reason is playback finished, evaluating listen conditions");
+                HandlePlaybackFinished(data);
+                return;
+            default:
+                _logger.LogDebug("Dropping event - unsupported data save reason");
+                return;
+        }
+    }
+
+    /// <summary>
+    /// Handle playback finished event (alternative recognition of listens).
+    /// </summary>
+    /// <param name="data">Event data.</param>
+    private void HandlePlaybackFinished(EventData data)
+    {
+        var config = Plugin.GetConfiguration();
+        if (!config.IsAlternativeModeEnabled)
+        {
+            _logger.LogDebug("Dropping event - alternative mode is disabled");
             return;
         }
 
@@ -346,6 +369,49 @@ public class PluginImplementation
     }
 
     /// <summary>
+    /// Handle favorite sync using MBID. Does not fall back to using MSID.
+    /// </summary>
+    /// <param name="data">Event data.</param>
+    private void HandleFavoriteSyncUsingMbid(EventData data)
+    {
+        try
+        {
+            AssertImmediateFavoriteSyncIsEnabled();
+            AssertMusicBrainzIsEnabled();
+
+            _logger.LogDebug("Checking if favorite sync is enabled");
+            var userConfig = data.JellyfinUser.GetListenBrainzConfig();
+            if (!userConfig.IsFavoritesSyncEnabled)
+            {
+                _logger.LogDebug("Favorite sync is disabled");
+                return;
+            }
+
+            _logger.LogDebug("Favorite sync is enabled");
+
+            _logger.LogInformation("Getting additional metadata...");
+            var metadata = _metadataClient.GetAudioItemMetadata(data.Item);
+            _logger.LogInformation("Additional metadata successfully received");
+
+            var userItemData = _userDataManager.GetUserData(data.JellyfinUser, data.Item);
+            if (string.IsNullOrEmpty(metadata.RecordingMbid))
+            {
+                _logger.LogInformation("No recording MBID is available, cannot sync favorite");
+                return;
+            }
+
+            _logger.LogInformation("Attempting to sync favorite status");
+            _listenBrainzClient.SendFeedback(userConfig, userItemData.IsFavorite, metadata.RecordingMbid);
+            _logger.LogInformation("Favorite sync has been successful");
+        }
+        catch (Exception e)
+        {
+            _logger.LogInformation("Favorite sync failed: {Reason}", e.Message);
+            _logger.LogDebug(e, "Favorite sync failed");
+        }
+    }
+
+    /// <summary>
     /// Assert MusicBrainz integration is enabled.
     /// </summary>
     /// <exception cref="PluginException">MusicBrainz integration is not enabled.</exception>
@@ -358,6 +424,21 @@ public class PluginImplementation
         }
 
         _logger.LogDebug("MusicBrainz integration is enabled");
+    }
+
+    /// <summary>
+    /// Asser immediate favorite sync is enabled.
+    /// </summary>
+    /// <exception cref="PluginException">Immediate favorite sync is disabled.</exception>
+    private void AssertImmediateFavoriteSyncIsEnabled()
+    {
+        _logger.LogDebug("Checking if immediate favorite sync is enabled");
+        if (!Plugin.GetConfiguration().IsImmediateFavoriteSyncEnabled)
+        {
+            throw new PluginException("Immediate favorite sync is disabled");
+        }
+
+        _logger.LogDebug("Immediate favorite sync is enabled");
     }
 
     /// <summary>
@@ -393,11 +474,6 @@ public class PluginImplementation
         if (eventArgs.Item is not Audio item)
         {
             throw new ArgumentException("Event item is not an Audio item");
-        }
-
-        if (eventArgs.SaveReason is not UserDataSaveReason.PlaybackFinished)
-        {
-            throw new ArgumentException("Not a playback finished event");
         }
 
         var jellyfinUser = _userManager.GetUserById(eventArgs.UserId);
