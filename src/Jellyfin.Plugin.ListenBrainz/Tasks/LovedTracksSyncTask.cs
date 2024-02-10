@@ -134,8 +134,7 @@ public class LovedTracksSyncTask : IScheduledTask
         var userData = _userDataManager.GetUserData(user, item);
         userData.IsFavorite = true;
 
-        // TODO: Plugin option
-        if (false)
+        if (Plugin.GetConfiguration().ShouldEmitUserRatingEvent)
         {
             // This spams UpdateUserRating events, which will feed into Immediate favorite sync feature.
             // But there might be other plugins reacting on this event, so if the plugin should produce these events

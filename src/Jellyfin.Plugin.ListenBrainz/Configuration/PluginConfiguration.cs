@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Xml.Serialization;
+using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Plugins;
 
 namespace Jellyfin.Plugin.ListenBrainz.Configuration;
@@ -14,6 +15,7 @@ public class PluginConfiguration : BasePluginConfiguration
     private string? _listenBrainzUrlOverride;
     private bool? _isMusicBrainzEnabledOverride;
     private bool? _isAlternativeModeEnabled;
+    private bool? _shouldEmitUserRatingEvent;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PluginConfiguration"/> class.
@@ -70,6 +72,17 @@ public class PluginConfiguration : BasePluginConfiguration
     {
         get => _isAlternativeModeEnabled ?? false;
         set => _isAlternativeModeEnabled = value;
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the plugin should emit
+    /// <see cref="UserDataSaveReason.UpdateUserRating"/> event when syncing favorites from ListenBrainz.
+    /// This is useful if there are other plugins used by the server which react on this event.
+    /// </summary>
+    public bool ShouldEmitUserRatingEvent
+    {
+        get => _shouldEmitUserRatingEvent ?? false;
+        set => _shouldEmitUserRatingEvent = value;
     }
 
     /// <summary>
