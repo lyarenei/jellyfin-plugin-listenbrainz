@@ -95,7 +95,11 @@ public class LovedTracksSyncTask : IScheduledTask
         var userData = _repository.GetAllUserData(user.InternalId);
 
         var allowedLibraries = GetAllowedLibraries().Select(al => _libraryManager.GetItemById(al));
-        var q = new InternalItemsQuery(user);
+        var q = new InternalItemsQuery(user)
+        {
+            // Future-proofing if music videos are supported in the future
+            MediaTypes = new[] { MediaType.Audio, MediaType.Video }
+        };
         var itemsWithRecordingId = _libraryManager
             .GetItemList(q, allowedLibraries.ToList())
             .Where(i => i.ProviderIds.GetValueOrDefault("MusicBrainzTrack") is not null)
