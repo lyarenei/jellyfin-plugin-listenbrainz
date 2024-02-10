@@ -106,24 +106,10 @@ public class LovedTracksSyncTask : IScheduledTask
             .Select(i => (i, _metadataClient.GetAudioItemMetadata(i).RecordingMbid))
             .Where(i => userFeedback.Contains(i.RecordingMbid));
 
-        // TODO: plugin option
-        if (false)
+        foreach (var tuple in itemsWithRecordingId)
         {
-            // This spams UpdateUserRating events, which will feed into Immediate favorite sync feature.
-            // But there might be other plugins reacting on this event, so there should be an option to produce them.
-            // TODO: internal flag to disable immediate sync during this
-            foreach (var tuple in itemsWithRecordingId)
-            {
-                var data = _userDataManager.GetUserData(user, tuple.i);
-                data.IsFavorite = true;
-                _userDataManager.SaveUserData(user, tuple.i, data, UserDataSaveReason.UpdateUserRating, cancellationToken);
-            }
-
-            return;
+            MarkAsFavorite(user, tuple.Item, cancellationToken);
         }
-
-        // TODO: solution without user rating event spam
-
     }
 
     private IEnumerable<Guid> GetAllowedLibraries()
@@ -138,19 +124,30 @@ public class LovedTracksSyncTask : IScheduledTask
     }
 
     /// <summary>
-    /// Converts <see cref="UserItemData.Key"/> to a GUID string.
+    /// Update favorite status of a <see cref="BaseItem"/> without invoking an event.
     /// </summary>
-    /// <param name="key">Key to convert.</param>
-    /// <returns>GUID string. Empty on failure.</returns>
-    private static string KeyToGuidString(string key)
+    /// <param name="user">User associated with the change.</param>
+    /// <param name="item">Affected item.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    private void MarkAsFavorite(User user, BaseItem item, CancellationToken cancellationToken)
     {
-        try
+        var userData = _userDataManager.GetUserData(user, item);
+        userData.IsFavorite = true;
+
+        // TODO: Plugin option
+        if (false)
         {
-            return new Guid(key).ToString();
+            // This spams UpdateUserRating events, which will feed into Immediate favorite sync feature.
+            // But there might be other plugins reacting on this event, so if the plugin should produce these events
+            // the plugin temporarily disables the immediate sync feature.
+            // TODO: disable immediate sync during this (probably move this up)
+            _userDataManager.SaveUserData(user, item, userData, UserDataSaveReason.UpdateUserRating, cancellationToken);
+            return;
         }
-        catch (FormatException)
+
+        foreach (var key in item.GetUserDataKeys())
         {
-            return string.Empty;
+            _repository.SaveUserData(user.InternalId, key, userData, cancellationToken);
         }
     }
 }
