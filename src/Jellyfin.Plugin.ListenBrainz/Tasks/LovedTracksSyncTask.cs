@@ -75,17 +75,32 @@ public class LovedTracksSyncTask : IScheduledTask
             return;
         }
 
-        var conf = Plugin.GetConfiguration();
-        foreach (var userConfig in conf.UserConfigs)
+        try
         {
-            if (!userConfig.IsFavoritesSyncEnabled)
+            SetImmediateFavSyncEnabled(false);
+            var conf = Plugin.GetConfiguration();
+            foreach (var userConfig in conf.UserConfigs)
             {
-                _logger.LogDebug("User has not favorite syncing enabled, skipping");
-                continue;
-            }
+                if (!userConfig.IsFavoritesSyncEnabled)
+                {
+                    _logger.LogDebug("User has not favorite syncing enabled, skipping");
+                    continue;
+                }
 
-            await HandleFavoriteSync(userConfig, cancellationToken);
+                await HandleFavoriteSync(userConfig, cancellationToken);
+            }
         }
+        finally
+        {
+            SetImmediateFavSyncEnabled(true);
+        }
+    }
+
+    private static void SetImmediateFavSyncEnabled(bool isEnabled)
+    {
+        var conf = Plugin.GetConfiguration();
+        conf.IsImmediateFavoriteSyncEnabled = isEnabled;
+        Plugin.UpdateConfig(conf);
     }
 
     private async Task HandleFavoriteSync(UserConfig userConfig, CancellationToken cancellationToken)
@@ -139,7 +154,6 @@ public class LovedTracksSyncTask : IScheduledTask
             // This spams UpdateUserRating events, which will feed into Immediate favorite sync feature.
             // But there might be other plugins reacting on this event, so if the plugin should produce these events
             // the plugin temporarily disables the immediate sync feature.
-            // TODO: disable immediate sync during this (probably move this up)
             _userDataManager.SaveUserData(user, item, userData, UserDataSaveReason.UpdateUserRating, cancellationToken);
             return;
         }
