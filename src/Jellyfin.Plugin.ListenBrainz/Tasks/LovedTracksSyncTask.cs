@@ -77,13 +77,16 @@ public class LovedTracksSyncTask : IScheduledTask
 
         try
         {
+            _logger.LogInformation("Starting favorite sync from ListenBrainz...");
+
             SetImmediateFavSyncEnabled(false);
             var conf = Plugin.GetConfiguration();
             foreach (var userConfig in conf.UserConfigs)
             {
+                _logger.LogInformation("Syncing favorites for user {Username}", userConfig.UserName);
                 if (!userConfig.IsFavoritesSyncEnabled)
                 {
-                    _logger.LogDebug("User has not favorite syncing enabled, skipping");
+                    _logger.LogInformation("User has not favorite syncing enabled, skipping");
                     continue;
                 }
 
@@ -146,6 +149,7 @@ public class LovedTracksSyncTask : IScheduledTask
     /// <param name="cancellationToken">Cancellation token.</param>
     private void MarkAsFavorite(User user, BaseItem item, CancellationToken cancellationToken)
     {
+        _logger.LogDebug("Marking item {Name} ({Id}) as favorite", item.Name, item.Id);
         var userData = _userDataManager.GetUserData(user, item);
         userData.IsFavorite = true;
 
