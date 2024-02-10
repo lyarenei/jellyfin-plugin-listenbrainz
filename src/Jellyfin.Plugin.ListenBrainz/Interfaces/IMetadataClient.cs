@@ -1,4 +1,5 @@
 using Jellyfin.Plugin.ListenBrainz.Dtos;
+using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Audio;
 
 namespace Jellyfin.Plugin.ListenBrainz.Interfaces;
@@ -13,5 +14,5 @@ public interface IMetadataClient
     /// </summary>
     /// <param name="item">Audio item.</param>
     /// <returns>Audio item metadata.</returns>
-    public AudioItemMetadata GetAudioItemMetadata(Audio item);
+    public AudioItemMetadata GetAudioItemMetadata(BaseItem item);
 }

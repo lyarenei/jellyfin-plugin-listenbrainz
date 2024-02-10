@@ -2,6 +2,7 @@ using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
+using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Audio;
 using MetaBrainz.MusicBrainz;
 
@@ -60,7 +61,7 @@ public sealed class MetadataClient : IMetadataClient, IDisposable
     }
 
     /// <inheritdoc />
-    public AudioItemMetadata GetAudioItemMetadata(Audio item)
+    public AudioItemMetadata GetAudioItemMetadata(BaseItem item)
     {
         var trackMbid = item.GetTrackMbid();
         if (trackMbid is null)

@@ -1,6 +1,7 @@
 using Jellyfin.Plugin.ListenBrainz.Api.Models;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Utils;
+using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Audio;
 
 namespace Jellyfin.Plugin.ListenBrainz.Extensions;
@@ -73,7 +74,7 @@ public static class AudioExtensions
     /// </summary>
     /// <param name="item">Audio item.</param>
     /// <returns>Track MBID. Null if not available.</returns>
-    public static string? GetTrackMbid(this Audio item) => item.ProviderIds.GetValueOrDefault("MusicBrainzTrack");
+    public static string? GetTrackMbid(this BaseItem item) => item.ProviderIds.GetValueOrDefault("MusicBrainzTrack");
 
     /// <summary>
     /// Create a <see cref="StoredListen"/> from this item.
