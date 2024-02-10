@@ -37,7 +37,12 @@ public class LovedTracksSyncTask : IScheduledTask
     /// <inheritdoc />
     public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
-        // TODO fail if musicbrainz integration is disabled
+        if (!Plugin.GetConfiguration().IsMusicBrainzEnabled)
+        {
+            _logger.LogInformation("MusicBrainz integration is disabled, cannot sync favorites");
+            return;
+        }
+
         var conf = Plugin.GetConfiguration();
         foreach (var userConfig in conf.UserConfigs)
         {
