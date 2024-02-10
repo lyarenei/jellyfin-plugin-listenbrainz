@@ -92,7 +92,6 @@ public class LovedTracksSyncTask : IScheduledTask
     {
         var userFeedback = await _listenBrainzClient.GetLovedTracksAsync(userConfig, cancellationToken);
         var user = _userManager.GetUserById(userConfig.JellyfinUserId);
-        var userData = _repository.GetAllUserData(user.InternalId);
 
         var allowedLibraries = GetAllowedLibraries().Select(al => _libraryManager.GetItemById(al));
         var q = new InternalItemsQuery(user)
@@ -100,10 +99,11 @@ public class LovedTracksSyncTask : IScheduledTask
             // Future-proofing if music videos are supported in the future
             MediaTypes = new[] { MediaType.Audio, MediaType.Video }
         };
+
         var itemsWithRecordingId = _libraryManager
             .GetItemList(q, allowedLibraries.ToList())
             .Where(i => i.ProviderIds.GetValueOrDefault("MusicBrainzTrack") is not null)
-            .Select(i => (i, _metadataClient.GetAudioItemMetadata(i).RecordingMbid))
+            .Select(i => (Item: i, _metadataClient.GetAudioItemMetadata(i).RecordingMbid))
             .Where(i => userFeedback.Contains(i.RecordingMbid));
 
         foreach (var tuple in itemsWithRecordingId)
