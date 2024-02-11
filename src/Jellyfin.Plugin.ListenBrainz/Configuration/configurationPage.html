@@ -121,6 +121,15 @@
                             </label>
                             <div class="fieldDescription">Sync favorite status immediately. Requires MusicBrainz metadata and integration to be enabled.</div>
                         </div>
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="ShouldEmitUserRatingEvent">
+                                <input is="emby-checkbox" type="checkbox" id="ShouldEmitUserRatingEvent"
+                                       name="ShouldEmitUserRatingEvent"/>
+                                <span>Emit UpdateUserRating events</span>
+                            </label>
+                            <div class="fieldDescription">Emit this event when syncing loved tracks from ListenBrainz.
+                                Enable only if you have other plugins working with favorite items.</div>
+                        </div>
                         <div class="sectionTitleContainer flex align-items-center">
                             <h4 class="sectionTitle">Allowed libraries for listen submission</h4>
                             <div class="raised button-alt headerHelpButton emby-button" id="ResetAllowedLibraries">
@@ -376,6 +385,9 @@
             document.querySelector("#IsImmediateFavoriteSyncEnabled")
                 .checked = data.IsImmediateFavoriteSyncEnabled;
 
+            document.querySelector("#ShouldEmitUserRatingEvent")
+                .checked = data.ShouldEmitUserRatingEvent;
+
             try {
                 buildAllowedLibrariesList(data.LibraryConfigs);
             } catch (err) {
@@ -426,6 +438,7 @@
                 IsMusicBrainzEnabled: document.querySelector('#IsMusicBrainzEnabled').checked,
                 IsAlternativeModeEnabled: document.querySelector('#IsAlternativeModeEnabled').checked,
                 IsImmediateFavoriteSyncEnabled: document.querySelector('#IsImmediateFavoriteSyncEnabled').checked,
+                ShouldEmitUserRatingEvent: document.querySelector('#ShouldEmitUserRatingEvent').checked,
                 LibraryConfigs: getLibraryConfigsInputs(),
             }
         }
