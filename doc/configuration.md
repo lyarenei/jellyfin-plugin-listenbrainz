@@ -72,13 +72,21 @@ Currently used metadata from MusicBrainz:
   If the fetching is not enabled, the plugin will default to sending all artist names, separated by a comma.
 
 - **ISRCs**
+
   ISRC stands for `International Standard Recording Code` and is a code uniquely identifying a specific recording.
   There is not much to add here. Jellyfin does not store this code, so the only option is to ask MusicBrainz.
   In some cases, there may be multiple ISRCs stored in MusicBrainz for a specific recording. In these cases, the plugin
   simply chooses the first one.
 
-- **Immediate favorite sync**
-  Enabling this integration allows you to use this feature, as it relies on the `Recording MBID`.
+
+Additionally, there are some plugin features which depend on this integration:
+
+- Immediate favorite sync
+  - Uses recording MBID
+
+- Favorite sync (ListenBrainz -> Jellyfin)
+  - Uses recording MBID
+
 
 ##### Use alternative event for recognizing listens
 
@@ -128,7 +136,7 @@ same timestamp.
 ##### Immediate favorite sync
 
 Modifies the behavior of favorite sync feature. If enabled, the favorite status of a track is synced immediately to
-ListenBrainz. Standard favorite sync (after playback of track finishes) is not affected. This feature only works if
+ListenBrainz. Standard favorite sync (after playback of track finishes) is not affected. This feature only works if a
 track has required metadata (track MBID) and the MusicBrainz integration is enabled.
 
 ##### Allowed libraries for listen submission
