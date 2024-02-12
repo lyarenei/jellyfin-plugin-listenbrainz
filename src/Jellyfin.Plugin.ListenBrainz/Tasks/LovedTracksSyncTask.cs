@@ -133,6 +133,7 @@ public class LovedTracksSyncTask : IScheduledTask
 
         var itemsWithRecordingId = _libraryManager
             .GetItemList(q, allowedLibraries.ToList())
+            .Where(i => !_userDataManager.GetUserData(userConfig.JellyfinUserId, i).IsFavorite)
             .Where(i => i.ProviderIds.GetValueOrDefault("MusicBrainzTrack") is not null)
             .Select(i => (Item: i, _metadataClient.GetAudioItemMetadata(i).RecordingMbid))
             .Where(i => userFeedback.Contains(i.RecordingMbid));
