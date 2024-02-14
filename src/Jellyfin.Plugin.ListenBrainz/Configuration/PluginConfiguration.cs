@@ -76,7 +76,7 @@ public class PluginConfiguration : BasePluginConfiguration
     }
 
     /// <summary>
-    /// Gets or set a value indicating whether immediate favorite sync is enabled.
+    /// Gets or sets a value indicating whether immediate favorite sync is enabled.
     /// </summary>
     public bool IsImmediateFavoriteSyncEnabled
     {
