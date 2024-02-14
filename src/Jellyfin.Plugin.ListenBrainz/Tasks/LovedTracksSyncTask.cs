@@ -24,6 +24,7 @@ public class LovedTracksSyncTask : IScheduledTask
     private readonly IUserManager _userManager;
     private readonly IUserDataRepository _repository;
     private readonly IUserDataManager _userDataManager;
+    private readonly int _usersCount;
     private bool _reenableImmediateSync;
 
     /// <summary>
@@ -50,6 +51,7 @@ public class LovedTracksSyncTask : IScheduledTask
         _userManager = userManager;
         _repository = dataRepository;
         _userDataManager = dataManager;
+        _usersCount = Plugin.GetConfiguration().UserConfigs.Count;
     }
 
     /// <inheritdoc />
@@ -93,10 +95,11 @@ public class LovedTracksSyncTask : IScheduledTask
                 if (!userConfig.IsFavoritesSyncEnabled)
                 {
                     _logger.LogInformation("User has not favorite syncing enabled, skipping");
+                    progress.Report(100.0 / _usersCount);
                     continue;
                 }
 
-                await HandleFavoriteSync(userConfig, cancellationToken);
+                await HandleFavoriteSync(progress, userConfig, cancellationToken);
             }
         }
         finally
@@ -119,9 +122,9 @@ public class LovedTracksSyncTask : IScheduledTask
         }
     }
 
-    private async Task HandleFavoriteSync(UserConfig userConfig, CancellationToken cancellationToken)
+    private async Task HandleFavoriteSync(IProgress<double> progress, UserConfig userConfig, CancellationToken cancellationToken)
     {
-        var userFeedback = await _listenBrainzClient.GetLovedTracksAsync(userConfig, cancellationToken);
+        var lovedTracksIds = (await _listenBrainzClient.GetLovedTracksAsync(userConfig, cancellationToken)).ToList();
         var user = _userManager.GetUserById(userConfig.JellyfinUserId);
 
         var allowedLibraries = GetAllowedLibraries().Select(al => _libraryManager.GetItemById(al));
@@ -131,16 +134,23 @@ public class LovedTracksSyncTask : IScheduledTask
             MediaTypes = new[] { MediaType.Audio, MediaType.Video }
         };
 
-        var itemsWithRecordingId = _libraryManager
+        var taggedItems = _libraryManager
             .GetItemList(q, allowedLibraries.ToList())
             .Where(i => !_userDataManager.GetUserData(userConfig.JellyfinUserId, i).IsFavorite)
             .Where(i => i.ProviderIds.GetValueOrDefault("MusicBrainzTrack") is not null)
-            .Select(i => (Item: i, _metadataClient.GetAudioItemMetadata(i).RecordingMbid))
-            .Where(i => userFeedback.Contains(i.RecordingMbid));
+            .Select(i => (Item: i, _metadataClient.GetAudioItemMetadata(i).RecordingMbid));
 
-        foreach (var tuple in itemsWithRecordingId)
+        var multiplier = 1;
+        foreach (var item in taggedItems)
         {
-            MarkAsFavorite(user, tuple.Item, cancellationToken);
+            if (lovedTracksIds.Contains(item.RecordingMbid))
+            {
+                MarkAsFavorite(user, item.Item, cancellationToken);
+                multiplier = 1;
+            }
+
+            progress.Report(100.0 / _usersCount / (lovedTracksIds.Count * multiplier));
+            multiplier++;
         }
     }
 
