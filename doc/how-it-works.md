@@ -57,5 +57,6 @@ will try getting the username and save it in the configuration.
 When using MSID for the sync, the plugin tries to find the correct MSID at exponential intervals, up to 4 attempts
 (around 10 minutes). If the MSID is still not found, then the sync is cancelled.
 
-For now, the sync is only one-way, from Jellyfin to ListenBrainz. The other direction is not currently implemented, but
-it is planned.
+For the reverse direction, only a manual task is available at this moment. The current limitations make it impractical
+to use as regular task. For reference, a library of approx. 4000 tracks takes around 70 minutes to complete. This is due
+to unavailability of recording MBIDs, which are required for the match - as that's only what ListenBrainz provides.

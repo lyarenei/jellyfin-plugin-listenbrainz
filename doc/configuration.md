@@ -23,13 +23,9 @@ Enables listen submitting for selected user. Pretty self-explanatory, nothing mu
 
 ##### Enable syncing favorites
 
-Enables synchronization of `favorite` tracks in Jellyfin with `loved` listens in ListenBrainz.
-This is currently only one-way, listens of favorite tracks in Jellyfin are marked as 'loved' in ListenBrainz.
-Marking listens as 'hated' is not supported as Jellyfin does not have such concept.
-If you unmark favorite track in Jellyfin, it will be marked as neutral in ListenBrainz.
-Favorite albums and artists are not supported as these are not supported by ListenBrainz as well.
-
-Support for the reverse direction is currently not implemented, but it is planned.
+Enables marking `favorite` tracks in Jellyfin as `loved` listens in ListenBrainz and vice-versa. Marking listens as
+'hated' is not supported as Jellyfin does not have such concept. If you unmark favorite track in Jellyfin, it will be
+marked as neutral in ListenBrainz. Favorite albums and artists are not supported as these are not supported by ListenBrainz.
 
 ## General configuration
 
