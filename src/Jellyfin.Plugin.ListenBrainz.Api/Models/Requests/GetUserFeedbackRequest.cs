@@ -18,7 +18,7 @@ public class GetUserFeedbackRequest : IListenBrainzRequest
     /// <param name="score">Feedback type (score) to get. If unset, both loved and hated feedbacks are returned.</param>
     /// <param name="count">Number of feedbacks to get.</param>
     /// <param name="offset">Feedback list offset.</param>
-    /// <param name="metadata">Include metadata</param>
+    /// <param name="metadata">Include metadata.</param>
     public GetUserFeedbackRequest(
         string userName,
         FeedbackScore? score = null,
