@@ -137,14 +137,13 @@ track has required metadata (track MBID) and the MusicBrainz integration is enab
 
 ##### Emit UpdateUserRating events
 
-During favorite sync from ListenBrainz, the plugin does not use standard method to mark items as favorite as that would
-emit the `UpdateUserRating` events which would feed into the immediate favorite sync feature - that would cause
-unnecessary favorite track updates back to ListenBrainz.
+When syncing loved listens from ListenBrainz, the plugin does not use standard method to mark items as favorite as that
+would emit the `UpdateUserRating` events, which would feed into the immediate favorite sync feature - and that would
+cause unnecessary favorite track updates back to ListenBrainz.
 
-Enable this if you are using other plugins which work with
-favorite items. If enabled, the plugin will automatically disable `Immediate favorite sync` feature (if enabled) during
-the sync to prevent the issue described earlier. This feature only works if a track has required metadata (track MBID)
-and the MusicBrainz integration is enabled.
+Enable this if you are using other plugins which work with favorite items. If enabled, the plugin will automatically
+disable `Immediate favorite sync` feature (if enabled) during the sync to prevent the issue described earlier. This
+feature only works if a track has required metadata (track MBID) and the MusicBrainz integration is enabled.
 
 ##### Allowed libraries for listen submission
 
