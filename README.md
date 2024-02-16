@@ -46,7 +46,7 @@ After you add the repository, you should be able to see `ListenBrainz` plugin in
 Install version according to the compatibility table below and restart the server as asked.
 Continue with plugin [configuration](doc/configuration.md).
 
-Version compatibility table:
+Plugin and Jellyfin versions compatibility table:
 
 | Plugin  | Jellyfin | Status      |
 |---------|----------|-------------|
