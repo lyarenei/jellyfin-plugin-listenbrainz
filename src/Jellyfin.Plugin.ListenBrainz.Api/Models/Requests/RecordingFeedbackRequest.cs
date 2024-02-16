@@ -14,7 +14,7 @@ public class RecordingFeedbackRequest : IListenBrainzRequest
     /// </summary>
     public RecordingFeedbackRequest()
     {
-        BaseUrl = Resources.General.BaseUrl;
+        BaseUrl = General.BaseUrl;
     }
 
     /// <inheritdoc />
