@@ -15,6 +15,7 @@ public class RecordingFeedbackRequest : IListenBrainzRequest
     public RecordingFeedbackRequest()
     {
         BaseUrl = General.BaseUrl;
+        Score = FeedbackScore.Neutral;
     }
 
     /// <inheritdoc />
