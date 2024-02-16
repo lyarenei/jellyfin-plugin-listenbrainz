@@ -45,19 +45,32 @@ cache for that user.
 ## Syncing favorites
 
 In addition to listen submission, this plugin also offers favorite sync. Or, more exactly, marking favorite tracks in
-Jellyfin as `loved` in ListenBrainz. The syncing takes place right away after successfully submitting a listen. Please
-note it may take some time for the hearts to be updated in the ListenBrainz UI. Primarily, a recording MBID is used for
-the sync process, but if it's not available, the process falls back to using MSID.
+Jellyfin as `loved` in ListenBrainz (and vice-versa). Synchronizing favorite artists and albums are not supported as
+this is not supported by ListenBrainz. Similarly, `hated` listens in ListenBrainz are not synced to Jellyfin as there
+is no such concept in Jellyfin.
+
+#### From Jellyfin to ListenBrainz
+
+Syncing always takes place right away after successfully submitting a listen. Please note it may take some time for the
+hearts to be updated in the ListenBrainz UI. Primarily, a recording MBID is used for the sync process, but if it's not
+available, the process falls back to using MSID.
 
 In the MSID case, you may see additional requests made for API token verification. This is to get a ListenBrainz
-username associated with the API token as the plugin did not store the username in earlier 3.x versions. If you wish to
+username associated with the API token (the plugin did not store the username in earlier 3.x versions). If you wish to
 avoid this, go to plugin settings and save the user configuration, no changes are necessary. Upon saving, the plugin
 will try getting the username and save it in the configuration.
 
 When using MSID for the sync, the plugin tries to find the correct MSID at exponential intervals, up to 4 attempts
 (around 10 minutes). If the MSID is still not found, then the sync is cancelled.
 
-For the reverse direction (ListenBrainz -> Jellyfin), only a manual task is available at this moment. This is because of an absence of recording MBIDs which make matching MBIDs to tracks a very expensive operation (in terms of time) and so it is impractical to run this sync regularly.
+#### From ListenBrainz to Jellyfin
 
-For reference, a library of approx. 4000 tracks takes around 70 minutes to complete (and this is multiplied  
-by number of users which have favorite syncing enabled).
+Currently, only a manual task is available at this moment. This is because of an absence of recording MBIDs which make
+matching MBIDs to tracks a very expensive operation (in terms of time) and so it is impractical to run this sync regularly.
+
+You can run the sync task from the Jellyfin administration menu (under scheduled tasks). The task pulls loved listens
+for all users which have favorite synchronization enabled. Keep in mind, that the task can take a long time to complete and
+I would not recommend at this moment to rely on some sort of regular sync. Hopefully this will change in the future.
+
+For reference, a library of approximately 4000 tracks takes around 70 minutes to complete. This is then multiplied by
+number of users which have favorite syncing enabled (assuming all users have access to all tracks on the server).
