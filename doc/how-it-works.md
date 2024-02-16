@@ -69,8 +69,8 @@ Currently, only a manual task is available at this moment. This is because of an
 matching MBIDs to tracks a very expensive operation (in terms of time) and so it is impractical to run this sync regularly.
 
 You can run the sync task from the Jellyfin administration menu (under scheduled tasks). The task pulls loved listens
-for all users which have favorite synchronization enabled. Keep in mind, that the task can take a long time to complete and
-I would not recommend at this moment to rely on some sort of regular sync. Hopefully this will change in the future.
+for all users which have favorite synchronization enabled. Keep in mind, that the task can take a long time to complete.
+Hopefully this will change at some point in the future.
 
 For reference, a library of approximately 4000 tracks takes around 70 minutes to complete. This is then multiplied by
 number of users which have favorite syncing enabled (assuming all users have access to all tracks on the server).
