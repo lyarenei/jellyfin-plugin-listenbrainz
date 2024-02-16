@@ -24,8 +24,9 @@ public class LovedTracksSyncTask : IScheduledTask
     private readonly IUserManager _userManager;
     private readonly IUserDataRepository _repository;
     private readonly IUserDataManager _userDataManager;
-    private readonly int _usersCount;
     private bool _reenableImmediateSync;
+    private double _progress;
+    private double _userCountRatio;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LovedTracksSyncTask"/> class.
@@ -51,7 +52,6 @@ public class LovedTracksSyncTask : IScheduledTask
         _userManager = userManager;
         _repository = dataRepository;
         _userDataManager = dataManager;
-        _usersCount = Plugin.GetConfiguration().UserConfigs.Count;
     }
 
     /// <inheritdoc />
@@ -72,6 +72,7 @@ public class LovedTracksSyncTask : IScheduledTask
     /// <inheritdoc />
     public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
+        Reset();
         var conf = Plugin.GetConfiguration();
         if (!conf.IsMusicBrainzEnabled)
         {
@@ -95,7 +96,8 @@ public class LovedTracksSyncTask : IScheduledTask
                 if (!userConfig.IsFavoritesSyncEnabled)
                 {
                     _logger.LogInformation("User has not favorite syncing enabled, skipping");
-                    progress.Report(100.0 / _usersCount);
+                    _progress += _userCountRatio;
+                    progress.Report(_progress);
                     continue;
                 }
 
@@ -134,23 +136,22 @@ public class LovedTracksSyncTask : IScheduledTask
             MediaTypes = new[] { MediaType.Audio, MediaType.Video }
         };
 
-        var taggedItems = _libraryManager
+        var items = _libraryManager
             .GetItemList(q, allowedLibraries.ToList())
             .Where(i => !_userDataManager.GetUserData(userConfig.JellyfinUserId, i).IsFavorite)
             .Where(i => i.ProviderIds.GetValueOrDefault("MusicBrainzTrack") is not null)
-            .Select(i => (Item: i, _metadataClient.GetAudioItemMetadata(i).RecordingMbid));
+            .ToList();
 
-        var multiplier = 1;
-        foreach (var item in taggedItems)
+        var itemMbidPairs = items.Select(i => (Item: i, _metadataClient.GetAudioItemMetadata(i).RecordingMbid));
+        foreach (var item in itemMbidPairs)
         {
             if (lovedTracksIds.Contains(item.RecordingMbid))
             {
                 MarkAsFavorite(user, item.Item, cancellationToken);
-                multiplier = 1;
             }
 
-            progress.Report(100.0 / _usersCount / (lovedTracksIds.Count * multiplier));
-            multiplier++;
+            _progress += _userCountRatio / items.Count;
+            progress.Report(_progress);
         }
     }
 
@@ -190,5 +191,11 @@ public class LovedTracksSyncTask : IScheduledTask
         {
             _repository.SaveUserData(user.InternalId, key, userData, cancellationToken);
         }
+    }
+
+    private void Reset()
+    {
+        _userCountRatio = 100.0 / Plugin.GetConfiguration().UserConfigs.Count;
+        _progress = 0;
     }
 }
