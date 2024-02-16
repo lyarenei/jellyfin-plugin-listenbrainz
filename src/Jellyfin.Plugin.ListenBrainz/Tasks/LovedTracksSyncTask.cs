@@ -174,7 +174,7 @@ public class LovedTracksSyncTask : IScheduledTask
     /// <param name="cancellationToken">Cancellation token.</param>
     private void MarkAsFavorite(User user, BaseItem item, CancellationToken cancellationToken)
     {
-        _logger.LogDebug("Marking item {Name} ({Id}) as favorite", item.Name, item.Id);
+        _logger.LogDebug("Marking item {Name} as favorite for user {User}", item.Name, user.Username);
         var userData = _userDataManager.GetUserData(user, item);
         userData.IsFavorite = true;
 
@@ -191,6 +191,8 @@ public class LovedTracksSyncTask : IScheduledTask
         {
             _repository.SaveUserData(user.InternalId, key, userData, cancellationToken);
         }
+
+        _logger.LogDebug("Item {Name} has been marked as favorite for user {User}", item.Name, user.Username);
     }
 
     private void Reset()
