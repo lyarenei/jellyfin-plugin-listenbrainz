@@ -23,13 +23,9 @@ Enables listen submitting for selected user. Pretty self-explanatory, nothing mu
 
 ##### Enable syncing favorites
 
-Enables synchronization of `favorite` tracks in Jellyfin with `loved` listens in ListenBrainz.
-This is currently only one-way, listens of favorite tracks in Jellyfin are marked as 'loved' in ListenBrainz.
-Marking listens as 'hated' is not supported as Jellyfin does not have such concept.
-If you unmark favorite track in Jellyfin, it will be marked as neutral in ListenBrainz.
-Favorite albums and artists are not supported as these are not supported by ListenBrainz as well.
-
-Support for the reverse direction is currently not implemented, but it is planned.
+Enables marking `favorite` tracks in Jellyfin as `loved` listens in ListenBrainz and vice-versa. Marking listens as
+'hated' is not supported as Jellyfin does not have such concept. If you unmark favorite track in Jellyfin, it will be
+marked as neutral in ListenBrainz. Favorite albums and artists are not supported as these are not supported by ListenBrainz.
 
 ## General configuration
 
@@ -72,13 +68,21 @@ Currently used metadata from MusicBrainz:
   If the fetching is not enabled, the plugin will default to sending all artist names, separated by a comma.
 
 - **ISRCs**
+
   ISRC stands for `International Standard Recording Code` and is a code uniquely identifying a specific recording.
   There is not much to add here. Jellyfin does not store this code, so the only option is to ask MusicBrainz.
   In some cases, there may be multiple ISRCs stored in MusicBrainz for a specific recording. In these cases, the plugin
   simply chooses the first one.
 
-- **Immediate favorite sync**
-  Enabling this integration allows you to use this feature, as it relies on the `Recording MBID`.
+
+Additionally, there are some plugin features which depend on this integration:
+
+- Immediate favorite sync
+  - Uses recording MBID
+
+- Favorite sync (ListenBrainz -> Jellyfin)
+  - Uses recording MBID
+
 
 ##### Use alternative event for recognizing listens
 
@@ -128,8 +132,18 @@ same timestamp.
 ##### Immediate favorite sync
 
 Modifies the behavior of favorite sync feature. If enabled, the favorite status of a track is synced immediately to
-ListenBrainz. Standard favorite sync (after playback of track finishes) is not affected. This feature only works if
+ListenBrainz. Standard favorite sync (after playback of track finishes) is not affected. This feature only works if a
 track has required metadata (track MBID) and the MusicBrainz integration is enabled.
+
+##### Emit UpdateUserRating events
+
+When syncing loved listens from ListenBrainz, the plugin does not use standard method to mark items as favorite - as that
+would emit the `UpdateUserRating` events, which would feed into the immediate favorite sync feature - and that would
+cause unnecessary favorite track updates back to ListenBrainz.
+
+Enable this if you are using other plugins which work with favorite items. If enabled, the plugin will automatically
+disable `Immediate favorite sync` feature (if enabled) during the sync to prevent the issue described above. This
+feature only works if a track has required metadata (track MBID) and the MusicBrainz integration is enabled.
 
 ##### Allowed libraries for listen submission
 

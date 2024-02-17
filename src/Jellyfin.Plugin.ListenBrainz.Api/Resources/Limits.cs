@@ -7,11 +7,33 @@ namespace Jellyfin.Plugin.ListenBrainz.Api.Resources;
 /// </summary>
 public static class Limits
 {
+    // TODO: these are configurable and should be a part of a config if connecting to a custom LB-compatible server.
+
     /// <summary>
-    /// Maximum listens to send in a request.
+    /// Maximum accepted duration of a listen.
+    /// </summary>
+    public const int MaxDurationLimit = 2073600;
+
+    /// <summary>
+    /// Maximum number of listens in a request.
     /// API docs states this limit is set to 1000, we will be a bit conservative.
     /// </summary>
     public const int MaxListensPerRequest = 100;
+
+    /// <summary>
+    /// Maximum number of items returned in a single GET request.
+    /// </summary>
+    public const int MaxItemsPerGet = 1000;
+
+    /// <summary>
+    /// Default number of items returned in a single GET request.
+    /// </summary>
+    public const int DefaultItemsPerGet = 25;
+
+    /// <summary>
+    /// Minimum acceptable value for listened_at field.
+    /// </summary>
+    public const int ListenMinimumTs = 1033430400;
 
     // ListenBrainz rules for submitting listens:
     // Listens should be submitted for tracks when the user has listened to half the track or 4 minutes of the track, whichever is lower.

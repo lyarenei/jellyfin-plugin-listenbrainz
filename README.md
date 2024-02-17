@@ -19,7 +19,8 @@
 - Send `listens` of tracks you've listened to
 - Send 'now playing' `listens`
 - Submit optional MusicBrainz metadata (requires relevant MusicBrainz track ID in Jellyfin metadata)
-- Sync favorite songs in Jellyfin to ListenBrainz (marked as loved)
+- Mark favorite tracks in Jellyfin as loved in ListenBrainz
+- Sync loved listens/tracks in ListenBrainz as favorite tracks in Jellyfin (requires track MBID)
 - Cache listens when ListenBrainz server cannot be reached
 
 ...and probably some more to come.
@@ -45,7 +46,7 @@ After you add the repository, you should be able to see `ListenBrainz` plugin in
 Install version according to the compatibility table below and restart the server as asked.
 Continue with plugin [configuration](doc/configuration.md).
 
-Version compatibility table:
+Plugin and Jellyfin versions compatibility table:
 
 | Plugin  | Jellyfin | Status      |
 |---------|----------|-------------|
