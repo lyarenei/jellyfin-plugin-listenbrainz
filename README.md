@@ -18,33 +18,30 @@
 
 - Send `listens` of tracks you've listened to
 - Send 'now playing' `listens`
-- Submit optional MusicBrainz metadata (requires relevant MusicBrainz track ID in Jellyfin metadata)
-- Mark favorite tracks in Jellyfin as loved in ListenBrainz
-- Sync loved listens/tracks in ListenBrainz as favorite tracks in Jellyfin (requires track MBID)
+- Submit optional MusicBrainz metadata (requires track MBID)
+- Mark favorite tracks in Jellyfin as loved listens in ListenBrainz
+- Sync loved listens in ListenBrainz as favorite tracks in Jellyfin (requires track MBID)
 - Cache listens when ListenBrainz server cannot be reached
 
 ...and probably some more to come.
 
-If you are interested in more details about how this plugin works, please check out the
-[documentation](doc/how-it-works.md).
+More details about the plugin features and how the plugin works can be found in the [documentation](doc/how-it-works.md).
 
 # Installation
 
 The plugin can be installed either via repository or [manually](#manual-build-and-installation).
-Additionally, all plugin releases are available on the
-[releases page](https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases).
+Additionally, all plugin releases are available on the [releases page](https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases).
 
 ## Install via repository
 
-The plugin is available on: `https://repo.xkrivo.net/jellyfin/manifest.json`
+The repository is available at: `https://repo.xkrivo.net/jellyfin/manifest.json`
 
 Head over to Repositories tab in Jellyfin server settings > Plugins (advanced section), and add the repository
 there, using the URL above.
 Repository name does not matter, it has only an informational purpose for the server admin.
 
 After you add the repository, you should be able to see `ListenBrainz` plugin in the catalog under `General` category.
-Install version according to the compatibility table below and restart the server as asked.
-Continue with plugin [configuration](doc/configuration.md).
+Select the version you want to install and restart the server as asked. Continue with plugin [configuration](doc/configuration.md).
 
 Plugin and Jellyfin versions compatibility table:
 
@@ -60,10 +57,9 @@ The complete configuration documentation is available [here](doc/configuration.m
 
 ### Quickstart
 
-For plugin to be able to send listens, it needs user API token to be able to authenticate.
-Unfortunately, the server admin must configure the plugin for all users as there's no way to make
-user-configurable plugin. So the admin has an access to the ListenBrainz API tokens of all users on their
-server.
+For plugin to be able to send listens, it needs user API token to be able to authenticate. Unfortunately, the server
+admin must configure the plugin for all users as there's no way to make user-configurable plugin. So the admin has an
+access to the ListenBrainz API tokens of all users on their server.
 
 Minimal user configuration:
 
@@ -76,9 +72,9 @@ Minimal user configuration:
 
 ### Debug logging
 
-Please always make sure to provide debug logs when reporting a plugin issue.
-To set up debug logging, you need to modify the logging configuration of the Jellyfin server.
-In addition to changing the logging level, it is also necessary to update the log template, to properly display logged data.
+Please always make sure to provide debug logs when reporting a plugin issue. To set up debug logging, you need to
+modify the logging configuration of the Jellyfin server. In addition to changing the logging level, it is also
+necessary to update the log template, to properly display logged data.
 
 To set up debug logging:
 
@@ -145,7 +141,7 @@ recompiled files.
 
 ## Making a plugin release
 
-1. Make sure you have updated [build file](build.yaml) (ideally should be part of feature pull request)
+1. Make sure you have updated [build file](build.yaml)
 2. Create a new release in the repository
 3. Check that the new version is available in the repository
 
