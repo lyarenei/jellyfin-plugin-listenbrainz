@@ -128,7 +128,6 @@ public class LovedTracksSyncTask : IScheduledTask
     {
         var lovedTracksIds = (await _listenBrainzClient.GetLovedTracksAsync(userConfig, cancellationToken)).ToList();
         var user = _userManager.GetUserById(userConfig.JellyfinUserId);
-
         var allowedLibraries = GetAllowedLibraries().Select(al => _libraryManager.GetItemById(al));
         var q = new InternalItemsQuery(user)
         {
