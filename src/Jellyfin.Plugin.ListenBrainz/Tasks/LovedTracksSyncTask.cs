@@ -132,7 +132,7 @@ public class LovedTracksSyncTask : IScheduledTask
         var allowedLibraries = GetAllowedLibraries().Select(al => _libraryManager.GetItemById(al));
         var q = new InternalItemsQuery(user)
         {
-            // Future-proofing if music videos are supported in the future
+            // Future-proofing for music videos
             MediaTypes = new[] { MediaType.Audio, MediaType.Video }
         };
 
