@@ -5,7 +5,6 @@ using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.Models.Requests;
 using MediaBrowser.Controller.Entities;
-using MediaBrowser.Controller.Entities.Audio;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.ListenBrainz.Clients;
