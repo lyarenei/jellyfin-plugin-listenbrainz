@@ -60,7 +60,7 @@ public class BaseClient : HttpClient
     /// <typeparam name="TRequest">Data type of the request.</typeparam>
     /// <typeparam name="TResponse">Data type of the response.</typeparam>
     /// <returns>Request response. Null if error.</returns>
-    protected async Task<TResponse?> Get<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
+    protected async Task<TResponse> Get<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
         where TRequest : IMusicBrainzRequest
         where TResponse : IMusicBrainzResponse
     {
@@ -84,7 +84,7 @@ public class BaseClient : HttpClient
 
     private Uri BuildRequestUri(string baseUrl, string endpoint) => new($"{baseUrl}/ws/{Api.Version}/{endpoint}");
 
-    private async Task<TResponse?> DoRequest<TResponse>(HttpRequestMessage requestMessage, CancellationToken cancellationToken)
+    private async Task<TResponse> DoRequest<TResponse>(HttpRequestMessage requestMessage, CancellationToken cancellationToken)
         where TResponse : IMusicBrainzResponse
     {
         var response = await SendRequest(requestMessage, cancellationToken);

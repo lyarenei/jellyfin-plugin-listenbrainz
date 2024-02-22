@@ -42,7 +42,7 @@ public class MusicBrainzClient : IMetadataClient
 
         var config = Plugin.GetConfiguration();
         var request = new RecordingRequest(trackMbid) { BaseUrl = config.MusicBrainzApiUrl };
-        var task = _apiClient.GetRecording(request, CancellationToken.None);
+        var task = _apiClient.GetRecordingAsync(request, CancellationToken.None);
         task.Wait();
         if (task.Exception is not null)
         {
