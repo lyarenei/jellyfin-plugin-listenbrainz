@@ -13,9 +13,7 @@ artifacts:
   - "Jellyfin.Plugin.ListenBrainz.dll"
   - "Jellyfin.Plugin.ListenBrainz.Http.dll"
   - "Jellyfin.Plugin.ListenBrainz.Api.dll"
-  - "MetaBrainz.Common.dll"
-  - "MetaBrainz.Common.Json.dll"
-  - "MetaBrainz.MusicBrainz.dll"
+  - "Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.dll"
 changelog: >
   New
     - Option to synchronize favorite tracks to ListenBrainz immediately (#82 @lyarenei)

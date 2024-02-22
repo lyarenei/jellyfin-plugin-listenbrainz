@@ -1,7 +1,6 @@
 using System.Text;
 using System.Text.Json.Serialization;
 using Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.Models;
-using MetaBrainz.MusicBrainz.Interfaces.Entities;
 
 namespace Jellyfin.Plugin.ListenBrainz.Dtos;
 
@@ -29,19 +28,6 @@ public class AudioItemMetadata
         RecordingMbid = recording.Mbid;
         ArtistCredits = recording.ArtistCredits.Select(r => new ArtistCredit(r.Name, r.JoinPhrase));
         Isrcs = recording.Isrcs;
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="AudioItemMetadata"/> class.
-    /// </summary>
-    /// <param name="recording">MBID recording data.</param>
-    public AudioItemMetadata(IRecording recording)
-    {
-        RecordingMbid = recording.Id.ToString();
-        Isrcs = recording.Isrcs ?? new List<string>();
-
-        var credit = recording.ArtistCredit ?? new List<INameCredit>();
-        ArtistCredits = credit.Select(c => new ArtistCredit(c.Name ?? string.Empty, c.JoinPhrase ?? string.Empty));
     }
 
     /// <summary>
