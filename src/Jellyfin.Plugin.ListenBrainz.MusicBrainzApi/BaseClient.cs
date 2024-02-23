@@ -179,8 +179,7 @@ public class BaseClient : HttpClient, IDisposable
             {
                 if (i + 1 == RateLimitAttempts)
                 {
-                    // TODO exception rate limit
-                    return default;
+                    throw new RateLimitException($"Could not fit into a rate limit window {RateLimitAttempts} times");
                 }
 
                 _logger.LogDebug("Rate limit reached, will retry after new window opens");
