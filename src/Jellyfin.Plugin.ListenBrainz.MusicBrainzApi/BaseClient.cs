@@ -1,9 +1,11 @@
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Web;
 using Jellyfin.Plugin.ListenBrainz.Http.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Http.Interfaces;
+using Jellyfin.Plugin.ListenBrainz.Http.Services;
 using Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.Json;
 using Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.Resources;
@@ -26,9 +28,13 @@ public class BaseClient : HttpClient
         PropertyNamingPolicy = KebabCaseNamingPolicy.Instance
     };
 
+    private const int RateLimitAttempts = 50;
     private readonly string _clientName;
     private readonly string _clientVersion;
     private readonly string _contactUrl;
+    private readonly ILogger _logger;
+    private readonly SemaphoreSlim _rateLimiter;
+    private readonly ISleepService _sleepService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BaseClient"/> class.
@@ -50,6 +56,9 @@ public class BaseClient : HttpClient
         _clientName = clientName;
         _clientVersion = clientVersion;
         _contactUrl = contactUrl;
+        _logger = logger;
+        _rateLimiter = new SemaphoreSlim(1, 1);
+        _sleepService = sleepService ?? new DefaultSleepService();
     }
 
     /// <summary>
@@ -87,7 +96,17 @@ public class BaseClient : HttpClient
     private async Task<TResponse> DoRequest<TResponse>(HttpRequestMessage requestMessage, CancellationToken cancellationToken)
         where TResponse : IMusicBrainzResponse
     {
-        var response = await SendRequest(requestMessage, cancellationToken);
+        HttpResponseMessage response;
+        await _rateLimiter.WaitAsync(cancellationToken);
+        try
+        {
+            response = await DoRequestWithRetry(requestMessage, cancellationToken);
+        }
+        finally
+        {
+            _rateLimiter.Release();
+        }
+
         var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
         var result = await JsonSerializer.DeserializeAsync<TResponse>(responseStream, SerializerOptions, cancellationToken);
         if (result is null) throw new InvalidResponseException("Response deserialized to NULL");
@@ -113,5 +132,39 @@ public class BaseClient : HttpClient
         }
 
         return query;
+    }
+
+    private async Task<HttpResponseMessage> DoRequestWithRetry(HttpRequestMessage requestMessage, CancellationToken cancellationToken)
+    {
+        for (int i = 0; i < RateLimitAttempts; i++)
+        {
+            var response = await SendRequest(requestMessage, cancellationToken);
+
+            // MusicBrainz will return 503 if over rate limit
+            if (response.StatusCode == HttpStatusCode.ServiceUnavailable)
+            {
+                if (i + 1 == RateLimitAttempts)
+                {
+                    // TODO exception rate limit
+                    return default;
+                }
+
+                _logger.LogDebug("Rate limit reached, will retry after new window opens");
+                await HandleRateLimit();
+                continue;
+            }
+
+            _logger.LogDebug("Did not hit any rate limits, all OK");
+            return response;
+        }
+
+        // TODO: exception - no response
+        return default;
+    }
+
+    private async Task HandleRateLimit()
+    {
+        // MusicBrainz documentation says the rate limit is on average 1 rps.
+        await _sleepService.SleepAsync(1);
     }
 }
