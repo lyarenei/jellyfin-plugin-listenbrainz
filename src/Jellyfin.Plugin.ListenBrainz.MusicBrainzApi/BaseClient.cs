@@ -147,7 +147,7 @@ public class BaseClient : HttpClient, IDisposable
         var result = await JsonSerializer.DeserializeAsync<TResponse>(responseStream, SerializerOptions, cancellationToken);
         if (result is null)
         {
-            throw new InvalidResponseException("Response deserialized to NULL");
+            throw new NoDataException("Response deserialized to NULL");
         }
 
         return result;
@@ -197,7 +197,7 @@ public class BaseClient : HttpClient, IDisposable
             return response;
         }
 
-        throw new NoDataException("No response available from MusicBrainz server");
+        throw new InvalidResponseException("No response available from MusicBrainz server");
     }
 
     private async Task HandleRateLimit()
