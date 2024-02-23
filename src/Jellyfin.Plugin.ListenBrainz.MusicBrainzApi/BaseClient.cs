@@ -109,7 +109,11 @@ public class BaseClient : HttpClient
 
         var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
         var result = await JsonSerializer.DeserializeAsync<TResponse>(responseStream, SerializerOptions, cancellationToken);
-        if (result is null) throw new InvalidResponseException("Response deserialized to NULL");
+        if (result is null)
+        {
+            throw new InvalidResponseException("Response deserialized to NULL");
+        }
+
         return result;
     }
 
