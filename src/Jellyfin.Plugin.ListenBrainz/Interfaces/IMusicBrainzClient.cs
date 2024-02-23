@@ -1,13 +1,12 @@
 using Jellyfin.Plugin.ListenBrainz.Dtos;
 using MediaBrowser.Controller.Entities;
-using MediaBrowser.Controller.Entities.Audio;
 
 namespace Jellyfin.Plugin.ListenBrainz.Interfaces;
 
 /// <summary>
 /// MusicBrainz client.
 /// </summary>
-public interface IMetadataClient
+public interface IMusicBrainzClient
 {
     /// <summary>
     /// Get additional metadata for specified audio item.

@@ -21,7 +21,7 @@ public class ResubmitListensTask : IScheduledTask
     private readonly ILogger _logger;
     private readonly ListensCacheManager _listensCache;
     private readonly IListenBrainzClient _listenBrainzClient;
-    private readonly IMetadataClient _metadataClient;
+    private readonly IMusicBrainzClient _musicBrainzClient;
     private readonly IUserManager _userManager;
     private readonly ILibraryManager _libraryManager;
 
@@ -37,7 +37,7 @@ public class ResubmitListensTask : IScheduledTask
         _logger = loggerFactory.CreateLogger($"{Plugin.LoggerCategory}.ResubmitListensTask");
         _listensCache = ListensCacheManager.Instance;
         _listenBrainzClient = ClientUtils.GetListenBrainzClient(_logger, clientFactory, libraryManager);
-        _metadataClient = ClientUtils.GetMusicBrainzClient(_logger, clientFactory);
+        _musicBrainzClient = ClientUtils.GetMusicBrainzClient(_logger, clientFactory);
         _userManager = userManager;
         _libraryManager = libraryManager;
     }
@@ -159,7 +159,7 @@ public class ResubmitListensTask : IScheduledTask
                 return listen;
             }
 
-            listen.Metadata = _metadataClient.GetAudioItemMetadata(item);
+            listen.Metadata = _musicBrainzClient.GetAudioItemMetadata(item);
         }
         catch (Exception e)
         {
