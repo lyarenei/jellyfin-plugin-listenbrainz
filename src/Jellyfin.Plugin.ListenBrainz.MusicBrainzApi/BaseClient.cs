@@ -17,7 +17,7 @@ namespace Jellyfin.Plugin.ListenBrainz.MusicBrainzApi;
 /// <summary>
 /// Base MusicBrainz API client.
 /// </summary>
-public class BaseClient : HttpClient
+public class BaseClient : HttpClient, IDisposable
 {
     /// <summary>
     /// Serializer options.
@@ -35,6 +35,8 @@ public class BaseClient : HttpClient
     private readonly ILogger _logger;
     private readonly SemaphoreSlim _rateLimiter;
     private readonly ISleepService _sleepService;
+
+    private bool _isDisposed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BaseClient"/> class.
@@ -59,6 +61,34 @@ public class BaseClient : HttpClient
         _logger = logger;
         _rateLimiter = new SemaphoreSlim(1, 1);
         _sleepService = sleepService ?? new DefaultSleepService();
+
+        _isDisposed = false;
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Disposes managed and unmanaged (own) resources.
+    /// </summary>
+    /// <param name="disposing">Dispose managed resources.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_isDisposed)
+        {
+            return;
+        }
+
+        if (disposing)
+        {
+            _rateLimiter.Dispose();
+        }
+
+        _isDisposed = true;
     }
 
     /// <summary>
