@@ -37,10 +37,11 @@ public static class ClientUtils
     /// </summary>
     /// <param name="logger">Logger instance.</param>
     /// <param name="clientFactory">HTTP client factory.</param>
-    /// <returns>Instance of <see cref="IMetadataClient"/>.</returns>
-    public static IMetadataClient GetMusicBrainzClient(ILogger logger, IHttpClientFactory clientFactory)
+    /// <returns>Instance of <see cref="IMusicBrainzClient"/>.</returns>
+    public static IMusicBrainzClient GetMusicBrainzClient(ILogger logger, IHttpClientFactory clientFactory)
     {
         var clientName = string.Join(string.Empty, Plugin.FullName.Split(' ').Select(s => s.Capitalize()));
-        return new MetadataClient(clientName, Plugin.Version, Plugin.SourceUrl);
+        var apiClient = new MusicBrainzApiClient(clientName, Plugin.Version, Plugin.SourceUrl, clientFactory, logger);
+        return new MusicBrainzClient(logger, apiClient);
     }
 }

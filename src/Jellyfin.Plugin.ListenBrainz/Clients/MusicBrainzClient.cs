@@ -5,7 +5,6 @@ using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.Models.Requests;
 using MediaBrowser.Controller.Entities;
-using MediaBrowser.Controller.Entities.Audio;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.ListenBrainz.Clients;
@@ -13,7 +12,7 @@ namespace Jellyfin.Plugin.ListenBrainz.Clients;
 /// <summary>
 /// MusicBrainz client for plugin.
 /// </summary>
-public class MusicBrainzClient : IMetadataClient
+public class MusicBrainzClient : IMusicBrainzClient
 {
     private readonly ILogger _logger;
     private readonly IMusicBrainzApiClient _apiClient;
@@ -43,7 +42,7 @@ public class MusicBrainzClient : IMetadataClient
 
         var config = Plugin.GetConfiguration();
         var request = new RecordingRequest(trackMbid) { BaseUrl = config.MusicBrainzApiUrl };
-        var task = _apiClient.GetRecording(request, CancellationToken.None);
+        var task = _apiClient.GetRecordingAsync(request, CancellationToken.None);
         task.Wait();
         if (task.Exception is not null)
         {

@@ -22,7 +22,7 @@ public class PluginImplementation
 {
     private readonly ILogger _logger;
     private readonly IListenBrainzClient _listenBrainzClient;
-    private readonly IMetadataClient _metadataClient;
+    private readonly IMusicBrainzClient _musicBrainzClient;
     private readonly IUserDataManager _userDataManager;
     private readonly ListensCacheManager _listensCache;
     private readonly IUserManager _userManager;
@@ -35,21 +35,21 @@ public class PluginImplementation
     /// </summary>
     /// <param name="logger">Logger instance.</param>
     /// <param name="listenBrainzClient">ListenBrainz client.</param>
-    /// <param name="metadataClient">Client for providing additional metadata.</param>
+    /// <param name="musicBrainzClient">Client for providing additional metadata.</param>
     /// <param name="userDataManager">User data manager.</param>
     /// <param name="userManager">User manager.</param>
     /// <param name="libraryManager">Library manager.</param>
     public PluginImplementation(
         ILogger logger,
         IListenBrainzClient listenBrainzClient,
-        IMetadataClient metadataClient,
+        IMusicBrainzClient musicBrainzClient,
         IUserDataManager userDataManager,
         IUserManager userManager,
         ILibraryManager libraryManager)
     {
         _logger = logger;
         _listenBrainzClient = listenBrainzClient;
-        _metadataClient = metadataClient;
+        _musicBrainzClient = musicBrainzClient;
         _userDataManager = userDataManager;
         _listensCache = ListensCacheManager.Instance;
         _userManager = userManager;
@@ -104,7 +104,7 @@ public class PluginImplementation
         {
             AssertMusicBrainzIsEnabled();
             _logger.LogInformation("Getting additional metadata...");
-            metadata = _metadataClient.GetAudioItemMetadata(data.Item);
+            metadata = _musicBrainzClient.GetAudioItemMetadata(data.Item);
             _logger.LogInformation("Additional metadata successfully received");
         }
         catch (Exception e)
@@ -190,7 +190,7 @@ public class PluginImplementation
         {
             AssertMusicBrainzIsEnabled();
             _logger.LogInformation("Getting additional metadata...");
-            metadata = _metadataClient.GetAudioItemMetadata(data.Item);
+            metadata = _musicBrainzClient.GetAudioItemMetadata(data.Item);
             _logger.LogInformation("Additional metadata successfully received");
         }
         catch (Exception e)
@@ -307,7 +307,7 @@ public class PluginImplementation
         {
             AssertMusicBrainzIsEnabled();
             _logger.LogInformation("Getting additional metadata...");
-            metadata = _metadataClient.GetAudioItemMetadata(data.Item);
+            metadata = _musicBrainzClient.GetAudioItemMetadata(data.Item);
             _logger.LogInformation("Additional metadata successfully received");
         }
         catch (Exception e)
@@ -390,7 +390,7 @@ public class PluginImplementation
             _logger.LogDebug("Favorite sync is enabled");
 
             _logger.LogInformation("Getting additional metadata...");
-            var metadata = _metadataClient.GetAudioItemMetadata(data.Item);
+            var metadata = _musicBrainzClient.GetAudioItemMetadata(data.Item);
             _logger.LogInformation("Additional metadata successfully received");
 
             var userItemData = _userDataManager.GetUserData(data.JellyfinUser, data.Item);

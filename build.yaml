@@ -1,7 +1,7 @@
 ---
 name: "ListenBrainz"
 guid: "59B20823-AAFE-454C-A393-17427F518631"
-version: "3.4.0.1"
+version: "3.4.1.0"
 targetAbi: "10.8.0.0"
 framework: "net6.0"
 overview: "Track your music habits with ListenBrainz."
@@ -11,17 +11,10 @@ category: "General"
 owner: "lyarenei"
 artifacts:
   - "Jellyfin.Plugin.ListenBrainz.dll"
-  - "Jellyfin.Plugin.ListenBrainz.Http.dll"
   - "Jellyfin.Plugin.ListenBrainz.Api.dll"
-  - "MetaBrainz.Common.dll"
-  - "MetaBrainz.Common.Json.dll"
-  - "MetaBrainz.MusicBrainz.dll"
+  - "Jellyfin.Plugin.ListenBrainz.Common.dll"
+  - "Jellyfin.Plugin.ListenBrainz.Http.dll"
+  - "Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.dll"
 changelog: >
-  New
-    - Option to synchronize favorite tracks to ListenBrainz immediately (#82 @lyarenei)
-    - Manual task for synchronizing loved listens from ListenBrainz (#80 @lyarenei)
   Maintenance
-    - Refactor even processing; improve logging (#76 @lyarenei)
-    - Use logging scopes (#77 @lyarenei)
-    - Deprecate MusicBrainz custom client in favor of the recommended one (#78 @lyarenei)
-    - Various documentation updates (#79 @lyarenei)
+    - Revert back to custom MusicBrainz client to avoid dependency conflicts (#89 @lyarenei)

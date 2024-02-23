@@ -14,5 +14,5 @@ public interface IMusicBrainzApiClient
     /// <param name="request">Recording request.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Recording response.</returns>
-    public Task<RecordingResponse?> GetRecording(RecordingRequest request, CancellationToken cancellationToken);
+    public Task<RecordingResponse> GetRecordingAsync(RecordingRequest request, CancellationToken cancellationToken);
 }

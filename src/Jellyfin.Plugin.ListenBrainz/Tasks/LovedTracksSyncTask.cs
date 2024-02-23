@@ -19,7 +19,7 @@ public class LovedTracksSyncTask : IScheduledTask
 {
     private readonly ILogger _logger;
     private readonly IListenBrainzClient _listenBrainzClient;
-    private readonly IMetadataClient _metadataClient;
+    private readonly IMusicBrainzClient _musicBrainzClient;
     private readonly ILibraryManager _libraryManager;
     private readonly IUserManager _userManager;
     private readonly IUserDataRepository _repository;
@@ -47,7 +47,7 @@ public class LovedTracksSyncTask : IScheduledTask
     {
         _logger = loggerFactory.CreateLogger($"{Plugin.LoggerCategory}.FavoriteSyncTask");
         _listenBrainzClient = ClientUtils.GetListenBrainzClient(_logger, clientFactory, libraryManager);
-        _metadataClient = ClientUtils.GetMusicBrainzClient(_logger, clientFactory);
+        _musicBrainzClient = ClientUtils.GetMusicBrainzClient(_logger, clientFactory);
         _libraryManager = libraryManager;
         _userManager = userManager;
         _repository = dataRepository;
@@ -141,7 +141,7 @@ public class LovedTracksSyncTask : IScheduledTask
             .Where(i => i.ProviderIds.GetValueOrDefault("MusicBrainzTrack") is not null)
             .ToList();
 
-        var itemMbidPairs = items.Select(i => (Item: i, _metadataClient.GetAudioItemMetadata(i).RecordingMbid));
+        var itemMbidPairs = items.Select(i => (Item: i, _musicBrainzClient.GetAudioItemMetadata(i).RecordingMbid));
         foreach (var item in itemMbidPairs)
         {
             if (lovedTracksIds.Contains(item.RecordingMbid))

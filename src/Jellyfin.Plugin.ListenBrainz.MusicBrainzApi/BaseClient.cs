@@ -1,9 +1,13 @@
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Web;
+using Jellyfin.Plugin.ListenBrainz.Common;
+using Jellyfin.Plugin.ListenBrainz.Common.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Http.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Http.Interfaces;
+using Jellyfin.Plugin.ListenBrainz.Http.Services;
 using Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.Json;
 using Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.Resources;
@@ -15,7 +19,7 @@ namespace Jellyfin.Plugin.ListenBrainz.MusicBrainzApi;
 /// <summary>
 /// Base MusicBrainz API client.
 /// </summary>
-public class BaseClient : HttpClient
+public class BaseClient : HttpClient, IDisposable
 {
     /// <summary>
     /// Serializer options.
@@ -26,9 +30,15 @@ public class BaseClient : HttpClient
         PropertyNamingPolicy = KebabCaseNamingPolicy.Instance
     };
 
+    private const int RateLimitAttempts = 50;
     private readonly string _clientName;
     private readonly string _clientVersion;
     private readonly string _contactUrl;
+    private readonly ILogger _logger;
+    private readonly SemaphoreSlim _rateLimiter;
+    private readonly ISleepService _sleepService;
+
+    private bool _isDisposed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BaseClient"/> class.
@@ -50,6 +60,37 @@ public class BaseClient : HttpClient
         _clientName = clientName;
         _clientVersion = clientVersion;
         _contactUrl = contactUrl;
+        _logger = logger;
+        _rateLimiter = new SemaphoreSlim(1, 1);
+        _sleepService = sleepService ?? new DefaultSleepService();
+
+        _isDisposed = false;
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Disposes managed and unmanaged (own) resources.
+    /// </summary>
+    /// <param name="disposing">Dispose managed resources.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_isDisposed)
+        {
+            return;
+        }
+
+        if (disposing)
+        {
+            _rateLimiter.Dispose();
+        }
+
+        _isDisposed = true;
     }
 
     /// <summary>
@@ -60,7 +101,7 @@ public class BaseClient : HttpClient
     /// <typeparam name="TRequest">Data type of the request.</typeparam>
     /// <typeparam name="TResponse">Data type of the response.</typeparam>
     /// <returns>Request response. Null if error.</returns>
-    protected async Task<TResponse?> Get<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
+    protected async Task<TResponse> Get<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
         where TRequest : IMusicBrainzRequest
         where TResponse : IMusicBrainzResponse
     {
@@ -82,15 +123,33 @@ public class BaseClient : HttpClient
         using (requestMessage) return await DoRequest<TResponse>(requestMessage, cancellationToken);
     }
 
-    private Uri BuildRequestUri(string baseUrl, string endpoint) => new($"{baseUrl}/ws/{Api.Version}/{endpoint}");
+    private static Uri BuildRequestUri(string baseUrl, string endpoint) => new($"{baseUrl}/ws/{Api.Version}/{endpoint}");
 
-    private async Task<TResponse?> DoRequest<TResponse>(HttpRequestMessage requestMessage, CancellationToken cancellationToken)
+    private async Task<TResponse> DoRequest<TResponse>(HttpRequestMessage requestMessage, CancellationToken cancellationToken)
         where TResponse : IMusicBrainzResponse
     {
-        var response = await SendRequest(requestMessage, cancellationToken);
+        using var scope = _logger.AddNewScope("ClientRequestId");
+        HttpResponseMessage response;
+        _logger.LogDebug("Waiting for previous request to complete (if any)");
+        await _rateLimiter.WaitAsync(cancellationToken);
+        try
+        {
+            _logger.LogDebug("Sending request...");
+            response = await DoRequestWithRetry(requestMessage, cancellationToken);
+        }
+        finally
+        {
+            _logger.LogDebug("Request has been processed, freeing up resources");
+            _rateLimiter.Release();
+        }
+
         var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
         var result = await JsonSerializer.DeserializeAsync<TResponse>(responseStream, SerializerOptions, cancellationToken);
-        if (result is null) throw new InvalidResponseException("Response deserialized to NULL");
+        if (result is null)
+        {
+            throw new NoDataException("Response deserialized to NULL");
+        }
+
         return result;
     }
 
@@ -113,5 +172,37 @@ public class BaseClient : HttpClient
         }
 
         return query;
+    }
+
+    private async Task<HttpResponseMessage> DoRequestWithRetry(HttpRequestMessage requestMessage, CancellationToken cancellationToken)
+    {
+        for (int i = 0; i < RateLimitAttempts; i++)
+        {
+            var response = await SendRequest(requestMessage, cancellationToken);
+
+            // MusicBrainz will return 503 if over rate limit
+            if (response.StatusCode == HttpStatusCode.ServiceUnavailable)
+            {
+                if (i + 1 == RateLimitAttempts)
+                {
+                    throw new RateLimitException($"Could not fit into a rate limit window {RateLimitAttempts} times");
+                }
+
+                _logger.LogDebug("Rate limit reached, will retry after new window opens");
+                await HandleRateLimit();
+                continue;
+            }
+
+            _logger.LogDebug("Did not hit any rate limits, all OK");
+            return response;
+        }
+
+        throw new InvalidResponseException("No response available from MusicBrainz server");
+    }
+
+    private async Task HandleRateLimit()
+    {
+        // MusicBrainz documentation says the rate limit is on average 1 rps.
+        await _sleepService.SleepAsync(1);
     }
 }
