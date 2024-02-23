@@ -16,11 +16,5 @@ artifacts:
   - "Jellyfin.Plugin.ListenBrainz.Http.dll"
   - "Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.dll"
 changelog: >
-  New
-    - Option to synchronize favorite tracks to ListenBrainz immediately (#82 @lyarenei)
-    - Manual task for synchronizing loved listens from ListenBrainz (#80 @lyarenei)
   Maintenance
-    - Refactor even processing; improve logging (#76 @lyarenei)
-    - Use logging scopes (#77 @lyarenei)
-    - Deprecate MusicBrainz custom client in favor of the recommended one (#78 @lyarenei)
-    - Various documentation updates (#79 @lyarenei)
+    - Revert back to custom MusicBrainz client to avoid dependency conflicts (#89 @lyarenei)
