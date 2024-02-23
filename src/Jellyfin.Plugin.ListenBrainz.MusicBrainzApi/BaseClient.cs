@@ -130,13 +130,16 @@ public class BaseClient : HttpClient, IDisposable
     {
         using var scope = _logger.AddNewScope("ClientRequestId");
         HttpResponseMessage response;
+        _logger.LogDebug("Waiting for previous request to complete (if any)");
         await _rateLimiter.WaitAsync(cancellationToken);
         try
         {
+            _logger.LogDebug("Sending request...");
             response = await DoRequestWithRetry(requestMessage, cancellationToken);
         }
         finally
         {
+            _logger.LogDebug("Request has been processed, freeing up resources");
             _rateLimiter.Release();
         }
 
