@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Web;
+using Jellyfin.Plugin.ListenBrainz.Common.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Http.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Http.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.Http.Services;
@@ -191,8 +192,7 @@ public class BaseClient : HttpClient, IDisposable
             return response;
         }
 
-        // TODO: exception - no response
-        return default;
+        throw new NoDataException("No response available from MusicBrainz server");
     }
 
     private async Task HandleRateLimit()
