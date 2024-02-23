@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Web;
+using Jellyfin.Plugin.ListenBrainz.Common;
 using Jellyfin.Plugin.ListenBrainz.Common.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Http.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Http.Interfaces;
@@ -127,6 +128,7 @@ public class BaseClient : HttpClient, IDisposable
     private async Task<TResponse> DoRequest<TResponse>(HttpRequestMessage requestMessage, CancellationToken cancellationToken)
         where TResponse : IMusicBrainzResponse
     {
+        using var scope = _logger.AddNewScope("ClientRequestId");
         HttpResponseMessage response;
         await _rateLimiter.WaitAsync(cancellationToken);
         try
