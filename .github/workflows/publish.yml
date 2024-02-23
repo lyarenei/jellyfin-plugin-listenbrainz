@@ -19,7 +19,7 @@ jobs:
           dotnet-version: "${{ inputs.dotnet-version }}"
 
       - name: Build Jellyfin Plugin
-        uses: oddstr13/jellyfin-plugin-repository-manager@4a2b165a3dc2cfc392db865a85f23c02e9f78c68 # v0.5.1
+        uses: oddstr13/jellyfin-plugin-repository-manager@eabb903cdac8a7f6d94df887c6910b5720ec48f9 # v1.0.11
         id: jprm
         with:
           dotnet-target: "${{ inputs.dotnet-target }}"
