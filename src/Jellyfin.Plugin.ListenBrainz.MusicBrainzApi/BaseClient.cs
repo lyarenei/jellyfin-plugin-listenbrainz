@@ -82,7 +82,7 @@ public class BaseClient : HttpClient
         using (requestMessage) return await DoRequest<TResponse>(requestMessage, cancellationToken);
     }
 
-    private Uri BuildRequestUri(string baseUrl, string endpoint) => new($"{baseUrl}/ws/{Api.Version}/{endpoint}");
+    private static Uri BuildRequestUri(string baseUrl, string endpoint) => new($"{baseUrl}/ws/{Api.Version}/{endpoint}");
 
     private async Task<TResponse> DoRequest<TResponse>(HttpRequestMessage requestMessage, CancellationToken cancellationToken)
         where TResponse : IMusicBrainzResponse
