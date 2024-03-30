@@ -110,7 +110,7 @@ the [jellyfin plugin template](https://github.com/jellyfin/jellyfin-plugin-templ
 
 ## Manual build and installation
 
-.NET 6.0 is required to build the plugin.
+.NET 8.0 is required to build the plugin.
 To install the .NET SDK, check out the [.NET download page](https://dotnet.microsoft.com/download).
 
 Once the SDK is installed, you should be able to compile the plugin in either debug or release configuration:
@@ -124,7 +124,7 @@ Once the SDK is installed, you should be able to compile the plugin in either de
 ```
 
 Once the build is completed, the compiled DLLs should be available at:
-`src/Jellyfin.Plugin.Listenbrainz/bin/<Debug|Release>/net6.0/`
+`src/Jellyfin.Plugin.Listenbrainz/bin/<Debug|Release>/net8.0/`
 
 To install the plugin for the first time, copy all **DLL** files starting with `Jellyfin.Plugin.ListenBrainz` to the
 plugin directory in your Jellyfin config directory (`${CONFIG_DIR}/plugins/Jellyfin.Plugin.ListenBrainz_1.0.0.0`).
