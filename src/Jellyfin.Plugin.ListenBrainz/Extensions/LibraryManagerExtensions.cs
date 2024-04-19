@@ -1,3 +1,4 @@
+using Jellyfin.Data.Enums;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 
@@ -30,6 +31,6 @@ public static class LibraryManagerExtensions
     {
         return GetLibraries(libraryManager)
             .Cast<CollectionFolder>()
-            .Where(f => f.CollectionType == "music");
+            .Where(f => f.CollectionType == CollectionType.music);
     }
 }

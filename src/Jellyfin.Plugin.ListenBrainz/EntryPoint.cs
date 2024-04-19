@@ -1,7 +1,7 @@
 using Jellyfin.Plugin.ListenBrainz.Utils;
 using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.Plugins;
 using MediaBrowser.Controller.Session;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.ListenBrainz;
@@ -9,7 +9,7 @@ namespace Jellyfin.Plugin.ListenBrainz;
 /// <summary>
 /// ListenBrainz plugin entrypoint for Jellyfin server.
 /// </summary>
-public sealed class EntryPoint : IServerEntryPoint
+public sealed class EntryPoint : IHostedService
 {
     private readonly ISessionManager _sessionManager;
     private readonly IUserDataManager _userDataManager;
@@ -51,7 +51,7 @@ public sealed class EntryPoint : IServerEntryPoint
     }
 
     /// <inheritdoc />
-    public Task RunAsync()
+    public Task StartAsync(CancellationToken cancellationToken)
     {
         _sessionManager.PlaybackStart += _plugin.OnPlaybackStart;
         _sessionManager.PlaybackStopped += _plugin.OnPlaybackStop;
@@ -60,10 +60,11 @@ public sealed class EntryPoint : IServerEntryPoint
     }
 
     /// <inheritdoc />
-    public void Dispose()
+    public Task StopAsync(CancellationToken cancellationToken)
     {
         _sessionManager.PlaybackStart -= _plugin.OnPlaybackStart;
         _sessionManager.PlaybackStopped -= _plugin.OnPlaybackStop;
         _userDataManager.UserDataSaved -= _plugin.OnUserDataSave;
+        return Task.CompletedTask;
     }
 }
