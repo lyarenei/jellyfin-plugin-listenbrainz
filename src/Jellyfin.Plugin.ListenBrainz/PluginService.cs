@@ -14,6 +14,7 @@ public sealed class PluginService : IHostedService
     private readonly ISessionManager _sessionManager;
     private readonly IUserDataManager _userDataManager;
     private readonly PluginImplementation _plugin;
+    private bool isStarted;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PluginService"/> class.
@@ -34,6 +35,7 @@ public sealed class PluginService : IHostedService
     {
         _sessionManager = sessionManager;
         _userDataManager = userDataManager;
+        isStarted = false;
 
         var listenBrainzLogger = loggerFactory.CreateLogger(Plugin.LoggerCategory + ".ListenBrainzApi");
         var listenBrainzClient = ClientUtils.GetListenBrainzClient(listenBrainzLogger, clientFactory, libraryManager);
@@ -53,18 +55,32 @@ public sealed class PluginService : IHostedService
     /// <inheritdoc />
     public Task StartAsync(CancellationToken cancellationToken)
     {
+        if (isStarted)
+        {
+            return Task.CompletedTask;
+        }
+
         _sessionManager.PlaybackStart += _plugin.OnPlaybackStart;
         _sessionManager.PlaybackStopped += _plugin.OnPlaybackStop;
         _userDataManager.UserDataSaved += _plugin.OnUserDataSave;
+
+        isStarted = true;
         return Task.CompletedTask;
     }
 
     /// <inheritdoc />
     public Task StopAsync(CancellationToken cancellationToken)
     {
+        if (!isStarted)
+        {
+            return Task.CompletedTask;
+        }
+
         _sessionManager.PlaybackStart -= _plugin.OnPlaybackStart;
         _sessionManager.PlaybackStopped -= _plugin.OnPlaybackStop;
         _userDataManager.UserDataSaved -= _plugin.OnUserDataSave;
+
+        isStarted = false;
         return Task.CompletedTask;
     }
 }
