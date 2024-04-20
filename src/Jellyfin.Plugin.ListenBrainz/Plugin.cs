@@ -4,8 +4,11 @@ using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
+using MediaBrowser.Controller.Library;
+using MediaBrowser.Controller.Session;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
+using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.ListenBrainz;
 
@@ -15,16 +18,35 @@ namespace Jellyfin.Plugin.ListenBrainz;
 public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 {
     private static Plugin? _thisInstance;
+    private readonly PluginService _service;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Plugin"/> class.
     /// </summary>
     /// <param name="paths">Application paths.</param>
     /// <param name="xmlSerializer">XML serializer.</param>
-    public Plugin(IApplicationPaths paths, IXmlSerializer xmlSerializer) : base(paths, xmlSerializer)
+    /// <param name="sessionManager">Session manager.</param>
+    /// <param name="loggerFactory">Logger factory.</param>
+    /// <param name="clientFactory">HTTP client factory.</param>
+    /// <param name="userDataManager">User data manager.</param>
+    /// <param name="libraryManager">Library manager.</param>
+    /// <param name="userManager">User manager.</param>
+    public Plugin(
+        IApplicationPaths paths,
+        IXmlSerializer xmlSerializer,
+        ISessionManager sessionManager,
+        ILoggerFactory loggerFactory,
+        IHttpClientFactory clientFactory,
+        IUserDataManager userDataManager,
+        ILibraryManager libraryManager,
+        IUserManager userManager) : base(paths, xmlSerializer)
     {
         _thisInstance = this;
+        _service = new PluginService(sessionManager, loggerFactory, clientFactory, userDataManager, libraryManager, userManager);
+        _service.StartAsync(CancellationToken.None);
     }
+
+    ~Plugin() => _service.StopAsync(CancellationToken.None);
 
     /// <inheritdoc />
     public override string Name => "ListenBrainz";
