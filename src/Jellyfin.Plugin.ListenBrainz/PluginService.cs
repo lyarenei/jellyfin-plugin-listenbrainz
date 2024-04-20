@@ -11,10 +11,11 @@ namespace Jellyfin.Plugin.ListenBrainz;
 /// </summary>
 public sealed class PluginService : IHostedService
 {
+    private readonly ILogger<PluginService> _logger;
     private readonly ISessionManager _sessionManager;
     private readonly IUserDataManager _userDataManager;
     private readonly PluginImplementation _plugin;
-    private bool isStarted;
+    private bool isActive;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PluginService"/> class.
@@ -33,9 +34,10 @@ public sealed class PluginService : IHostedService
         ILibraryManager libraryManager,
         IUserManager userManager)
     {
+        _logger = loggerFactory.CreateLogger<PluginService>();
         _sessionManager = sessionManager;
         _userDataManager = userDataManager;
-        isStarted = false;
+        isActive = false;
 
         var listenBrainzLogger = loggerFactory.CreateLogger(Plugin.LoggerCategory + ".ListenBrainzApi");
         var listenBrainzClient = ClientUtils.GetListenBrainzClient(listenBrainzLogger, clientFactory, libraryManager);
@@ -55,8 +57,10 @@ public sealed class PluginService : IHostedService
     /// <inheritdoc />
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        if (isStarted)
+        _logger.LogInformation("Activating plugin service");
+        if (isActive)
         {
+            _logger.LogInformation("Plugin service has been already activated");
             return Task.CompletedTask;
         }
 
@@ -64,15 +68,18 @@ public sealed class PluginService : IHostedService
         _sessionManager.PlaybackStopped += _plugin.OnPlaybackStop;
         _userDataManager.UserDataSaved += _plugin.OnUserDataSave;
 
-        isStarted = true;
+        isActive = true;
+        _logger.LogInformation("Plugin service in now active");
         return Task.CompletedTask;
     }
 
     /// <inheritdoc />
     public Task StopAsync(CancellationToken cancellationToken)
     {
-        if (!isStarted)
+        _logger.LogInformation("Deactivating plugin service");
+        if (!isActive)
         {
+            _logger.LogInformation("Plugin service has been already deactivated");
             return Task.CompletedTask;
         }
 
@@ -80,7 +87,8 @@ public sealed class PluginService : IHostedService
         _sessionManager.PlaybackStopped -= _plugin.OnPlaybackStop;
         _userDataManager.UserDataSaved -= _plugin.OnUserDataSave;
 
-        isStarted = false;
+        isActive = false;
+        _logger.LogInformation("Plugin service has been deactivated");
         return Task.CompletedTask;
     }
 }
