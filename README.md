@@ -127,7 +127,7 @@ Once the build is completed, the compiled DLLs should be available at:
 `src/Jellyfin.Plugin.Listenbrainz/bin/<Debug|Release>/net6.0/`
 
 To install the plugin for the first time, copy all **DLL** files starting with `Jellyfin.Plugin.ListenBrainz` to the
-plugin directory in your Jellyfin config directory (`${CONFIG_DIR}/plugins/Jellyfin.Plugin.ListenBrainz_1.0.0.0`).
+plugin directory in your Jellyfin config directory (`${CONFIG_DIR}/plugins/ListenBrainz_1.0.0.0`).
 Create the plugin directory if it does not exist, and make sure Jellyfin has correct permissions to access it.
 
 Then copy all the DLL files and restart the Jellyfin server. After restarting Jellyfin, the plugin should be recognized
