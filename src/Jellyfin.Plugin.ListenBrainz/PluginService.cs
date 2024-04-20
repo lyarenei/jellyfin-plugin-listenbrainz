@@ -7,16 +7,16 @@ using Microsoft.Extensions.Logging;
 namespace Jellyfin.Plugin.ListenBrainz;
 
 /// <summary>
-/// ListenBrainz plugin entrypoint for Jellyfin server.
+/// ListenBrainz plugin service for Jellyfin server.
 /// </summary>
-public sealed class EntryPoint : IHostedService
+public sealed class PluginService : IHostedService
 {
     private readonly ISessionManager _sessionManager;
     private readonly IUserDataManager _userDataManager;
     private readonly PluginImplementation _plugin;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="EntryPoint"/> class.
+    /// Initializes a new instance of the <see cref="PluginService"/> class.
     /// </summary>
     /// <param name="sessionManager">Session manager.</param>
     /// <param name="loggerFactory">Logger factory.</param>
@@ -24,7 +24,7 @@ public sealed class EntryPoint : IHostedService
     /// <param name="userDataManager">User data manager.</param>
     /// <param name="libraryManager">Library manager.</param>
     /// <param name="userManager">User manager.</param>
-    public EntryPoint(
+    public PluginService(
         ISessionManager sessionManager,
         ILoggerFactory loggerFactory,
         IHttpClientFactory clientFactory,
