@@ -46,6 +46,9 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
         _service.StartAsync(CancellationToken.None);
     }
 
+    /// <summary>
+    /// Finalizes an instance of the <see cref="Plugin"/> class.
+    /// </summary>
     ~Plugin() => _service.StopAsync(CancellationToken.None);
 
     /// <inheritdoc />
