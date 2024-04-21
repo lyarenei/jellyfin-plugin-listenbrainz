@@ -614,7 +614,7 @@ public class PluginImplementation
     private IEnumerable<Guid> GetAllowedLibraries()
     {
         var allLibraries = Plugin.GetConfiguration().LibraryConfigs;
-        if (allLibraries.Any())
+        if (allLibraries.Count > 0)
         {
             return allLibraries.Where(lc => lc.IsAllowed).Select(lc => lc.Id);
         }
