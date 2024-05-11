@@ -1,22 +1,24 @@
 using Jellyfin.Plugin.ListenBrainz.Utils;
 using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.Plugins;
 using MediaBrowser.Controller.Session;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.ListenBrainz;
 
 /// <summary>
-/// ListenBrainz plugin entrypoint for Jellyfin server.
+/// ListenBrainz plugin service for Jellyfin server.
 /// </summary>
-public sealed class EntryPoint : IServerEntryPoint
+public sealed class PluginService : IHostedService
 {
+    private readonly ILogger<PluginService> _logger;
     private readonly ISessionManager _sessionManager;
     private readonly IUserDataManager _userDataManager;
     private readonly PluginImplementation _plugin;
+    private bool _isActive;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="EntryPoint"/> class.
+    /// Initializes a new instance of the <see cref="PluginService"/> class.
     /// </summary>
     /// <param name="sessionManager">Session manager.</param>
     /// <param name="loggerFactory">Logger factory.</param>
@@ -24,7 +26,7 @@ public sealed class EntryPoint : IServerEntryPoint
     /// <param name="userDataManager">User data manager.</param>
     /// <param name="libraryManager">Library manager.</param>
     /// <param name="userManager">User manager.</param>
-    public EntryPoint(
+    public PluginService(
         ISessionManager sessionManager,
         ILoggerFactory loggerFactory,
         IHttpClientFactory clientFactory,
@@ -32,8 +34,10 @@ public sealed class EntryPoint : IServerEntryPoint
         ILibraryManager libraryManager,
         IUserManager userManager)
     {
+        _logger = loggerFactory.CreateLogger<PluginService>();
         _sessionManager = sessionManager;
         _userDataManager = userDataManager;
+        _isActive = false;
 
         var listenBrainzLogger = loggerFactory.CreateLogger(Plugin.LoggerCategory + ".ListenBrainzApi");
         var listenBrainzClient = ClientUtils.GetListenBrainzClient(listenBrainzLogger, clientFactory, libraryManager);
@@ -51,19 +55,40 @@ public sealed class EntryPoint : IServerEntryPoint
     }
 
     /// <inheritdoc />
-    public Task RunAsync()
+    public Task StartAsync(CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Activating plugin service");
+        if (_isActive)
+        {
+            _logger.LogInformation("Plugin service has been already activated");
+            return Task.CompletedTask;
+        }
+
         _sessionManager.PlaybackStart += _plugin.OnPlaybackStart;
         _sessionManager.PlaybackStopped += _plugin.OnPlaybackStop;
         _userDataManager.UserDataSaved += _plugin.OnUserDataSave;
+
+        _isActive = true;
+        _logger.LogInformation("Plugin service in now active");
         return Task.CompletedTask;
     }
 
     /// <inheritdoc />
-    public void Dispose()
+    public Task StopAsync(CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Deactivating plugin service");
+        if (!_isActive)
+        {
+            _logger.LogInformation("Plugin service has been already deactivated");
+            return Task.CompletedTask;
+        }
+
         _sessionManager.PlaybackStart -= _plugin.OnPlaybackStart;
         _sessionManager.PlaybackStopped -= _plugin.OnPlaybackStop;
         _userDataManager.UserDataSaved -= _plugin.OnUserDataSave;
+
+        _isActive = false;
+        _logger.LogInformation("Plugin service has been deactivated");
+        return Task.CompletedTask;
     }
 }

@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text;
 using Jellyfin.Plugin.ListenBrainz.Api.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.Api.Resources;
 
@@ -10,6 +11,7 @@ namespace Jellyfin.Plugin.ListenBrainz.Api.Models.Requests;
 public class GetUserListensRequest : IListenBrainzRequest
 {
     private readonly string _userName;
+    private readonly CompositeFormat _endpointFormat;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GetUserListensRequest"/> class.
@@ -18,6 +20,7 @@ public class GetUserListensRequest : IListenBrainzRequest
     /// <param name="listensNumber">Number of listens to fetch.</param>
     public GetUserListensRequest(string userName, int listensNumber = 10)
     {
+        _endpointFormat = CompositeFormat.Parse(Endpoints.ListensEndpoint);
         _userName = userName;
         BaseUrl = General.BaseUrl;
         QueryDict = new Dictionary<string, string> { { "count", listensNumber.ToString(NumberFormatInfo.InvariantInfo) } };
@@ -27,7 +30,7 @@ public class GetUserListensRequest : IListenBrainzRequest
     public string? ApiToken { get; init; }
 
     /// <inheritdoc />
-    public string Endpoint => string.Format(CultureInfo.InvariantCulture, Endpoints.ListensEndpoint, _userName);
+    public string Endpoint => string.Format(CultureInfo.InvariantCulture, _endpointFormat, _userName);
 
     /// <inheritdoc />
     public string BaseUrl { get; init; }

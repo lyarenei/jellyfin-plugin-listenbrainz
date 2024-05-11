@@ -47,11 +47,11 @@ public class ListenTests
 
 public class RecordingFeedbackTests
 {
-    public static IEnumerable<FeedbackScore[]> GetFeedbackScores()
+    public static IEnumerable<object[]> GetFeedbackScores()
     {
-        yield return new [] { Hated };
-        yield return new [] { Loved };
-        yield return new [] { Neutral };
+        yield return [Hated];
+        yield return [Loved];
+        yield return [Neutral];
     }
 
     [Theory]

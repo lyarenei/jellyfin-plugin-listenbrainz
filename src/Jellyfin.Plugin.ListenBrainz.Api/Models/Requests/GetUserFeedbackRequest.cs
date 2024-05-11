@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text;
 using Jellyfin.Plugin.ListenBrainz.Api.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.Api.Resources;
 
@@ -10,6 +11,7 @@ namespace Jellyfin.Plugin.ListenBrainz.Api.Models.Requests;
 public class GetUserFeedbackRequest : IListenBrainzRequest
 {
     private readonly string _userName;
+    private readonly CompositeFormat _endpointFormat;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GetUserFeedbackRequest"/> class.
@@ -26,6 +28,7 @@ public class GetUserFeedbackRequest : IListenBrainzRequest
         int offset = 0,
         bool? metadata = null)
     {
+        _endpointFormat = CompositeFormat.Parse(Endpoints.ListensEndpoint);
         _userName = userName;
         BaseUrl = General.BaseUrl;
         QueryDict = new Dictionary<string, string>
@@ -49,7 +52,7 @@ public class GetUserFeedbackRequest : IListenBrainzRequest
     public string? ApiToken { get; init; }
 
     /// <inheritdoc />
-    public string Endpoint => string.Format(CultureInfo.InvariantCulture, Endpoints.UserFeedback, _userName);
+    public string Endpoint => string.Format(CultureInfo.InvariantCulture, _endpointFormat, _userName);
 
     /// <inheritdoc />
     public string BaseUrl { get; init; }

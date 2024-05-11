@@ -24,7 +24,7 @@ public class JellyfinMediaLibrary
     {
         Name = item.Name;
         Id = item.Id;
-        LibraryType = item.CollectionType;
+        LibraryType = item.CollectionType.Value.ToString();
     }
 
     /// <summary>

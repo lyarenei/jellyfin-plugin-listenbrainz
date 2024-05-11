@@ -109,7 +109,7 @@ public class BaseApiClient : IBaseApiClient, IDisposable
         var requestMessage = new HttpRequestMessage
         {
             Method = HttpMethod.Get,
-            RequestUri = request.QueryDict.Any() ? new Uri($"{requestUri}?{queryParams}") : new Uri(requestUri.ToString())
+            RequestUri = request.QueryDict.Count > 0 ? new Uri($"{requestUri}?{queryParams}") : new Uri(requestUri.ToString())
         };
 
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("token", request.ApiToken);

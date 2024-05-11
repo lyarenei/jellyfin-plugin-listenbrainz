@@ -1,4 +1,5 @@
 using Jellyfin.Data.Entities;
+using Jellyfin.Data.Enums;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
@@ -157,7 +158,7 @@ public class LovedTracksSyncTask : IScheduledTask
     private IEnumerable<Guid> GetAllowedLibraries()
     {
         var allLibraries = Plugin.GetConfiguration().LibraryConfigs;
-        if (allLibraries.Any())
+        if (allLibraries.Count > 0)
         {
             return allLibraries.Where(lc => lc.IsAllowed).Select(lc => lc.Id);
         }
