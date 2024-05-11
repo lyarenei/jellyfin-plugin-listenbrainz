@@ -34,7 +34,15 @@ Additionally, all plugin releases are available on the [releases page](https://g
 
 ## Install via repository
 
-The repository is available at: `https://repo.xkrivo.net/jellyfin/manifest.json`
+The repository is available at: `https://repo.xkrivo.net/jellyfin/manifest.json`, this will always contain the plugin version compatible
+with the latest Jellyfin server version.
+
+>For now, the plugin version for Jellyfin 10.8.x will still receive bugfixes (if applicable), at least for a few patch versions.
+Since Jellyfin [will install even an incompatible plugin version](https://github.com/jellyfin/jellyfin/issues/11331),
+I created a temporary repo you can switch to, to avoid installing incompatible versions and have the plugin break on every server restart.
+The repository URL is `https://repo.xkrivo.net/jellyfin-10-8/manifest.json`.
+>
+>Alternatively, you can also remove the repository altogether and install the plugin manually.
 
 Head over to Repositories tab in Jellyfin server settings > Plugins (advanced section), and add the repository
 there, using the URL above.
@@ -45,11 +53,12 @@ Select the version you want to install and restart the server as asked. Continue
 
 Plugin and Jellyfin versions compatibility table:
 
-| Plugin  | Jellyfin | Status      |
-|---------|----------|-------------|
-| 1.x.y.z | 10.7.a   | Unsupported |
-| 2.x.y.z | 10.8.a   | Unsupported |
-| 3.x.y.z | 10.8.a   | Supported   |
+| Plugin  | Jellyfin | Status        |
+|---------|----------|---------------|
+| 1.x.y.z | 10.7.a   | Unsupported   |
+| 2.x.y.z | 10.8.a   | Unsupported   |
+| 3.x.y.z | 10.8.a   | Bugfixes only |
+| 4.x.y.z | 10.9.a   | Supported     |
 
 ## Configuration
 
