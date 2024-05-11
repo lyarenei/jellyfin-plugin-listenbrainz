@@ -1,7 +1,7 @@
 ---
 name: "ListenBrainz"
 guid: "59B20823-AAFE-454C-A393-17427F518631"
-version: "4.0.0.1"
+version: "4.0.0.2"
 targetAbi: "10.9.0.0"
 framework: "net8.0"
 overview: "Track your music habits with ListenBrainz."
