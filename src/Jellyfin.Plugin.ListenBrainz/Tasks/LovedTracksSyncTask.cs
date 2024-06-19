@@ -73,6 +73,7 @@ public class LovedTracksSyncTask : IScheduledTask
     /// <inheritdoc />
     public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
+        using var logScope = BeginLogScope();
         Reset();
         var conf = Plugin.GetConfiguration();
         if (!conf.IsMusicBrainzEnabled)
@@ -213,5 +214,10 @@ public class LovedTracksSyncTask : IScheduledTask
     {
         _userCountRatio = 100.0 / Plugin.GetConfiguration().UserConfigs.Count;
         _progress = 0;
+    }
+
+    private IDisposable? BeginLogScope()
+    {
+        return _logger.BeginScope(new Dictionary<string, object> { { "EventId", "LovedTracksSyncTask" } });
     }
 }
