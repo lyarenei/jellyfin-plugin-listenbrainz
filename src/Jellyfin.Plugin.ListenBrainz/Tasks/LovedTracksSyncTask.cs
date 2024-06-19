@@ -146,7 +146,12 @@ public class LovedTracksSyncTask : IScheduledTask
             var recordingMbid = string.Empty;
             try
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 recordingMbid = _musicBrainzClient.GetAudioItemMetadata(item).RecordingMbid;
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.LogInformation("Task has been cancelled");
             }
             catch (Exception e)
             {
