@@ -153,6 +153,7 @@ public class LovedTracksSyncTask : IScheduledTask
             catch (OperationCanceledException)
             {
                 _logger.LogInformation("Task has been cancelled");
+                throw;
             }
             catch (Exception e)
             {
