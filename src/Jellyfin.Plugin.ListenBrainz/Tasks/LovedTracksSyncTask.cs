@@ -141,12 +141,21 @@ public class LovedTracksSyncTask : IScheduledTask
             .Where(i => i.ProviderIds.GetValueOrDefault("MusicBrainzTrack") is not null)
             .ToList();
 
-        var itemMbidPairs = items.Select(i => (Item: i, _musicBrainzClient.GetAudioItemMetadata(i).RecordingMbid));
-        foreach (var item in itemMbidPairs)
+        foreach (var item in items)
         {
-            if (lovedTracksIds.Contains(item.RecordingMbid))
+            var recordingMbid = string.Empty;
+            try
             {
-                MarkAsFavorite(user, item.Item, cancellationToken);
+                recordingMbid = _musicBrainzClient.GetAudioItemMetadata(item).RecordingMbid;
+            }
+            catch (Exception e)
+            {
+                _logger.LogWarning("Failed to get metadata for item {ItemId}: {Error}", item.Id, e.Message);
+            }
+
+            if (lovedTracksIds.Contains(recordingMbid))
+            {
+                MarkAsFavorite(user, item, cancellationToken);
             }
 
             _progress += _userCountRatio / items.Count;
