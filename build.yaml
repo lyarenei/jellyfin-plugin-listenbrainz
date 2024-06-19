@@ -16,4 +16,5 @@ artifacts:
   - "Jellyfin.Plugin.ListenBrainz.Http.dll"
   - "Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.dll"
 changelog: >
-  Re-release to test the release process
+  Fix
+    - Handle exceptions during loved/favorite sync (LB -> JF) (#98 @lyarenei)
