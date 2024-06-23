@@ -1,4 +1,5 @@
 using Jellyfin.Data.Entities;
+using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
@@ -129,7 +130,7 @@ public class LovedTracksSyncTask : IScheduledTask
     {
         var lovedTracksIds = (await _listenBrainzClient.GetLovedTracksAsync(userConfig, cancellationToken)).ToList();
         var user = _userManager.GetUserById(userConfig.JellyfinUserId);
-        var allowedLibraries = GetAllowedLibraries().Select(al => _libraryManager.GetItemById(al));
+        var allowedLibraries = GetAllowedLibraries().Select(al => _libraryManager.GetItemById(al)).WhereNotNull();
         var q = new InternalItemsQuery(user)
         {
             // Future-proofing for music videos
