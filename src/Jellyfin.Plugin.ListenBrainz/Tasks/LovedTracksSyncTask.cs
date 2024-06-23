@@ -130,6 +130,12 @@ public class LovedTracksSyncTask : IScheduledTask
     {
         var lovedTracksIds = (await _listenBrainzClient.GetLovedTracksAsync(userConfig, cancellationToken)).ToList();
         var user = _userManager.GetUserById(userConfig.JellyfinUserId);
+        if (user is null)
+        {
+            _logger.LogError("User with ID {UserId} does not exist", userConfig.JellyfinUserId);
+            return;
+        }
+
         var allowedLibraries = GetAllowedLibraries().Select(al => _libraryManager.GetItemById(al)).WhereNotNull();
         var q = new InternalItemsQuery(user)
         {
