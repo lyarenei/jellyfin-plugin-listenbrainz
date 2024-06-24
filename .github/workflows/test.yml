@@ -3,14 +3,14 @@ name: 'Test Plugin'
 on:
   push:
     branches:
-      - main
+      - 10.8.x-compat
     paths-ignore:
       - '**/*.md'
       - '**/*.yml'
       - '**/*.yaml'
   pull_request:
     branches:
-      - main
+      - 10.8.x-compat
     paths-ignore:
       - '**/*.md'
       - '**/*.yml'
