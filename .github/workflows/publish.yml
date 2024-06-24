@@ -84,9 +84,9 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ contains(github.repository, 'lyarenei/') }}
     env:
-      MANIFEST_FILE: "/var/www/repos/jellyfin/manifest.json"
-      REPO_PATH: "/var/www/repos/jellyfin"
-      REPO_URL: "https://repo.xkrivo.net/jellyfin"
+      MANIFEST_FILE: "/var/www/repos/jellyfin-10-8/manifest.json"
+      REPO_PATH: "/var/www/repos/jellyfin-10-8"
+      REPO_URL: "https://repo.xkrivo.net/jellyfin-10-8"
     steps:
       - name: Update Plugin Manifest
         uses: appleboy/ssh-action@334f9259f2f8eb3376d33fa4c684fff373f2c2a6 # v0.1.10
