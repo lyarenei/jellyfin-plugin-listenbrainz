@@ -17,4 +17,4 @@ artifacts:
   - "Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.dll"
 changelog: >
   Fix
-    - Handle exceptions during loved/favorite sync (LB -> JF) (#98 @lyarenei)
+    - Fix handling expections in favorite sync (backport of #98) (#99 @lyarenei)
