@@ -1,4 +1,5 @@
 using Jellyfin.Data.Entities;
+using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
@@ -45,7 +46,7 @@ public class LovedTracksSyncTask : IScheduledTask
         IUserDataRepository dataRepository,
         IUserDataManager dataManager)
     {
-        _logger = loggerFactory.CreateLogger($"{Plugin.LoggerCategory}.FavoriteSyncTask");
+        _logger = loggerFactory.CreateLogger($"{Plugin.LoggerCategory}.LovedSyncTask");
         _listenBrainzClient = ClientUtils.GetListenBrainzClient(_logger, clientFactory, libraryManager);
         _musicBrainzClient = ClientUtils.GetMusicBrainzClient(_logger, clientFactory);
         _libraryManager = libraryManager;
@@ -72,6 +73,7 @@ public class LovedTracksSyncTask : IScheduledTask
     /// <inheritdoc />
     public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
+        using var logScope = BeginLogScope();
         Reset();
         var conf = Plugin.GetConfiguration();
         if (!conf.IsMusicBrainzEnabled)
@@ -128,7 +130,13 @@ public class LovedTracksSyncTask : IScheduledTask
     {
         var lovedTracksIds = (await _listenBrainzClient.GetLovedTracksAsync(userConfig, cancellationToken)).ToList();
         var user = _userManager.GetUserById(userConfig.JellyfinUserId);
-        var allowedLibraries = GetAllowedLibraries().Select(al => _libraryManager.GetItemById(al));
+        if (user is null)
+        {
+            _logger.LogError("User with ID {UserId} does not exist", userConfig.JellyfinUserId);
+            return;
+        }
+
+        var allowedLibraries = GetAllowedLibraries().Select(al => _libraryManager.GetItemById(al)).WhereNotNull();
         var q = new InternalItemsQuery(user)
         {
             // Future-proofing for music videos
@@ -141,12 +149,27 @@ public class LovedTracksSyncTask : IScheduledTask
             .Where(i => i.ProviderIds.GetValueOrDefault("MusicBrainzTrack") is not null)
             .ToList();
 
-        var itemMbidPairs = items.Select(i => (Item: i, _musicBrainzClient.GetAudioItemMetadata(i).RecordingMbid));
-        foreach (var item in itemMbidPairs)
+        foreach (var item in items)
         {
-            if (lovedTracksIds.Contains(item.RecordingMbid))
+            var recordingMbid = string.Empty;
+            try
             {
-                MarkAsFavorite(user, item.Item, cancellationToken);
+                cancellationToken.ThrowIfCancellationRequested();
+                recordingMbid = _musicBrainzClient.GetAudioItemMetadata(item).RecordingMbid;
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.LogInformation("Task has been cancelled");
+                throw;
+            }
+            catch (Exception e)
+            {
+                _logger.LogWarning("Failed to get metadata for item {ItemId}: {Error}", item.Id, e.Message);
+            }
+
+            if (lovedTracksIds.Contains(recordingMbid))
+            {
+                MarkAsFavorite(user, item, cancellationToken);
             }
 
             _progress += _userCountRatio / items.Count;
@@ -198,5 +221,10 @@ public class LovedTracksSyncTask : IScheduledTask
     {
         _userCountRatio = 100.0 / Plugin.GetConfiguration().UserConfigs.Count;
         _progress = 0;
+    }
+
+    private IDisposable? BeginLogScope()
+    {
+        return _logger.BeginScope(new Dictionary<string, object> { { "EventId", "LovedTracksSyncTask" } });
     }
 }
