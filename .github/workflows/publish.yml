@@ -7,6 +7,13 @@ on:
       repo:
         type: string
         required: true
+    secrets:
+      DEPLOY_HOST:
+        required: false
+      DEPLOY_USER:
+        required: false
+      DEPLOY_KEY:
+        required: false
 
 jobs:
   publish:
