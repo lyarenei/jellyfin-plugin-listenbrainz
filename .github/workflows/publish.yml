@@ -16,13 +16,13 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # tag=v4.0.1
         with:
-          dotnet-version: "${{ inputs.dotnet-version }}"
+          dotnet-version: "8.0"
 
       - name: Build Jellyfin Plugin
         uses: oddstr13/jellyfin-plugin-repository-manager@9497a0a499416cc572ed2e07a391d9f943a37b4d # v1.1.1
         id: jprm
         with:
-          dotnet-target: "${{ inputs.dotnet-target }}"
+          dotnet-target: "net8.0"
 
       - name: Upload Artifact
         uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
