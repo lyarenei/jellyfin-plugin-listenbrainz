@@ -62,6 +62,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// </summary>
     public static new string Version
     {
+        // dummy comment
         get => Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0.0";
     }
 
