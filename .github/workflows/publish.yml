@@ -1,14 +1,19 @@
 name: 'Publish Plugin'
 
-on: { }
+on:
+  workflow_call:
+    inputs:
+      repo:
+        type: string
+        required: true
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     env:
-      MANIFEST_FILE: "/var/www/repos/jellyfin/manifest.json"
-      REPO_PATH: "/var/www/repos/jellyfin"
-      REPO_URL: "https://repo.xkrivo.net/jellyfin"
+      MANIFEST_FILE: "/var/www/repos/${{ inputs.repo }}/manifest.json"
+      REPO_PATH: "/var/www/repos/${{ inputs.repo }}"
+      REPO_URL: "https://repo.xkrivo.net/${{ inputs.repo }}"
     steps:
       - name: Update Plugin Manifest
         uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
