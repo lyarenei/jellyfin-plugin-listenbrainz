@@ -1,6 +1,16 @@
 name: 'Build Plugin'
 
-on: { }
+on:
+  workflow_call:
+    inputs:
+      dotnet-version:
+        type: string
+        required: false
+        default: "8.0"
+      dotnet-target:
+        type: string
+        required: false
+        default: "net8.0"
 
 jobs:
   build:
@@ -12,13 +22,13 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # tag=v4.0.1
         with:
-          dotnet-version: "8.0"
+          dotnet-version: "${{ inputs.dotnet-version }}"
 
       - name: Build Jellyfin Plugin
         uses: oddstr13/jellyfin-plugin-repository-manager@9497a0a499416cc572ed2e07a391d9f943a37b4d # v1.1.1
         id: jprm
         with:
-          dotnet-target: "net8.0"
+          dotnet-target: "${{ inputs.dotnet-target }}"
 
       - name: Upload Artifact
         uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
