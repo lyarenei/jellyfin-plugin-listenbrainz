@@ -5,7 +5,7 @@ on:
   workflow_call:
 
 jobs:
-  build:
+  upload:
     runs-on: ubuntu-latest
     steps:
       - name: Download Artifact

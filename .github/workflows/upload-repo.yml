@@ -9,7 +9,7 @@ on:
         required: true
 
 jobs:
-  build:
+  upload-repo:
     runs-on: ubuntu-latest
     steps:
       - name: Download Artifact
