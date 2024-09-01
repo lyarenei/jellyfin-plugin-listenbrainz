@@ -1,40 +1,38 @@
+# $schema: https://json.schemastore.org/github-workflow
 name: 'Build Plugin'
 
 on:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - '**/*.md'
-      - '**/*.yml'
-      - '**/*.yaml'
-  pull_request:
-    branches:
-      - main
-    paths-ignore:
-      - '**/*.md'
-      - '**/*.yml'
-      - '**/*.yaml'
-  workflow_dispatch:
+  workflow_call:
+    inputs:
+      dotnet-version:
+        type: string
+        required: false
+        default: "8.0"
+      dotnet-target:
+        type: string
+        required: false
+        default: "net8.0"
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@3447fd6a9f9e57506b15f895c5b76d3b197dc7c2 # v3.2.0
+        uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # v4.0.1
         with:
-          dotnet-version: "8.0"
+          dotnet-version: "${{ inputs.dotnet-version }}"
 
       - name: Build Jellyfin Plugin
-        uses: oddstr13/jellyfin-plugin-repository-manager@eabb903cdac8a7f6d94df887c6910b5720ec48f9 # v1.0.11
+        uses: oddstr13/jellyfin-plugin-repository-manager@9497a0a499416cc572ed2e07a391d9f943a37b4d # v1.1.1
         id: jprm
+        with:
+          dotnet-target: "${{ inputs.dotnet-target }}"
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         with:
           name: build-artifact
           retention-days: 14
