@@ -26,6 +26,10 @@ jobs:
     uses: .github/workflows/upload-repo.yml@main
     with:
       repo: "jellyfin"
+    secrets:
+      host: ${{ secrets.DEPLOY_HOST }}
+      username: ${{ secrets.DEPLOY_USER }}
+      key: ${{ secrets.DEPLOY_KEY }}
 
   publish:
     if: ${{ contains(github.repository, 'lyarenei/') }}
@@ -33,3 +37,7 @@ jobs:
     uses: .github/workflows/publish.yml@main
     with:
       repo: "jellyfin"
+    secrets:
+      host: ${{ secrets.DEPLOY_HOST }}
+      username: ${{ secrets.DEPLOY_USER }}
+      key: ${{ secrets.DEPLOY_KEY }}

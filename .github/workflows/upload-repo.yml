@@ -8,12 +8,12 @@ on:
         type: string
         required: true
     secrets:
-      DEPLOY_HOST:
-        required: false
-      DEPLOY_USER:
-        required: false
-      DEPLOY_KEY:
-        required: false
+      host:
+        required: true
+      user:
+        required: true
+      key:
+        required: true
 
 jobs:
   upload-repo:
@@ -28,9 +28,9 @@ jobs:
         uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
         if: ${{ contains(github.repository, 'lyarenei/') }}
         with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_KEY }}
+          host: ${{ secrets.host }}
+          username: ${{ secrets.user }}
+          key: ${{ secrets.key }}
           script_stop: true
           script: |-
             mkdir -p "/var/www/repos/${{ inputs.repo }}/${{ github.repository }}/${{ inputs.version }}" || exit 1
@@ -42,6 +42,6 @@ jobs:
           switches: -vrptz
           path: ./*.zip
           remote_path: /var/www/repos/${{ inputs.repo }}/${{ github.repository }}/${{ inputs.version }}
-          remote_host: ${{ secrets.DEPLOY_HOST }}
-          remote_user: ${{ secrets.DEPLOY_USER }}
-          remote_key: ${{ secrets.DEPLOY_KEY }}
+          remote_host: ${{ secrets.host }}
+          remote_user: ${{ secrets.user }}
+          remote_key: ${{ secrets.key }}
