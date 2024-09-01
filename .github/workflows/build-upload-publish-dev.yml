@@ -1,0 +1,27 @@
+name: 'Build, upload & publish plugin (dev)'
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.yml'
+      - '**/*.yaml'
+  workflow_dispatch:
+
+jobs:
+  test:
+    uses: jellyfin/jellyfin-meta-plugins/.github/workflows/test.yaml@master
+
+  build:
+    uses: .github/workflows/build.yml
+
+  upload:
+    needs: build
+    uses: .github/workflows/upload.yml
+
+  publish:
+    if: ${{ contains(github.repository, 'lyarenei/') }}
+    needs: upload
+    uses: .github/workflows/publish-dev.yml
