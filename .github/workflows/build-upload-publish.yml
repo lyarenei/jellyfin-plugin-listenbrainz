@@ -1,4 +1,5 @@
-name: 'Build, upload & publish plugin'
+# $schema: https://json.schemastore.org/github-workflow
+name: 'Build and release plugin'
 
 on:
   release:
@@ -19,6 +20,12 @@ jobs:
   upload:
     needs: build
     uses: .github/workflows/upload.yml
+
+  upload-repo:
+    needs: build
+    uses: .github/workflows/upload-repo.yml
+    with:
+      repo: "jellyfin"
 
   publish:
     if: ${{ contains(github.repository, 'lyarenei/') }}
