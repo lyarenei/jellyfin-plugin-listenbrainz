@@ -13,6 +13,8 @@ on:
 jobs:
   test:
     uses: jellyfin/jellyfin-meta-plugins/.github/workflows/test.yaml@master
+    with:
+      dotnet-version: "8.0"
 
   build:
     uses: .github/workflows/build.yml
