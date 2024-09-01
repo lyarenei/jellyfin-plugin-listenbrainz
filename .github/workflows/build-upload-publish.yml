@@ -15,21 +15,21 @@ jobs:
 
   build:
     needs: test
-    uses: .github/workflows/build.yml
+    uses: .github/workflows/build.yml@main
 
   upload:
     needs: build
-    uses: .github/workflows/upload.yml
+    uses: .github/workflows/upload.yml@main
 
   upload-repo:
     needs: build
-    uses: .github/workflows/upload-repo.yml
+    uses: .github/workflows/upload-repo.yml@main
     with:
       repo: "jellyfin"
 
   publish:
     if: ${{ contains(github.repository, 'lyarenei/') }}
     needs: upload
-    uses: .github/workflows/publish.yml
+    uses: .github/workflows/publish.yml@main
     with:
       repo: "jellyfin"

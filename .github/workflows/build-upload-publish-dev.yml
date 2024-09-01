@@ -18,17 +18,17 @@ jobs:
       dotnet-version: "8.0"
 
   build:
-    uses: .github/workflows/build.yml
+    uses: ./.github/workflows/build.yml
 
   upload-repo:
     needs: build
-    uses: .github/workflows/upload-repo.yml
+    uses: ./.github/workflows/upload-repo.yml
     with:
       repo: "jellyfin-dev"
 
   publish:
     if: ${{ contains(github.repository, 'lyarenei/') }}
     needs: upload
-    uses: .github/workflows/publish.yml
+    uses: ./.github/workflows/publish.yml
     with:
       repo: "jellyfin-dev"
