@@ -27,7 +27,6 @@ jobs:
     with:
       repo: "jellyfin-dev"
     secrets:
-      foobar: "foobar"
       host: ${{ secrets.DEPLOY_HOST }}
       username: ${{ secrets.DEPLOY_USER }}
       key: ${{ secrets.DEPLOY_KEY }}
