@@ -29,7 +29,7 @@ jobs:
       repo: "jellyfin"
     secrets:
       host: ${{ secrets.DEPLOY_HOST }}
-      username: ${{ secrets.DEPLOY_USER }}
+      user: ${{ secrets.DEPLOY_USER }}
       key: ${{ secrets.DEPLOY_KEY }}
 
   publish:
@@ -40,5 +40,5 @@ jobs:
       repo: "jellyfin"
     secrets:
       host: ${{ secrets.DEPLOY_HOST }}
-      username: ${{ secrets.DEPLOY_USER }}
+      user: ${{ secrets.DEPLOY_USER }}
       key: ${{ secrets.DEPLOY_KEY }}
