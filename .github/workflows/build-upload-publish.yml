@@ -15,16 +15,16 @@ jobs:
 
   build:
     needs: test
-    uses: .github/workflows/build.yml@main
+    uses: ./.github/workflows/build.yml
 
   upload:
     needs: build
-    uses: .github/workflows/upload.yml@main
+    uses: ./.github/workflows/upload.yml
 
   upload-repo:
     if: ${{ contains(github.repository, 'lyarenei/') }}
     needs: build
-    uses: .github/workflows/upload-repo.yml@main
+    uses: ./.github/workflows/upload-repo.yml
     with:
       repo: "jellyfin"
     secrets:
@@ -35,7 +35,7 @@ jobs:
   publish:
     if: ${{ contains(github.repository, 'lyarenei/') }}
     needs: upload
-    uses: .github/workflows/publish.yml@main
+    uses: ./.github/workflows/publish.yml
     with:
       repo: "jellyfin"
     secrets:
