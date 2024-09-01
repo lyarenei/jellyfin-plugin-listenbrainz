@@ -26,7 +26,6 @@ jobs:
 
       - name: Ensure Destination Path Exists
         uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
-        if: ${{ contains(github.repository, 'lyarenei/') }}
         with:
           host: ${{ secrets.host }}
           username: ${{ secrets.user }}
@@ -37,7 +36,6 @@ jobs:
 
       - name: Upload Jellyfin Plugin Repository Assets
         uses: burnett01/rsync-deployments@796cf0d5e4b535745ce49d7429f77cf39e25ef39 # v7.0.1
-        if: ${{ contains(github.repository, 'lyarenei/') }}
         with:
           switches: -vrptz
           path: ./*.zip

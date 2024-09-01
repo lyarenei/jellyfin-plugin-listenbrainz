@@ -22,6 +22,7 @@ jobs:
     uses: .github/workflows/upload.yml@main
 
   upload-repo:
+    if: ${{ contains(github.repository, 'lyarenei/') }}
     needs: build
     uses: .github/workflows/upload-repo.yml@main
     with:
