@@ -137,6 +137,28 @@
                             </label>
                             <div class="fieldDescription">Only necessary if you have other plugins working with favorite items.</div>
                         </div>
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="BackupPath">
+                                Listen backup path
+                            </label>
+                            <div class="bootstrap-wrapper row no-gutters">
+                                <input id="BackupPath" name="BackupPath" type="text"
+                                       is="emby-input"
+                                       class="bootstrap-wrapper col-md-9 vertical-center"/>
+                                <div id="SetBackupPath"
+                                     class="raised button block emby-button bootstrap-wrapper col-md-2 offset-md-1 vertical-center">
+                                    Browse
+                                </div>
+                            </div>
+                        </div>
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="IsBackupenabled">
+                                <input is="emby-checkbox" type="checkbox" id="IsBackupenabled"
+                                       name="IsBackupEnabled"/>
+                                <span>Enable listen backups</span>
+                            </label>
+                            <div class="fieldDescription">Backup listens locally to a specified path.</div>
+                        </div>
                         <div class="sectionTitleContainer flex align-items-center">
                             <h4 class="sectionTitle">Allowed libraries for listen submission</h4>
                             <div class="raised button-alt headerHelpButton emby-button" id="ResetAllowedLibraries">
