@@ -474,6 +474,7 @@
                 ApiToken: btoa(getApiToken()),
                 IsListenSubmitEnabled: document.querySelector('#IsListenSubmitEnabled').checked,
                 IsFavoritesSyncEnabled: document.querySelector('#IsFavoritesSyncEnabled').checked,
+                IsBackupEnabled: document.querySelector('#IsUserBackupEnabled').checked,
                 UserName: userName,
             }
         }
@@ -486,6 +487,8 @@
                 IsAlternativeModeEnabled: document.querySelector('#IsAlternativeModeEnabled').checked,
                 IsImmediateFavoriteSyncEnabled: document.querySelector('#IsImmediateFavoriteSyncEnabled').checked,
                 ShouldEmitUserRatingEvent: document.querySelector('#ShouldEmitUserRatingEvent').checked,
+                BackupPath: document.querySelector('#BackupPath').value,
+                IsBackupEnabled: document.querySelector('#IsBackupEnabled').checked,
                 LibraryConfigs: getLibraryConfigsInputs(),
             }
         }
