@@ -1,0 +1,43 @@
+# $schema: https://json.schemastore.org/github-workflow
+name: 'Build and release plugin (dev)'
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.yml'
+      - '**/*.yaml'
+  workflow_dispatch:
+
+jobs:
+  test:
+    uses: jellyfin/jellyfin-meta-plugins/.github/workflows/test.yaml@master
+    with:
+      dotnet-version: "8.0"
+
+  build:
+    uses: ./.github/workflows/build.yml
+
+  upload-repo:
+    if: ${{ contains(github.repository, 'lyarenei/') }}
+    needs: build
+    uses: ./.github/workflows/upload-repo.yml
+    with:
+      repo: "jellyfin-dev"
+    secrets:
+      host: ${{ secrets.DEPLOY_HOST }}
+      user: ${{ secrets.DEPLOY_USER }}
+      key: ${{ secrets.DEPLOY_KEY }}
+
+  publish:
+    if: ${{ contains(github.repository, 'lyarenei/') }}
+    needs: upload-repo
+    uses: ./.github/workflows/publish.yml
+    with:
+      repo: "jellyfin-dev"
+    secrets:
+      host: ${{ secrets.DEPLOY_HOST }}
+      user: ${{ secrets.DEPLOY_USER }}
+      key: ${{ secrets.DEPLOY_KEY }}
