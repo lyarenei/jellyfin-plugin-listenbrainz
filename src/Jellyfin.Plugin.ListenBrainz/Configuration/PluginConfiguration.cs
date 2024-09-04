@@ -112,6 +112,11 @@ public class PluginConfiguration : BasePluginConfiguration
     public Collection<LibraryConfig> LibraryConfigs { get; set; }
 
     /// <summary>
+    /// Gets or sets backup path.
+    /// </summary>
+    public string BackupPath { get; set; }
+
+    /// <summary>
     /// Gets or sets a value indicating whether backup feature is enabled.
     /// </summary>
     public bool IsBackupEnabled
@@ -126,9 +131,4 @@ public class PluginConfiguration : BasePluginConfiguration
     [JsonIgnore]
     [XmlIgnore]
     public bool IsNotBackupEnabled => !IsBackupEnabled;
-
-    /// <summary>
-    /// Gets or sets backup path.
-    /// </summary>
-    public string BackupPath { get; set; }
 }
