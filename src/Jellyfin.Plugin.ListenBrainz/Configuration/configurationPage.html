@@ -225,6 +225,11 @@
                 onSubmitConfigForm(event.submitter.id);
             });
 
+        document.querySelector('#SetBackupPath')
+            .addEventListener('mouseup', (event) => {
+                onSetBackupPath();
+            });
+
         function onPageShow() {
             loadCss('bootstrap-grid.min.css');
             loadCss('styles.css');
@@ -331,6 +336,18 @@
                     console.log("ListenBrainz plugin: Failed to reset MusicBrainz URL: " + reason);
                     Dashboard.alert("Reset failed");
                 });
+        }
+
+        function onSetBackupPath() {
+            const browser = new Dashboard.DirectoryBrowser();
+            browser.show({
+                includeFiles: false,
+                callback: (selectedDir) => {
+                    browser.close();
+                    document.querySelector('#BackupPath').value = selectedDir;
+                },
+                header: "Select path for backups"
+            })
         }
 
         function onSaveGeneralConfig() {
