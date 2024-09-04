@@ -435,6 +435,12 @@
             document.querySelector("#ShouldEmitUserRatingEvent")
                 .checked = data.ShouldEmitUserRatingEvent;
 
+            document.querySelector("#BackupPath")
+                .value = data.BackupPath;
+
+            document.querySelector("#IsBackupEnabled")
+                .checked = data.IsBackupEnabled;
+
             try {
                 buildAllowedLibrariesList(data.LibraryConfigs);
             } catch (err) {
@@ -456,6 +462,9 @@
 
             document.querySelector("#IsFavoritesSyncEnabled")
                 .checked = data.IsFavoritesSyncEnabled;
+
+            document.querySelector("#IsUserBackupEnabled")
+                .checked = data.IsBackupEnabled;
         }
 
         function getUserConfig(config, userId) {
