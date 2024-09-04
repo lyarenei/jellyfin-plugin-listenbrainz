@@ -27,6 +27,7 @@ public class PluginConfiguration : BasePluginConfiguration
         UserConfigs = new Collection<UserConfig>();
         LibraryConfigs = new Collection<LibraryConfig>();
         BackupPath = string.Empty;
+        IsBackupEnabled = false;
     }
 
     /// <summary>
