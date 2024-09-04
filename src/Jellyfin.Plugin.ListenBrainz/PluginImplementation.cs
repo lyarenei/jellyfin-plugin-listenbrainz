@@ -29,6 +29,7 @@ public class PluginImplementation
     private readonly object _userDataSaveLock = new();
     private readonly PlaybackTrackingManager _playbackTracker;
     private readonly ILibraryManager _libraryManager;
+    private readonly BackupManager _backupManager;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PluginImplementation"/> class.
@@ -55,6 +56,7 @@ public class PluginImplementation
         _userManager = userManager;
         _playbackTracker = PlaybackTrackingManager.Instance;
         _libraryManager = libraryManager;
+        _backupManager = BackupManager.Instance;
     }
 
     /// <summary>
@@ -199,6 +201,21 @@ public class PluginImplementation
             _logger.LogDebug(e, "Additional metadata are not available");
         }
 
+        if (config.IsBackupEnabled && userConfig.IsBackupEnabled)
+        {
+            try
+            {
+                _logger.LogInformation("Adding listen to backups...");
+                _backupManager.Backup(userConfig.UserName, data.Item, metadata, now);
+                _logger.LogInformation("Listen successfully backed up");
+            }
+            catch (Exception e)
+            {
+                _logger.LogInformation("Listen backup failed: {Reason}", e.Message);
+                _logger.LogDebug(e, "Listen backup failed");
+            }
+        }
+
         try
         {
             _logger.LogInformation("Sending listen...");
@@ -314,6 +331,21 @@ public class PluginImplementation
         {
             _logger.LogInformation("Additional metadata are not available: {Reason}", e.Message);
             _logger.LogDebug(e, "Additional metadata are not available");
+        }
+
+        if (config.IsBackupEnabled && userConfig.IsBackupEnabled)
+        {
+            try
+            {
+                _logger.LogInformation("Adding listen to backups...");
+                _backupManager.Backup(userConfig.UserName, data.Item, metadata, now);
+                _logger.LogInformation("Listen successfully backed up");
+            }
+            catch (Exception e)
+            {
+                _logger.LogInformation("Listen backup failed: {Reason}", e.Message);
+                _logger.LogDebug(e, "Listen backup failed");
+            }
         }
 
         try
