@@ -138,13 +138,13 @@
                             </label>
                             <div class="fieldDescription">Only necessary if you have other plugins working with favorite items.</div>
                         </div>
+                        <div class="sectionTitleContainer flex align-items-center">
+                            <h4 class="sectionTitle">Backup of listens</h4>
+                        </div>
                         <div class="inputContainer">
-                            <label class="inputLabel inputLabelUnfocused" for="BackupPath">
-                                Path to listens backups
-                            </label>
+                            <label class="inputLabel inputLabelUnfocused" for="BackupPath">Backup path</label>
                             <div class="bootstrap-wrapper row no-gutters">
-                                <input id="BackupPath" name="BackupPath" type="text"
-                                       is="emby-input"
+                                <input id="BackupPath" name="BackupPath" type="text" is="emby-input"
                                        class="bootstrap-wrapper col-md-9 vertical-center"/>
                                 <div id="SetBackupPath"
                                      class="raised button block emby-button bootstrap-wrapper col-md-2 offset-md-1 vertical-center">
@@ -154,9 +154,8 @@
                         </div>
                         <div class="inputContainer">
                             <label class="inputLabel inputLabelUnfocused" for="IsBackupEnabled">
-                                <input is="emby-checkbox" type="checkbox" id="IsBackupEnabled"
-                                       name="IsBackupEnabled"/>
-                                <span>Enable listen backups</span>
+                                <input is="emby-checkbox" type="checkbox" id="IsBackupEnabled" name="IsBackupEnabled"/>
+                                <span>Enabled</span>
                             </label>
                             <div class="fieldDescription">Has no effect if backup path above is not set.</div>
                         </div>
