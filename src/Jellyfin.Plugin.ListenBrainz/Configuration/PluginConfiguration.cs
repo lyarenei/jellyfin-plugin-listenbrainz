@@ -18,6 +18,7 @@ public class PluginConfiguration : BasePluginConfiguration
     private bool? _isAlternativeModeEnabled;
     private bool? _isImmediateFavoriteSyncEnabled;
     private bool? _shouldEmitUserRatingEvent;
+    private bool? _isBackupEnabled;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PluginConfiguration"/> class.
@@ -113,7 +114,11 @@ public class PluginConfiguration : BasePluginConfiguration
     /// <summary>
     /// Gets or sets a value indicating whether backup feature is enabled.
     /// </summary>
-    public bool IsBackupEnabled { get; set; }
+    public bool IsBackupEnabled
+    {
+        get => (_isBackupEnabled ?? false) && !string.IsNullOrEmpty(BackupPath);
+        set => _isBackupEnabled = value;
+    }
 
     /// <summary>
     /// Gets a value indicating whether backup feature is not enabled.
