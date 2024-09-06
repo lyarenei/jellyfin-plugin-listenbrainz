@@ -25,7 +25,8 @@ public class BackupManager : IBackupManager
     /// </summary>
     private static readonly JsonSerializerOptions _serializerOptions = new()
     {
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
     };
 
     /// <summary>
