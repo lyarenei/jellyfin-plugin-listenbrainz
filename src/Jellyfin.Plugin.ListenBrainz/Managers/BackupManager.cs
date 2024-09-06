@@ -35,6 +35,17 @@ public class BackupManager : IDisposable
     public static BackupManager Instance => _instance ??= new BackupManager();
 
     /// <summary>
+    /// Get the backup file path for specified user and filename.
+    /// </summary>
+    /// <param name="userName">Owner of the backup file.</param>
+    /// <returns>Path to the backup file.</returns>
+    public static string BackupFilePath(string userName)
+    {
+        var config = Plugin.GetConfiguration();
+        return Path.Combine(config.BackupPath, userName, DateTime.Today.ToShortDateString());
+    }
+
+    /// <summary>
     /// Back up listen of a current item.
     /// </summary>
     /// <param name="userName">ListenBrainz username.</param>
@@ -44,8 +55,7 @@ public class BackupManager : IDisposable
     /// <exception cref="PluginException">Backup failed.</exception>
     public void Backup(string userName, Audio item, AudioItemMetadata? metadata, long timestamp)
     {
-        var config = Plugin.GetConfiguration();
-        var filePath = Path.Combine(config.BackupPath, userName, DateTime.Today.ToShortDateString());
+        var filePath = BackupFilePath(userName);
         List<Listen>? userListens = null;
 
         _lock.Wait();
