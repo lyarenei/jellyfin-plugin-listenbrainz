@@ -5,6 +5,7 @@ using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
+using Jellyfin.Plugin.ListenBrainz.Utils;
 using MediaBrowser.Controller.Entities.Audio;
 using Microsoft.Extensions.Logging;
 
@@ -34,31 +35,20 @@ public class BackupManager : IBackupManager
     /// </summary>
     ~BackupManager() => Dispose(false);
 
-    /// <summary>
-    /// Get the backup file path for specified user and filename.
-    /// </summary>
-    /// <param name="userName">Owner of the backup file.</param>
-    /// <returns>Path to the backup file.</returns>
-    public static string BackupFilePath(string userName)
-    {
-        var config = Plugin.GetConfiguration();
-        var dateString = DateTime.Today.ToString("yyyy-MM-dd", DateTimeFormatInfo.InvariantInfo);
-        return Path.Combine(config.BackupPath, userName, dateString);
-    }
-
     /// <inheritdoc />
     public void Backup(string userName, Audio item, AudioItemMetadata? metadata, long timestamp)
     {
-        var filePath = BackupFilePath(userName);
+        var config = Plugin.GetConfiguration();
+        var dirPath = Path.Combine(config.BackupPath, userName);
+        var filePath = Path.Combine(dirPath, DateUtils.TodayIso);
         List<Listen>? userListens = null;
 
         _logger.LogDebug("Backing up listen of {SongName} to {FileName}", item.Name, filePath);
 
         _lock.Wait();
-        var config = Plugin.GetConfiguration();
-        var dirInfo = new DirectoryInfo(config.BackupPath);
         try
         {
+            var dirInfo = new DirectoryInfo(dirPath);
             if (dirInfo.Exists)
             {
                 using var stream = File.OpenRead(filePath);
