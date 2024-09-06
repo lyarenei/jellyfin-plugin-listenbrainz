@@ -145,6 +145,15 @@ Enable this if you are using other plugins which work with favorite items. If en
 disable `Immediate favorite sync` feature (if enabled) during the sync to prevent the issue described above. This
 feature only works if a track has required metadata (track MBID) and the MusicBrainz integration is enabled.
 
+##### Backup of listens
+
+If you wish to save listens locally, in addition to have them sent to ListenBrainz. To configure backups, first select the
+path where the backups should be created and select users for which the backups should be created.
+
+If the path is not set, backups will **NOT* be created, even if there are users with backups enabled.
+The backup file structure is: `<configured_path>/<listenbrainz_username>/yyyy-MM-dd.json` - each user has its own directory and
+each day a new backup file is created. Currently, the JSON format should be the same or similar to exported listens from ListenBrainz.
+
 ##### Allowed libraries for listen submission
 
 Depending on your setup, you may not want to record listens of audio from a certain library. Listens of audio from
