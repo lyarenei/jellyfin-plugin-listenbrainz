@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Jellyfin.Plugin.ListenBrainz.Api.Models;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
@@ -19,6 +20,14 @@ public class BackupManager : IBackupManager
     private readonly ILogger _logger;
     private readonly SemaphoreSlim _lock;
     private bool _isDisposed;
+
+    /// <summary>
+    /// JSON serializer options.
+    /// </summary>
+    private static readonly JsonSerializerOptions _serializerOptions = new()
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BackupManager"/> class.
@@ -52,7 +61,7 @@ public class BackupManager : IBackupManager
             if (dirInfo.Exists)
             {
                 using var stream = File.OpenRead(filePath);
-                userListens = JsonSerializer.Deserialize<List<Listen>>(stream);
+                userListens = JsonSerializer.Deserialize<List<Listen>>(stream, _serializerOptions);
             }
             else
             {
@@ -75,7 +84,7 @@ public class BackupManager : IBackupManager
         try
         {
             using var stream = File.Create(filePath);
-            JsonSerializer.Serialize(stream, userListens);
+            JsonSerializer.Serialize(stream, userListens, _serializerOptions);
         }
         catch (Exception ex)
         {
