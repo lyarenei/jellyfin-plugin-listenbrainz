@@ -34,11 +34,6 @@ public class BackupManager : IBackupManager
     ~BackupManager() => Dispose(false);
 
     /// <summary>
-    /// Gets instance of the backup manager.
-    /// </summary>
-    public static BackupManager Instance => _instance ??= new BackupManager();
-
-    /// <summary>
     /// Get the backup file path for specified user and filename.
     /// </summary>
     /// <param name="userName">Owner of the backup file.</param>
