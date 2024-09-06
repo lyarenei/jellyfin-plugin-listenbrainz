@@ -50,6 +50,8 @@ public class BackupManager : IBackupManager
         var filePath = BackupFilePath(userName);
         List<Listen>? userListens = null;
 
+        _logger.LogDebug("Backing up listen of {SongName} to {FileName}", item.Name, filePath);
+
         _lock.Wait();
         var config = Plugin.GetConfiguration();
         var dirInfo = new DirectoryInfo(config.BackupPath);
@@ -62,11 +64,13 @@ public class BackupManager : IBackupManager
             }
             else
             {
+                _logger.LogDebug("Directory does not exist, it will be created");
                 dirInfo.Create();
             }
         }
         catch (FileNotFoundException)
         {
+            _logger.LogDebug("File does not exist, it will be created");
         }
         catch (Exception ex)
         {
