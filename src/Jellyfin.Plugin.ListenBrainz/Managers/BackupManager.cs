@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using Jellyfin.Plugin.ListenBrainz.Api.Models;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
@@ -41,7 +42,8 @@ public class BackupManager : IBackupManager
     public static string BackupFilePath(string userName)
     {
         var config = Plugin.GetConfiguration();
-        return Path.Combine(config.BackupPath, userName, DateTime.Today.ToShortDateString());
+        var dateString = DateTime.Today.ToString("yyyy-MM-dd", DateTimeFormatInfo.InvariantInfo);
+        return Path.Combine(config.BackupPath, userName, dateString);
     }
 
     /// <inheritdoc />
