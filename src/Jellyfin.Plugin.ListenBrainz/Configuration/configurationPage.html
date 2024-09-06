@@ -152,13 +152,6 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="inputContainer">
-                            <label class="inputLabel inputLabelUnfocused" for="IsBackupEnabled">
-                                <input is="emby-checkbox" type="checkbox" id="IsBackupEnabled" name="IsBackupEnabled"/>
-                                <span>Enabled</span>
-                            </label>
-                            <div class="fieldDescription">Has no effect if backup path above is not set.</div>
-                        </div>
                         <div class="sectionTitleContainer flex align-items-center">
                             <h4 class="sectionTitle">Allowed libraries for listen submission</h4>
                             <div class="raised button-alt headerHelpButton emby-button" id="ResetAllowedLibraries">
@@ -438,9 +431,6 @@
             document.querySelector("#BackupPath")
                 .value = data.BackupPath;
 
-            document.querySelector("#IsBackupEnabled")
-                .checked = data.IsBackupEnabled;
-
             try {
                 buildAllowedLibrariesList(data.LibraryConfigs);
             } catch (err) {
@@ -497,7 +487,6 @@
                 IsImmediateFavoriteSyncEnabled: document.querySelector('#IsImmediateFavoriteSyncEnabled').checked,
                 ShouldEmitUserRatingEvent: document.querySelector('#ShouldEmitUserRatingEvent').checked,
                 BackupPath: document.querySelector('#BackupPath').value,
-                IsBackupEnabled: document.querySelector('#IsBackupEnabled').checked,
                 LibraryConfigs: getLibraryConfigsInputs(),
             }
         }

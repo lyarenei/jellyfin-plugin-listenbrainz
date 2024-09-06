@@ -18,7 +18,6 @@ public class PluginConfiguration : BasePluginConfiguration
     private bool? _isAlternativeModeEnabled;
     private bool? _isImmediateFavoriteSyncEnabled;
     private bool? _shouldEmitUserRatingEvent;
-    private bool? _isBackupEnabled;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PluginConfiguration"/> class.
@@ -28,7 +27,6 @@ public class PluginConfiguration : BasePluginConfiguration
         UserConfigs = new Collection<UserConfig>();
         LibraryConfigs = new Collection<LibraryConfig>();
         BackupPath = string.Empty;
-        IsBackupEnabled = false;
     }
 
     /// <summary>
@@ -117,18 +115,9 @@ public class PluginConfiguration : BasePluginConfiguration
     public string BackupPath { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether backup feature is enabled.
-    /// </summary>
-    public bool IsBackupEnabled
-    {
-        get => (_isBackupEnabled ?? false) && !string.IsNullOrEmpty(BackupPath);
-        set => _isBackupEnabled = value;
-    }
-
-    /// <summary>
-    /// Gets a value indicating whether backup feature is not enabled.
+    /// Gets a value indicating whether backup feature is enabled.
     /// </summary>
     [JsonIgnore]
     [XmlIgnore]
-    public bool IsNotBackupEnabled => !IsBackupEnabled;
+    public bool IsBackupEnabled => !string.IsNullOrEmpty(BackupPath);
 }
