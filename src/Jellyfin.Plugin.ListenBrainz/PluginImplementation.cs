@@ -29,7 +29,7 @@ public class PluginImplementation
     private readonly object _userDataSaveLock = new();
     private readonly PlaybackTrackingManager _playbackTracker;
     private readonly ILibraryManager _libraryManager;
-    private readonly BackupManager _backupManager;
+    private readonly IBackupManager _backupManager;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PluginImplementation"/> class.
@@ -40,13 +40,15 @@ public class PluginImplementation
     /// <param name="userDataManager">User data manager.</param>
     /// <param name="userManager">User manager.</param>
     /// <param name="libraryManager">Library manager.</param>
+    /// <param name="backupManager">Backup manager.</param>
     public PluginImplementation(
         ILogger logger,
         IListenBrainzClient listenBrainzClient,
         IMusicBrainzClient musicBrainzClient,
         IUserDataManager userDataManager,
         IUserManager userManager,
-        ILibraryManager libraryManager)
+        ILibraryManager libraryManager,
+        IBackupManager backupManager)
     {
         _logger = logger;
         _listenBrainzClient = listenBrainzClient;
@@ -56,7 +58,8 @@ public class PluginImplementation
         _userManager = userManager;
         _playbackTracker = PlaybackTrackingManager.Instance;
         _libraryManager = libraryManager;
-        _backupManager = BackupManager.Instance;
+        _backupManager = backupManager;
+    }
     }
 
     /// <summary>

@@ -1,3 +1,4 @@
+using Jellyfin.Plugin.ListenBrainz.Managers;
 using Jellyfin.Plugin.ListenBrainz.Utils;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Session;
@@ -45,13 +46,17 @@ public sealed class PluginService : IHostedService
         var musicBrainzLogger = loggerFactory.CreateLogger(Plugin.LoggerCategory + ".MusicBrainzApi");
         var musicBrainzClient = ClientUtils.GetMusicBrainzClient(musicBrainzLogger, clientFactory);
 
+        var backupLogger = loggerFactory.CreateLogger(Plugin.LoggerCategory + ".Backup");
+        var backupManager = new BackupManager(backupLogger);
+
         _plugin = new PluginImplementation(
             loggerFactory.CreateLogger(Plugin.LoggerCategory),
             listenBrainzClient,
             musicBrainzClient,
             userDataManager,
             userManager,
-            libraryManager);
+            libraryManager,
+            backupManager);
     }
 
     /// <inheritdoc />

@@ -3,24 +3,28 @@ using Jellyfin.Plugin.ListenBrainz.Api.Models;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
+using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using MediaBrowser.Controller.Entities.Audio;
+using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.ListenBrainz.Managers;
 
 /// <summary>
 /// Listens backup manager.
 /// </summary>
-public class BackupManager : IDisposable
+public class BackupManager : IBackupManager
 {
-    private static BackupManager? _instance;
+    private readonly ILogger _logger;
     private readonly SemaphoreSlim _lock;
     private bool _isDisposed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BackupManager"/> class.
     /// </summary>
-    public BackupManager()
+    /// <param name="logger">Logger.</param>
+    public BackupManager(ILogger logger)
     {
+        _logger = logger;
         _lock = new SemaphoreSlim(1, 1);
     }
 
@@ -45,14 +49,7 @@ public class BackupManager : IDisposable
         return Path.Combine(config.BackupPath, userName, DateTime.Today.ToShortDateString());
     }
 
-    /// <summary>
-    /// Back up listen of a current item.
-    /// </summary>
-    /// <param name="userName">ListenBrainz username.</param>
-    /// <param name="item">Listened item.</param>
-    /// <param name="metadata">Item metadata.</param>
-    /// <param name="timestamp">Listen timestamp.</param>
-    /// <exception cref="PluginException">Backup failed.</exception>
+    /// <inheritdoc />
     public void Backup(string userName, Audio item, AudioItemMetadata? metadata, long timestamp)
     {
         var filePath = BackupFilePath(userName);
