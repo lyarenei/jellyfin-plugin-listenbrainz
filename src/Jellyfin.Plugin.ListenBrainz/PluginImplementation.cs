@@ -18,7 +18,7 @@ namespace Jellyfin.Plugin.ListenBrainz;
 /// <summary>
 /// ListenBrainz plugin implementation.
 /// </summary>
-public class PluginImplementation
+public class PluginImplementation : IDisposable
 {
     private readonly ILogger _logger;
     private readonly IListenBrainzClient _listenBrainzClient;
@@ -30,6 +30,7 @@ public class PluginImplementation
     private readonly PlaybackTrackingManager _playbackTracker;
     private readonly ILibraryManager _libraryManager;
     private readonly IBackupManager _backupManager;
+    private bool _isDisposed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PluginImplementation"/> class.
@@ -60,6 +61,36 @@ public class PluginImplementation
         _libraryManager = libraryManager;
         _backupManager = backupManager;
     }
+
+    /// <summary>
+    /// Finalizes an instance of the <see cref="PluginImplementation"/> class.
+    /// </summary>
+    ~PluginImplementation() => Dispose(false);
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Dispose managed and unmanaged (own) resources.
+    /// </summary>
+    /// <param name="disposing">Dispose managed resources.</param>
+    private void Dispose(bool disposing)
+    {
+        if (_isDisposed)
+        {
+            return;
+        }
+
+        if (disposing)
+        {
+            _backupManager.Dispose();
+        }
+
+        _isDisposed = true;
     }
 
     /// <summary>
