@@ -40,7 +40,7 @@ public class BackupManager : IBackupManager
     {
         var config = Plugin.GetConfiguration();
         var dirPath = Path.Combine(config.BackupPath, userName);
-        var filePath = Path.Combine(dirPath, DateUtils.TodayIso);
+        var filePath = Path.Combine(dirPath, $"{DateUtils.TodayIso}.json");
         List<Listen>? userListens = null;
 
         _logger.LogDebug("Backing up listen of {SongName} to {FileName}", item.Name, filePath);
