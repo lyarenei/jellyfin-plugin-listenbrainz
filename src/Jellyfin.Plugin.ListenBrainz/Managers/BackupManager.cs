@@ -59,10 +59,19 @@ public class BackupManager : IDisposable
         List<Listen>? userListens = null;
 
         _lock.Wait();
+        var config = Plugin.GetConfiguration();
+        var dirInfo = new DirectoryInfo(config.BackupPath);
         try
         {
-            using var stream = File.OpenRead(filePath);
-            userListens = JsonSerializer.Deserialize<List<Listen>>(stream);
+            if (dirInfo.Exists)
+            {
+                using var stream = File.OpenRead(filePath);
+                userListens = JsonSerializer.Deserialize<List<Listen>>(stream);
+            }
+            else
+            {
+                dirInfo.Create();
+            }
         }
         catch (FileNotFoundException)
         {
