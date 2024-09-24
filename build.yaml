@@ -17,4 +17,4 @@ artifacts:
   - "Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.dll"
 changelog: >
   Fix
-    - Handle exceptions during loved/favorite sync (LB -> JF) (#98 @lyarenei)
+    - Submission of multiple artist MBIDs (#103 @moisespr123)
