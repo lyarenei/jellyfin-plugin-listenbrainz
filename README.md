@@ -46,14 +46,16 @@ version. It is recommended to use the "main" repository, which will always conta
 compatible with the latest major Jellyfin server. Otherwise you can use the specific ones to avoid breakage with the
 server version you are using.
 
-| Jellyfin version       | Repo URL                                              |
-|------------------------|-------------------------------------------------------|
-| Latest major (10.9.x)  | `https://repo.xkrivo.net/jellyfin/manifest.json`      |
-| 10.8.x                 | `https://repo.xkrivo.net/jellyfin-10-8/manifest.json` |
-| Unstable - development | `https://repo.xkrivo.net/jellyfin-dev/manifest.json`  |
+| Jellyfin version               | Repo URL                                              |
+|--------------------------------|-------------------------------------------------------|
+| Latest major version           | `https://repo.xkrivo.net/jellyfin/manifest.json`      |
+| Jellyfin 10.9.x                | `https://repo.xkrivo.net/jellyfin-10-9/manifest.json` |
+| Jellyfin 10.8.x                | `https://repo.xkrivo.net/jellyfin-10-8/manifest.json` |
+| Unstable - development builds  | `https://repo.xkrivo.net/jellyfin-dev/manifest.json`  |
 
-The development repo should not be used, unless you are fine with all the risks of running unstable releases of software
-or you have been explicitly asked to (for example when testing fixes or new features).
+The development repo is listed here just for the sake of completeness.
+It should not be used, unless you are fine with all the risks of running unstable releases of software or you have been
+explicitly asked to.
 
 ### Adding the repository
 
@@ -62,16 +64,18 @@ there, using one the URLs above. Repository name does not matter, it has only an
 admin.
 
 After you add the repository, you should be able to see `ListenBrainz` plugin in the catalog under `General` category.
-Select the version you want to install and restart the server as asked. Continue with plugin [configuration](doc/configuration.md).
+Select the version you want to install and restart the server as asked. Continue with
+plugin [configuration](doc/configuration.md).
 
 Plugin and Jellyfin versions compatibility table:
 
-| Plugin  | Jellyfin | Status      |
-|---------|----------|-------------|
-| 1.x.y.z | 10.7.a   | Unsupported |
-| 2.x.y.z | 10.8.a   | Unsupported |
-| 3.x.y.z | 10.8.a   | Unsupported |
-| 4.x.y.z | 10.9.a   | Active      |
+| Plugin  | Jellyfin | Status        |
+|---------|----------|---------------|
+| 1.x.y.z | 10.7.a   | Unsupported   |
+| 2.x.y.z | 10.8.a   | Unsupported   |
+| 3.x.y.z | 10.8.a   | Unsupported   |
+| 4.x.y.z | 10.9.a   | Bugfixes only |
+| 5.x.y.z | 10.10.a  | Active        |
 
 ## Configuration
 
