@@ -30,26 +30,39 @@ More details about the plugin features and how the plugin works can be found in 
 # Installation
 
 The plugin can be installed either via repository or [manually](#manual-build-and-installation).
-Additionally, all plugin releases are available on the [releases page](https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases).
+Additionally, all plugin releases are available on
+the [releases page](https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases).
 
 ## Install via repository
 
-The repository is available at: `https://repo.xkrivo.net/jellyfin/manifest.json`, this will always contain the plugin version compatible
-with the latest Jellyfin server version.
+Currently, the server will always try installing newest plugin version, even if it's not compatible with the its
+version.
+Until [this issue](https://github.com/jellyfin/jellyfin/issues/11331) is fixed, there will be multiple repositories for
+each Jellyfin server version (starting from Jellyfin 10.8).
+It is recommended to use the "main" repository, which will contain the latest version. Otherwise you can use the
+specific
+ones to avoid breakage with your server version.
 
->For now, the plugin version for Jellyfin 10.8.x will still receive bugfixes (if applicable), at least for a few patch versions.
-Since Jellyfin [will install even an incompatible plugin version](https://github.com/jellyfin/jellyfin/issues/11331),
-I created a temporary repo you can switch to, to avoid installing incompatible versions and have the plugin break on every server restart.
-The repository URL is `https://repo.xkrivo.net/jellyfin-10-8/manifest.json`.
->
->Alternatively, you can also remove the repository altogether and install the plugin manually.
+| Jellyfin version               | Repo URL                                              |
+|--------------------------------|-------------------------------------------------------|
+| Latest major version           | `https://repo.xkrivo.net/jellyfin/manifest.json`      |
+| Jellyfin 10.9.x                | `https://repo.xkrivo.net/jellyfin-10-9/manifest.json` |
+| Jellyfin 10.8.x                | `https://repo.xkrivo.net/jellyfin-10-8/manifest.json` |
+| Unstable - development builds  | `https://repo.xkrivo.net/jellyfin-dev/manifest.json`  |
+
+The development repo is listed here just for the sake of completeness.
+It should not be used, unless you are fine with all the risks of running unstable releases of software or you have been
+explicitly asked to.
+
+### Adding the repository
 
 Head over to Repositories tab in Jellyfin server settings > Plugins (advanced section), and add the repository
-there, using the URL above.
+there, using one the URLs above.
 Repository name does not matter, it has only an informational purpose for the server admin.
 
 After you add the repository, you should be able to see `ListenBrainz` plugin in the catalog under `General` category.
-Select the version you want to install and restart the server as asked. Continue with plugin [configuration](doc/configuration.md).
+Select the version you want to install and restart the server as asked. Continue with
+plugin [configuration](doc/configuration.md).
 
 Plugin and Jellyfin versions compatibility table:
 
@@ -57,8 +70,9 @@ Plugin and Jellyfin versions compatibility table:
 |---------|----------|---------------|
 | 1.x.y.z | 10.7.a   | Unsupported   |
 | 2.x.y.z | 10.8.a   | Unsupported   |
-| 3.x.y.z | 10.8.a   | Bugfixes only |
-| 4.x.y.z | 10.9.a   | Supported     |
+| 3.x.y.z | 10.8.a   | Unsupported   |
+| 4.x.y.z | 10.9.a   | Bugfixes only |
+| 5.x.y.z | 10.10.a  | Active        |
 
 ## Configuration
 
