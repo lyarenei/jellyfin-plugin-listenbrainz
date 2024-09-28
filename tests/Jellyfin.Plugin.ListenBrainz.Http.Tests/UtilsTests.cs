@@ -23,8 +23,8 @@ public class UtilsTests
             { "isOk", "false" }
         };
 
-        const string expected = "foo=bar&abc=efg&number=42&isOk=false";
-        Assert.Equal(expected, Utils.ToHttpGetQuery(data));
+        const string Expected = "foo=bar&abc=efg&number=42&isOk=false";
+        Assert.Equal(Expected, Utils.ToHttpGetQuery(data));
     }
 
     [Fact]
@@ -37,7 +37,7 @@ public class UtilsTests
             { "number", "42" }
         };
 
-        const string expected = "space=a+b&special=%26%2f%2f&number=42";
-        Assert.Equal(expected, Utils.ToHttpGetQuery(data));
+        const string Expected = "space=a+b&special=%26%2f%2f&number=42";
+        Assert.Equal(Expected, Utils.ToHttpGetQuery(data));
     }
 }
