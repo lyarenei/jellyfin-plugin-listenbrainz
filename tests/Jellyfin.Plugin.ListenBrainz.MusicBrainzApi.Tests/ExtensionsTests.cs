@@ -1,4 +1,4 @@
-using Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.Extensions;
+using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 using Xunit;
 
 namespace Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.Tests;
