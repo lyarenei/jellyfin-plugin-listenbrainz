@@ -7,11 +7,15 @@ on:
       - released
   workflow_dispatch:
 
+env:
+  DOTNET_VERSION: "8.0"
+  REPO_NAME: "jellyfin"
+
 jobs:
   test:
     uses: jellyfin/jellyfin-meta-plugins/.github/workflows/test.yaml@master
     with:
-      dotnet-version: "8.0"
+      dotnet-version: ${{ env.DOTNET_VERSION }}
 
   build:
     needs: test
@@ -26,7 +30,7 @@ jobs:
     needs: build
     uses: ./.github/workflows/upload-repo.yml
     with:
-      repo: "jellyfin"
+      repo: ${{ env.REPO_NAME }}
     secrets:
       host: ${{ secrets.DEPLOY_HOST }}
       user: ${{ secrets.DEPLOY_USER }}
@@ -37,7 +41,7 @@ jobs:
     needs: upload
     uses: ./.github/workflows/publish.yml
     with:
-      repo: "jellyfin"
+      repo: ${{ env.REPO_NAME }}
     secrets:
       host: ${{ secrets.DEPLOY_HOST }}
       user: ${{ secrets.DEPLOY_USER }}
