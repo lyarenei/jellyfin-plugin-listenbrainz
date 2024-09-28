@@ -1,4 +1,4 @@
-namespace Jellyfin.Plugin.ListenBrainz.Utils;
+namespace Jellyfin.Plugin.ListenBrainz.Common;
 
 /// <summary>
 /// DateTime utilities.

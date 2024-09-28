@@ -1,5 +1,5 @@
+using Jellyfin.Plugin.ListenBrainz.Common;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
-using Jellyfin.Plugin.ListenBrainz.Utils;
 using MediaBrowser.Controller.Entities;
 
 namespace Jellyfin.Plugin.ListenBrainz.Extensions;
