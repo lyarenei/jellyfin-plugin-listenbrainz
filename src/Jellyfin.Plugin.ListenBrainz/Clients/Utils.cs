@@ -1,5 +1,5 @@
 using Jellyfin.Plugin.ListenBrainz.Api;
-using Jellyfin.Plugin.ListenBrainz.Extensions;
+using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.MusicBrainzApi;
 using MediaBrowser.Controller.Library;

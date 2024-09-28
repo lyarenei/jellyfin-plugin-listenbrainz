@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace Jellyfin.Plugin.ListenBrainz.Extensions;
+namespace Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 
 /// <summary>
 /// String extensions.
