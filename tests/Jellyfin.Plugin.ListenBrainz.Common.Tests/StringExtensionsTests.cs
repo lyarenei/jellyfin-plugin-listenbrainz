@@ -1,10 +1,19 @@
 using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
-using Xunit;
 
-namespace Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.Tests;
+namespace Jellyfin.Plugin.ListenBrainz.Common.Tests;
 
-public class ExtensionsTests
+public class StringExtensionsTests
 {
+    [Theory]
+    [InlineData("foobar", "Foobar")]
+    [InlineData("", "")]
+    [InlineData("f", "F")]
+    [InlineData("FOOBAR", "FOOBAR")]
+    public void Extensions_Capitalize(string s, string expected)
+    {
+        Assert.Equal(expected, s.Capitalize());
+    }
+
     [Theory]
     [InlineData("kebabCase", "kebab-case")]
     [InlineData("Kebabcase", "kebabcase")]
