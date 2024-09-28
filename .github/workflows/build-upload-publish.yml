@@ -38,7 +38,7 @@ jobs:
 
   update-manifest:
     if: ${{ contains(github.repository, 'lyarenei/') }}
-    needs: upload
+    needs: upload-repo
     uses: ./.github/workflows/publish.yml
     with:
       repo: ${{ env.REPO_NAME }}
