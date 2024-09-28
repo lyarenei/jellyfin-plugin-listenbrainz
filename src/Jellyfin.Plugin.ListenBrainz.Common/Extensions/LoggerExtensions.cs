@@ -1,7 +1,7 @@
 using Jellyfin.Plugin.ListenBrainz.Common.Exceptions;
 using Microsoft.Extensions.Logging;
 
-namespace Jellyfin.Plugin.ListenBrainz.Common;
+namespace Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 
 /// <summary>
 /// Extensions for <see cref="ILogger"/>.
