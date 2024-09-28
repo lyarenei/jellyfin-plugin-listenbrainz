@@ -1,8 +1,8 @@
 using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
-using Jellyfin.Plugin.ListenBrainz.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using ClientUtils = Jellyfin.Plugin.ListenBrainz.Clients.Utils;
 
 namespace Jellyfin.Plugin.ListenBrainz.Controllers;
 
