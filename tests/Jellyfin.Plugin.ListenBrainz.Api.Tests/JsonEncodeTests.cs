@@ -32,8 +32,8 @@ public class ListenTests
         var listenJson = JsonConvert.SerializeObject(_exampleListen, BaseApiClient.SerializerSettings);
         Assert.NotNull(listenJson);
 
-        var expectedJSON = @"{""listened_at"":1234,""track_metadata"":{""artist_name"":""Foo Bar"",""track_name"":""Foo - Bar"",""release_name"":""Foobar"",""additional_info"":{""artist_mbids"":[""artist-foo""],""release_mbid"":""release-foo"",""recording_mbid"":""recording-foo""}}}";
-        Assert.Equal(expectedJSON, listenJson);
+        const string ExpectedJson = """{"listened_at":1234,"track_metadata":{"artist_name":"Foo Bar","track_name":"Foo - Bar","release_name":"Foobar","additional_info":{"artist_mbids":["artist-foo"],"release_mbid":"release-foo","recording_mbid":"recording-foo"}}}""";
+        Assert.Equal(ExpectedJson, listenJson);
     }
 
     [Fact]
@@ -62,7 +62,7 @@ public class RecordingFeedbackTests
         var actualJson = JsonConvert.SerializeObject(request, BaseApiClient.SerializerSettings);
         Assert.NotNull(actualJson);
 
-        var expectedJson = @"{""score"":" + score.Value + "}";
+        var expectedJson = """{"score":""" + score.Value + "}";
         Assert.Equal(expectedJson, actualJson);
     }
 }
