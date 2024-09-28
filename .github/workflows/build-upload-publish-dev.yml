@@ -35,7 +35,7 @@ jobs:
       user: ${{ secrets.DEPLOY_USER }}
       key: ${{ secrets.DEPLOY_KEY }}
 
-  publish:
+  update-manifest:
     if: ${{ contains(github.repository, 'lyarenei/') }}
     needs: upload-repo
     uses: ./.github/workflows/publish.yml
