@@ -9,7 +9,7 @@ public class StringExtensionsTests
     [InlineData("", "")]
     [InlineData("f", "F")]
     [InlineData("FOOBAR", "FOOBAR")]
-    public void Extensions_Capitalize(string s, string expected)
+    public void StringExtensions_Capitalize(string s, string expected)
     {
         Assert.Equal(expected, s.Capitalize());
     }
@@ -19,7 +19,7 @@ public class StringExtensionsTests
     [InlineData("Kebabcase", "kebabcase")]
     [InlineData("KebAbcAse", "keb-abc-ase")]
     [InlineData("KebabcasE", "kebabcas-e")]
-    public void Extensions_ConvertToKebabCase(string input, string expected)
+    public void StringExtensions_ConvertToKebabCase(string input, string expected)
     {
         Assert.Equal(expected, input.ToKebabCase());
     }
