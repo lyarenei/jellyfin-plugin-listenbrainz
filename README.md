@@ -1,7 +1,13 @@
 <!--suppress CheckEmptyScriptTag, HtmlDeprecatedAttribute -->
-<div align="center">
+<div align=center>
     <h1>ListenBrainz plugin for Jellyfin</h1>
-    <image src="res/listenbrainz/ListenBrainz_logo.svg" alt="Image for ListenBrainz plugin for Jellyfin" width=500 height="300" align=center />
+    <image
+        src="res/listenbrainz/ListenBrainz_logo.svg"
+        alt="Image for ListenBrainz plugin for Jellyfin"
+        width=500
+        height="300"
+        align=center
+    />
 <p>This plugin allows you to record your music activity directly from Jellyfin server to ListenBrainz.</p>
 </div>
 
@@ -10,9 +16,7 @@
 > ListenBrainz keeps track of music you listen to and provides you with insights into your listening habits.
 > We're completely open-source and publish our data as open data.
 
-&mdash; <cite>[ListenBrainz][1]</cite>
-
-[1]: https://listenbrainz.org
+&mdash; <cite>[ListenBrainz][LISTENBRAINZ]</cite>
 
 ## Features
 
@@ -25,40 +29,49 @@
 
 ...and probably some more to come.
 
-More details about the plugin features and how the plugin works can be found in the [documentation](doc/how-it-works.md).
+More details about the plugin features and how the plugin works can be found in the
+[documentation](doc/how-it-works.md).
 
 # Installation
 
 The plugin can be installed either via repository or [manually](#manual-build-and-installation).
-Additionally, all plugin releases are available on the [releases page](https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases).
+Additionally, all plugin releases are available on
+the [releases page][RELEASES].
 
 ## Install via repository
 
-The repository is available at: `https://repo.xkrivo.net/jellyfin/manifest.json`, this will always contain the plugin version compatible
-with the latest Jellyfin server version.
+Currently, the server will always try installing newest plugin version, even if it's not compatible with the its
+version. Until [this issue][VERSION_ISSUE] is fixed, there will be multiple repositories for each Jellyfin server
+version. It is recommended to use the "main" repository, which will always contain the latest version of the plugin
+compatible with the latest major Jellyfin server. Otherwise you can use the specific ones to avoid breakage with the
+server version you are using.
 
->For now, the plugin version for Jellyfin 10.8.x will still receive bugfixes (if applicable), at least for a few patch versions.
-Since Jellyfin [will install even an incompatible plugin version](https://github.com/jellyfin/jellyfin/issues/11331),
-I created a temporary repo you can switch to, to avoid installing incompatible versions and have the plugin break on every server restart.
-The repository URL is `https://repo.xkrivo.net/jellyfin-10-8/manifest.json`.
->
->Alternatively, you can also remove the repository altogether and install the plugin manually.
+| Jellyfin version       | Repo URL                                              |
+|------------------------|-------------------------------------------------------|
+| Latest major (10.9.x)  | `https://repo.xkrivo.net/jellyfin/manifest.json`      |
+| 10.8.x                 | `https://repo.xkrivo.net/jellyfin-10-8/manifest.json` |
+| Unstable - development | `https://repo.xkrivo.net/jellyfin-dev/manifest.json`  |
+
+The development repo should not be used, unless you are fine with all the risks of running unstable releases of software
+or you have been explicitly asked to (for example when testing fixes or new features).
+
+### Adding the repository
 
 Head over to Repositories tab in Jellyfin server settings > Plugins (advanced section), and add the repository
-there, using the URL above.
-Repository name does not matter, it has only an informational purpose for the server admin.
+there, using one the URLs above. Repository name does not matter, it has only an informational purpose for the server
+admin.
 
 After you add the repository, you should be able to see `ListenBrainz` plugin in the catalog under `General` category.
 Select the version you want to install and restart the server as asked. Continue with plugin [configuration](doc/configuration.md).
 
 Plugin and Jellyfin versions compatibility table:
 
-| Plugin  | Jellyfin | Status        |
-|---------|----------|---------------|
-| 1.x.y.z | 10.7.a   | Unsupported   |
-| 2.x.y.z | 10.8.a   | Unsupported   |
-| 3.x.y.z | 10.8.a   | Bugfixes only |
-| 4.x.y.z | 10.9.a   | Supported     |
+| Plugin  | Jellyfin | Status      |
+|---------|----------|-------------|
+| 1.x.y.z | 10.7.a   | Unsupported |
+| 2.x.y.z | 10.8.a   | Unsupported |
+| 3.x.y.z | 10.8.a   | Unsupported |
+| 4.x.y.z | 10.9.a   | Active      |
 
 ## Configuration
 
@@ -87,10 +100,11 @@ necessary to update the log template, to properly display logged data.
 
 To set up debug logging:
 
-First, follow the steps described [here](https://jellyfin.org/docs/general/administration/troubleshooting/#debug-logging)
-to enable debug logging. Then, in the same file, you will see two log templates (`outputTemplate`). One template is for
-a console output, the other one is for a file output. If you are using the Jellyfin UI to collect the logs, then modify
-the **File** template by adding `{EventId}`, `{ClientRequestId}` and `{HttpRequestId}` fields.
+First, follow the steps described [here][JELLYFIN_DEBUG] to enable debug logging. Then, in the same file, you will see
+two log templates (`outputTemplate`). One template is for a console output, the other one is for a file output. If you
+are using the Jellyfin UI to collect the logs, then modify the **File** template by adding `{EventId}`
+, `{ClientRequestId}` and `{HttpRequestId}` fields.
+
 - `EventId` identifies the event which is being processed (playback start/stop, user data save)
 - `ClientRequestId` identifies a ListenBrainz API request being processed
 - `HttpRequestId` identifies a specific HTTP request being processed
@@ -101,10 +115,12 @@ The modified template should look like this:
 - "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u3}] [{ThreadId}] {SourceContext}: {Message}{NewLine}{Exception}"
 + "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u3}] [{ThreadId}] {SourceContext} {EventId} {ClientRequestId} {HttpRequestId}: {Message}{NewLine}{Exception}"
 ```
+
 After modifying the template, restart Jellyfin server and you should see extra whitespace (before the `:`) in the log
 like this: <code>... &#91;INF] &#91;1] Main&nbsp;&nbsp;&nbsp;: Jellyfin version: "10.8.13"</code>
 This is expected, as the three new fields you added earlier are only defined in this plugin, while the template affects
-all log messages. Unfortunately, Jellyfin does not seem to be using a logging extension which allows dynamic log templates.
+all log messages. Unfortunately, Jellyfin does not seem to be using a logging extension which allows dynamic log
+templates.
 
 Do not forget to revert these changes after you are done with capturing the logs. You can keep the template if you don't
 mind the additional IDs, but make sure you change the log level back to `Information` as debug logging can in general
@@ -114,8 +130,7 @@ have an impact on the application performance.
 
 This should be somewhat similar to standard .NET project development.
 So, clone the repo, open it in your favorite editor, restore dependencies and you should be good to go.
-Debugging setup is documented in
-the [jellyfin plugin template](https://github.com/jellyfin/jellyfin-plugin-template#6-set-up-debugging).
+Debugging setup is documented in the [jellyfin plugin template][PLUGIN_DEBUGGING].
 
 ## Manual build and installation
 
@@ -125,11 +140,11 @@ To install the .NET SDK, check out the [.NET download page](https://dotnet.micro
 Once the SDK is installed, you should be able to compile the plugin in either debug or release configuration:
 
 ```shell
-> dotnet publish -c Debug
+dotnet publish -c Debug
 ```
 
 ```shell
-> dotnet publish -c Release
+dotnet publish -c Release
 ```
 
 Once the build is completed, the compiled DLLs should be available at:
@@ -169,3 +184,14 @@ code (except some parts as described below) under the MIT license.
 
 However, if I understand correctly, the code which depends on Jellyfin libraries, which are licenced under GPLv3, must
 be also licenced under GPLv3 license. And so this plugin is also licensed under the GPLv3 license.
+
+
+[LISTENBRAINZ]: https://listenbrainz.org
+
+[VERSION_ISSUE]: https://github.com/jellyfin/jellyfin/issues/11331
+
+[RELEASES]: https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases
+
+[JELLYFIN_DEBUG]: https://jellyfin.org/docs/general/administration/troubleshooting/#debug-logging
+
+[PLUGIN_DEBUGGING]: https://github.com/jellyfin/jellyfin-plugin-template#6-set-up-debugging
