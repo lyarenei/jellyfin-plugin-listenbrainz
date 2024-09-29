@@ -147,12 +147,12 @@ feature only works if a track has required metadata (track MBID) and the MusicBr
 
 ##### Backup of listens
 
-If you wish to save listens locally, in addition to have them sent to ListenBrainz. To configure backups, first select the
-path where the backups should be created. Then enable backups in user settings for each user you wish to create backups for.
+Save listen locally before it is sent to ListenBrainz. To configure backups, first select the path where the backups
+should be created. Then enable backups in user settings for each user you wish to create backups for.
 
-If the path is not set, backups will **NOT* be created, even if there are users with backups enabled.
-The backup file structure is: `<configured_path>/<listenbrainz_username>/yyyy-MM-dd.json` - each user has its own directory and
-each day a new backup file is created. Currently, the JSON format should be the same or similar to exported listens from ListenBrainz.
+If the path is not set, backups will **NOT* be created, even if there are users with backups enabled. The backup file
+structure is: `<configured_path>/<listenbrainz_username>/yyyy-MM-dd.json` - each user has its own directory and each day
+a new backup file is created. Currently, the JSON format should be the same or similar to exported listens from ListenBrainz.
 
 ##### Allowed libraries for listen submission
 
