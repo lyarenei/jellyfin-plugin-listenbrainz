@@ -136,9 +136,17 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     public static string GetConfigDirPath()
     {
         var path = _thisInstance?.ConfigurationFilePath;
-        if (path is null) throw new PluginException("Plugin instance is not available");
+        if (path is null)
+        {
+            throw new PluginException("Plugin instance is not available");
+        }
+
         var dirName = Path.GetDirectoryName(path);
-        if (dirName is null) throw new PluginException("Could not get a config directory name");
+        if (dirName is null)
+        {
+            throw new PluginException("Could not get a config directory name");
+        }
+
         return dirName;
     }
 
