@@ -15,7 +15,7 @@ jobs:
   test:
     uses: jellyfin/jellyfin-meta-plugins/.github/workflows/test.yaml@master
     with:
-      dotnet-version: ${{ env.DOTNET_8 }}
+      dotnet-version: ${{ vars.DOTNET_8 }}
 
   build:
     uses: ./.github/workflows/build.yml
@@ -25,7 +25,7 @@ jobs:
     needs: build
     uses: ./.github/workflows/upload-repo.yml
     with:
-      repo: ${{ env.REPO_DEV }}
+      repo: ${{ vars.REPO_DEV }}
     secrets:
       host: ${{ secrets.DEPLOY_HOST }}
       user: ${{ secrets.DEPLOY_USER }}
@@ -36,7 +36,7 @@ jobs:
     needs: upload-repo
     uses: ./.github/workflows/publish.yml
     with:
-      repo: ${{ env.REPO_DEV }}
+      repo: ${{ vars.REPO_DEV }}
     secrets:
       host: ${{ secrets.DEPLOY_HOST }}
       user: ${{ secrets.DEPLOY_USER }}
