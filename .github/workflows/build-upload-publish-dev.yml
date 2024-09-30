@@ -10,23 +10,12 @@ on:
       - '**/*.yml'
       - '**/*.yaml'
   workflow_dispatch:
-    inputs:
-      DOTNET_VERSION:
-        description: .NET version to use
-        type: string
-        default: "8.0"
-        required: false
-      REPO_NAME:
-        description: Repository name
-        type: string
-        default: "jellyfin-dev"
-        required: false
 
 jobs:
   test:
     uses: jellyfin/jellyfin-meta-plugins/.github/workflows/test.yaml@master
     with:
-      dotnet-version: ${{ inputs.DOTNET_VERSION }}
+      dotnet-version: ${{ env.DOTNET_8 }}
 
   build:
     uses: ./.github/workflows/build.yml
@@ -36,7 +25,7 @@ jobs:
     needs: build
     uses: ./.github/workflows/upload-repo.yml
     with:
-      repo: ${{ inputs.REPO_NAME }}
+      repo: ${{ env.REPO_DEV }}
     secrets:
       host: ${{ secrets.DEPLOY_HOST }}
       user: ${{ secrets.DEPLOY_USER }}
@@ -47,7 +36,7 @@ jobs:
     needs: upload-repo
     uses: ./.github/workflows/publish.yml
     with:
-      repo: ${{ inputs.REPO_NAME }}
+      repo: ${{ env.REPO_DEV }}
     secrets:
       host: ${{ secrets.DEPLOY_HOST }}
       user: ${{ secrets.DEPLOY_USER }}
