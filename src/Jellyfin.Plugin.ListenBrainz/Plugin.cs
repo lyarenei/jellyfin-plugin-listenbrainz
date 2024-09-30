@@ -42,7 +42,13 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
         IUserManager userManager) : base(paths, xmlSerializer)
     {
         _thisInstance = this;
-        _service = new PluginService(sessionManager, loggerFactory, clientFactory, userDataManager, libraryManager, userManager);
+        _service = new PluginService(
+            sessionManager,
+            loggerFactory,
+            clientFactory,
+            userDataManager,
+            libraryManager,
+            userManager);
         _service.StartAsync(CancellationToken.None);
     }
 

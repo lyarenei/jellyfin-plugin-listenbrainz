@@ -1,5 +1,5 @@
 using System.Text.Json;
-using Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.Extensions;
+using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 
 namespace Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.Json;
 

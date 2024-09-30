@@ -6,6 +6,8 @@ using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.ListenBrainz.Tasks;
 
+// TODO: To be removed in v5.x (JF 10.10.a)
+
 /// <summary>
 /// Jellyfin scheduled task to migrate old plugin configuration.
 /// </summary>

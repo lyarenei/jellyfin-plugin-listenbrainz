@@ -1,6 +1,7 @@
+using Jellyfin.Plugin.ListenBrainz.Common.Exceptions;
 using Microsoft.Extensions.Logging;
 
-namespace Jellyfin.Plugin.ListenBrainz.Common;
+namespace Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 
 /// <summary>
 /// Extensions for <see cref="ILogger"/>.
@@ -18,6 +19,7 @@ public static class LoggerExtensions
     {
         var key = eventKey ?? "EventId";
         var val = eventVal ?? Utils.GetNewId();
-        return logger.BeginScope(new Dictionary<string, object> { { key, val } });
+        var scopedLogger = logger.BeginScope(new Dictionary<string, object> { { key, val } });
+        return scopedLogger ?? throw new FatalException("Failed to initialize logger");
     }
 }

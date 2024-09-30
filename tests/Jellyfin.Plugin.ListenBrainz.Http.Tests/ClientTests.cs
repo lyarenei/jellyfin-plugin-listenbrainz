@@ -45,7 +45,7 @@ public class ClientTests
             });
 
         var httpClient = new System.Net.Http.HttpClient(mockHandler.Object);
-        mockFactory.Setup(_ => _.CreateClient(It.IsAny<string>())).Returns(httpClient);
+        mockFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
         var logger = new Mock<ILogger>();
         var sleepService = new Mock<ISleepService>();
@@ -72,7 +72,7 @@ public class ClientTests
             .ThrowsAsync(new Exception());
 
         var httpClient = new System.Net.Http.HttpClient(mockHandler.Object);
-        mockFactory.Setup(_ => _.CreateClient(It.IsAny<string>())).Returns(httpClient);
+        mockFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
         var logger = new Mock<ILogger>();
         var sleepService = new Mock<ISleepService>();
@@ -100,7 +100,7 @@ public class ClientTests
             });
 
         var httpClient = new System.Net.Http.HttpClient(mockHandler.Object);
-        mockFactory.Setup(_ => _.CreateClient(It.IsAny<string>())).Returns(httpClient);
+        mockFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
         var logger = new Mock<ILogger>();
         var sleepService = new Mock<ISleepService>();
@@ -125,7 +125,7 @@ public class ClientTests
             .ThrowsAsync(new TaskCanceledException());
 
         var httpClient = new System.Net.Http.HttpClient(mockHandler.Object);
-        mockFactory.Setup(_ => _.CreateClient(It.IsAny<string>())).Returns(httpClient);
+        mockFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
         var logger = new Mock<ILogger>();
         var sleepService = new Mock<ISleepService>();
