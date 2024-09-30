@@ -1,11 +1,11 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Jellyfin.Plugin.ListenBrainz.Api.Models;
+using Jellyfin.Plugin.ListenBrainz.Common;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
-using Jellyfin.Plugin.ListenBrainz.Utils;
 using MediaBrowser.Controller.Entities.Audio;
 using Microsoft.Extensions.Logging;
 
