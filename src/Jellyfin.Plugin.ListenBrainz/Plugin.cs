@@ -109,11 +109,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     public static PluginConfiguration GetConfiguration()
     {
         var config = _thisInstance?.Configuration;
-        if (config is not null)
-        {
-            return config;
-        }
-
+        if (config is not null) return config;
         throw new PluginException("Plugin instance is not available");
     }
 
