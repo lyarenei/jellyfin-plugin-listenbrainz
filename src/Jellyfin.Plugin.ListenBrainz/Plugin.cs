@@ -124,11 +124,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
         // var path = _thisInstance?.DataFolderPath;
         var pluginDirName = string.Format(CultureInfo.InvariantCulture, "{0}_{1}", _thisInstance?.Name, Version);
         var path = Path.Join(_thisInstance?.ApplicationPaths.PluginsPath, pluginDirName);
-        if (path is null)
-        {
-            throw new PluginException("Plugin instance is not available");
-        }
-
+        if (path is null) throw new PluginException("Plugin instance is not available");
         return path;
     }
 
