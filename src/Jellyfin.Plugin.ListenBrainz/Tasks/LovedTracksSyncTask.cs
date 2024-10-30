@@ -151,6 +151,7 @@ public class LovedTracksSyncTask : IScheduledTask
                 var foundUser = _userManager.GetUserById(userConfig.JellyfinUserId);
                 if (foundUser is null)
                 {
+                    // Skip item if we can't determine favorite status.
                     return false;
                 }
 
