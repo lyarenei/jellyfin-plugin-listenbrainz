@@ -146,17 +146,7 @@ public class LovedTracksSyncTask : IScheduledTask
 
         var items = _libraryManager
             .GetItemList(q, allowedLibraries.ToList())
-            .Where(i =>
-            {
-                var foundUser = _userManager.GetUserById(userConfig.JellyfinUserId);
-                if (foundUser is null)
-                {
-                    // Skip item if we can't determine favorite status.
-                    return false;
-                }
-
-                return !_userDataManager.GetUserData(foundUser, i).IsFavorite;
-            })
+            .Where(i => !_userDataManager.GetUserData(user, i).IsFavorite)
             .Where(i => i.ProviderIds.GetValueOrDefault("MusicBrainzTrack") is not null)
             .ToList();
 
