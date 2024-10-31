@@ -1,8 +1,7 @@
 # How does the plugin work
 
 Here is a general description of how particular plugin features work. The plugin configuration is documented separately
-and can be found [here](configuration.md). If you are upgrading from versions 2 and below, it might be worth to check
-out the [migration documentation](migration.md) as well.
+and can be found [here](configuration.md).
 
 ## Sending listens
 
