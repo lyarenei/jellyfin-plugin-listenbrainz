@@ -131,7 +131,7 @@ public class ListenBrainzClient : IListenBrainzClient
     /// <exception cref="PluginException">Sending listens failed.</exception>
     public async Task SendListensAsync(
         UserConfig config,
-        IEnumerable<StoredListen> storedListens,
+        IEnumerable<Listen> listens,
         CancellationToken cancellationToken)
     {
         var pluginConfig = Plugin.GetConfiguration();
@@ -139,7 +139,7 @@ public class ListenBrainzClient : IListenBrainzClient
         {
             ApiToken = config.PlaintextApiToken,
             ListenType = ListenType.Import,
-            Payload = ToListens(storedListens),
+            Payload = listens,
             BaseUrl = pluginConfig.ListenBrainzApiUrl
         };
 

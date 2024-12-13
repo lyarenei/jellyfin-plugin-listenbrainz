@@ -132,7 +132,8 @@ public class ResubmitListensTask : IScheduledTask
             cancellationToken.ThrowIfCancellationRequested();
             try
             {
-                await _listenBrainzClient.SendListensAsync(userConfig, chunkToSubmit, cancellationToken);
+                // var convertedChunk = ToListens(chunkToSubmit);
+                // await _listenBrainzClient.SendListensAsync(userConfig, convertedChunk, cancellationToken);
                 await _listensCache.RemoveListensAsync(userId, listenChunk);
                 await _listensCache.SaveAsync();
             }
