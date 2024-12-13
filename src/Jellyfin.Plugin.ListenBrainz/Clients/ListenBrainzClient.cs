@@ -98,7 +98,11 @@ public class ListenBrainzClient : IListenBrainzClient
     }
 
     /// <inheritdoc />
-    public void SendFeedback(UserConfig config, bool isFavorite, string? recordingMbid = null, string? recordingMsid = null)
+    public void SendFeedback(
+        UserConfig config,
+        bool isFavorite,
+        string? recordingMbid = null,
+        string? recordingMsid = null)
     {
         var pluginConfig = Plugin.GetConfiguration();
         var request = new RecordingFeedbackRequest
@@ -125,7 +129,10 @@ public class ListenBrainzClient : IListenBrainzClient
 
     /// <inheritdoc />
     /// <exception cref="PluginException">Sending listens failed.</exception>
-    public async Task SendListensAsync(UserConfig config, IEnumerable<StoredListen> storedListens, CancellationToken cancellationToken)
+    public async Task SendListensAsync(
+        UserConfig config,
+        IEnumerable<StoredListen> storedListens,
+        CancellationToken cancellationToken)
     {
         var pluginConfig = Plugin.GetConfiguration();
         var request = new SubmitListensRequest
@@ -197,7 +204,11 @@ public class ListenBrainzClient : IListenBrainzClient
         GetUserFeedbackResponse response;
         do
         {
-            var request = new GetUserFeedbackRequest(config.UserName, FeedbackScore.Loved, Limits.MaxItemsPerGet, offset);
+            var request = new GetUserFeedbackRequest(
+                config.UserName,
+                FeedbackScore.Loved,
+                Limits.MaxItemsPerGet,
+                offset);
             try
             {
                 response = await _apiClient.GetUserFeedback(request, cancellationToken);
