@@ -1,4 +1,6 @@
+using Jellyfin.Plugin.ListenBrainz.Api.Models;
 using Jellyfin.Plugin.ListenBrainz.Api.Resources;
+using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
@@ -128,13 +130,31 @@ public class ResubmitListensTask : IScheduledTask
         var listenChunks = _listensCache.GetListens(userId).Chunk(Limits.MaxListensPerRequest);
         foreach (var listenChunk in listenChunks)
         {
-            var chunkToSubmit = pluginConfig.IsMusicBrainzEnabled ? listenChunk.Select(UpdateMetadataIfNecessary) : listenChunk;
-            cancellationToken.ThrowIfCancellationRequested();
+            var listensToSend = listenChunk.Select(listen =>
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    var processedListen = pluginConfig.IsMusicBrainzEnabled
+                        ? UpdateMetadataIfNecessary(listen)
+                        : listen;
+
+                    try
+                    {
+                        var convertedListen = ToListen(processedListen);
+                        _listensCache.RemoveListen(userId, processedListen);
+                        return convertedListen;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogInformation("Failed to prepare cached listen for submission: {Reason}", ex.Message);
+                        _logger.LogDebug(ex, "Recreating listen from cache failed");
+                        return null;
+                    }
+                })
+                .WhereNotNull();
+
             try
             {
-                // var convertedChunk = ToListens(chunkToSubmit);
-                // await _listenBrainzClient.SendListensAsync(userConfig, convertedChunk, cancellationToken);
-                await _listensCache.RemoveListensAsync(userId, listenChunk);
+                await _listenBrainzClient.SendListensAsync(userConfig, listensToSend, cancellationToken);
                 await _listensCache.SaveAsync();
             }
             catch (Exception ex)
@@ -169,5 +189,22 @@ public class ResubmitListensTask : IScheduledTask
         }
 
         return listen;
+    }
+
+    /// <summary>
+    /// Convert a <see cref="StoredListen"/> to <see cref="Listen"/>s.
+    /// </summary>
+    /// <param name="storedListen">Stored listen to convert.</param>
+    /// <returns>Converted listens.</returns>
+    private Listen? ToListen(StoredListen storedListen)
+    {
+        if (_libraryManager is null)
+        {
+            throw new InvalidOperationException("Library manager is not available");
+        }
+
+        var baseItem = _libraryManager.GetItemById(storedListen.Id);
+        var audio = (Audio?)baseItem;
+        return audio?.AsListen(storedListen.ListenedAt, storedListen.Metadata);
     }
 }

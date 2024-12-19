@@ -235,24 +235,6 @@ public class ListenBrainzClient : IListenBrainzClient
     }
 
     /// <summary>
-    /// Convert all <see cref="StoredListen"/>s to <see cref="Listen"/>s.
-    /// </summary>
-    /// <param name="storedListens">Stored listens to convert.</param>
-    /// <returns>Converted listens.</returns>
-    private IEnumerable<Listen> ToListens(IEnumerable<StoredListen> storedListens)
-    {
-        if (_libraryManager is null) throw new InvalidOperationException("Library manager is not available");
-
-        var listensToConvert = storedListens.ToArray();
-        return listensToConvert.Select(l =>
-        {
-            var baseItem = _libraryManager.GetItemById(l.Id);
-            var audio = (Audio?)baseItem ?? throw new PluginException("Invalid item");
-            return audio.AsListen(l.ListenedAt, l.Metadata);
-        });
-    }
-
-    /// <summary>
     /// Fetch ListenBrainz username using the API token.
     /// </summary>
     /// <param name="userApiToken">ListenBrainz API token.</param>
