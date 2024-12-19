@@ -241,6 +241,23 @@ public sealed class ListensCacheManager : ICacheManager, IListensCache, IDisposa
     }
 
     /// <inheritdoc />
+    public void RemoveListen(Guid userId, StoredListen listen)
+    {
+        _lock.Wait();
+        try
+        {
+            if (_listensCache.TryGetValue(userId, out var userListens))
+            {
+                userListens.Remove(listen);
+            }
+        }
+        finally
+        {
+            _lock.Release();
+        }
+    }
+
+    /// <inheritdoc />
     public void RemoveListens(Guid userId, IEnumerable<StoredListen> listens)
     {
         _lock.Wait();
