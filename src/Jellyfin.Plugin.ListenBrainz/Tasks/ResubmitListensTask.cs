@@ -34,7 +34,11 @@ public class ResubmitListensTask : IScheduledTask
     /// <param name="clientFactory">HTTP client factory.</param>
     /// <param name="userManager">User manager.</param>
     /// <param name="libraryManager">Library manager.</param>
-    public ResubmitListensTask(ILoggerFactory loggerFactory, IHttpClientFactory clientFactory, IUserManager userManager, ILibraryManager libraryManager)
+    public ResubmitListensTask(
+        ILoggerFactory loggerFactory,
+        IHttpClientFactory clientFactory,
+        IUserManager userManager,
+        ILibraryManager libraryManager)
     {
         _logger = loggerFactory.CreateLogger($"{Plugin.LoggerCategory}.ResubmitListensTask");
         _listensCache = ListensCacheManager.Instance;
@@ -113,7 +117,10 @@ public class ResubmitListensTask : IScheduledTask
         return TimeSpan.TicksPerDay + (randomMinute * TimeSpan.TicksPerMinute);
     }
 
-    private async Task SubmitListensForUser(PluginConfiguration pluginConfig, Guid userId, CancellationToken cancellationToken)
+    private async Task SubmitListensForUser(
+        PluginConfiguration pluginConfig,
+        Guid userId,
+        CancellationToken cancellationToken)
     {
         var user = _userManager.GetUserById(userId);
         if (user is null)
