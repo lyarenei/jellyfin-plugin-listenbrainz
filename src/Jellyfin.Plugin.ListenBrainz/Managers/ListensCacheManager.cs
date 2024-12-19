@@ -197,10 +197,7 @@ public sealed class ListensCacheManager : ICacheManager, IListensCache, IDisposa
         }
         catch (KeyNotFoundException)
         {
-            _listensCache[userId] = new List<StoredListen>
-            {
-                item.AsStoredListen(listenedAt, metadata)
-            };
+            _listensCache[userId] = new List<StoredListen> { item.AsStoredListen(listenedAt, metadata) };
         }
         finally
         {
@@ -218,10 +215,7 @@ public sealed class ListensCacheManager : ICacheManager, IListensCache, IDisposa
         }
         catch (KeyNotFoundException)
         {
-            _listensCache[userId] = new List<StoredListen>
-            {
-                item.AsStoredListen(listenedAt, metadata)
-            };
+            _listensCache[userId] = new List<StoredListen> { item.AsStoredListen(listenedAt, metadata) };
         }
         finally
         {
