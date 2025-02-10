@@ -1,4 +1,3 @@
-using Jellyfin.Plugin.ListenBrainz.Api.Models;
 using Jellyfin.Plugin.ListenBrainz.Api.Resources;
 using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
@@ -152,7 +151,7 @@ public class ResubmitListensTask : IScheduledTask
 
                     try
                     {
-                        var convertedListen = ToListen(processedListen);
+                        var convertedListen = _libraryManager.ToListen(processedListen);
                         _listensCache.RemoveListen(userId, processedListen);
                         return convertedListen;
                     }
@@ -202,22 +201,5 @@ public class ResubmitListensTask : IScheduledTask
         }
 
         return listen;
-    }
-
-    /// <summary>
-    /// Convert a <see cref="StoredListen"/> to <see cref="Listen"/>s.
-    /// </summary>
-    /// <param name="storedListen">Stored listen to convert.</param>
-    /// <returns>Converted listens.</returns>
-    private Listen? ToListen(StoredListen storedListen)
-    {
-        if (_libraryManager is null)
-        {
-            throw new InvalidOperationException("Library manager is not available");
-        }
-
-        var baseItem = _libraryManager.GetItemById(storedListen.Id);
-        var audio = (Audio?)baseItem;
-        return audio?.AsListen(storedListen.ListenedAt, storedListen.Metadata);
     }
 }
