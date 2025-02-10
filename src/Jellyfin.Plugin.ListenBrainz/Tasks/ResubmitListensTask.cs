@@ -21,7 +21,7 @@ namespace Jellyfin.Plugin.ListenBrainz.Tasks;
 public class ResubmitListensTask : IScheduledTask
 {
     private readonly ILogger _logger;
-    private readonly ListensCacheManager _listensCache;
+    private readonly IListensCacheManager _listensCache;
     private readonly IListenBrainzClient _listenBrainzClient;
     private readonly IMusicBrainzClient _musicBrainzClient;
     private readonly IUserManager _userManager;
@@ -34,18 +34,24 @@ public class ResubmitListensTask : IScheduledTask
     /// <param name="clientFactory">HTTP client factory.</param>
     /// <param name="userManager">User manager.</param>
     /// <param name="libraryManager">Library manager.</param>
+    /// <param name="listensCacheManager">Listens cache instance.</param>
+    /// <param name="listenBrainzClient">ListenBrainz client.</param>
+    /// <param name="musicBrainzClient">MusicBRainz client.</param>
     public ResubmitListensTask(
         ILoggerFactory loggerFactory,
         IHttpClientFactory clientFactory,
         IUserManager userManager,
-        ILibraryManager libraryManager)
+        ILibraryManager libraryManager,
+        IListensCacheManager? listensCacheManager = null,
+        IListenBrainzClient? listenBrainzClient = null,
+        IMusicBrainzClient? musicBrainzClient = null)
     {
         _logger = loggerFactory.CreateLogger($"{Plugin.LoggerCategory}.ResubmitListensTask");
-        _listensCache = ListensCacheManager.Instance;
-        _listenBrainzClient = ClientUtils.GetListenBrainzClient(_logger, clientFactory, libraryManager);
-        _musicBrainzClient = ClientUtils.GetMusicBrainzClient(_logger, clientFactory);
         _userManager = userManager;
         _libraryManager = libraryManager;
+        _listensCache = listensCacheManager ?? ListensCacheManager.Instance;
+        _listenBrainzClient = listenBrainzClient ?? ClientUtils.GetListenBrainzClient(_logger, clientFactory, libraryManager);
+        _musicBrainzClient = musicBrainzClient ?? ClientUtils.GetMusicBrainzClient(_logger, clientFactory);
     }
 
     /// <inheritdoc />

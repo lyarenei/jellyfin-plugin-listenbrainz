@@ -10,7 +10,7 @@ namespace Jellyfin.Plugin.ListenBrainz.Managers;
 /// <summary>
 /// Cache manager.
 /// </summary>
-public sealed class ListensCacheManager : ICacheManager, IListensCache, IDisposable
+public sealed class ListensCacheManager : IListensCacheManager
 {
     /// <summary>
     /// Cache file name.
