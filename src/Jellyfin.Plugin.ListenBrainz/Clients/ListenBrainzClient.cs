@@ -233,12 +233,12 @@ public class ListenBrainzClient : IListenBrainzClient
         if (_libraryManager is null) throw new InvalidOperationException("Library manager is not available");
 
         var listensToConvert = storedListens.ToArray();
-        return listensToConvert
-            .Select(l => _libraryManager.GetItemById(l.Id))
-            .Cast<Audio>()
-            .Select(a => a.AsListen(
-                listensToConvert.First(l => l.Id == a.Id).ListenedAt,
-                listensToConvert.First(l => l.Id == a.Id).Metadata));
+        return listensToConvert.Select(l =>
+        {
+            var baseItem = _libraryManager.GetItemById(l.Id);
+            var audio = (Audio?)baseItem ?? throw new PluginException("Invalid item");
+            return audio.AsListen(l.ListenedAt, l.Metadata);
+        });
     }
 
     /// <summary>
