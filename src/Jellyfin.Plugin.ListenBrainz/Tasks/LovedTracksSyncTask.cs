@@ -24,7 +24,6 @@ public class LovedTracksSyncTask : IScheduledTask
     private readonly IMusicBrainzClient _musicBrainzClient;
     private readonly ILibraryManager _libraryManager;
     private readonly IUserManager _userManager;
-    private readonly IUserDataRepository _repository;
     private readonly IUserDataManager _userDataManager;
     private bool _reenableImmediateSync;
     private double _progress;
@@ -37,14 +36,12 @@ public class LovedTracksSyncTask : IScheduledTask
     /// <param name="clientFactory">HTTP client factory.</param>
     /// <param name="libraryManager">Library manager.</param>
     /// <param name="userManager">User manager.</param>
-    /// <param name="dataRepository">Data repository.</param>
     /// <param name="dataManager">User data manager.</param>
     public LovedTracksSyncTask(
         ILoggerFactory loggerFactory,
         IHttpClientFactory clientFactory,
         ILibraryManager libraryManager,
         IUserManager userManager,
-        IUserDataRepository dataRepository,
         IUserDataManager dataManager)
     {
         _logger = loggerFactory.CreateLogger($"{Plugin.LoggerCategory}.LovedSyncTask");
@@ -52,7 +49,6 @@ public class LovedTracksSyncTask : IScheduledTask
         _musicBrainzClient = ClientUtils.GetMusicBrainzClient(_logger, clientFactory);
         _libraryManager = libraryManager;
         _userManager = userManager;
-        _repository = dataRepository;
         _userDataManager = dataManager;
     }
 
@@ -209,11 +205,7 @@ public class LovedTracksSyncTask : IScheduledTask
             _userDataManager.SaveUserData(user, item, userData, UserDataSaveReason.UpdateUserRating, cancellationToken);
             return;
         }
-
-        foreach (var key in item.GetUserDataKeys())
-        {
-            _repository.SaveUserData(user.InternalId, key, userData, cancellationToken);
-        }
+        _userDataManager.SaveUserData(user, item, userData, UserDataSaveReason.UpdateUserRating, cancellationToken);
 
         _logger.LogDebug("Item {Name} has been marked as favorite for user {User}", item.Name, user.Username);
     }
