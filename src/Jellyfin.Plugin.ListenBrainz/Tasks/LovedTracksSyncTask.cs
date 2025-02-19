@@ -205,6 +205,7 @@ public class LovedTracksSyncTask : IScheduledTask
             _userDataManager.SaveUserData(user, item, userData, UserDataSaveReason.UpdateUserRating, cancellationToken);
             return;
         }
+
         _userDataManager.SaveUserData(user, item, userData, UserDataSaveReason.UpdateUserRating, cancellationToken);
 
         _logger.LogDebug("Item {Name} has been marked as favorite for user {User}", item.Name, user.Username);
