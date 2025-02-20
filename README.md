@@ -69,13 +69,14 @@ plugin [configuration](doc/configuration.md).
 
 Plugin and Jellyfin versions compatibility table:
 
-| Plugin  | Jellyfin | Status        |
-|---------|----------|---------------|
-| 1.x.y.z | 10.7.a   | Unsupported   |
-| 2.x.y.z | 10.8.a   | Unsupported   |
-| 3.x.y.z | 10.8.a   | Unsupported   |
-| 4.x.y.z | 10.9.a   | Bugfixes only |
-| 5.x.y.z | 10.10.a  | Active        |
+| Plugin  | Jellyfin | Status      |
+|---------|----------|-------------|
+| 1.x.y.z | 10.7.a   | Unsupported |
+| 2.x.y.z | 10.8.a   | Unsupported |
+| 3.x.y.z | 10.8.a   | Unsupported |
+| 4.x.y.z | 10.9.a   | Unsupported |
+| 5.x.y.z | 10.10.a  | Unsupported |
+| 5.x.y.z | 10.11.a  | Active      |
 
 ## Configuration
 
