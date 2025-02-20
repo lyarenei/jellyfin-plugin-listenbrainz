@@ -55,8 +55,9 @@ server version you are using.
 | Unstable - development builds | `https://repo.xkrivo.net/jellyfin-dev/manifest.json`   |
 
 The development repo is listed here just for the sake of completeness.
-It should not be used, unless you are fine with all the risks of running unstable releases of software or you have been
-explicitly asked to.
+It should not be used, unless:
+1. You are fine with all the risks of running unstable releases of software
+2. Or you have been explicitly asked to use it
 
 ### Adding the repository
 
