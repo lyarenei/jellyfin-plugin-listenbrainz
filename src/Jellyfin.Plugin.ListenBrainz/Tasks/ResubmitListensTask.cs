@@ -122,7 +122,7 @@ public class ResubmitListensTask : IScheduledTask
         return TimeSpan.TicksPerDay + (randomMinute * TimeSpan.TicksPerMinute);
     }
 
-    private async Task SubmitListensForUser(
+    internal async Task SubmitListensForUser(
         PluginConfiguration pluginConfig,
         Guid userId,
         CancellationToken cancellationToken)
