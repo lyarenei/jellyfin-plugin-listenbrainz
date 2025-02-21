@@ -115,7 +115,7 @@ public class ResubmitListensTask : IScheduledTask
         };
     }
 
-    private static long GetInterval()
+    internal static long GetInterval()
     {
         var random = new Random();
         var randomMinute = random.Next(50);
