@@ -27,5 +27,5 @@ public class StoredListen
     /// Gets a value indicating whether this listen has MusicBrainz recording ID.
     /// </summary>
     [JsonIgnore]
-    public bool HasRecordingMbid => string.IsNullOrEmpty(Metadata?.RecordingMbid);
+    public bool HasRecordingMbid => !string.IsNullOrEmpty(Metadata?.RecordingMbid);
 }
