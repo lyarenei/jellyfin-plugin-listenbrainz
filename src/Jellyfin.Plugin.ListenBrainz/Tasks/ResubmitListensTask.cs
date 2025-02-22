@@ -22,7 +22,6 @@ public class ResubmitListensTask : IScheduledTask
     private readonly IListensCacheManager _listensCache;
     private readonly IListenBrainzClient _listenBrainzClient;
     private readonly IMusicBrainzClient _musicBrainzClient;
-    private readonly IUserManager _userManager;
     private readonly ILibraryManager _libraryManager;
 
     /// <summary>
@@ -30,7 +29,6 @@ public class ResubmitListensTask : IScheduledTask
     /// </summary>
     /// <param name="loggerFactory">Logger factory.</param>
     /// <param name="clientFactory">HTTP client factory.</param>
-    /// <param name="userManager">User manager.</param>
     /// <param name="libraryManager">Library manager.</param>
     /// <param name="listensCacheManager">Listens cache instance.</param>
     /// <param name="listenBrainzClient">ListenBrainz client.</param>
@@ -38,14 +36,12 @@ public class ResubmitListensTask : IScheduledTask
     public ResubmitListensTask(
         ILoggerFactory loggerFactory,
         IHttpClientFactory clientFactory,
-        IUserManager userManager,
         ILibraryManager libraryManager,
         IListensCacheManager? listensCacheManager = null,
         IListenBrainzClient? listenBrainzClient = null,
         IMusicBrainzClient? musicBrainzClient = null)
     {
         _logger = loggerFactory.CreateLogger($"{Plugin.LoggerCategory}.ResubmitListensTask");
-        _userManager = userManager;
         _libraryManager = libraryManager;
         _listensCache = listensCacheManager ?? ListensCacheManager.Instance;
         _listenBrainzClient = listenBrainzClient ??

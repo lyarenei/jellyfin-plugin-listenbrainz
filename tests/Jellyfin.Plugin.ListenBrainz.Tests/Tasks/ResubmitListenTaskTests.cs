@@ -25,7 +25,6 @@ public class ResubmitListensTaskTests
     private readonly Mock<ILoggerFactory> _loggerFactoryMock;
     private readonly Mock<IHttpClientFactory> _clientFactoryMock;
     private readonly Mock<ILibraryManager> _libraryManagerMock;
-    private readonly Mock<IUserManager> _userManagerMock;
     private readonly Mock<IListensCacheManager> _listensCacheManagerMock;
     private readonly Mock<IListenBrainzClient> _listenBrainzClientMock;
     private readonly Mock<IMusicBrainzClient> _musicBrainzClientMock;
@@ -40,7 +39,6 @@ public class ResubmitListensTaskTests
 
         _clientFactoryMock = new Mock<IHttpClientFactory>();
         _libraryManagerMock = new Mock<ILibraryManager>();
-        _userManagerMock = new Mock<IUserManager>();
         _listensCacheManagerMock = new Mock<IListensCacheManager>();
         _listenBrainzClientMock = new Mock<IListenBrainzClient>();
         _musicBrainzClientMock = new Mock<IMusicBrainzClient>();
@@ -48,7 +46,6 @@ public class ResubmitListensTaskTests
         _task = new ResubmitListensTask(
             _loggerFactoryMock.Object,
             _clientFactoryMock.Object,
-            _userManagerMock.Object,
             _libraryManagerMock.Object,
             _listensCacheManagerMock.Object,
             _listenBrainzClientMock.Object,
