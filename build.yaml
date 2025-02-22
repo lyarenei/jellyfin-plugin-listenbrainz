@@ -16,5 +16,5 @@ artifacts:
   - "Jellyfin.Plugin.ListenBrainz.Http.dll"
   - "Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.dll"
 changelog: >
-  Fix
-    - Incorrect timestamp and meta-data for repeated listens in cache (#113 @Maxr1998)
+  New
+    - Listen backup feature (#102 @lyarenei)
