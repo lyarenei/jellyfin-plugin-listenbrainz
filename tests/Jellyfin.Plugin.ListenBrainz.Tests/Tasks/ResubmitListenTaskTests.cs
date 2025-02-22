@@ -22,7 +22,6 @@ namespace Jellyfin.Plugin.ListenBrainz.Tests.Tasks;
 
 public class ResubmitListensTaskTests
 {
-    private readonly Mock<ILoggerFactory> _loggerFactoryMock;
     private readonly Mock<IHttpClientFactory> _clientFactoryMock;
     private readonly Mock<ILibraryManager> _libraryManagerMock;
     private readonly Mock<IListensCacheManager> _listensCacheManagerMock;
@@ -32,8 +31,8 @@ public class ResubmitListensTaskTests
 
     public ResubmitListensTaskTests()
     {
-        _loggerFactoryMock = new Mock<ILoggerFactory>();
-        _loggerFactoryMock
+        var loggerFactoryMock = new Mock<ILoggerFactory>();
+        loggerFactoryMock
             .Setup(lf => lf.CreateLogger(It.IsAny<string>()))
             .Returns(new NullLogger<ResubmitListensTask>());
 
@@ -44,7 +43,7 @@ public class ResubmitListensTaskTests
         _musicBrainzClientMock = new Mock<IMusicBrainzClient>();
 
         _task = new ResubmitListensTask(
-            _loggerFactoryMock.Object,
+            loggerFactoryMock.Object,
             _clientFactoryMock.Object,
             _libraryManagerMock.Object,
             _listensCacheManagerMock.Object,
