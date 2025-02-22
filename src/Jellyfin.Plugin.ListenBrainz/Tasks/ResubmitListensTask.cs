@@ -2,7 +2,6 @@ using Jellyfin.Plugin.ListenBrainz.Api.Resources;
 using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
-using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.Managers;
@@ -49,7 +48,8 @@ public class ResubmitListensTask : IScheduledTask
         _userManager = userManager;
         _libraryManager = libraryManager;
         _listensCache = listensCacheManager ?? ListensCacheManager.Instance;
-        _listenBrainzClient = listenBrainzClient ?? ClientUtils.GetListenBrainzClient(_logger, clientFactory, libraryManager);
+        _listenBrainzClient = listenBrainzClient ??
+                              ClientUtils.GetListenBrainzClient(_logger, clientFactory, libraryManager);
         _musicBrainzClient = musicBrainzClient ?? ClientUtils.GetMusicBrainzClient(_logger, clientFactory);
     }
 
@@ -81,7 +81,7 @@ public class ResubmitListensTask : IScheduledTask
                         "Found listens in cache for user {UserId}, will try resubmitting",
                         userConfig.JellyfinUserId);
                     cancellationToken.ThrowIfCancellationRequested();
-                    await SubmitListensForUser(config, userConfig.JellyfinUserId, cancellationToken);
+                    await ProcessSavedListensForUser(config, userConfig, cancellationToken);
                 }
                 else
                 {
@@ -122,76 +122,88 @@ public class ResubmitListensTask : IScheduledTask
         return TimeSpan.TicksPerDay + (randomMinute * TimeSpan.TicksPerMinute);
     }
 
-    internal async Task SubmitListensForUser(
+    private async Task ProcessSavedListensForUser(
         PluginConfiguration pluginConfig,
-        Guid userId,
-        CancellationToken cancellationToken)
+        UserConfig userConfig,
+        CancellationToken ct)
     {
-        var user = _userManager.GetUserById(userId);
-        if (user is null)
-        {
-            throw new PluginException("Invalid Jellyfin user ID");
-        }
-
-        var userConfig = user.GetListenBrainzConfig();
-        if (userConfig is null)
-        {
-            throw new PluginException($"No configuration for user {user.Username}");
-        }
-
-        var listenChunks = _listensCache.GetListens(userId).Chunk(Limits.MaxListensPerRequest);
+        ct.ThrowIfCancellationRequested();
+        var listenChunks = _listensCache.GetListens(userConfig.JellyfinUserId).Chunk(Limits.MaxListensPerRequest);
         foreach (var listenChunk in listenChunks)
         {
-            var listensToSend = listenChunk.Select(listen =>
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    var processedListen = pluginConfig.IsMusicBrainzEnabled
-                        ? UpdateMetadataIfNecessary(listen)
-                        : listen;
+            var validListens = listenChunk
+                .TakeWhile(IsValidListen)
+                .Select(l => pluginConfig.IsMusicBrainzEnabled ? UpdateMetadataIfNecessary(l) : l)
+                .WhereNotNull()
+                .ToArray();
 
-                    try
-                    {
-                        var convertedListen = _libraryManager.ToListen(processedListen);
-                        _listensCache.RemoveListen(userId, processedListen);
-                        return convertedListen;
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogInformation("Failed to prepare cached listen for submission: {Reason}", ex.Message);
-                        _logger.LogDebug(ex, "Recreating listen from cache failed");
-                        return null;
-                    }
-                })
-                .WhereNotNull();
-
-            try
-            {
-                await _listenBrainzClient.SendListensAsync(userConfig, listensToSend, cancellationToken);
-                await _listensCache.SaveAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogInformation("Failed to resubmit listens for user {User}: {Reason}", userId, ex.Message);
-                _logger.LogDebug(ex, "Listen resubmit failed");
-                break;
-            }
+            await ProcessChunkOfStoredListens(validListens, userConfig, ct);
         }
     }
 
-    private StoredListen UpdateMetadataIfNecessary(StoredListen listen)
+    internal async Task ProcessChunkOfStoredListens(
+        StoredListen[] validListens,
+        UserConfig userConfig,
+        CancellationToken ct)
     {
-        if (listen.Metadata is not null && !string.IsNullOrEmpty(listen.Metadata.RecordingMbid))
+        try
+        {
+            var listensToRemove = new List<StoredListen>();
+            var listensToSend = validListens.Select(l =>
+                {
+                    var listen = _libraryManager.ToListen(l);
+                    if (listen is null)
+                    {
+                        return null;
+                    }
+
+                    listensToRemove.Add(l);
+                    return listen;
+                })
+                .WhereNotNull();
+            await _listenBrainzClient.SendListensAsync(userConfig, listensToSend, ct);
+            await _listensCache.RemoveListensAsync(userConfig.JellyfinUserId, listensToRemove);
+            await _listensCache.SaveAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogInformation(
+                "Failed to resubmit listens for user {User}: {Reason}",
+                userConfig.JellyfinUserId,
+                ex.Message);
+            _logger.LogDebug(ex, "Listen resubmit failed");
+        }
+    }
+
+    internal bool IsValidListen(StoredListen listen)
+    {
+        try
+        {
+            return _libraryManager.ToListen(listen) is not null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogInformation("Failed to prepare cached listen for submission: {Reason}", ex.Message);
+            _logger.LogDebug(ex, "Recreating listen from cache failed");
+            return false;
+        }
+    }
+
+    internal StoredListen? UpdateMetadataIfNecessary(StoredListen listen)
+    {
+        if (_libraryManager.GetItemById(listen.Id) is not Audio item)
+        {
+            _logger.LogWarning("Item with ID {ListenID} is not an audio item", listen.Id);
+            return null;
+        }
+
+        if (listen.HasRecordingMbid)
         {
             return listen;
         }
 
         try
         {
-            if (_libraryManager.GetItemById(listen.Id) is not Audio item)
-            {
-                return listen;
-            }
-
             listen.Metadata = _musicBrainzClient.GetAudioItemMetadata(item);
         }
         catch (Exception e)

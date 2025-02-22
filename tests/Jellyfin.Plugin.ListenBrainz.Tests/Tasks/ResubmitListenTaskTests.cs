@@ -10,13 +10,11 @@ using System.Threading.Tasks;
 using Jellyfin.Plugin.ListenBrainz.Api.Models;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Tasks;
-using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller.Entities.Audio;
+using MediaBrowser.Controller.Entities.Movies;
 using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.Session;
-using MediaBrowser.Model.Serialization;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 
@@ -31,18 +29,22 @@ public class ResubmitListensTaskTests
     private readonly Mock<IListensCacheManager> _listensCacheManagerMock;
     private readonly Mock<IListenBrainzClient> _listenBrainzClientMock;
     private readonly Mock<IMusicBrainzClient> _musicBrainzClientMock;
-    private readonly Plugin _plugin;
     private readonly ResubmitListensTask _task;
 
     public ResubmitListensTaskTests()
     {
         _loggerFactoryMock = new Mock<ILoggerFactory>();
+        _loggerFactoryMock
+            .Setup(lf => lf.CreateLogger(It.IsAny<string>()))
+            .Returns(new NullLogger<ResubmitListensTask>());
+
         _clientFactoryMock = new Mock<IHttpClientFactory>();
         _libraryManagerMock = new Mock<ILibraryManager>();
         _userManagerMock = new Mock<IUserManager>();
         _listensCacheManagerMock = new Mock<IListensCacheManager>();
         _listenBrainzClientMock = new Mock<IListenBrainzClient>();
         _musicBrainzClientMock = new Mock<IMusicBrainzClient>();
+
         _task = new ResubmitListensTask(
             _loggerFactoryMock.Object,
             _clientFactoryMock.Object,
@@ -51,18 +53,6 @@ public class ResubmitListensTaskTests
             _listensCacheManagerMock.Object,
             _listenBrainzClientMock.Object,
             _musicBrainzClientMock.Object);
-
-        _plugin = MockPlugin.Init(
-            new Mock<IApplicationPaths>(),
-            new Mock<IXmlSerializer>(),
-            new Mock<ISessionManager>(),
-            _loggerFactoryMock,
-            _clientFactoryMock,
-            new Mock<IUserDataManager>(),
-            _libraryManagerMock,
-            _userManagerMock,
-            new Mock<IHostedService>(),
-            new PluginConfiguration());
     }
 
     [Fact]
@@ -83,8 +73,109 @@ public class ResubmitListensTaskTests
     }
 
     [Fact]
-    public async Task SubmitListensForUser_ShouldSubmitListens()
+    public void IsValidListen_ShouldReturnTrueForValidListen()
     {
+        var listen = new StoredListen
+        {
+            Id = Guid.NewGuid(),
+            ListenedAt = 12345567890
+        };
+
+        _libraryManagerMock
+            .Setup(lm => lm.GetItemById(listen.Id))
+            .Returns(new Audio());
+
+        Assert.True(_task.IsValidListen(listen));
+    }
+
+    [Fact]
+    public void IsValidListen_ShouldReturnFalseForInvalidListen()
+    {
+        var listen = new StoredListen
+        {
+            Id = Guid.NewGuid(),
+            ListenedAt = 12345567890
+        };
+
+        _libraryManagerMock
+            .Setup(lm => lm.GetItemById(listen.Id))
+            .Returns(new Movie());
+
+        Assert.False(_task.IsValidListen(listen));
+    }
+
+    [Fact]
+    public void UpdateMetadataIfNecessary_ShouldNotDoAnythingIfRecordingMbidIsPresent()
+    {
+        var listen = new StoredListen
+        {
+            Id = Guid.NewGuid(),
+            ListenedAt = 12345567890,
+            Metadata = new AudioItemMetadata { RecordingMbid = "mbid-not-changed" }
+        };
+
+        _task.UpdateMetadataIfNecessary(listen);
+        Assert.Equal("mbid-not-changed", listen.Metadata.RecordingMbid);
+    }
+
+    [Fact]
+    public void UpdateMetadataIfNecessary_ShouldReturnNullIfInvalidListen()
+    {
+        var listen = new StoredListen
+        {
+            Id = Guid.NewGuid(),
+            ListenedAt = 12345567890
+        };
+
+        _libraryManagerMock
+            .Setup(lm => lm.GetItemById(listen.Id))
+            .Returns(new Movie());
+
+        Assert.Null(_task.UpdateMetadataIfNecessary(listen));
+    }
+
+    [Fact]
+    public void UpdateMetadataIfNecessary_ShouldUpdateMetadata()
+    {
+        var listen = new StoredListen
+        {
+            Id = Guid.NewGuid(),
+            ListenedAt = 12345567890,
+            Metadata = new AudioItemMetadata { RecordingMbid = "old-mbid" }
+        };
+
+        _libraryManagerMock
+            .Setup(lm => lm.GetItemById(listen.Id))
+            .Returns(new Audio());
+
+        _musicBrainzClientMock
+            .Setup(mbc => mbc.GetAudioItemMetadata(It.IsAny<Audio>()))
+            .Returns(new AudioItemMetadata { RecordingMbid = "new-mbid" });
+
+        _task.UpdateMetadataIfNecessary(listen);
+        Assert.Equal("new-mbid", listen.Metadata.RecordingMbid);
+    }
+
+    [Fact]
+    public async Task ProcessChunkOfStoredListens_Ok()
+    {
+        var token = CancellationToken.None;
+        var listens = new[]
+        {
+            new StoredListen
+            {
+                Id = Guid.NewGuid(),
+                ListenedAt = 12345567890,
+                Metadata = new AudioItemMetadata { RecordingMbid = "mbid-1" }
+            },
+            new StoredListen
+            {
+                Id = Guid.NewGuid(),
+                ListenedAt = 12345567891,
+                Metadata = new AudioItemMetadata { RecordingMbid = "mbid-2" }
+            }
+        };
+
         var user = new User("foobar", "auth-provider-id", "pw-reset-provider-id");
         var userConfig = new UserConfig
         {
@@ -95,44 +186,77 @@ public class ResubmitListensTaskTests
             PlaintextApiToken = "some-token"
         };
 
-        _plugin.Configuration.UserConfigs = [userConfig];
-        var cancellationToken = CancellationToken.None;
-        var audio = new Audio { Name = "some-track" };
-        var listen = new Listen
+        _libraryManagerMock
+            .Setup(lm => lm.GetItemById(It.IsAny<Guid>()))
+            .Returns(new Audio());
+
+        await _task.ProcessChunkOfStoredListens(listens, userConfig, token);
+
+        _listenBrainzClientMock.Verify(lbc =>
+                lbc.SendListensAsync(userConfig,
+                    It.Is<IEnumerable<Listen>>(l => l.Count() == 2),
+                    token),
+            Times.Once);
+
+        _listensCacheManagerMock.Verify(lcm =>
+                lcm.RemoveListensAsync(userConfig.JellyfinUserId,
+                    It.Is<IEnumerable<StoredListen>>(l => l == listens)),
+            Times.Once);
+
+        _listensCacheManagerMock.Verify(lcm => lcm.SaveAsync(), Times.Once);
+    }
+
+    [Fact]
+    public async Task ProcessChunkOfStoredListens_DropInvalid()
+    {
+        var token = CancellationToken.None;
+        var listens = new[]
         {
-            ListenedAt = 12345567890,
-            RecordingMsid = "some-msid",
-            TrackMetadata = new TrackMetadata
+            new StoredListen
             {
-                ArtistName = "some-artist",
-                TrackName = "some-track",
-                ReleaseName = "some-album",
-                AdditionalInfo = new AdditionalInfo()
+                Id = Guid.NewGuid(),
+                ListenedAt = 12345567890,
+                Metadata = new AudioItemMetadata { RecordingMbid = "mbid-1" }
+            },
+            new StoredListen
+            {
+                Id = Guid.NewGuid(),
+                ListenedAt = 12345567891,
+                Metadata = new AudioItemMetadata { RecordingMbid = "mbid-2" }
             }
         };
-        var storedListen = new StoredListen
+
+        var user = new User("foobar", "auth-provider-id", "pw-reset-provider-id");
+        var userConfig = new UserConfig
         {
-            Id = audio.Id,
-            ListenedAt = listen.ListenedAt.Value,
-            Metadata = new AudioItemMetadata { RecordingMbid = "some-mbid" }
+            JellyfinUserId = user.Id,
+            UserName = "foobar",
+            IsListenSubmitEnabled = true,
+            ApiToken = "some-token",
+            PlaintextApiToken = "some-token"
         };
 
         _libraryManagerMock
-            .Setup(lm => lm.GetItemById(storedListen.Id))
-            .Returns(audio);
+            .Setup(lm => lm.GetItemById(listens[0].Id))
+            .Returns(new Audio());
 
-        _userManagerMock
-            .Setup(um => um.GetUserById(user.Id))
-            .Returns(user);
+        _libraryManagerMock
+            .Setup(lm => lm.GetItemById(listens[1].Id))
+            .Returns(new Movie());
 
-        _listensCacheManagerMock
-            .Setup(lcm => lcm.GetListens(user.Id))
-            .Returns([storedListen]);
-
-        await _task.SubmitListensForUser(_plugin.Configuration, user.Id, cancellationToken);
+        await _task.ProcessChunkOfStoredListens(listens, userConfig, token);
 
         _listenBrainzClientMock.Verify(lbc =>
-                lbc.SendListensAsync(userConfig, It.Is<IEnumerable<Listen>>(l => l.Count() == 1), cancellationToken),
+                lbc.SendListensAsync(userConfig,
+                    It.Is<IEnumerable<Listen>>(l => l.Count() == 1),
+                    token),
             Times.Once);
+
+        _listensCacheManagerMock.Verify(lcm =>
+                lcm.RemoveListensAsync(userConfig.JellyfinUserId,
+                    It.Is<IEnumerable<StoredListen>>(l => l.Count() == 1 && l.First() == listens[0])),
+            Times.Once);
+
+        _listensCacheManagerMock.Verify(lcm => lcm.SaveAsync(), Times.Once);
     }
 }
