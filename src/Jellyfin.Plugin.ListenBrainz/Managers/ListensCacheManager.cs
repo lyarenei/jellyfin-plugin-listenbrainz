@@ -10,7 +10,7 @@ namespace Jellyfin.Plugin.ListenBrainz.Managers;
 /// <summary>
 /// Cache manager.
 /// </summary>
-public sealed class ListensCacheManager : ICacheManager, IListensCache, IDisposable
+public sealed class ListensCacheManager : IListensCacheManager
 {
     /// <summary>
     /// Cache file name.
@@ -197,10 +197,7 @@ public sealed class ListensCacheManager : ICacheManager, IListensCache, IDisposa
         }
         catch (KeyNotFoundException)
         {
-            _listensCache[userId] = new List<StoredListen>
-            {
-                item.AsStoredListen(listenedAt, metadata)
-            };
+            _listensCache[userId] = new List<StoredListen> { item.AsStoredListen(listenedAt, metadata) };
         }
         finally
         {
@@ -218,10 +215,7 @@ public sealed class ListensCacheManager : ICacheManager, IListensCache, IDisposa
         }
         catch (KeyNotFoundException)
         {
-            _listensCache[userId] = new List<StoredListen>
-            {
-                item.AsStoredListen(listenedAt, metadata)
-            };
+            _listensCache[userId] = new List<StoredListen> { item.AsStoredListen(listenedAt, metadata) };
         }
         finally
         {
@@ -238,6 +232,23 @@ public sealed class ListensCacheManager : ICacheManager, IListensCache, IDisposa
         }
 
         return Array.Empty<StoredListen>();
+    }
+
+    /// <inheritdoc />
+    public void RemoveListen(Guid userId, StoredListen listen)
+    {
+        _lock.Wait();
+        try
+        {
+            if (_listensCache.TryGetValue(userId, out var userListens))
+            {
+                userListens.Remove(listen);
+            }
+        }
+        finally
+        {
+            _lock.Release();
+        }
     }
 
     /// <inheritdoc />
