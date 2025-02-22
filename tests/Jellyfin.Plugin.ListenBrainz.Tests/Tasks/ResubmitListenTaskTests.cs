@@ -55,6 +55,33 @@ public class ResubmitListensTaskTests
             _musicBrainzClientMock.Object);
     }
 
+    private static User GetUser() => new("foobar", "auth-provider-id", "pw-reset-provider-id");
+
+    private static UserConfig GetUserConfig(Guid userId) => new()
+    {
+        JellyfinUserId = userId,
+        UserName = "foobar",
+        IsListenSubmitEnabled = true,
+        ApiToken = "some-token",
+        PlaintextApiToken = "some-token"
+    };
+
+    private static StoredListen[] GetStoredListens() =>
+    [
+        new()
+        {
+            Id = Guid.NewGuid(),
+            ListenedAt = 12345567890,
+            Metadata = new AudioItemMetadata { RecordingMbid = "mbid-1" }
+        },
+        new()
+        {
+            Id = Guid.NewGuid(),
+            ListenedAt = 12345567891,
+            Metadata = new AudioItemMetadata { RecordingMbid = "mbid-2" }
+        }
+    ];
+
     [Fact]
     public void GetInterval_ReturnValidInterval()
     {
@@ -75,11 +102,7 @@ public class ResubmitListensTaskTests
     [Fact]
     public void IsValidListen_ShouldReturnTrueForValidListen()
     {
-        var listen = new StoredListen
-        {
-            Id = Guid.NewGuid(),
-            ListenedAt = 12345567890
-        };
+        var listen = GetStoredListens()[0];
 
         _libraryManagerMock
             .Setup(lm => lm.GetItemById(listen.Id))
@@ -91,11 +114,7 @@ public class ResubmitListensTaskTests
     [Fact]
     public void IsValidListen_ShouldReturnFalseForInvalidListen()
     {
-        var listen = new StoredListen
-        {
-            Id = Guid.NewGuid(),
-            ListenedAt = 12345567890
-        };
+        var listen = GetStoredListens()[0];
 
         _libraryManagerMock
             .Setup(lm => lm.GetItemById(listen.Id))
@@ -107,12 +126,8 @@ public class ResubmitListensTaskTests
     [Fact]
     public void UpdateMetadataIfNecessary_ShouldNotDoAnythingIfRecordingMbidIsPresent()
     {
-        var listen = new StoredListen
-        {
-            Id = Guid.NewGuid(),
-            ListenedAt = 12345567890,
-            Metadata = new AudioItemMetadata { RecordingMbid = "mbid-not-changed" }
-        };
+        var listen = GetStoredListens()[0];
+        listen.Metadata = new AudioItemMetadata { RecordingMbid = "mbid-not-changed" };
 
         _task.UpdateMetadataIfNecessary(listen);
         Assert.Equal("mbid-not-changed", listen.Metadata.RecordingMbid);
@@ -121,11 +136,7 @@ public class ResubmitListensTaskTests
     [Fact]
     public void UpdateMetadataIfNecessary_ShouldReturnNullIfInvalidListen()
     {
-        var listen = new StoredListen
-        {
-            Id = Guid.NewGuid(),
-            ListenedAt = 12345567890
-        };
+        var listen = GetStoredListens()[0];
 
         _libraryManagerMock
             .Setup(lm => lm.GetItemById(listen.Id))
@@ -137,12 +148,7 @@ public class ResubmitListensTaskTests
     [Fact]
     public void UpdateMetadataIfNecessary_ShouldUpdateMetadata()
     {
-        var listen = new StoredListen
-        {
-            Id = Guid.NewGuid(),
-            ListenedAt = 12345567890,
-            Metadata = new AudioItemMetadata { RecordingMbid = "old-mbid" }
-        };
+        var listen = GetStoredListens()[0];
 
         _libraryManagerMock
             .Setup(lm => lm.GetItemById(listen.Id))
@@ -153,38 +159,16 @@ public class ResubmitListensTaskTests
             .Returns(new AudioItemMetadata { RecordingMbid = "new-mbid" });
 
         _task.UpdateMetadataIfNecessary(listen);
-        Assert.Equal("new-mbid", listen.Metadata.RecordingMbid);
+        Assert.Equal("new-mbid", listen.Metadata?.RecordingMbid);
     }
 
     [Fact]
     public async Task ProcessChunkOfStoredListens_Ok()
     {
         var token = CancellationToken.None;
-        var listens = new[]
-        {
-            new StoredListen
-            {
-                Id = Guid.NewGuid(),
-                ListenedAt = 12345567890,
-                Metadata = new AudioItemMetadata { RecordingMbid = "mbid-1" }
-            },
-            new StoredListen
-            {
-                Id = Guid.NewGuid(),
-                ListenedAt = 12345567891,
-                Metadata = new AudioItemMetadata { RecordingMbid = "mbid-2" }
-            }
-        };
-
-        var user = new User("foobar", "auth-provider-id", "pw-reset-provider-id");
-        var userConfig = new UserConfig
-        {
-            JellyfinUserId = user.Id,
-            UserName = "foobar",
-            IsListenSubmitEnabled = true,
-            ApiToken = "some-token",
-            PlaintextApiToken = "some-token"
-        };
+        var listens = GetStoredListens();
+        var user = GetUser();
+        var userConfig = GetUserConfig(user.Id);
 
         _libraryManagerMock
             .Setup(lm => lm.GetItemById(It.IsAny<Guid>()))
@@ -198,11 +182,7 @@ public class ResubmitListensTaskTests
                     token),
             Times.Once);
 
-        _listensCacheManagerMock.Verify(lcm =>
-                lcm.RemoveListensAsync(userConfig.JellyfinUserId,
-                    It.Is<IEnumerable<StoredListen>>(l => l == listens)),
-            Times.Once);
-
+        _listensCacheManagerMock.Verify(lcm => lcm.RemoveListensAsync(userConfig.JellyfinUserId, listens), Times.Once);
         _listensCacheManagerMock.Verify(lcm => lcm.SaveAsync(), Times.Once);
     }
 
@@ -210,31 +190,9 @@ public class ResubmitListensTaskTests
     public async Task ProcessChunkOfStoredListens_DropInvalid()
     {
         var token = CancellationToken.None;
-        var listens = new[]
-        {
-            new StoredListen
-            {
-                Id = Guid.NewGuid(),
-                ListenedAt = 12345567890,
-                Metadata = new AudioItemMetadata { RecordingMbid = "mbid-1" }
-            },
-            new StoredListen
-            {
-                Id = Guid.NewGuid(),
-                ListenedAt = 12345567891,
-                Metadata = new AudioItemMetadata { RecordingMbid = "mbid-2" }
-            }
-        };
-
-        var user = new User("foobar", "auth-provider-id", "pw-reset-provider-id");
-        var userConfig = new UserConfig
-        {
-            JellyfinUserId = user.Id,
-            UserName = "foobar",
-            IsListenSubmitEnabled = true,
-            ApiToken = "some-token",
-            PlaintextApiToken = "some-token"
-        };
+        var listens = GetStoredListens();
+        var user = GetUser();
+        var userConfig = GetUserConfig(user.Id);
 
         _libraryManagerMock
             .Setup(lm => lm.GetItemById(listens[0].Id))
