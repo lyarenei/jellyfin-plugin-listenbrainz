@@ -126,8 +126,12 @@ public class ResubmitListensTaskTests
         var listen = GetStoredListens()[0];
         listen.Metadata = new AudioItemMetadata { RecordingMbid = "mbid-not-changed" };
 
-        _task.UpdateMetadataIfNecessary(listen);
-        Assert.Equal("mbid-not-changed", listen.Metadata.RecordingMbid);
+        _libraryManagerMock
+            .Setup(lm => lm.GetItemById(listen.Id))
+            .Returns(new Audio());
+
+        var updatedListen = _task.UpdateMetadataIfNecessary(listen);
+        Assert.Equal("mbid-not-changed", updatedListen?.Metadata?.RecordingMbid);
     }
 
     [Fact]
@@ -146,6 +150,7 @@ public class ResubmitListensTaskTests
     public void UpdateMetadataIfNecessary_ShouldUpdateMetadata()
     {
         var listen = GetStoredListens()[0];
+        listen.Metadata = new AudioItemMetadata { RecordingMbid = string.Empty };
 
         _libraryManagerMock
             .Setup(lm => lm.GetItemById(listen.Id))
@@ -155,8 +160,8 @@ public class ResubmitListensTaskTests
             .Setup(mbc => mbc.GetAudioItemMetadata(It.IsAny<Audio>()))
             .Returns(new AudioItemMetadata { RecordingMbid = "new-mbid" });
 
-        _task.UpdateMetadataIfNecessary(listen);
-        Assert.Equal("new-mbid", listen.Metadata?.RecordingMbid);
+        var updatedListen = _task.UpdateMetadataIfNecessary(listen);
+        Assert.Equal("new-mbid", updatedListen?.Metadata?.RecordingMbid);
     }
 
     [Fact]
