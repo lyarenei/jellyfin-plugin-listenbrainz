@@ -67,14 +67,12 @@ public class ResubmitListensTaskTests
         new()
         {
             Id = Guid.NewGuid(),
-            ListenedAt = 12345567890,
-            Metadata = new AudioItemMetadata { RecordingMbid = "mbid-1" }
+            ListenedAt = 12345567890
         },
         new()
         {
             Id = Guid.NewGuid(),
-            ListenedAt = 12345567891,
-            Metadata = new AudioItemMetadata { RecordingMbid = "mbid-2" }
+            ListenedAt = 12345567891
         }
     ];
 
