@@ -34,4 +34,8 @@
         <EmbeddedResource Include="Configuration\bootstrap-grid.min.css" />
     </ItemGroup>
 
+    <ItemGroup>
+        <InternalsVisibleTo Include="Jellyfin.Plugin.ListenBrainz.Tests" />
+    </ItemGroup>
+
 </Project>
