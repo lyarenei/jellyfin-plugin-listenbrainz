@@ -129,7 +129,7 @@ public class ResubmitListensTask : IScheduledTask
         {
             var validListens = listenChunk
                 .TakeWhile(IsValidListen)
-                .Select(l => pluginConfig.IsMusicBrainzEnabled ? UpdateMetadataIfNecessary(l) : l)
+                .Select(l => pluginConfig.IsMusicBrainzEnabled ? UpdateMetadataIfNecessary(l, ct) : l)
                 .WhereNotNull()
                 .ToArray();
 
@@ -185,7 +185,7 @@ public class ResubmitListensTask : IScheduledTask
         }
     }
 
-    internal StoredListen? UpdateMetadataIfNecessary(StoredListen listen)
+    internal StoredListen? UpdateMetadataIfNecessary(StoredListen listen, CancellationToken ct)
     {
         if (_libraryManager.GetItemById(listen.Id) is not Audio item)
         {
@@ -198,6 +198,7 @@ public class ResubmitListensTask : IScheduledTask
             return listen;
         }
 
+        ct.ThrowIfCancellationRequested();
         try
         {
             listen.Metadata = _musicBrainzClient.GetAudioItemMetadata(item);

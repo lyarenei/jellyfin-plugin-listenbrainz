@@ -127,7 +127,7 @@ public class ResubmitListensTaskTests
             .Setup(lm => lm.GetItemById(listen.Id))
             .Returns(new Audio());
 
-        var updatedListen = _task.UpdateMetadataIfNecessary(listen);
+        var updatedListen = _task.UpdateMetadataIfNecessary(listen, CancellationToken.None);
         Assert.Equal("mbid-not-changed", updatedListen?.Metadata?.RecordingMbid);
     }
 
@@ -140,7 +140,7 @@ public class ResubmitListensTaskTests
             .Setup(lm => lm.GetItemById(listen.Id))
             .Returns(new Movie());
 
-        Assert.Null(_task.UpdateMetadataIfNecessary(listen));
+        Assert.Null(_task.UpdateMetadataIfNecessary(listen, CancellationToken.None));
     }
 
     [Fact]
@@ -157,7 +157,7 @@ public class ResubmitListensTaskTests
             .Setup(mbc => mbc.GetAudioItemMetadata(It.IsAny<Audio>()))
             .Returns(new AudioItemMetadata { RecordingMbid = "new-mbid" });
 
-        var updatedListen = _task.UpdateMetadataIfNecessary(listen);
+        var updatedListen = _task.UpdateMetadataIfNecessary(listen, CancellationToken.None);
         Assert.Equal("new-mbid", updatedListen?.Metadata?.RecordingMbid);
     }
 
