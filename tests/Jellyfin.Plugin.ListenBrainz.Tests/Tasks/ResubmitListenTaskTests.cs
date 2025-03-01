@@ -118,6 +118,18 @@ public class ResubmitListensTaskTests
     }
 
     [Fact]
+    public void IsValidListen_ShouldCatchException()
+    {
+        var listen = GetStoredListens()[0];
+
+        _libraryManagerMock
+            .Setup(lm => lm.GetItemById(listen.Id))
+            .Throws<Exception>();
+
+        Assert.False(_task.IsValidListen(listen));
+    }
+
+    [Fact]
     public void UpdateMetadataIfNecessary_ShouldNotDoAnythingIfRecordingMbidIsPresent()
     {
         var listen = GetStoredListens()[0];
@@ -159,6 +171,23 @@ public class ResubmitListensTaskTests
 
         var updatedListen = _task.UpdateMetadataIfNecessary(listen, CancellationToken.None);
         Assert.Equal("new-mbid", updatedListen?.Metadata?.RecordingMbid);
+    }
+
+    [Fact]
+    public void UpdateMetadataIfNecessary_ShouldCatchException()
+    {
+        var listen = GetStoredListens()[0];
+
+        _libraryManagerMock
+            .Setup(lm => lm.GetItemById(listen.Id))
+            .Returns(new Audio());
+
+        _musicBrainzClientMock
+            .Setup(mb => mb.GetAudioItemMetadata(It.IsAny<Audio>()))
+            .Throws<Exception>();
+
+        var gotListen = _task.UpdateMetadataIfNecessary(listen, CancellationToken.None);
+        Assert.Equal(listen, gotListen);
     }
 
     [Fact]
