@@ -17,4 +17,4 @@ artifacts:
   - "Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.dll"
 changelog: >
   Maintenance
-    - Improve error handling in resubmit listen process (#117 @lyarenei)
+    - Improve invalid listen handling in resubmit listen process (#117 @lyarenei)
