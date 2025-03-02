@@ -40,8 +40,7 @@ public class MockPlugin : Plugin
         clientFactory.Object,
         userDataManager.Object,
         libraryManager.Object,
-        userManager.Object,
-        pluginService.Object)
+        userManager.Object)
     {
         _pathsMock = paths;
         _xmlSerializerMock = xmlSerializer;
