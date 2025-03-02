@@ -16,5 +16,8 @@ artifacts:
   - "Jellyfin.Plugin.ListenBrainz.Http.dll"
   - "Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.dll"
 changelog: >
-  Maintenance
-    - Improve invalid listen handling in resubmit listen process (#117 @lyarenei)
+  Fix
+    - Issue with server crashing (#122 @lyarenei)
+
+  If you have installed previous version (5.1.1.3) and experiencing server crash,
+  you will need to manually remove the plugin version and install this one.
