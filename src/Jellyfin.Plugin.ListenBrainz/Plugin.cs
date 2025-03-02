@@ -41,18 +41,16 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
         IHttpClientFactory clientFactory,
         IUserDataManager userDataManager,
         ILibraryManager libraryManager,
-        IUserManager userManager,
-        IHostedService? pluginService = null) : base(paths, xmlSerializer)
+        IUserManager userManager) : base(paths, xmlSerializer)
     {
         _thisInstance = this;
-        _service = pluginService ??
-                   new PluginService(
-                       sessionManager,
-                       loggerFactory,
-                       clientFactory,
-                       userDataManager,
-                       libraryManager,
-                       userManager);
+        _service = new PluginService(
+            sessionManager,
+            loggerFactory,
+            clientFactory,
+            userDataManager,
+            libraryManager,
+            userManager);
         _service.StartAsync(CancellationToken.None);
     }
 
