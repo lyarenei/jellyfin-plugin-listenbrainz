@@ -39,17 +39,22 @@ public class LovedTracksSyncTask : IScheduledTask
     /// <param name="userManager">User manager.</param>
     /// <param name="dataRepository">Data repository.</param>
     /// <param name="dataManager">User data manager.</param>
+    /// <param name="listenBrainzClient">ListenBrainz client.</param>
+    /// <param name="musicBrainzClient">MusicBrainz client.</param>
     public LovedTracksSyncTask(
         ILoggerFactory loggerFactory,
         IHttpClientFactory clientFactory,
         ILibraryManager libraryManager,
         IUserManager userManager,
         IUserDataRepository dataRepository,
-        IUserDataManager dataManager)
+        IUserDataManager dataManager,
+        IListenBrainzClient? listenBrainzClient = null,
+        IMusicBrainzClient? musicBrainzClient = null)
     {
         _logger = loggerFactory.CreateLogger($"{Plugin.LoggerCategory}.LovedSyncTask");
-        _listenBrainzClient = ClientUtils.GetListenBrainzClient(_logger, clientFactory);
-        _musicBrainzClient = ClientUtils.GetMusicBrainzClient(_logger, clientFactory);
+        _listenBrainzClient = listenBrainzClient ??
+                              ClientUtils.GetListenBrainzClient(_logger, clientFactory, libraryManager);
+        _musicBrainzClient = musicBrainzClient ?? ClientUtils.GetMusicBrainzClient(_logger, clientFactory);
         _libraryManager = libraryManager;
         _userManager = userManager;
         _repository = dataRepository;
@@ -127,7 +132,10 @@ public class LovedTracksSyncTask : IScheduledTask
         }
     }
 
-    private async Task HandleFavoriteSync(IProgress<double> progress, UserConfig userConfig, CancellationToken cancellationToken)
+    private async Task HandleFavoriteSync(
+        IProgress<double> progress,
+        UserConfig userConfig,
+        CancellationToken cancellationToken)
     {
         var lovedTracksIds = (await _listenBrainzClient.GetLovedTracksAsync(userConfig, cancellationToken)).ToList();
         var user = _userManager.GetUserById(userConfig.JellyfinUserId);
