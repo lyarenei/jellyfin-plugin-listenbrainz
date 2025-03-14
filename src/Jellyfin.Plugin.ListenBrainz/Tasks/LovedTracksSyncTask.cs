@@ -80,8 +80,9 @@ public class LovedTracksSyncTask : IScheduledTask
     public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
         using var logScope = BeginLogScope();
-        ResetProgress();
         var conf = Plugin.GetConfiguration();
+        ResetProgress(conf.UserConfigs.Count);
+
         if (!conf.IsMusicBrainzEnabled)
         {
             _logger.LogInformation("MusicBrainz integration is disabled, cannot sync favorites");
@@ -226,9 +227,9 @@ public class LovedTracksSyncTask : IScheduledTask
         _logger.LogDebug("Item {Name} has been marked as favorite for user {User}", item.Name, user.Username);
     }
 
-    private void ResetProgress()
+    private void ResetProgress(int userCount)
     {
-        _userCountRatio = 100.0 / Plugin.GetConfiguration().UserConfigs.Count;
+        _userCountRatio = 100.0 / userCount;
         _progress = 0;
     }
 
