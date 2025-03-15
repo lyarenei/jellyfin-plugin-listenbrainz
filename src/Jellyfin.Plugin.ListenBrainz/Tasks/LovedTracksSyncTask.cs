@@ -4,6 +4,7 @@ using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
+using Jellyfin.Plugin.ListenBrainz.Managers;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Persistence;
@@ -26,6 +27,7 @@ public class LovedTracksSyncTask : IScheduledTask
     private readonly IUserManager _userManager;
     private readonly IUserDataRepository _repository;
     private readonly IUserDataManager _userDataManager;
+    private readonly IPluginConfigManager _pluginConfig;
     private bool _reenableImmediateSync;
     private double _progress;
     private double _userCountRatio;
@@ -41,6 +43,7 @@ public class LovedTracksSyncTask : IScheduledTask
     /// <param name="dataManager">User data manager.</param>
     /// <param name="listenBrainzClient">ListenBrainz client.</param>
     /// <param name="musicBrainzClient">MusicBrainz client.</param>
+    /// <param name="pluginConfig">Plugin configuration manager.</param>
     public LovedTracksSyncTask(
         ILoggerFactory loggerFactory,
         IHttpClientFactory clientFactory,
@@ -49,7 +52,8 @@ public class LovedTracksSyncTask : IScheduledTask
         IUserDataRepository dataRepository,
         IUserDataManager dataManager,
         IListenBrainzClient? listenBrainzClient = null,
-        IMusicBrainzClient? musicBrainzClient = null)
+        IMusicBrainzClient? musicBrainzClient = null,
+        IPluginConfigManager? pluginConfig = null)
     {
         _logger = loggerFactory.CreateLogger($"{Plugin.LoggerCategory}.LovedSyncTask");
         _listenBrainzClient = listenBrainzClient ??
@@ -59,6 +63,7 @@ public class LovedTracksSyncTask : IScheduledTask
         _userManager = userManager;
         _repository = dataRepository;
         _userDataManager = dataManager;
+        _pluginConfig = pluginConfig ?? new PluginConfigManager();
     }
 
     /// <inheritdoc />
