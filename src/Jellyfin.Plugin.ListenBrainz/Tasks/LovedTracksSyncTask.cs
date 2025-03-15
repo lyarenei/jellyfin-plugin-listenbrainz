@@ -126,11 +126,8 @@ public class LovedTracksSyncTask : IScheduledTask
     private static void SetImmediateFavSyncEnabled(bool isEnabled)
     {
         var conf = Plugin.GetConfiguration();
-        if (conf.IsImmediateFavoriteSyncEnabled)
-        {
-            conf.IsImmediateFavoriteSyncEnabled = isEnabled;
-            Plugin.UpdateConfig(conf);
-        }
+        conf.IsImmediateFavoriteSyncEnabled = isEnabled;
+        Plugin.UpdateConfig(conf);
     }
 
     private async Task HandleFavoriteSync(
