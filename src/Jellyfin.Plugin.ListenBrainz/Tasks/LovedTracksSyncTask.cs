@@ -43,7 +43,7 @@ public class LovedTracksSyncTask : IScheduledTask
     /// <param name="dataManager">User data manager.</param>
     /// <param name="listenBrainzClient">ListenBrainz client.</param>
     /// <param name="musicBrainzClient">MusicBrainz client.</param>
-    /// <param name="pluginConfig">Plugin configuration manager.</param>
+    /// <param name="configManager">Plugin configuration manager.</param>
     public LovedTracksSyncTask(
         ILoggerFactory loggerFactory,
         IHttpClientFactory clientFactory,
@@ -53,7 +53,7 @@ public class LovedTracksSyncTask : IScheduledTask
         IUserDataManager dataManager,
         IListenBrainzClient? listenBrainzClient = null,
         IMusicBrainzClient? musicBrainzClient = null,
-        IPluginConfigManager? pluginConfig = null)
+        IPluginConfigManager? configManager = null)
     {
         _logger = loggerFactory.CreateLogger($"{Plugin.LoggerCategory}.LovedSyncTask");
         _listenBrainzClient = listenBrainzClient ??
@@ -63,7 +63,7 @@ public class LovedTracksSyncTask : IScheduledTask
         _userManager = userManager;
         _repository = dataRepository;
         _userDataManager = dataManager;
-        _configManager = pluginConfig ?? new PluginConfigManager();
+        _configManager = configManager ?? new PluginConfigManager();
     }
 
     /// <inheritdoc />
