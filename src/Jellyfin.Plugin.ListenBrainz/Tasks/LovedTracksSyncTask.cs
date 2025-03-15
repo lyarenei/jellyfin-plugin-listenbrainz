@@ -118,6 +118,11 @@ public class LovedTracksSyncTask : IScheduledTask
                 await HandleFavoriteSync(progress, userConfig, cancellationToken);
             }
         }
+        catch (OperationCanceledException)
+        {
+            _logger.LogInformation("Favorite sync task has been cancelled");
+            progress.Report(100);
+        }
         finally
         {
             if (_reenableImmediateSync)
@@ -171,7 +176,7 @@ public class LovedTracksSyncTask : IScheduledTask
             }
             catch (OperationCanceledException)
             {
-                _logger.LogInformation("Task has been cancelled");
+                _logger.LogDebug("Sync task has been cancelled");
                 throw;
             }
             catch (Exception e)
