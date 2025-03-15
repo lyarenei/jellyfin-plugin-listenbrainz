@@ -85,7 +85,7 @@ public class LovedTracksSyncTask : IScheduledTask
     public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
         using var logScope = BeginLogScope();
-        var conf = Plugin.GetConfiguration();
+        var conf = _pluginConfig.GetConfiguration();
         ResetProgress(conf.UserConfigs.Count);
 
         if (!conf.IsMusicBrainzEnabled)
@@ -128,11 +128,11 @@ public class LovedTracksSyncTask : IScheduledTask
         }
     }
 
-    private static void SetImmediateFavSyncEnabled(bool isEnabled)
+    private void SetImmediateFavSyncEnabled(bool isEnabled)
     {
-        var conf = Plugin.GetConfiguration();
+        var conf = _pluginConfig.GetConfiguration();
         conf.IsImmediateFavoriteSyncEnabled = isEnabled;
-        Plugin.UpdateConfig(conf);
+        _pluginConfig.SaveConfiguration(conf);
     }
 
     private async Task HandleFavoriteSync(
@@ -191,7 +191,7 @@ public class LovedTracksSyncTask : IScheduledTask
 
     private IEnumerable<Guid> GetAllowedLibraries()
     {
-        var allLibraries = Plugin.GetConfiguration().LibraryConfigs;
+        var allLibraries = _pluginConfig.GetConfiguration().LibraryConfigs;
         if (allLibraries.Count > 0)
         {
             return allLibraries.Where(lc => lc.IsAllowed).Select(lc => lc.Id);
@@ -212,7 +212,7 @@ public class LovedTracksSyncTask : IScheduledTask
         var userData = _userDataManager.GetUserData(user, item);
         userData.IsFavorite = true;
 
-        if (Plugin.GetConfiguration().ShouldEmitUserRatingEvent)
+        if (_pluginConfig.GetConfiguration().ShouldEmitUserRatingEvent)
         {
             // This spams UpdateUserRating events, which feeds into Immediate favorite sync feature.
             // But there might be other plugins reacting on this event, so if the plugin should produce these events
