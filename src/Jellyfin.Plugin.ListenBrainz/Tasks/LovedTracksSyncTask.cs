@@ -93,6 +93,13 @@ public class LovedTracksSyncTask : IScheduledTask
             return;
         }
 
+        if (conf.UserConfigs.Count == 0)
+        {
+            _logger.LogInformation("No users have been configured, cannot sync");
+            progress.Report(100);
+            return;
+        }
+
         if (conf.IsImmediateFavoriteSyncEnabled)
         {
             _logger.LogInformation("Immediate favorite sync is enabled, disabling it temporarily");
