@@ -86,7 +86,6 @@ public class LovedTracksSyncTask : IScheduledTask
     {
         using var logScope = BeginLogScope();
         var conf = _configManager.GetConfiguration();
-        ResetProgress(conf.UserConfigs.Count);
 
         if (!conf.IsMusicBrainzEnabled)
         {
@@ -104,6 +103,7 @@ public class LovedTracksSyncTask : IScheduledTask
         try
         {
             _logger.LogInformation("Starting favorite sync from ListenBrainz...");
+            ResetProgress(conf.UserConfigs.Count);
             foreach (var userConfig in conf.UserConfigs)
             {
                 _logger.LogInformation("Syncing favorites for user {Username}", userConfig.UserName);
