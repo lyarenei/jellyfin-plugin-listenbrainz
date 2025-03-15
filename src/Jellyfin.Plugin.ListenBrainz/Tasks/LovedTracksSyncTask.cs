@@ -27,7 +27,7 @@ public class LovedTracksSyncTask : IScheduledTask
     private readonly IUserManager _userManager;
     private readonly IUserDataRepository _repository;
     private readonly IUserDataManager _userDataManager;
-    private readonly IPluginConfigManager _pluginConfig;
+    private readonly IPluginConfigManager _configManager;
     private bool _reenableImmediateSync;
     private double _progress;
     private double _userCountRatio;
@@ -63,7 +63,7 @@ public class LovedTracksSyncTask : IScheduledTask
         _userManager = userManager;
         _repository = dataRepository;
         _userDataManager = dataManager;
-        _pluginConfig = pluginConfig ?? new PluginConfigManager();
+        _configManager = pluginConfig ?? new PluginConfigManager();
     }
 
     /// <inheritdoc />
@@ -85,7 +85,7 @@ public class LovedTracksSyncTask : IScheduledTask
     public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
         using var logScope = BeginLogScope();
-        var conf = _pluginConfig.GetConfiguration();
+        var conf = _configManager.GetConfiguration();
         ResetProgress(conf.UserConfigs.Count);
 
         if (!conf.IsMusicBrainzEnabled)
@@ -130,9 +130,9 @@ public class LovedTracksSyncTask : IScheduledTask
 
     private void SetImmediateFavSyncEnabled(bool isEnabled)
     {
-        var conf = _pluginConfig.GetConfiguration();
+        var conf = _configManager.GetConfiguration();
         conf.IsImmediateFavoriteSyncEnabled = isEnabled;
-        _pluginConfig.SaveConfiguration(conf);
+        _configManager.SaveConfiguration(conf);
     }
 
     private async Task HandleFavoriteSync(
@@ -191,7 +191,7 @@ public class LovedTracksSyncTask : IScheduledTask
 
     private IEnumerable<Guid> GetAllowedLibraries()
     {
-        var allLibraries = _pluginConfig.GetConfiguration().LibraryConfigs;
+        var allLibraries = _configManager.GetConfiguration().LibraryConfigs;
         if (allLibraries.Count > 0)
         {
             return allLibraries.Where(lc => lc.IsAllowed).Select(lc => lc.Id);
@@ -212,7 +212,7 @@ public class LovedTracksSyncTask : IScheduledTask
         var userData = _userDataManager.GetUserData(user, item);
         userData.IsFavorite = true;
 
-        if (_pluginConfig.GetConfiguration().ShouldEmitUserRatingEvent)
+        if (_configManager.GetConfiguration().ShouldEmitUserRatingEvent)
         {
             // This spams UpdateUserRating events, which feeds into Immediate favorite sync feature.
             // But there might be other plugins reacting on this event, so if the plugin should produce these events
