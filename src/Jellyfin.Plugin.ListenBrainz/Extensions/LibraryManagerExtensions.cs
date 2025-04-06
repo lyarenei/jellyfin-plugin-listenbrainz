@@ -1,3 +1,4 @@
+using Jellyfin.Database.Implementations.Enums;
 using Jellyfin.Data.Enums;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;

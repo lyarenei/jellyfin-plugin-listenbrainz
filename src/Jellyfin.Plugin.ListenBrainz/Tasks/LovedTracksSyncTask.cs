@@ -1,4 +1,5 @@
-using Jellyfin.Data.Entities;
+using Jellyfin.Database.Implementations.Entities;
+using Jellyfin.Database.Implementations.Enums;
 using Jellyfin.Data.Enums;
 using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
@@ -205,8 +206,6 @@ public class LovedTracksSyncTask : IScheduledTask
             _userDataManager.SaveUserData(user, item, userData, UserDataSaveReason.UpdateUserRating, cancellationToken);
             return;
         }
-
-        _userDataManager.SaveUserData(user, item, userData, UserDataSaveReason.UpdateUserRating, cancellationToken);
 
         _logger.LogDebug("Item {Name} has been marked as favorite for user {User}", item.Name, user.Username);
     }
