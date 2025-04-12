@@ -198,15 +198,7 @@ public class LovedTracksSyncTask : IScheduledTask
         var userData = _userDataManager.GetUserData(user, item);
         userData.IsFavorite = true;
 
-        if (Plugin.GetConfiguration().ShouldEmitUserRatingEvent)
-        {
-            // This spams UpdateUserRating events, which feeds into Immediate favorite sync feature.
-            // But there might be other plugins reacting on this event, so if the plugin should produce these events
-            // the plugin temporarily disables the immediate sync feature (see usages of SetImmediateFavSyncEnabled()).
-            _userDataManager.SaveUserData(user, item, userData, UserDataSaveReason.UpdateUserRating, cancellationToken);
-            return;
-        }
-
+        _userDataManager.SaveUserData(user, item, userData, UserDataSaveReason.UpdateUserRating, cancellationToken);
         _logger.LogDebug("Item {Name} has been marked as favorite for user {User}", item.Name, user.Username);
     }
 
