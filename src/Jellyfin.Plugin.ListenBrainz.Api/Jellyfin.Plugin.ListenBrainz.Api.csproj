@@ -16,7 +16,6 @@
       <PackageReference Include="SmartAnalyzers.ExceptionAnalyzer" Version="1.0.10" />
       <PackageReference Include="SmartAnalyzers.MultithreadingAnalyzer" Version="1.1.31" />
       <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.507">
-      <Reference Include="/home/moisespr123/repos/jellyfin/Jellyfin.Server/bin/Debug/net9.0/MediaBrowser.Controller.dll" Version="10.11.0" />
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>

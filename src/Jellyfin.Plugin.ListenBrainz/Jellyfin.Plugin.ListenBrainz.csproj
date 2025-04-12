@@ -11,11 +11,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-     <Reference Include="/home/moisespr123/repos/jellyfin/Jellyfin.Server/bin/Debug/net9.0/MediaBrowser.Common.dll" Version="10.11.0" />
-      <Reference Include="/home/moisespr123/repos/jellyfin/Jellyfin.Server/bin/Debug/net9.0/MediaBrowser.Controller.dll" Version="10.11.0" />
-      <Reference Include="/home/moisespr123/repos/jellyfin/Jellyfin.Server/bin/Debug/net9.0/Jellyfin.Database.Implementations.dll" Version="10.11.0" />
-      <Reference Include="/home/moisespr123/repos/jellyfin/Jellyfin.Server/bin/Debug/net9.0/Jellyfin.Data.dll" Version="10.11.0" />
-      <Reference Include="/home/moisespr123/repos/jellyfin/Jellyfin.Server/bin/Debug/net9.0/MediaBrowser.Model.dll" Version="10.11.0" />
       <PackageReference Include="SerilogAnalyzer" Version="0.15.0" />
       <PackageReference Include="SmartAnalyzers.ExceptionAnalyzer" Version="1.0.10" />
       <PackageReference Include="SmartAnalyzers.MultithreadingAnalyzer" Version="1.1.31" />
