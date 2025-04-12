@@ -247,6 +247,8 @@ public class PluginImplementation
         {
             case UserDataSaveReason.UpdateUserRating:
                 _logger.LogDebug("Reason is user rating update, attempting favorite sync");
+                // TODO: Skip this if loved track sync task is running, to prevent endless loop
+                // dont't forget to update config and documentation
                 HandleFavoriteSyncUsingMbid(data);
                 return;
             case UserDataSaveReason.PlaybackFinished:
