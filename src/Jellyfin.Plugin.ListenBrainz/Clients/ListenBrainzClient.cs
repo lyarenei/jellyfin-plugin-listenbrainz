@@ -9,7 +9,6 @@ using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using MediaBrowser.Controller.Entities.Audio;
-using MediaBrowser.Controller.Library;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.ListenBrainz.Clients;
@@ -21,7 +20,6 @@ public class ListenBrainzClient : IListenBrainzClient
 {
     private readonly ILogger _logger;
     private readonly IListenBrainzApiClient _apiClient;
-    private readonly ILibraryManager? _libraryManager;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ListenBrainzClient"/> class.
@@ -32,19 +30,6 @@ public class ListenBrainzClient : IListenBrainzClient
     {
         _logger = logger;
         _apiClient = apiClient;
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ListenBrainzClient"/> class.
-    /// </summary>
-    /// <param name="logger">Logger instance.</param>
-    /// <param name="apiClient">ListenBrainz API client instance.</param>
-    /// <param name="libraryManager">Library manager.</param>
-    public ListenBrainzClient(ILogger logger, IListenBrainzApiClient apiClient, ILibraryManager libraryManager)
-    {
-        _logger = logger;
-        _apiClient = apiClient;
-        _libraryManager = libraryManager;
     }
 
     /// <inheritdoc />
