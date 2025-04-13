@@ -31,6 +31,7 @@ public class PluginImplementation : IDisposable
     private readonly ILibraryManager _libraryManager;
     private readonly IBackupManager _backupManager;
     private readonly IPluginConfigService _configService;
+    private readonly IFavoriteSyncService _favoriteSyncService;
     private bool _isDisposed;
 
     /// <summary>
@@ -471,21 +472,7 @@ public class PluginImplementation : IDisposable
             }
 
             _logger.LogDebug("Favorite sync is enabled");
-
-            _logger.LogInformation("Getting additional metadata...");
-            var metadata = _musicBrainzClient.GetAudioItemMetadata(data.Item);
-            _logger.LogInformation("Additional metadata successfully received");
-
-            var userItemData = _userDataManager.GetUserData(data.JellyfinUser, data.Item);
-            if (string.IsNullOrEmpty(metadata.RecordingMbid))
-            {
-                _logger.LogInformation("No recording MBID is available, cannot sync favorite");
-                return;
-            }
-
-            _logger.LogInformation("Attempting to sync favorite status");
-            _listenBrainzClient.SendFeedback(userConfig, userItemData.IsFavorite, metadata.RecordingMbid);
-            _logger.LogInformation("Favorite sync has been successful");
+            _favoriteSyncService.SyncToListenBrainz(data.Item.Id, data.JellyfinUser.Id);
         }
         catch (Exception e)
         {
