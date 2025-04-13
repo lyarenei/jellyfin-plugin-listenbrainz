@@ -430,6 +430,7 @@ public class PluginImplementation : IDisposable
             data.Item.Name,
             data.JellyfinUser.Username);
 
+        // TODO: use favorite sync service
         try
         {
             var userItemData = _userDataManager.GetUserData(data.JellyfinUser, data.Item);
