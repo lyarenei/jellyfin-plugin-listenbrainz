@@ -45,7 +45,7 @@ public class ResubmitListensTask : IScheduledTask
         _libraryManager = libraryManager;
         _listensCache = listensCacheManager ?? ListensCacheManager.Instance;
         _listenBrainzClient = listenBrainzClient ??
-                              ClientUtils.GetListenBrainzClient(_logger, clientFactory, libraryManager);
+                              ClientUtils.GetListenBrainzClient(_logger, clientFactory);
         _musicBrainzClient = musicBrainzClient ?? ClientUtils.GetMusicBrainzClient(_logger, clientFactory);
     }
 

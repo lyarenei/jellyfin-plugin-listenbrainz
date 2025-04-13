@@ -9,7 +9,6 @@ using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using MediaBrowser.Controller.Entities.Audio;
-using MediaBrowser.Controller.Library;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.ListenBrainz.Clients;
@@ -21,42 +20,30 @@ public class ListenBrainzClient : IListenBrainzClient
 {
     private readonly ILogger _logger;
     private readonly IListenBrainzApiClient _apiClient;
-    private readonly ILibraryManager? _libraryManager;
+    private readonly IPluginConfigService _pluginConfig;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ListenBrainzClient"/> class.
     /// </summary>
     /// <param name="logger">Logger instance.</param>
     /// <param name="apiClient">ListenBrainz API client instance.</param>
-    public ListenBrainzClient(ILogger logger, IListenBrainzApiClient apiClient)
+    /// <param name="pluginConfig">Plugin configuration service.</param>
+    public ListenBrainzClient(ILogger logger, IListenBrainzApiClient apiClient, IPluginConfigService pluginConfig)
     {
         _logger = logger;
         _apiClient = apiClient;
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ListenBrainzClient"/> class.
-    /// </summary>
-    /// <param name="logger">Logger instance.</param>
-    /// <param name="apiClient">ListenBrainz API client instance.</param>
-    /// <param name="libraryManager">Library manager.</param>
-    public ListenBrainzClient(ILogger logger, IListenBrainzApiClient apiClient, ILibraryManager libraryManager)
-    {
-        _logger = logger;
-        _apiClient = apiClient;
-        _libraryManager = libraryManager;
+        _pluginConfig = pluginConfig;
     }
 
     /// <inheritdoc />
     public void SendNowPlaying(UserConfig config, Audio item, AudioItemMetadata? audioMetadata)
     {
-        var pluginConfig = Plugin.GetConfiguration();
         var request = new SubmitListensRequest
         {
             ApiToken = config.PlaintextApiToken,
             ListenType = ListenType.PlayingNow,
             Payload = new[] { item.AsListen(itemMetadata: audioMetadata) },
-            BaseUrl = pluginConfig.ListenBrainzApiUrl
+            BaseUrl = _pluginConfig.GetListenBrainzApiUrl()
         };
 
         var task = _apiClient.SubmitListens(request, CancellationToken.None);
@@ -75,13 +62,12 @@ public class ListenBrainzClient : IListenBrainzClient
     /// <inheritdoc />
     public void SendListen(UserConfig config, Audio item, AudioItemMetadata? metadata, long listenedAt)
     {
-        var pluginConfig = Plugin.GetConfiguration();
         var request = new SubmitListensRequest
         {
             ApiToken = config.PlaintextApiToken,
             ListenType = ListenType.Single,
             Payload = new[] { item.AsListen(listenedAt, metadata) },
-            BaseUrl = pluginConfig.ListenBrainzApiUrl
+            BaseUrl = _pluginConfig.GetListenBrainzApiUrl()
         };
 
         var task = _apiClient.SubmitListens(request, CancellationToken.None);
@@ -104,14 +90,13 @@ public class ListenBrainzClient : IListenBrainzClient
         string? recordingMbid = null,
         string? recordingMsid = null)
     {
-        var pluginConfig = Plugin.GetConfiguration();
         var request = new RecordingFeedbackRequest
         {
             ApiToken = config.PlaintextApiToken,
             RecordingMbid = recordingMbid,
             RecordingMsid = recordingMsid,
             Score = isFavorite ? FeedbackScore.Loved : FeedbackScore.Neutral,
-            BaseUrl = pluginConfig.ListenBrainzApiUrl
+            BaseUrl = _pluginConfig.GetListenBrainzApiUrl()
         };
 
         var task = _apiClient.SubmitRecordingFeedback(request, CancellationToken.None);
@@ -134,13 +119,12 @@ public class ListenBrainzClient : IListenBrainzClient
         IEnumerable<Listen> listens,
         CancellationToken cancellationToken)
     {
-        var pluginConfig = Plugin.GetConfiguration();
         var request = new SubmitListensRequest
         {
             ApiToken = config.PlaintextApiToken,
             ListenType = ListenType.Import,
             Payload = listens,
-            BaseUrl = pluginConfig.ListenBrainzApiUrl
+            BaseUrl = _pluginConfig.GetListenBrainzApiUrl()
         };
 
         SubmitListensResponse resp;
@@ -162,8 +146,7 @@ public class ListenBrainzClient : IListenBrainzClient
     /// <inheritdoc />
     public async Task<ValidatedToken> ValidateToken(string apiToken)
     {
-        var pluginConfig = Plugin.GetConfiguration();
-        var request = new ValidateTokenRequest(apiToken) { BaseUrl = pluginConfig.ListenBrainzApiUrl };
+        var request = new ValidateTokenRequest(apiToken) { BaseUrl = _pluginConfig.GetListenBrainzApiUrl() };
         var response = await _apiClient.ValidateToken(request, CancellationToken.None);
         return new ValidatedToken
         {
@@ -242,8 +225,7 @@ public class ListenBrainzClient : IListenBrainzClient
     /// <exception cref="PluginException">Username could not be obtained.</exception>
     private string GetListenBrainzUsername(string userApiToken)
     {
-        var pluginConfig = Plugin.GetConfiguration();
-        var tokenRequest = new ValidateTokenRequest(userApiToken) { BaseUrl = pluginConfig.ListenBrainzApiUrl };
+        var tokenRequest = new ValidateTokenRequest(userApiToken) { BaseUrl = _pluginConfig.GetListenBrainzApiUrl() };
         var task = _apiClient.ValidateToken(tokenRequest, CancellationToken.None);
         task.Wait();
         if (task.Exception is not null)

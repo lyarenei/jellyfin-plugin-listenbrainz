@@ -42,7 +42,7 @@ public sealed class PluginService : IHostedService, IDisposable
         _isActive = false;
 
         var listenBrainzLogger = loggerFactory.CreateLogger(Plugin.LoggerCategory + ".ListenBrainzApi");
-        var listenBrainzClient = ClientUtils.GetListenBrainzClient(listenBrainzLogger, clientFactory, libraryManager);
+        var listenBrainzClient = ClientUtils.GetListenBrainzClient(listenBrainzLogger, clientFactory);
 
         var musicBrainzLogger = loggerFactory.CreateLogger(Plugin.LoggerCategory + ".MusicBrainzApi");
         var musicBrainzClient = ClientUtils.GetMusicBrainzClient(musicBrainzLogger, clientFactory);
