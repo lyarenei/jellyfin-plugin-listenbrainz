@@ -13,4 +13,10 @@ public interface IPluginConfigService
     /// <param name="jellyfinUserId">ID of the Jellyfin user.</param>
     /// <returns>User configuration. Null if it does not exist.</returns>
     public UserConfig? GetUserConfig(Guid jellyfinUserId);
+
+    /// <summary>
+    /// Get configured ListenBrainz API URL.
+    /// </summary>
+    /// <returns>ListenBrainz API URL.</returns>
+    public string GetListenBrainzApiUrl();
 }

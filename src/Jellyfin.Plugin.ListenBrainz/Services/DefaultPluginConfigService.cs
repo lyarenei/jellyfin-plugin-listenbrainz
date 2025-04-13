@@ -18,4 +18,7 @@ public class DefaultPluginConfigService : IPluginConfigService
 
         return userConfig;
     }
+
+    /// <inheritdoc />
+    public string GetListenBrainzApiUrl() => Plugin.GetConfiguration().ListenBrainzApiUrl;
 }
