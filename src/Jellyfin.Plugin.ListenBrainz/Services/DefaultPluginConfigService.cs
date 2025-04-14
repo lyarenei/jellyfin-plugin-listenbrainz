@@ -17,6 +17,12 @@ public class DefaultPluginConfigService : IPluginConfigService
     }
 
     /// <inheritdoc />
+    public string ListenBrainzApiUrl
+    {
+        get => Config.ListenBrainzApiUrl;
+    }
+
+    /// <inheritdoc />
     public UserConfig? GetUserConfig(Guid jellyfinUserId)
     {
         var userConfig = Config
@@ -25,7 +31,4 @@ public class DefaultPluginConfigService : IPluginConfigService
 
         return userConfig;
     }
-
-    /// <inheritdoc />
-    public string GetListenBrainzApiUrl() => Config.ListenBrainzApiUrl;
 }

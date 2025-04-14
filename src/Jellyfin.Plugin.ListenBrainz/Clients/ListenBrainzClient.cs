@@ -43,7 +43,7 @@ public class ListenBrainzClient : IListenBrainzClient
             ApiToken = config.PlaintextApiToken,
             ListenType = ListenType.PlayingNow,
             Payload = new[] { item.AsListen(itemMetadata: audioMetadata) },
-            BaseUrl = _pluginConfig.GetListenBrainzApiUrl()
+            BaseUrl = _pluginConfig.ListenBrainzApiUrl
         };
 
         var task = _apiClient.SubmitListens(request, CancellationToken.None);
@@ -67,7 +67,7 @@ public class ListenBrainzClient : IListenBrainzClient
             ApiToken = config.PlaintextApiToken,
             ListenType = ListenType.Single,
             Payload = new[] { item.AsListen(listenedAt, metadata) },
-            BaseUrl = _pluginConfig.GetListenBrainzApiUrl()
+            BaseUrl = _pluginConfig.ListenBrainzApiUrl
         };
 
         var task = _apiClient.SubmitListens(request, CancellationToken.None);
@@ -96,7 +96,7 @@ public class ListenBrainzClient : IListenBrainzClient
             RecordingMbid = recordingMbid,
             RecordingMsid = recordingMsid,
             Score = isFavorite ? FeedbackScore.Loved : FeedbackScore.Neutral,
-            BaseUrl = _pluginConfig.GetListenBrainzApiUrl()
+            BaseUrl = _pluginConfig.ListenBrainzApiUrl
         };
 
         var task = _apiClient.SubmitRecordingFeedback(request, CancellationToken.None);
@@ -124,7 +124,7 @@ public class ListenBrainzClient : IListenBrainzClient
             ApiToken = config.PlaintextApiToken,
             ListenType = ListenType.Import,
             Payload = listens,
-            BaseUrl = _pluginConfig.GetListenBrainzApiUrl()
+            BaseUrl = _pluginConfig.ListenBrainzApiUrl
         };
 
         SubmitListensResponse resp;
@@ -146,7 +146,7 @@ public class ListenBrainzClient : IListenBrainzClient
     /// <inheritdoc />
     public async Task<ValidatedToken> ValidateToken(string apiToken)
     {
-        var request = new ValidateTokenRequest(apiToken) { BaseUrl = _pluginConfig.GetListenBrainzApiUrl() };
+        var request = new ValidateTokenRequest(apiToken) { BaseUrl = _pluginConfig.ListenBrainzApiUrl };
         var response = await _apiClient.ValidateToken(request, CancellationToken.None);
         return new ValidatedToken
         {
@@ -225,7 +225,7 @@ public class ListenBrainzClient : IListenBrainzClient
     /// <exception cref="PluginException">Username could not be obtained.</exception>
     private string GetListenBrainzUsername(string userApiToken)
     {
-        var tokenRequest = new ValidateTokenRequest(userApiToken) { BaseUrl = _pluginConfig.GetListenBrainzApiUrl() };
+        var tokenRequest = new ValidateTokenRequest(userApiToken) { BaseUrl = _pluginConfig.ListenBrainzApiUrl };
         var task = _apiClient.ValidateToken(tokenRequest, CancellationToken.None);
         task.Wait();
         if (task.Exception is not null)

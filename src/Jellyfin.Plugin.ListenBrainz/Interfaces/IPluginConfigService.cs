@@ -13,15 +13,15 @@ public interface IPluginConfigService
     public bool IsAlternativeModeEnabled { get; }
 
     /// <summary>
+    /// Gets configured ListenBrainz API URL.
+    /// </summary>
+    /// <returns>ListenBrainz API URL.</returns>
+    public string ListenBrainzApiUrl { get; }
+
+    /// <summary>
     /// Get a configuration for a specified Jellyfin user ID.
     /// </summary>
     /// <param name="jellyfinUserId">ID of the Jellyfin user.</param>
     /// <returns>User configuration. Null if it does not exist.</returns>
     public UserConfig? GetUserConfig(Guid jellyfinUserId);
-
-    /// <summary>
-    /// Get configured ListenBrainz API URL.
-    /// </summary>
-    /// <returns>ListenBrainz API URL.</returns>
-    public string GetListenBrainzApiUrl();
 }
