@@ -188,8 +188,7 @@ public class PluginImplementation : IDisposable
     {
         using var logScope = BeginLogScope();
         _logger.LogDebug("Picking up playback stop event for item {Item}", args.Item.Name);
-        var config = Plugin.GetConfiguration();
-        if (config.IsAlternativeModeEnabled)
+        if (_configService.IsAlternativeModeEnabled)
         {
             _logger.LogDebug("Dropping event - alternative mode is enabled");
             return;
@@ -211,11 +210,16 @@ public class PluginImplementation : IDisposable
             data.Item.Name,
             data.JellyfinUser.Username);
 
-        UserConfig userConfig;
+        var userConfig = _configService.GetUserConfig(data.JellyfinUser.Id);
+        if (userConfig is null)
+        {
+            _logger.LogInformation("Dropping event, user configuration is not available");
+            return;
+        }
+
         try
         {
             AssertInAllowedLibrary(data.Item);
-            userConfig = data.JellyfinUser.GetListenBrainzConfig();
             AssertSubmissionEnabled(userConfig);
             AssertBasicMetadataRequirements(data.Item);
             AssertListenBrainzRequirements(args, data);
@@ -244,7 +248,7 @@ public class PluginImplementation : IDisposable
             _logger.LogDebug(e, "Additional metadata are not available");
         }
 
-        if (config.IsBackupEnabled && userConfig.IsBackupEnabled)
+        if (_configService.IsBackupEnabled && userConfig.IsBackupEnabled)
         {
             try
             {

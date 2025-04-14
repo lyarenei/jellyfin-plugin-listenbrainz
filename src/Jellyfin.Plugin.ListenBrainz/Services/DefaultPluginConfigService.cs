@@ -23,6 +23,12 @@ public class DefaultPluginConfigService : IPluginConfigService
     }
 
     /// <inheritdoc />
+    public bool IsBackupEnabled
+    {
+        get => Config.IsBackupEnabled;
+    }
+
+    /// <inheritdoc />
     public UserConfig? GetUserConfig(Guid jellyfinUserId)
     {
         var userConfig = Config

@@ -19,6 +19,11 @@ public interface IPluginConfigService
     public string ListenBrainzApiUrl { get; }
 
     /// <summary>
+    /// Gets a value indicating whether listen backup feature is enabled.
+    /// </summary>
+    bool IsBackupEnabled { get; }
+
+    /// <summary>
     /// Get a configuration for a specified Jellyfin user ID.
     /// </summary>
     /// <param name="jellyfinUserId">ID of the Jellyfin user.</param>
