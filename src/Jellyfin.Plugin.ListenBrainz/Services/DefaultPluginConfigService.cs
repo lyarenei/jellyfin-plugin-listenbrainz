@@ -8,17 +8,18 @@ namespace Jellyfin.Plugin.ListenBrainz.Services;
 /// </summary>
 public class DefaultPluginConfigService : IPluginConfigService
 {
+    private static PluginConfiguration Config => Plugin.GetConfiguration();
+
     /// <inheritdoc />
     public bool IsAlternativeModeEnabled
     {
-        get => Plugin.GetConfiguration().IsAlternativeModeEnabled;
+        get => Config.IsAlternativeModeEnabled;
     }
 
     /// <inheritdoc />
     public UserConfig? GetUserConfig(Guid jellyfinUserId)
     {
-        var userConfig = Plugin
-            .GetConfiguration()
+        var userConfig = Config
             .UserConfigs
             .FirstOrDefault(u => u.JellyfinUserId == jellyfinUserId);
 
@@ -26,5 +27,5 @@ public class DefaultPluginConfigService : IPluginConfigService
     }
 
     /// <inheritdoc />
-    public string GetListenBrainzApiUrl() => Plugin.GetConfiguration().ListenBrainzApiUrl;
+    public string GetListenBrainzApiUrl() => Config.ListenBrainzApiUrl;
 }
