@@ -122,11 +122,16 @@ public class PluginImplementation : IDisposable
             data.Item.Name,
             data.JellyfinUser.Username);
 
-        UserConfig userConfig;
+        var userConfig = _configService.GetUserConfig(data.JellyfinUser.Id);
+        if (userConfig is null)
+        {
+            _logger.LogInformation("Dropping event, user configuration is not available");
+            return;
+        }
+
         try
         {
             AssertInAllowedLibrary(data.Item);
-            userConfig = data.JellyfinUser.GetListenBrainzConfig();
             AssertSubmissionEnabled(userConfig);
             AssertBasicMetadataRequirements(data.Item);
         }
@@ -165,7 +170,7 @@ public class PluginImplementation : IDisposable
             _logger.LogDebug(e, "Failed to send 'playing now' listen");
         }
 
-        if (Plugin.GetConfiguration().IsAlternativeModeEnabled)
+        if (_configService.IsAlternativeModeEnabled)
         {
             _logger.LogDebug("Alternative mode is enabled, adding item to playback tracker");
             _playbackTracker.AddItem(data.JellyfinUser.Id.ToString(), data.Item);

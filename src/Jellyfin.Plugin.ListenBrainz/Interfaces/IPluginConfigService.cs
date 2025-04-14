@@ -8,6 +8,11 @@ namespace Jellyfin.Plugin.ListenBrainz.Interfaces;
 public interface IPluginConfigService
 {
     /// <summary>
+    /// Gets a value indicating whether the alternative mode is enabled.
+    /// </summary>
+    public bool IsAlternativeModeEnabled { get; }
+
+    /// <summary>
     /// Get a configuration for a specified Jellyfin user ID.
     /// </summary>
     /// <param name="jellyfinUserId">ID of the Jellyfin user.</param>

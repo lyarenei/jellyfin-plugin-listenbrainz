@@ -9,6 +9,12 @@ namespace Jellyfin.Plugin.ListenBrainz.Services;
 public class DefaultPluginConfigService : IPluginConfigService
 {
     /// <inheritdoc />
+    public bool IsAlternativeModeEnabled
+    {
+        get => Plugin.GetConfiguration().IsAlternativeModeEnabled;
+    }
+
+    /// <inheritdoc />
     public UserConfig? GetUserConfig(Guid jellyfinUserId)
     {
         var userConfig = Plugin
