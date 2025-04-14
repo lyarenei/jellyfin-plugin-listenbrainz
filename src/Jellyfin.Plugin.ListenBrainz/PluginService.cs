@@ -1,4 +1,5 @@
 using Jellyfin.Plugin.ListenBrainz.Managers;
+using Jellyfin.Plugin.ListenBrainz.Services;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Session;
 using Microsoft.Extensions.Hosting;
@@ -50,6 +51,8 @@ public sealed class PluginService : IHostedService, IDisposable
         var backupLogger = loggerFactory.CreateLogger(Plugin.LoggerCategory + ".Backup");
         var backupManager = new BackupManager(backupLogger);
 
+        var pluginConfigService = new DefaultPluginConfigService();
+
         _plugin = new PluginImplementation(
             loggerFactory.CreateLogger(Plugin.LoggerCategory),
             listenBrainzClient,
@@ -57,7 +60,8 @@ public sealed class PluginService : IHostedService, IDisposable
             userDataManager,
             userManager,
             libraryManager,
-            backupManager);
+            backupManager,
+            pluginConfigService);
     }
 
     /// <summary>

@@ -30,6 +30,7 @@ public class PluginImplementation : IDisposable
     private readonly PlaybackTrackingManager _playbackTracker;
     private readonly ILibraryManager _libraryManager;
     private readonly IBackupManager _backupManager;
+    private readonly IPluginConfigService _configService;
     private bool _isDisposed;
 
     /// <summary>
@@ -42,6 +43,7 @@ public class PluginImplementation : IDisposable
     /// <param name="userManager">User manager.</param>
     /// <param name="libraryManager">Library manager.</param>
     /// <param name="backupManager">Backup manager.</param>
+    /// <param name="configService">Plugin configuration service.</param>
     public PluginImplementation(
         ILogger logger,
         IListenBrainzClient listenBrainzClient,
@@ -49,7 +51,8 @@ public class PluginImplementation : IDisposable
         IUserDataManager userDataManager,
         IUserManager userManager,
         ILibraryManager libraryManager,
-        IBackupManager backupManager)
+        IBackupManager backupManager,
+        IPluginConfigService configService)
     {
         _logger = logger;
         _listenBrainzClient = listenBrainzClient;
@@ -60,6 +63,7 @@ public class PluginImplementation : IDisposable
         _playbackTracker = PlaybackTrackingManager.Instance;
         _libraryManager = libraryManager;
         _backupManager = backupManager;
+        _configService = configService;
     }
 
     /// <summary>
