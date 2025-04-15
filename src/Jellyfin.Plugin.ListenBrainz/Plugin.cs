@@ -108,6 +108,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// </summary>
     /// <returns>Plugin configuration.</returns>
     /// <exception cref="PluginException">Plugin instance is not available.</exception>
+    [Obsolete("Use PluginConfigurationService to access plugin configuration.")]
     public static PluginConfiguration GetConfiguration()
     {
         var config = _thisInstance?.Configuration;
