@@ -329,8 +329,7 @@ public class PluginImplementation : IDisposable
     /// <param name="data">Event data.</param>
     private void HandlePlaybackFinished(EventData data)
     {
-        var config = Plugin.GetConfiguration();
-        if (!config.IsAlternativeModeEnabled)
+        if (!_configService.IsAlternativeModeEnabled)
         {
             _logger.LogDebug("Dropping event - alternative mode is disabled");
             return;
@@ -341,11 +340,16 @@ public class PluginImplementation : IDisposable
             data.Item.Name,
             data.JellyfinUser.Username);
 
-        UserConfig userConfig;
+        var userConfig = _configService.GetUserConfig(data.JellyfinUser.Id);
+        if (userConfig is null)
+        {
+            _logger.LogInformation("Dropping event, user configuration is not available");
+            return;
+        }
+
         try
         {
             AssertInAllowedLibrary(data.Item);
-            userConfig = data.JellyfinUser.GetListenBrainzConfig();
             AssertSubmissionEnabled(userConfig);
             AssertBasicMetadataRequirements(data.Item);
 
@@ -380,7 +384,7 @@ public class PluginImplementation : IDisposable
             _logger.LogDebug(e, "Additional metadata are not available");
         }
 
-        if (config.IsBackupEnabled && userConfig.IsBackupEnabled)
+        if (_configService.IsBackupEnabled && userConfig.IsBackupEnabled)
         {
             try
             {
