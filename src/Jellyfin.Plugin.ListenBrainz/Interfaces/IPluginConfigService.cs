@@ -29,6 +29,11 @@ public interface IPluginConfigService
     bool IsMusicBrainzEnabled { get; }
 
     /// <summary>
+    /// Gets a value indicating whether the immediate favorite sync feature is enabled.
+    /// </summary>
+    bool IsImmediateFavoriteSyncEnabled { get; }
+
+    /// <summary>
     /// Get a configuration for a specified Jellyfin user ID.
     /// </summary>
     /// <param name="jellyfinUserId">ID of the Jellyfin user.</param>

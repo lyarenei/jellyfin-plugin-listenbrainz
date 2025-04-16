@@ -35,6 +35,12 @@ public class DefaultPluginConfigService : IPluginConfigService
     }
 
     /// <inheritdoc />
+    public bool IsImmediateFavoriteSyncEnabled
+    {
+        get => Config.IsImmediateFavoriteSyncEnabled;
+    }
+
+    /// <inheritdoc />
     public UserConfig? GetUserConfig(Guid jellyfinUserId)
     {
         var userConfig = Config

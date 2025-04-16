@@ -516,7 +516,7 @@ public class PluginImplementation : IDisposable
     private void AssertImmediateFavoriteSyncIsEnabled()
     {
         _logger.LogDebug("Checking if immediate favorite sync is enabled");
-        if (!Plugin.GetConfiguration().IsImmediateFavoriteSyncEnabled)
+        if (!_configService.IsImmediateFavoriteSyncEnabled)
         {
             throw new PluginException("Immediate favorite sync is disabled");
         }
