@@ -24,6 +24,11 @@ public interface IPluginConfigService
     bool IsBackupEnabled { get; }
 
     /// <summary>
+    /// Gets a value indicating whether MusicBrainz integration is enabled.
+    /// </summary>
+    bool IsMusicBrainzEnabled { get; }
+
+    /// <summary>
     /// Get a configuration for a specified Jellyfin user ID.
     /// </summary>
     /// <param name="jellyfinUserId">ID of the Jellyfin user.</param>

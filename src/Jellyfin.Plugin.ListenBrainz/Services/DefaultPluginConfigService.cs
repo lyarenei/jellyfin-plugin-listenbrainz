@@ -29,6 +29,12 @@ public class DefaultPluginConfigService : IPluginConfigService
     }
 
     /// <inheritdoc />
+    public bool IsMusicBrainzEnabled
+    {
+        get => Config.IsMusicBrainzEnabled;
+    }
+
+    /// <inheritdoc />
     public UserConfig? GetUserConfig(Guid jellyfinUserId)
     {
         var userConfig = Config

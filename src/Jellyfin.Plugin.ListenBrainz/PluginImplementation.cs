@@ -501,7 +501,7 @@ public class PluginImplementation : IDisposable
     private void AssertMusicBrainzIsEnabled()
     {
         _logger.LogDebug("Checking if MusicBrainz integration is enabled");
-        if (!Plugin.GetConfiguration().IsMusicBrainzEnabled)
+        if (!_configService.IsMusicBrainzEnabled)
         {
             throw new PluginException("MusicBrainz integration is disabled");
         }
