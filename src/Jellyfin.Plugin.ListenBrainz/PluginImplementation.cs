@@ -696,7 +696,7 @@ public class PluginImplementation : IDisposable
 
     private IEnumerable<Guid> GetAllowedLibraries()
     {
-        var allLibraries = Plugin.GetConfiguration().LibraryConfigs;
+        var allLibraries = _configService.LibraryConfigs;
         if (allLibraries.Count > 0)
         {
             return allLibraries.Where(lc => lc.IsAllowed).Select(lc => lc.Id);

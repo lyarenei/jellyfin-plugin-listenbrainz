@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 
@@ -38,6 +39,12 @@ public class DefaultPluginConfigService : IPluginConfigService
     public bool IsImmediateFavoriteSyncEnabled
     {
         get => Config.IsImmediateFavoriteSyncEnabled;
+    }
+
+    /// <inheritdoc />
+    public Collection<LibraryConfig> LibraryConfigs
+    {
+        get => Config.LibraryConfigs;
     }
 
     /// <inheritdoc />

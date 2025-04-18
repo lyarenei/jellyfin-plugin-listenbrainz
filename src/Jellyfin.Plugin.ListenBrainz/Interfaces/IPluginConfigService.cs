@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 
 namespace Jellyfin.Plugin.ListenBrainz.Interfaces;
@@ -32,6 +33,11 @@ public interface IPluginConfigService
     /// Gets a value indicating whether the immediate favorite sync feature is enabled.
     /// </summary>
     bool IsImmediateFavoriteSyncEnabled { get; }
+
+    /// <summary>
+    /// Gets library configurations.
+    /// </summary>
+    Collection<LibraryConfig> LibraryConfigs { get; }
 
     /// <summary>
     /// Get a configuration for a specified Jellyfin user ID.
