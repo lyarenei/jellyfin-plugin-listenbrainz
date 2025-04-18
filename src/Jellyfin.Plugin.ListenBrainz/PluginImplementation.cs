@@ -30,6 +30,7 @@ public class PluginImplementation : IDisposable
     private readonly PlaybackTrackingManager _playbackTracker;
     private readonly ILibraryManager _libraryManager;
     private readonly IBackupManager _backupManager;
+    private readonly IPluginConfigService _configService;
     private bool _isDisposed;
 
     /// <summary>
@@ -42,6 +43,7 @@ public class PluginImplementation : IDisposable
     /// <param name="userManager">User manager.</param>
     /// <param name="libraryManager">Library manager.</param>
     /// <param name="backupManager">Backup manager.</param>
+    /// <param name="configService">Plugin configuration service.</param>
     public PluginImplementation(
         ILogger logger,
         IListenBrainzClient listenBrainzClient,
@@ -49,7 +51,8 @@ public class PluginImplementation : IDisposable
         IUserDataManager userDataManager,
         IUserManager userManager,
         ILibraryManager libraryManager,
-        IBackupManager backupManager)
+        IBackupManager backupManager,
+        IPluginConfigService configService)
     {
         _logger = logger;
         _listenBrainzClient = listenBrainzClient;
@@ -60,6 +63,7 @@ public class PluginImplementation : IDisposable
         _playbackTracker = PlaybackTrackingManager.Instance;
         _libraryManager = libraryManager;
         _backupManager = backupManager;
+        _configService = configService;
     }
 
     /// <summary>
@@ -118,11 +122,16 @@ public class PluginImplementation : IDisposable
             data.Item.Name,
             data.JellyfinUser.Username);
 
-        UserConfig userConfig;
+        var userConfig = _configService.GetUserConfig(data.JellyfinUser.Id);
+        if (userConfig is null)
+        {
+            _logger.LogInformation("Dropping event, user configuration is not available");
+            return;
+        }
+
         try
         {
             AssertInAllowedLibrary(data.Item);
-            userConfig = data.JellyfinUser.GetListenBrainzConfig();
             AssertSubmissionEnabled(userConfig);
             AssertBasicMetadataRequirements(data.Item);
         }
@@ -161,7 +170,7 @@ public class PluginImplementation : IDisposable
             _logger.LogDebug(e, "Failed to send 'playing now' listen");
         }
 
-        if (Plugin.GetConfiguration().IsAlternativeModeEnabled)
+        if (_configService.IsAlternativeModeEnabled)
         {
             _logger.LogDebug("Alternative mode is enabled, adding item to playback tracker");
             _playbackTracker.AddItem(data.JellyfinUser.Id.ToString(), data.Item);
@@ -179,8 +188,7 @@ public class PluginImplementation : IDisposable
     {
         using var logScope = BeginLogScope();
         _logger.LogDebug("Picking up playback stop event for item {Item}", args.Item.Name);
-        var config = Plugin.GetConfiguration();
-        if (config.IsAlternativeModeEnabled)
+        if (_configService.IsAlternativeModeEnabled)
         {
             _logger.LogDebug("Dropping event - alternative mode is enabled");
             return;
@@ -202,11 +210,16 @@ public class PluginImplementation : IDisposable
             data.Item.Name,
             data.JellyfinUser.Username);
 
-        UserConfig userConfig;
+        var userConfig = _configService.GetUserConfig(data.JellyfinUser.Id);
+        if (userConfig is null)
+        {
+            _logger.LogInformation("Dropping event, user configuration is not available");
+            return;
+        }
+
         try
         {
             AssertInAllowedLibrary(data.Item);
-            userConfig = data.JellyfinUser.GetListenBrainzConfig();
             AssertSubmissionEnabled(userConfig);
             AssertBasicMetadataRequirements(data.Item);
             AssertListenBrainzRequirements(args, data);
@@ -235,7 +248,7 @@ public class PluginImplementation : IDisposable
             _logger.LogDebug(e, "Additional metadata are not available");
         }
 
-        if (config.IsBackupEnabled && userConfig.IsBackupEnabled)
+        if (_configService.IsBackupEnabled && userConfig.IsBackupEnabled)
         {
             try
             {
@@ -316,8 +329,7 @@ public class PluginImplementation : IDisposable
     /// <param name="data">Event data.</param>
     private void HandlePlaybackFinished(EventData data)
     {
-        var config = Plugin.GetConfiguration();
-        if (!config.IsAlternativeModeEnabled)
+        if (!_configService.IsAlternativeModeEnabled)
         {
             _logger.LogDebug("Dropping event - alternative mode is disabled");
             return;
@@ -328,11 +340,16 @@ public class PluginImplementation : IDisposable
             data.Item.Name,
             data.JellyfinUser.Username);
 
-        UserConfig userConfig;
+        var userConfig = _configService.GetUserConfig(data.JellyfinUser.Id);
+        if (userConfig is null)
+        {
+            _logger.LogInformation("Dropping event, user configuration is not available");
+            return;
+        }
+
         try
         {
             AssertInAllowedLibrary(data.Item);
-            userConfig = data.JellyfinUser.GetListenBrainzConfig();
             AssertSubmissionEnabled(userConfig);
             AssertBasicMetadataRequirements(data.Item);
 
@@ -367,7 +384,7 @@ public class PluginImplementation : IDisposable
             _logger.LogDebug(e, "Additional metadata are not available");
         }
 
-        if (config.IsBackupEnabled && userConfig.IsBackupEnabled)
+        if (_configService.IsBackupEnabled && userConfig.IsBackupEnabled)
         {
             try
             {
@@ -484,7 +501,7 @@ public class PluginImplementation : IDisposable
     private void AssertMusicBrainzIsEnabled()
     {
         _logger.LogDebug("Checking if MusicBrainz integration is enabled");
-        if (!Plugin.GetConfiguration().IsMusicBrainzEnabled)
+        if (!_configService.IsMusicBrainzEnabled)
         {
             throw new PluginException("MusicBrainz integration is disabled");
         }
@@ -499,7 +516,7 @@ public class PluginImplementation : IDisposable
     private void AssertImmediateFavoriteSyncIsEnabled()
     {
         _logger.LogDebug("Checking if immediate favorite sync is enabled");
-        if (!Plugin.GetConfiguration().IsImmediateFavoriteSyncEnabled)
+        if (!_configService.IsImmediateFavoriteSyncEnabled)
         {
             throw new PluginException("Immediate favorite sync is disabled");
         }
@@ -679,7 +696,7 @@ public class PluginImplementation : IDisposable
 
     private IEnumerable<Guid> GetAllowedLibraries()
     {
-        var allLibraries = Plugin.GetConfiguration().LibraryConfigs;
+        var allLibraries = _configService.LibraryConfigs;
         if (allLibraries.Count > 0)
         {
             return allLibraries.Where(lc => lc.IsAllowed).Select(lc => lc.Id);
