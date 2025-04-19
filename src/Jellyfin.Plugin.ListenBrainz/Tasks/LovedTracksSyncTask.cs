@@ -1,4 +1,5 @@
-using Jellyfin.Data.Entities;
+using Jellyfin.Database.Implementations.Entities;
+using Jellyfin.Database.Implementations.Enums;
 using Jellyfin.Data.Enums;
 using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
@@ -24,7 +25,6 @@ public class LovedTracksSyncTask : IScheduledTask
     private readonly IMusicBrainzClient _musicBrainzClient;
     private readonly ILibraryManager _libraryManager;
     private readonly IUserManager _userManager;
-    private readonly IUserDataRepository _repository;
     private readonly IUserDataManager _userDataManager;
     private bool _reenableImmediateSync;
     private double _progress;
@@ -37,14 +37,12 @@ public class LovedTracksSyncTask : IScheduledTask
     /// <param name="clientFactory">HTTP client factory.</param>
     /// <param name="libraryManager">Library manager.</param>
     /// <param name="userManager">User manager.</param>
-    /// <param name="dataRepository">Data repository.</param>
     /// <param name="dataManager">User data manager.</param>
     public LovedTracksSyncTask(
         ILoggerFactory loggerFactory,
         IHttpClientFactory clientFactory,
         ILibraryManager libraryManager,
         IUserManager userManager,
-        IUserDataRepository dataRepository,
         IUserDataManager dataManager)
     {
         _logger = loggerFactory.CreateLogger($"{Plugin.LoggerCategory}.LovedSyncTask");
@@ -52,7 +50,6 @@ public class LovedTracksSyncTask : IScheduledTask
         _musicBrainzClient = ClientUtils.GetMusicBrainzClient(_logger, clientFactory);
         _libraryManager = libraryManager;
         _userManager = userManager;
-        _repository = dataRepository;
         _userDataManager = dataManager;
     }
 
@@ -201,20 +198,7 @@ public class LovedTracksSyncTask : IScheduledTask
         var userData = _userDataManager.GetUserData(user, item);
         userData.IsFavorite = true;
 
-        if (Plugin.GetConfiguration().ShouldEmitUserRatingEvent)
-        {
-            // This spams UpdateUserRating events, which feeds into Immediate favorite sync feature.
-            // But there might be other plugins reacting on this event, so if the plugin should produce these events
-            // the plugin temporarily disables the immediate sync feature (see usages of SetImmediateFavSyncEnabled()).
-            _userDataManager.SaveUserData(user, item, userData, UserDataSaveReason.UpdateUserRating, cancellationToken);
-            return;
-        }
-
-        foreach (var key in item.GetUserDataKeys())
-        {
-            _repository.SaveUserData(user.InternalId, key, userData, cancellationToken);
-        }
-
+        _userDataManager.SaveUserData(user, item, userData, UserDataSaveReason.UpdateUserRating, cancellationToken);
         _logger.LogDebug("Item {Name} has been marked as favorite for user {User}", item.Name, user.Username);
     }
 
