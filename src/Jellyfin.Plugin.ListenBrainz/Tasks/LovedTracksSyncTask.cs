@@ -4,7 +4,7 @@ using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
-using Jellyfin.Plugin.ListenBrainz.Managers;
+using Jellyfin.Plugin.ListenBrainz.Services;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Persistence;
@@ -27,7 +27,7 @@ public class LovedTracksSyncTask : IScheduledTask
     private readonly IUserManager _userManager;
     private readonly IUserDataRepository _repository;
     private readonly IUserDataManager _userDataManager;
-    private readonly IPluginConfigManager _configManager;
+    private readonly IPluginConfigService _configService;
     private bool _reenableImmediateSync;
     private double _progress;
     private double _userCountRatio;
@@ -43,7 +43,7 @@ public class LovedTracksSyncTask : IScheduledTask
     /// <param name="dataManager">User data manager.</param>
     /// <param name="listenBrainzClient">ListenBrainz client.</param>
     /// <param name="musicBrainzClient">MusicBrainz client.</param>
-    /// <param name="configManager">Plugin configuration manager.</param>
+    /// <param name="configService">Plugin configuration service.</param>
     public LovedTracksSyncTask(
         ILoggerFactory loggerFactory,
         IHttpClientFactory clientFactory,
@@ -53,7 +53,7 @@ public class LovedTracksSyncTask : IScheduledTask
         IUserDataManager dataManager,
         IListenBrainzClient? listenBrainzClient = null,
         IMusicBrainzClient? musicBrainzClient = null,
-        IPluginConfigManager? configManager = null)
+        IPluginConfigService? configService = null)
     {
         _logger = loggerFactory.CreateLogger($"{Plugin.LoggerCategory}.LovedSyncTask");
         _listenBrainzClient = listenBrainzClient ?? ClientUtils.GetListenBrainzClient(_logger, clientFactory);
@@ -62,7 +62,7 @@ public class LovedTracksSyncTask : IScheduledTask
         _userManager = userManager;
         _repository = dataRepository;
         _userDataManager = dataManager;
-        _configManager = configManager ?? new PluginConfigManager();
+        _configService = configService ?? new DefaultPluginConfigService();
     }
 
     /// <inheritdoc />
@@ -84,22 +84,21 @@ public class LovedTracksSyncTask : IScheduledTask
     public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
         using var logScope = BeginLogScope();
-        var conf = _configManager.GetConfiguration();
 
-        if (!conf.IsMusicBrainzEnabled)
+        if (!_configService.IsMusicBrainzEnabled)
         {
             _logger.LogInformation("MusicBrainz integration is disabled, cannot sync favorites");
             return;
         }
 
-        if (conf.UserConfigs.Count == 0)
+        if (_configService.UserConfigs.Count == 0)
         {
             _logger.LogInformation("No users have been configured, cannot sync");
             progress.Report(100);
             return;
         }
 
-        if (conf.IsImmediateFavoriteSyncEnabled)
+        if (_configService.IsImmediateFavoriteSyncEnabled)
         {
             _logger.LogInformation("Immediate favorite sync is enabled, disabling it temporarily");
             _reenableImmediateSync = true;
@@ -109,8 +108,8 @@ public class LovedTracksSyncTask : IScheduledTask
         try
         {
             _logger.LogInformation("Starting favorite sync from ListenBrainz...");
-            ResetProgress(conf.UserConfigs.Count);
-            foreach (var userConfig in conf.UserConfigs)
+            ResetProgress(_configService.UserConfigs.Count);
+            foreach (var userConfig in _configService.UserConfigs)
             {
                 _logger.LogInformation("Syncing favorites for user {Username}", userConfig.UserName);
                 if (!userConfig.IsFavoritesSyncEnabled)
@@ -141,9 +140,9 @@ public class LovedTracksSyncTask : IScheduledTask
 
     private void SetImmediateFavSyncEnabled(bool isEnabled)
     {
-        var conf = _configManager.GetConfiguration();
+        var conf = _configService.GetConfiguration();
         conf.IsImmediateFavoriteSyncEnabled = isEnabled;
-        _configManager.SaveConfiguration(conf);
+        _configService.SaveConfiguration(conf);
     }
 
     private async Task HandleFavoriteSync(
@@ -202,7 +201,7 @@ public class LovedTracksSyncTask : IScheduledTask
 
     private IEnumerable<Guid> GetAllowedLibraries()
     {
-        var allLibraries = _configManager.GetConfiguration().LibraryConfigs;
+        var allLibraries = _configService.LibraryConfigs;
         if (allLibraries.Count > 0)
         {
             return allLibraries.Where(lc => lc.IsAllowed).Select(lc => lc.Id);
@@ -223,7 +222,7 @@ public class LovedTracksSyncTask : IScheduledTask
         var userData = _userDataManager.GetUserData(user, item);
         userData.IsFavorite = true;
 
-        if (_configManager.GetConfiguration().ShouldEmitUserRatingEvent)
+        if (_configService.GetConfiguration().ShouldEmitUserRatingEvent)
         {
             // This spams UpdateUserRating events, which feeds into Immediate favorite sync feature.
             // But there might be other plugins reacting on this event, so if the plugin should produce these events

@@ -24,7 +24,7 @@ public class LovedTracksSyncTaskTests
     private readonly Mock<IUserDataManager> _userDataManagerMock;
     private readonly Mock<IListenBrainzClient> _listenBrainzClientMock;
     private readonly Mock<IMusicBrainzClient> _musicBrainzClientMock;
-    private readonly Mock<IPluginConfigManager> _pluginConfigManagerMock;
+    private readonly Mock<IPluginConfigService> _pluginConfigServiceMock;
     private readonly LovedTracksSyncTask _task;
     private readonly Mock<IProgress<double>> _progressMock;
 
@@ -42,7 +42,7 @@ public class LovedTracksSyncTaskTests
         _userDataManagerMock = new Mock<IUserDataManager>();
         _listenBrainzClientMock = new Mock<IListenBrainzClient>();
         _musicBrainzClientMock = new Mock<IMusicBrainzClient>();
-        _pluginConfigManagerMock = new Mock<IPluginConfigManager>();
+        _pluginConfigServiceMock = new Mock<IPluginConfigService>();
 
         _task = new LovedTracksSyncTask(
             loggerFactoryMock.Object,
@@ -53,7 +53,7 @@ public class LovedTracksSyncTaskTests
             _userDataManagerMock.Object,
             _listenBrainzClientMock.Object,
             _musicBrainzClientMock.Object,
-            _pluginConfigManagerMock.Object);
+            _pluginConfigServiceMock.Object);
 
         _progressMock = new Mock<IProgress<double>>();
     }
@@ -80,13 +80,13 @@ public class LovedTracksSyncTaskTests
             UserConfigs = [GetUserConfig(user.Id)]
         };
 
-        _pluginConfigManagerMock
+        _pluginConfigServiceMock
             .Setup(m => m.GetConfiguration())
             .Returns(pluginConfig);
 
         await _task.ExecuteAsync(_progressMock.Object, CancellationToken.None);
 
-        _pluginConfigManagerMock.Verify(pcm => pcm.GetConfiguration(), Times.Once);
+        _pluginConfigServiceMock.Verify(pcm => pcm.GetConfiguration(), Times.Once);
         _listenBrainzClientMock.Verify(
             lbc => lbc.GetLovedTracksAsync(
                 It.IsAny<UserConfig>(),
@@ -104,13 +104,13 @@ public class LovedTracksSyncTaskTests
             UserConfigs = []
         };
 
-        _pluginConfigManagerMock
+        _pluginConfigServiceMock
             .Setup(m => m.GetConfiguration())
             .Returns(pluginConfig);
 
         await _task.ExecuteAsync(_progressMock.Object, CancellationToken.None);
 
-        _pluginConfigManagerMock.Verify(pcm => pcm.GetConfiguration(), Times.Once);
+        _pluginConfigServiceMock.Verify(pcm => pcm.GetConfiguration(), Times.Once);
         _progressMock.Verify(pm => pm.Report(100), Times.Once);
         _listenBrainzClientMock.Verify(
             lbc => lbc.GetLovedTracksAsync(
