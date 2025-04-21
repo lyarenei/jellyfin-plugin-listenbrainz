@@ -56,8 +56,7 @@ public class LovedTracksSyncTask : IScheduledTask
         IPluginConfigManager? configManager = null)
     {
         _logger = loggerFactory.CreateLogger($"{Plugin.LoggerCategory}.LovedSyncTask");
-        _listenBrainzClient = listenBrainzClient ??
-                              ClientUtils.GetListenBrainzClient(_logger, clientFactory, libraryManager);
+        _listenBrainzClient = listenBrainzClient ?? ClientUtils.GetListenBrainzClient(_logger, clientFactory);
         _musicBrainzClient = musicBrainzClient ?? ClientUtils.GetMusicBrainzClient(_logger, clientFactory);
         _libraryManager = libraryManager;
         _userManager = userManager;
