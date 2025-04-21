@@ -43,7 +43,13 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
         _libraryManager = libraryManager;
         _userManager = userManager;
         _userDataManager = userDataManager;
+        Instance = this;
     }
+
+    /// <summary>
+    /// Gets a singleton instance of the favorite sync service.
+    /// </summary>
+    public static IFavoriteSyncService? Instance { get; private set; }
 
     /// <inheritdoc />
     public void SyncToListenBrainz(Guid itemId, Guid jellyfinUserId)
