@@ -45,6 +45,7 @@ public class PluginImplementation : IDisposable
     /// <param name="libraryManager">Library manager.</param>
     /// <param name="backupManager">Backup manager.</param>
     /// <param name="configService">Plugin configuration service.</param>
+    /// <param name="favoriteSyncService">Favorite sync service.</param>
     public PluginImplementation(
         ILogger logger,
         IListenBrainzClient listenBrainzClient,
@@ -53,7 +54,8 @@ public class PluginImplementation : IDisposable
         IUserManager userManager,
         ILibraryManager libraryManager,
         IBackupManager backupManager,
-        IPluginConfigService configService)
+        IPluginConfigService configService,
+        IFavoriteSyncService favoriteSyncService)
     {
         _logger = logger;
         _listenBrainzClient = listenBrainzClient;
@@ -65,6 +67,7 @@ public class PluginImplementation : IDisposable
         _libraryManager = libraryManager;
         _backupManager = backupManager;
         _configService = configService;
+        _favoriteSyncService = favoriteSyncService;
     }
 
     /// <summary>
