@@ -433,19 +433,16 @@ public class PluginImplementation : IDisposable
             data.Item.Name,
             data.JellyfinUser.Username);
 
-        // TODO: use favorite sync service
         try
         {
-            var userItemData = _userDataManager.GetUserData(data.JellyfinUser, data.Item);
             if (metadata?.RecordingMbid is not null)
             {
-                _logger.LogInformation("Recording MBID is available, using it for favorite sync");
-                _listenBrainzClient.SendFeedback(userConfig, userItemData.IsFavorite, metadata.RecordingMbid);
-                _logger.LogInformation("Favorite sync has been successful");
+                _favoriteSyncService.SyncToListenBrainz(data.Item.Id, userConfig.JellyfinUserId);
                 return;
             }
 
             _logger.LogInformation("No recording MBID is available, will attempt to sync favorite status using MSID");
+            var userItemData = _userDataManager.GetUserData(data.JellyfinUser, data.Item);
             SendFeedbackUsingMsid(userConfig, userItemData.IsFavorite, listenTs);
             _logger.LogInformation("Favorite sync has been successful");
         }
