@@ -28,6 +28,7 @@ public class LovedTracksSyncTask : IScheduledTask
     private readonly IUserDataRepository _repository;
     private readonly IUserDataManager _userDataManager;
     private readonly IPluginConfigService _configService;
+    private IFavoriteSyncService? _favoriteSyncService;
     private bool _reenableImmediateSync;
     private double _progress;
     private double _userCountRatio;
@@ -44,6 +45,7 @@ public class LovedTracksSyncTask : IScheduledTask
     /// <param name="listenBrainzClient">ListenBrainz client.</param>
     /// <param name="musicBrainzClient">MusicBrainz client.</param>
     /// <param name="configService">Plugin configuration service.</param>
+    /// <param name="favoriteSyncService">Favorite sync service.</param>
     public LovedTracksSyncTask(
         ILoggerFactory loggerFactory,
         IHttpClientFactory clientFactory,
@@ -53,7 +55,8 @@ public class LovedTracksSyncTask : IScheduledTask
         IUserDataManager dataManager,
         IListenBrainzClient? listenBrainzClient = null,
         IMusicBrainzClient? musicBrainzClient = null,
-        IPluginConfigService? configService = null)
+        IPluginConfigService? configService = null,
+        IFavoriteSyncService? favoriteSyncService = null)
     {
         _logger = loggerFactory.CreateLogger($"{Plugin.LoggerCategory}.LovedSyncTask");
         _listenBrainzClient = listenBrainzClient ?? ClientUtils.GetListenBrainzClient(_logger, clientFactory);
@@ -63,6 +66,7 @@ public class LovedTracksSyncTask : IScheduledTask
         _repository = dataRepository;
         _userDataManager = dataManager;
         _configService = configService ?? new DefaultPluginConfigService();
+        _favoriteSyncService = favoriteSyncService ?? DefaultFavoriteSyncService.Instance;
     }
 
     /// <inheritdoc />
@@ -84,6 +88,15 @@ public class LovedTracksSyncTask : IScheduledTask
     public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
         using var logScope = BeginLogScope();
+        if (_favoriteSyncService is null)
+        {
+            _favoriteSyncService = DefaultFavoriteSyncService.Instance;
+            if (_favoriteSyncService is null)
+            {
+                _logger.LogError("Favorite sync service is not available, cannot sync favorites");
+                return;
+            }
+        }
 
         if (!_configService.IsMusicBrainzEnabled)
         {
