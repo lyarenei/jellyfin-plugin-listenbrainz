@@ -111,17 +111,14 @@ public class LovedTracksSyncTask : IScheduledTask
             return;
         }
 
-        if (_configService.IsImmediateFavoriteSyncEnabled)
-        {
-            _logger.LogInformation("Immediate favorite sync is enabled, disabling it temporarily");
-            _reenableImmediateSync = true;
-            SetImmediateFavSyncEnabled(false);
-        }
+        _logger.LogInformation("Starting favorite sync from ListenBrainz...");
+        ResetProgress(_configService.UserConfigs.Count);
+
+        _logger.LogDebug("Temporarily disabling favorite sync service");
+        _favoriteSyncService.Disable();
 
         try
         {
-            _logger.LogInformation("Starting favorite sync from ListenBrainz...");
-            ResetProgress(_configService.UserConfigs.Count);
             foreach (var userConfig in _configService.UserConfigs)
             {
                 _logger.LogInformation("Syncing favorites for user {Username}", userConfig.UserName);
@@ -143,11 +140,8 @@ public class LovedTracksSyncTask : IScheduledTask
         }
         finally
         {
-            if (_reenableImmediateSync)
-            {
-                _logger.LogInformation("Re-enabling Immediate favorite sync");
-                SetImmediateFavSyncEnabled(true);
-            }
+            _logger.LogDebug("Re-enabling favorite sync service");
+            _favoriteSyncService.Enable();
         }
     }
 
@@ -235,20 +229,7 @@ public class LovedTracksSyncTask : IScheduledTask
         var userData = _userDataManager.GetUserData(user, item);
         userData.IsFavorite = true;
 
-        if (_configService.GetConfiguration().ShouldEmitUserRatingEvent)
-        {
-            // This spams UpdateUserRating events, which feeds into Immediate favorite sync feature.
-            // But there might be other plugins reacting on this event, so if the plugin should produce these events
-            // the plugin temporarily disables the immediate sync feature (see usages of SetImmediateFavSyncEnabled()).
-            _userDataManager.SaveUserData(user, item, userData, UserDataSaveReason.UpdateUserRating, cancellationToken);
-            return;
-        }
-
-        foreach (var key in item.GetUserDataKeys())
-        {
-            _repository.SaveUserData(user.InternalId, key, userData, cancellationToken);
-        }
-
+        _userDataManager.SaveUserData(user, item, userData, UserDataSaveReason.UpdateUserRating, cancellationToken);
         _logger.LogDebug("Item {Name} has been marked as favorite for user {User}", item.Name, user.Username);
     }
 
