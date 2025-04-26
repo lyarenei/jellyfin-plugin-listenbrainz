@@ -99,7 +99,7 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
         }
         catch (Exception e)
         {
-            _logger.LogWarning("Favorite sync failed: {Reason}", e.Message);
+            _logger.LogInformation("Favorite sync failed: {Reason}", e.Message);
             _logger.LogDebug(e, "Favorite sync failed");
         }
     }
