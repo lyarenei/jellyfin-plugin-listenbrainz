@@ -7,7 +7,6 @@ using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.Services;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.Persistence;
 using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Tasks;
 using Microsoft.Extensions.Logging;
@@ -25,11 +24,9 @@ public class LovedTracksSyncTask : IScheduledTask
     private readonly IMusicBrainzClient _musicBrainzClient;
     private readonly ILibraryManager _libraryManager;
     private readonly IUserManager _userManager;
-    private readonly IUserDataRepository _repository;
     private readonly IUserDataManager _userDataManager;
     private readonly IPluginConfigService _configService;
     private IFavoriteSyncService? _favoriteSyncService;
-    private bool _reenableImmediateSync;
     private double _progress;
     private double _userCountRatio;
 
@@ -40,7 +37,6 @@ public class LovedTracksSyncTask : IScheduledTask
     /// <param name="clientFactory">HTTP client factory.</param>
     /// <param name="libraryManager">Library manager.</param>
     /// <param name="userManager">User manager.</param>
-    /// <param name="dataRepository">Data repository.</param>
     /// <param name="dataManager">User data manager.</param>
     /// <param name="listenBrainzClient">ListenBrainz client.</param>
     /// <param name="musicBrainzClient">MusicBrainz client.</param>
@@ -51,7 +47,6 @@ public class LovedTracksSyncTask : IScheduledTask
         IHttpClientFactory clientFactory,
         ILibraryManager libraryManager,
         IUserManager userManager,
-        IUserDataRepository dataRepository,
         IUserDataManager dataManager,
         IListenBrainzClient? listenBrainzClient = null,
         IMusicBrainzClient? musicBrainzClient = null,
@@ -63,7 +58,6 @@ public class LovedTracksSyncTask : IScheduledTask
         _musicBrainzClient = musicBrainzClient ?? ClientUtils.GetMusicBrainzClient(_logger, clientFactory);
         _libraryManager = libraryManager;
         _userManager = userManager;
-        _repository = dataRepository;
         _userDataManager = dataManager;
         _configService = configService ?? new DefaultPluginConfigService();
         _favoriteSyncService = favoriteSyncService ?? DefaultFavoriteSyncService.Instance;
@@ -145,13 +139,6 @@ public class LovedTracksSyncTask : IScheduledTask
         }
     }
 
-    private void SetImmediateFavSyncEnabled(bool isEnabled)
-    {
-        var conf = _configService.GetConfiguration();
-        conf.IsImmediateFavoriteSyncEnabled = isEnabled;
-        _configService.SaveConfiguration(conf);
-    }
-
     private async Task HandleFavoriteSync(
         IProgress<double> progress,
         UserConfig userConfig,
@@ -166,11 +153,7 @@ public class LovedTracksSyncTask : IScheduledTask
         }
 
         var allowedLibraries = GetAllowedLibraries().Select(al => _libraryManager.GetItemById(al)).WhereNotNull();
-        var q = new InternalItemsQuery(user)
-        {
-            // Future-proofing for music videos
-            MediaTypes = new[] { MediaType.Audio, MediaType.Video }
-        };
+        var q = new InternalItemsQuery(user) { MediaTypes = new[] { MediaType.Audio } };
 
         var items = _libraryManager
             .GetItemList(q, allowedLibraries.ToList())
@@ -180,16 +163,12 @@ public class LovedTracksSyncTask : IScheduledTask
 
         foreach (var item in items)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var recordingMbid = string.Empty;
+
             try
             {
-                cancellationToken.ThrowIfCancellationRequested();
                 recordingMbid = _musicBrainzClient.GetAudioItemMetadata(item).RecordingMbid;
-            }
-            catch (OperationCanceledException)
-            {
-                _logger.LogDebug("Sync task has been cancelled");
-                throw;
             }
             catch (Exception e)
             {
