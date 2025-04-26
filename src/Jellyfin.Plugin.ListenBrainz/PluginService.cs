@@ -58,7 +58,7 @@ public sealed class PluginService : IHostedService, IDisposable
             favoriteSyncLogger,
             listenBrainzClient,
             musicBrainzClient,
-            new DefaultPluginConfigService(),
+            pluginConfigService,
             libraryManager,
             userManager,
             userDataManager);
