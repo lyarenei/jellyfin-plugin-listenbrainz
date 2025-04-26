@@ -16,6 +16,7 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
     private readonly ILibraryManager _libraryManager;
     private readonly IUserManager _userManager;
     private readonly IUserDataManager _userDataManager;
+    private bool _isEnabled;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DefaultFavoriteSyncService"/> class.
@@ -43,6 +44,7 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
         _libraryManager = libraryManager;
         _userManager = userManager;
         _userDataManager = userDataManager;
+        _isEnabled = true;
         Instance = this;
     }
 
@@ -54,6 +56,12 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
     /// <inheritdoc />
     public void SyncToListenBrainz(Guid itemId, Guid jellyfinUserId)
     {
+        if (!_isEnabled)
+        {
+            _logger.LogDebug("Favorite sync service is disabled, cancelling sync");
+            return;
+        }
+
         var item = _libraryManager.GetItemById(itemId);
         if (item is null)
         {
@@ -102,5 +110,19 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
             _logger.LogInformation("Favorite sync failed: {Reason}", e.Message);
             _logger.LogDebug(e, "Favorite sync failed");
         }
+    }
+
+    /// <inheritdoc />
+    public void Enable()
+    {
+        _isEnabled = true;
+        _logger.LogDebug("Favorite sync service has been enabled");
+    }
+
+    /// <inheritdoc />
+    public void Disable()
+    {
+        _isEnabled = false;
+        _logger.LogDebug("Favorite sync service has been disabled");
     }
 }

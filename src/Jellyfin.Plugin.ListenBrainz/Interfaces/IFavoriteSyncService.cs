@@ -11,4 +11,14 @@ public interface IFavoriteSyncService
     /// <param name="itemId">ID of the audio item.</param>
     /// <param name="jellyfinUserId">ID of the Jellyfin user.</param>
     public void SyncToListenBrainz(Guid itemId, Guid jellyfinUserId);
+
+    /// <summary>
+    /// Enables the service.
+    /// </summary>
+    public void Enable();
+
+    /// <summary>
+    /// Disables the service.
+    /// </summary>
+    public void Disable();
 }
