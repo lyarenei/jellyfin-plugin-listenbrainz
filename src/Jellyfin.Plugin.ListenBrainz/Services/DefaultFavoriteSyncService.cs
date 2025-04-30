@@ -88,16 +88,14 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
         var recordingMbid = item.ProviderIds.GetValueOrDefault("MusicBrainzRecording");
         if (string.IsNullOrEmpty(recordingMbid) && _pluginConfigService.IsMusicBrainzEnabled)
         {
-            _logger.LogInformation("Getting additional metadata...");
             var metadata = _musicBrainzClient.GetAudioItemMetadata(item);
             recordingMbid = metadata.RecordingMbid;
-            if (string.IsNullOrEmpty(recordingMbid))
-            {
-                _logger.LogInformation("No recording MBID is available, cannot sync favorite");
-                return;
-            }
+        }
 
-            _logger.LogInformation("Additional metadata successfully received");
+        if (string.IsNullOrEmpty(recordingMbid) && listenTs is null)
+        {
+            _logger.LogInformation("No recording MBID is available, cannot sync favorite");
+            return;
         }
 
         try
