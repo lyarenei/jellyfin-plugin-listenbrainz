@@ -88,8 +88,15 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
         var recordingMbid = item.ProviderIds.GetValueOrDefault("MusicBrainzRecording");
         if (string.IsNullOrEmpty(recordingMbid) && _pluginConfigService.IsMusicBrainzEnabled)
         {
-            var metadata = _musicBrainzClient.GetAudioItemMetadata(item);
-            recordingMbid = metadata.RecordingMbid;
+            try
+            {
+                var metadata = _musicBrainzClient.GetAudioItemMetadata(item);
+                recordingMbid = metadata.RecordingMbid;
+            }
+            catch (Exception e)
+            {
+                _logger.LogDebug(e, "Failed to get recording MBID");
+            }
         }
 
         if (string.IsNullOrEmpty(recordingMbid) && listenTs is null)
