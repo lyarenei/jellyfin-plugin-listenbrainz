@@ -86,7 +86,7 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
         var userItemData = _userDataManager.GetUserData(jellyfinUser, item);
 
         var recordingMbid = item.ProviderIds.GetValueOrDefault("MusicBrainzRecording");
-        if (string.IsNullOrEmpty(recordingMbid))
+        if (string.IsNullOrEmpty(recordingMbid) && _pluginConfigService.IsMusicBrainzEnabled)
         {
             _logger.LogInformation("Getting additional metadata...");
             var metadata = _musicBrainzClient.GetAudioItemMetadata(item);
