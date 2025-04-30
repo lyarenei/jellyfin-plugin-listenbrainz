@@ -54,7 +54,7 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
     public static IFavoriteSyncService? Instance { get; private set; }
 
     /// <inheritdoc />
-    public void SyncToListenBrainz(Guid itemId, Guid jellyfinUserId)
+    public void SyncToListenBrainz(Guid itemId, Guid jellyfinUserId, long? listenTs = null)
     {
         if (!_isEnabled)
         {

@@ -10,7 +10,8 @@ public interface IFavoriteSyncService
     /// </summary>
     /// <param name="itemId">ID of the audio item.</param>
     /// <param name="jellyfinUserId">ID of the Jellyfin user.</param>
-    public void SyncToListenBrainz(Guid itemId, Guid jellyfinUserId);
+    /// <param name="listenTs">Listen timestamp. If specified, MSID sync will be attempted if recording MBID is not available.</param>
+    public void SyncToListenBrainz(Guid itemId, Guid jellyfinUserId, long? listenTs = null);
 
     /// <summary>
     /// Enables the service.
