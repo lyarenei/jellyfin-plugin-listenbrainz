@@ -69,21 +69,6 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
             return;
         }
 
-        var recordingMbid = item.ProviderIds.GetValueOrDefault("MusicBrainzRecording");
-        if (string.IsNullOrEmpty(recordingMbid))
-        {
-            _logger.LogInformation("Getting additional metadata...");
-            var metadata = _musicBrainzClient.GetAudioItemMetadata(item);
-            recordingMbid = metadata.RecordingMbid;
-            if (string.IsNullOrEmpty(recordingMbid))
-            {
-                _logger.LogInformation("No recording MBID is available, cannot sync favorite");
-                return;
-            }
-
-            _logger.LogInformation("Additional metadata successfully received");
-        }
-
         var userConfig = _pluginConfigService.GetUserConfig(jellyfinUserId);
         if (userConfig is null)
         {
@@ -99,6 +84,22 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
         }
 
         var userItemData = _userDataManager.GetUserData(jellyfinUser, item);
+
+        var recordingMbid = item.ProviderIds.GetValueOrDefault("MusicBrainzRecording");
+        if (string.IsNullOrEmpty(recordingMbid))
+        {
+            _logger.LogInformation("Getting additional metadata...");
+            var metadata = _musicBrainzClient.GetAudioItemMetadata(item);
+            recordingMbid = metadata.RecordingMbid;
+            if (string.IsNullOrEmpty(recordingMbid))
+            {
+                _logger.LogInformation("No recording MBID is available, cannot sync favorite");
+                return;
+            }
+
+            _logger.LogInformation("Additional metadata successfully received");
+        }
+
         try
         {
             _logger.LogInformation("Attempting to sync favorite status");
