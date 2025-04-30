@@ -310,6 +310,11 @@ public class PluginImplementation : IDisposable
         switch (args.SaveReason)
         {
             case UserDataSaveReason.UpdateUserRating:
+                if (!_configService.IsImmediateFavoriteSyncEnabled)
+                {
+                    return;
+                }
+
                 _logger.LogDebug("Reason is user rating update, attempting favorite sync");
                 _favoriteSyncService.SyncToListenBrainz(data.Item.Id, data.JellyfinUser.Id);
                 return;
@@ -445,21 +450,6 @@ public class PluginImplementation : IDisposable
         }
 
         _logger.LogDebug("MusicBrainz integration is enabled");
-    }
-
-    /// <summary>
-    /// Asser immediate favorite sync is enabled.
-    /// </summary>
-    /// <exception cref="PluginException">Immediate favorite sync is disabled.</exception>
-    private void AssertImmediateFavoriteSyncIsEnabled()
-    {
-        _logger.LogDebug("Checking if immediate favorite sync is enabled");
-        if (!_configService.IsImmediateFavoriteSyncEnabled)
-        {
-            throw new PluginException("Immediate favorite sync is disabled");
-        }
-
-        _logger.LogDebug("Immediate favorite sync is enabled");
     }
 
     /// <summary>
