@@ -67,7 +67,6 @@ public sealed class PluginService : IHostedService, IDisposable
             loggerFactory.CreateLogger(Plugin.LoggerCategory),
             listenBrainzClient,
             musicBrainzClient,
-            userDataManager,
             userManager,
             libraryManager,
             backupManager,

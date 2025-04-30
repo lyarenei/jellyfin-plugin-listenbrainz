@@ -23,7 +23,6 @@ public class PluginImplementation : IDisposable
     private readonly ILogger _logger;
     private readonly IListenBrainzClient _listenBrainzClient;
     private readonly IMusicBrainzClient _musicBrainzClient;
-    private readonly IUserDataManager _userDataManager;
     private readonly ListensCacheManager _listensCache;
     private readonly IUserManager _userManager;
     private readonly object _userDataSaveLock = new();
@@ -40,7 +39,6 @@ public class PluginImplementation : IDisposable
     /// <param name="logger">Logger instance.</param>
     /// <param name="listenBrainzClient">ListenBrainz client.</param>
     /// <param name="musicBrainzClient">Client for providing additional metadata.</param>
-    /// <param name="userDataManager">User data manager.</param>
     /// <param name="userManager">User manager.</param>
     /// <param name="libraryManager">Library manager.</param>
     /// <param name="backupManager">Backup manager.</param>
@@ -50,7 +48,6 @@ public class PluginImplementation : IDisposable
         ILogger logger,
         IListenBrainzClient listenBrainzClient,
         IMusicBrainzClient musicBrainzClient,
-        IUserDataManager userDataManager,
         IUserManager userManager,
         ILibraryManager libraryManager,
         IBackupManager backupManager,
@@ -60,7 +57,6 @@ public class PluginImplementation : IDisposable
         _logger = logger;
         _listenBrainzClient = listenBrainzClient;
         _musicBrainzClient = musicBrainzClient;
-        _userDataManager = userDataManager;
         _listensCache = ListensCacheManager.Instance;
         _userManager = userManager;
         _playbackTracker = PlaybackTrackingManager.Instance;
