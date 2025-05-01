@@ -23,9 +23,10 @@ Enables listen submitting for selected user. Pretty self-explanatory, nothing mu
 
 ##### Enable syncing favorites
 
-Enables marking `favorite` tracks in Jellyfin as `loved` listens in ListenBrainz and vice-versa. Marking listens as
+Enables marking `favorite` tracks in Jellyfin as `loved` listens in ListenBrainz and vice versa. Marking listens as
 'hated' is not supported as Jellyfin does not have such concept. If you unmark favorite track in Jellyfin, it will be
-marked as neutral in ListenBrainz. Favorite albums and artists are not supported as these are not supported by ListenBrainz.
+marked as neutral in ListenBrainz. Favorite albums and artists are not supported as these are not supported by
+ListenBrainz.
 
 ## General configuration
 
@@ -74,15 +75,13 @@ Currently used metadata from MusicBrainz:
   In some cases, there may be multiple ISRCs stored in MusicBrainz for a specific recording. In these cases, the plugin
   simply chooses the first one.
 
-
 Additionally, there are some plugin features which depend on this integration:
 
 - Immediate favorite sync
-  - Uses recording MBID
+    - Uses recording MBID
 
 - Favorite sync (ListenBrainz -> Jellyfin)
-  - Uses recording MBID
-
+    - Uses recording MBID
 
 ##### Use alternative event for recognizing listens
 
@@ -142,7 +141,8 @@ should be created. Then enable backups in user settings for each user you wish t
 
 If the path is not set, backups will **NOT* be created, even if there are users with backups enabled. The backup file
 structure is: `<configured_path>/<listenbrainz_username>/yyyy-MM-dd.json` - each user has its own directory and each day
-a new backup file is created. Currently, the JSON format should be the same or similar to exported listens from ListenBrainz.
+a new backup file is created. Currently, the JSON format should be the same or similar to exported listens from
+ListenBrainz.
 
 ##### Allowed libraries for listen submission
 
