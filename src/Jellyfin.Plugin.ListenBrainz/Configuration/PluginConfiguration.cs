@@ -91,6 +91,7 @@ public class PluginConfiguration : BasePluginConfiguration
     /// <see cref="UserDataSaveReason.UpdateUserRating"/> event when syncing favorites from ListenBrainz.
     /// This is useful if there are other plugins used by the server which react on this event.
     /// </summary>
+    [Obsolete("Not used anymore, will be removed in future version.")]
     public bool ShouldEmitUserRatingEvent
     {
         get => _shouldEmitUserRatingEvent ?? false;
