@@ -1,4 +1,4 @@
-using Jellyfin.Data.Entities;
+using Jellyfin.Database.Implementations.Entities;
 using Jellyfin.Plugin.ListenBrainz.Api.Resources;
 using Jellyfin.Plugin.ListenBrainz.Common;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
@@ -315,6 +315,8 @@ public class PluginImplementation : IDisposable
         {
             case UserDataSaveReason.UpdateUserRating:
                 _logger.LogDebug("Reason is user rating update, attempting favorite sync");
+                // TODO: Skip this if loved track sync task is running, to prevent endless loop
+                // dont't forget to update config and documentation
                 HandleFavoriteSyncUsingMbid(data);
                 return;
             case UserDataSaveReason.PlaybackFinished:

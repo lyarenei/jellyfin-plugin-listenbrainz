@@ -1,3 +1,4 @@
+using Jellyfin.Database.Implementations.Enums;
 using Jellyfin.Data.Enums;
 using Jellyfin.Plugin.ListenBrainz.Api.Models;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
