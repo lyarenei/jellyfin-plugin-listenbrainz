@@ -54,7 +54,7 @@ public sealed class PluginService : IHostedService, IDisposable
         var pluginConfigService = new DefaultPluginConfigService();
 
         var favoriteSyncLogger = loggerFactory.CreateLogger(Plugin.LoggerCategory + ".FavoriteSync");
-        var favoriteSyncSevice = new DefaultFavoriteSyncService(
+        var favoriteSyncService = new DefaultFavoriteSyncService(
             favoriteSyncLogger,
             listenBrainzClient,
             musicBrainzClient,
@@ -71,7 +71,7 @@ public sealed class PluginService : IHostedService, IDisposable
             libraryManager,
             backupManager,
             pluginConfigService,
-            favoriteSyncSevice);
+            favoriteSyncService);
     }
 
     /// <summary>
