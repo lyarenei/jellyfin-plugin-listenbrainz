@@ -2,7 +2,6 @@ using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using System.Xml.Serialization;
-using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Plugins;
 
 namespace Jellyfin.Plugin.ListenBrainz.Configuration;
