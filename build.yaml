@@ -17,4 +17,4 @@ artifacts:
   - "Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.dll"
 changelog: >
   Maintenance/fix
-    - Favorite sync logic (#124 @lyarenei)
+    - Reimplementation of loved sync task (#124 @lyarenei)
