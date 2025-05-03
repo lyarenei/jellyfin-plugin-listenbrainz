@@ -17,7 +17,6 @@ public class PluginConfiguration : BasePluginConfiguration
     private bool? _isMusicBrainzEnabledOverride;
     private bool? _isAlternativeModeEnabled;
     private bool? _isImmediateFavoriteSyncEnabled;
-    private bool? _shouldEmitUserRatingEvent;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PluginConfiguration"/> class.
@@ -84,18 +83,6 @@ public class PluginConfiguration : BasePluginConfiguration
     {
         get => _isImmediateFavoriteSyncEnabled ?? true;
         set => _isImmediateFavoriteSyncEnabled = value;
-    }
-
-    /// <summary>
-    /// Gets or sets a value indicating whether the plugin should emit
-    /// <see cref="UserDataSaveReason.UpdateUserRating"/> event when syncing favorites from ListenBrainz.
-    /// This is useful if there are other plugins used by the server which react on this event.
-    /// </summary>
-    [Obsolete("Not used anymore, will be removed in future version.")]
-    public bool ShouldEmitUserRatingEvent
-    {
-        get => _shouldEmitUserRatingEvent ?? false;
-        set => _shouldEmitUserRatingEvent = value;
     }
 
     /// <summary>
