@@ -312,6 +312,7 @@ public class PluginImplementation : IDisposable
             case UserDataSaveReason.UpdateUserRating:
                 if (!_configService.IsImmediateFavoriteSyncEnabled)
                 {
+                    _logger.LogDebug("Dropping event - immediate favorite sync is disabled");
                     return;
                 }
 
