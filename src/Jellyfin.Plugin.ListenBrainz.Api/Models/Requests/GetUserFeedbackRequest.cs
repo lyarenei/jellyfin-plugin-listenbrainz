@@ -28,7 +28,7 @@ public class GetUserFeedbackRequest : IListenBrainzRequest
         int offset = 0,
         bool? metadata = null)
     {
-        _endpointFormat = CompositeFormat.Parse(Endpoints.ListensEndpoint);
+        _endpointFormat = CompositeFormat.Parse(Endpoints.UserFeedback);
         _userName = userName;
         BaseUrl = General.BaseUrl;
         QueryDict = new Dictionary<string, string>

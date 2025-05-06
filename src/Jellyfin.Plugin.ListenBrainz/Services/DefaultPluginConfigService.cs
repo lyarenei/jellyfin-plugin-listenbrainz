@@ -48,6 +48,12 @@ public class DefaultPluginConfigService : IPluginConfigService
     }
 
     /// <inheritdoc />
+    public Collection<UserConfig> UserConfigs
+    {
+        get => Config.UserConfigs;
+    }
+
+    /// <inheritdoc />
     public UserConfig? GetUserConfig(Guid jellyfinUserId)
     {
         var userConfig = Config

@@ -23,7 +23,6 @@ public class PluginImplementation : IDisposable
     private readonly ILogger _logger;
     private readonly IListenBrainzClient _listenBrainzClient;
     private readonly IMusicBrainzClient _musicBrainzClient;
-    private readonly IUserDataManager _userDataManager;
     private readonly ListensCacheManager _listensCache;
     private readonly IUserManager _userManager;
     private readonly object _userDataSaveLock = new();
@@ -40,7 +39,6 @@ public class PluginImplementation : IDisposable
     /// <param name="logger">Logger instance.</param>
     /// <param name="listenBrainzClient">ListenBrainz client.</param>
     /// <param name="musicBrainzClient">Client for providing additional metadata.</param>
-    /// <param name="userDataManager">User data manager.</param>
     /// <param name="userManager">User manager.</param>
     /// <param name="libraryManager">Library manager.</param>
     /// <param name="backupManager">Backup manager.</param>
@@ -50,7 +48,6 @@ public class PluginImplementation : IDisposable
         ILogger logger,
         IListenBrainzClient listenBrainzClient,
         IMusicBrainzClient musicBrainzClient,
-        IUserDataManager userDataManager,
         IUserManager userManager,
         ILibraryManager libraryManager,
         IBackupManager backupManager,
@@ -60,7 +57,6 @@ public class PluginImplementation : IDisposable
         _logger = logger;
         _listenBrainzClient = listenBrainzClient;
         _musicBrainzClient = musicBrainzClient;
-        _userDataManager = userDataManager;
         _listensCache = ListensCacheManager.Instance;
         _userManager = userManager;
         _playbackTracker = PlaybackTrackingManager.Instance;
@@ -286,7 +282,7 @@ public class PluginImplementation : IDisposable
 
         if (userConfig.IsFavoritesSyncEnabled)
         {
-            HandleFavoriteSync(data, metadata, userConfig, now);
+            HandleFavoriteSync(data, userConfig, now);
         }
     }
 
@@ -314,8 +310,14 @@ public class PluginImplementation : IDisposable
         switch (args.SaveReason)
         {
             case UserDataSaveReason.UpdateUserRating:
+                if (!_configService.IsImmediateFavoriteSyncEnabled)
+                {
+                    _logger.LogDebug("Dropping event - immediate favorite sync is disabled");
+                    return;
+                }
+
                 _logger.LogDebug("Reason is user rating update, attempting favorite sync");
-                HandleFavoriteSyncUsingMbid(data);
+                _favoriteSyncService.SyncToListenBrainz(data.Item.Id, data.JellyfinUser.Id);
                 return;
             case UserDataSaveReason.PlaybackFinished:
                 _logger.LogDebug("Reason is playback finished, evaluating listen conditions");
@@ -422,64 +424,18 @@ public class PluginImplementation : IDisposable
 
         if (userConfig.IsFavoritesSyncEnabled)
         {
-            HandleFavoriteSync(data, metadata, userConfig, now);
+            HandleFavoriteSync(data, userConfig, now);
         }
     }
 
-    private void HandleFavoriteSync(EventData data, AudioItemMetadata? metadata, UserConfig userConfig, long listenTs)
+    private void HandleFavoriteSync(EventData data, UserConfig userConfig, long listenTs)
     {
         _logger.LogInformation(
             "Attempting to sync favorite status for track {Track} and user {User}",
             data.Item.Name,
             data.JellyfinUser.Username);
 
-        try
-        {
-            if (metadata?.RecordingMbid is not null)
-            {
-                _favoriteSyncService.SyncToListenBrainz(data.Item.Id, userConfig.JellyfinUserId);
-                return;
-            }
-
-            _logger.LogInformation("No recording MBID is available, will attempt to sync favorite status using MSID");
-            var userItemData = _userDataManager.GetUserData(data.JellyfinUser, data.Item);
-            SendFeedbackUsingMsid(userConfig, userItemData.IsFavorite, listenTs);
-            _logger.LogInformation("Favorite sync has been successful");
-        }
-        catch (Exception e)
-        {
-            _logger.LogInformation("Favorite sync failed: {Reason}", e.Message);
-            _logger.LogDebug(e, "Favorite sync failed");
-        }
-    }
-
-    /// <summary>
-    /// Handle favorite sync using MBID. Does not fall back to using MSID.
-    /// </summary>
-    /// <param name="data">Event data.</param>
-    private void HandleFavoriteSyncUsingMbid(EventData data)
-    {
-        try
-        {
-            AssertImmediateFavoriteSyncIsEnabled();
-            AssertMusicBrainzIsEnabled();
-
-            _logger.LogDebug("Checking if favorite sync is enabled");
-            var userConfig = data.JellyfinUser.GetListenBrainzConfig();
-            if (!userConfig.IsFavoritesSyncEnabled)
-            {
-                _logger.LogDebug("Favorite sync is disabled");
-                return;
-            }
-
-            _logger.LogDebug("Favorite sync is enabled");
-            _favoriteSyncService.SyncToListenBrainz(data.Item.Id, data.JellyfinUser.Id);
-        }
-        catch (Exception e)
-        {
-            _logger.LogInformation("Favorite sync failed: {Reason}", e.Message);
-            _logger.LogDebug(e, "Favorite sync failed");
-        }
+        _favoriteSyncService.SyncToListenBrainz(data.Item.Id, userConfig.JellyfinUserId, listenTs);
     }
 
     /// <summary>
@@ -495,21 +451,6 @@ public class PluginImplementation : IDisposable
         }
 
         _logger.LogDebug("MusicBrainz integration is enabled");
-    }
-
-    /// <summary>
-    /// Asser immediate favorite sync is enabled.
-    /// </summary>
-    /// <exception cref="PluginException">Immediate favorite sync is disabled.</exception>
-    private void AssertImmediateFavoriteSyncIsEnabled()
-    {
-        _logger.LogDebug("Checking if immediate favorite sync is enabled");
-        if (!_configService.IsImmediateFavoriteSyncEnabled)
-        {
-            throw new PluginException("Immediate favorite sync is disabled");
-        }
-
-        _logger.LogDebug("Immediate favorite sync is enabled");
     }
 
     /// <summary>
@@ -590,47 +531,6 @@ public class PluginImplementation : IDisposable
         }
 
         _logger.LogDebug("ListenBrainz submission is enabled for the user");
-    }
-
-    private void SendFeedbackUsingMsid(UserConfig userConfig, bool isFavorite, long listenTs)
-    {
-        const int MaxAttempts = 4;
-        const int BackOffSecs = 5;
-        var sleepSecs = 1;
-
-        // TODO: Improve logging
-
-        // Delay to maximize the chance of getting it on first try
-        Thread.Sleep(500);
-        string? recordingMsid = null;
-        for (int i = 0; i < MaxAttempts; i++)
-        {
-            try
-            {
-                recordingMsid = _listenBrainzClient.GetRecordingMsidByListenTs(userConfig, listenTs);
-                break;
-            }
-            catch (Exception e)
-            {
-                _logger.LogDebug(e, "Failed to get recording MSID");
-            }
-
-            sleepSecs *= BackOffSecs;
-            sleepSecs += new Random().Next(20);
-            _logger.LogDebug(
-                "Recording MSID with listen timestamp {Ts} not found, will retry in {Secs} seconds",
-                listenTs,
-                sleepSecs);
-
-            Thread.Sleep(sleepSecs * 1000);
-        }
-
-        if (recordingMsid is null)
-        {
-            throw new PluginException("Maximum retry attempts have been reached");
-        }
-
-        _listenBrainzClient.SendFeedback(userConfig, isFavorite, recordingMsid: recordingMsid);
     }
 
     /// <summary>

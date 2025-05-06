@@ -40,6 +40,11 @@ public interface IPluginConfigService
     Collection<LibraryConfig> LibraryConfigs { get; }
 
     /// <summary>
+    /// Gets all ListenBrainz user configurations.
+    /// </summary>
+    Collection<UserConfig> UserConfigs { get; }
+
+    /// <summary>
     /// Get a configuration for a specified Jellyfin user ID.
     /// </summary>
     /// <param name="jellyfinUserId">ID of the Jellyfin user.</param>
