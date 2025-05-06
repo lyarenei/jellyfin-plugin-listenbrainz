@@ -316,12 +316,6 @@ public class PluginImplementation : IDisposable
                     return;
                 }
 
-                if (_favoriteSyncService.IsDisabled)
-                {
-                    _logger.LogDebug("Dropping event - favorite sync is disabled");
-                    return;
-                }
-
                 _logger.LogDebug("Reason is user rating update, attempting favorite sync");
                 _favoriteSyncService.SyncToListenBrainz(data.Item.Id, data.JellyfinUser.Id);
                 return;
