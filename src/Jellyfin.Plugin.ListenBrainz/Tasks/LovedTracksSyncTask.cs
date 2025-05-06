@@ -100,7 +100,7 @@ public class LovedTracksSyncTask : IScheduledTask
 
         if (_configService.UserConfigs.Count == 0)
         {
-            _logger.LogInformation("No users have been configured, cannot sync");
+            _logger.LogInformation("No users have been configured, nothing to sync");
             progress.Report(100);
             return;
         }
