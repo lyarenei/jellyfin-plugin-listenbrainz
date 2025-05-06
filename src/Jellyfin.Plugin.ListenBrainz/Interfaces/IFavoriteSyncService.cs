@@ -22,4 +22,14 @@ public interface IFavoriteSyncService
     /// Disables the service.
     /// </summary>
     public void Disable();
+
+    /// <summary>
+    /// Gets a value indicating whether the service is enabled.
+    /// </summary>
+    bool IsEnabled { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether the service is disabled.
+    /// </summary>
+    bool IsDisabled { get; }
 }
