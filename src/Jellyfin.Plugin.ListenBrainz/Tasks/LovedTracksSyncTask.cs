@@ -5,9 +5,9 @@ using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
+using Jellyfin.Plugin.ListenBrainz.Services;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.Persistence;
 using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Tasks;
 using Microsoft.Extensions.Logging;
@@ -26,7 +26,8 @@ public class LovedTracksSyncTask : IScheduledTask
     private readonly ILibraryManager _libraryManager;
     private readonly IUserManager _userManager;
     private readonly IUserDataManager _userDataManager;
-    private bool _reenableImmediateSync;
+    private readonly IPluginConfigService _configService;
+    private IFavoriteSyncService? _favoriteSyncService;
     private double _progress;
     private double _userCountRatio;
 
@@ -38,19 +39,29 @@ public class LovedTracksSyncTask : IScheduledTask
     /// <param name="libraryManager">Library manager.</param>
     /// <param name="userManager">User manager.</param>
     /// <param name="dataManager">User data manager.</param>
+    /// <param name="listenBrainzClient">ListenBrainz client.</param>
+    /// <param name="musicBrainzClient">MusicBrainz client.</param>
+    /// <param name="configService">Plugin configuration service.</param>
+    /// <param name="favoriteSyncService">Favorite sync service.</param>
     public LovedTracksSyncTask(
         ILoggerFactory loggerFactory,
         IHttpClientFactory clientFactory,
         ILibraryManager libraryManager,
         IUserManager userManager,
-        IUserDataManager dataManager)
+        IUserDataManager dataManager,
+        IListenBrainzClient? listenBrainzClient = null,
+        IMusicBrainzClient? musicBrainzClient = null,
+        IPluginConfigService? configService = null,
+        IFavoriteSyncService? favoriteSyncService = null)
     {
         _logger = loggerFactory.CreateLogger($"{Plugin.LoggerCategory}.LovedSyncTask");
-        _listenBrainzClient = ClientUtils.GetListenBrainzClient(_logger, clientFactory, libraryManager);
-        _musicBrainzClient = ClientUtils.GetMusicBrainzClient(_logger, clientFactory);
+        _listenBrainzClient = listenBrainzClient ?? ClientUtils.GetListenBrainzClient(_logger, clientFactory);
+        _musicBrainzClient = musicBrainzClient ?? ClientUtils.GetMusicBrainzClient(_logger, clientFactory);
         _libraryManager = libraryManager;
         _userManager = userManager;
         _userDataManager = dataManager;
+        _configService = configService ?? new DefaultPluginConfigService();
+        _favoriteSyncService = favoriteSyncService ?? DefaultFavoriteSyncService.Instance;
     }
 
     /// <inheritdoc />
@@ -72,25 +83,38 @@ public class LovedTracksSyncTask : IScheduledTask
     public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
         using var logScope = BeginLogScope();
-        Reset();
-        var conf = Plugin.GetConfiguration();
-        if (!conf.IsMusicBrainzEnabled)
+        if (_favoriteSyncService is null)
+        {
+            _favoriteSyncService = DefaultFavoriteSyncService.Instance;
+            if (_favoriteSyncService is null)
+            {
+                _logger.LogError("Favorite sync service is not available, cannot sync favorites");
+                return;
+            }
+        }
+
+        if (!_configService.IsMusicBrainzEnabled)
         {
             _logger.LogInformation("MusicBrainz integration is disabled, cannot sync favorites");
             return;
         }
 
-        if (conf.IsImmediateFavoriteSyncEnabled)
+        if (_configService.UserConfigs.Count == 0)
         {
-            _logger.LogInformation("Immediate favorite sync is enabled, disabling it temporarily");
-            _reenableImmediateSync = true;
-            SetImmediateFavSyncEnabled(false);
+            _logger.LogInformation("No users have been configured, nothing to sync");
+            progress.Report(100);
+            return;
         }
+
+        _logger.LogInformation("Starting favorite sync from ListenBrainz...");
+        ResetProgress(_configService.UserConfigs.Count);
+
+        _logger.LogDebug("Temporarily disabling favorite sync service");
+        _favoriteSyncService.Disable();
 
         try
         {
-            _logger.LogInformation("Starting favorite sync from ListenBrainz...");
-            foreach (var userConfig in conf.UserConfigs)
+            foreach (var userConfig in _configService.UserConfigs)
             {
                 _logger.LogInformation("Syncing favorites for user {Username}", userConfig.UserName);
                 if (!userConfig.IsFavoritesSyncEnabled)
@@ -104,27 +128,22 @@ public class LovedTracksSyncTask : IScheduledTask
                 await HandleFavoriteSync(progress, userConfig, cancellationToken);
             }
         }
+        catch (OperationCanceledException)
+        {
+            _logger.LogInformation("Favorite sync task has been cancelled");
+            progress.Report(100);
+        }
         finally
         {
-            if (_reenableImmediateSync)
-            {
-                _logger.LogInformation("Re-enabling Immediate favorite sync");
-                SetImmediateFavSyncEnabled(true);
-            }
+            _logger.LogDebug("Re-enabling favorite sync service");
+            _favoriteSyncService.Enable();
         }
     }
 
-    private static void SetImmediateFavSyncEnabled(bool isEnabled)
-    {
-        var conf = Plugin.GetConfiguration();
-        if (conf.IsImmediateFavoriteSyncEnabled)
-        {
-            conf.IsImmediateFavoriteSyncEnabled = isEnabled;
-            Plugin.UpdateConfig(conf);
-        }
-    }
-
-    private async Task HandleFavoriteSync(IProgress<double> progress, UserConfig userConfig, CancellationToken cancellationToken)
+    private async Task HandleFavoriteSync(
+        IProgress<double> progress,
+        UserConfig userConfig,
+        CancellationToken cancellationToken)
     {
         var lovedTracksIds = (await _listenBrainzClient.GetLovedTracksAsync(userConfig, cancellationToken)).ToList();
         var user = _userManager.GetUserById(userConfig.JellyfinUserId);
@@ -135,11 +154,7 @@ public class LovedTracksSyncTask : IScheduledTask
         }
 
         var allowedLibraries = GetAllowedLibraries().Select(al => _libraryManager.GetItemById(al)).WhereNotNull();
-        var q = new InternalItemsQuery(user)
-        {
-            // Future-proofing for music videos
-            MediaTypes = new[] { MediaType.Audio, MediaType.Video }
-        };
+        var q = new InternalItemsQuery(user) { MediaTypes = new[] { MediaType.Audio } };
 
         var items = _libraryManager
             .GetItemList(q, allowedLibraries.ToList())
@@ -149,16 +164,12 @@ public class LovedTracksSyncTask : IScheduledTask
 
         foreach (var item in items)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var recordingMbid = string.Empty;
+
             try
             {
-                cancellationToken.ThrowIfCancellationRequested();
                 recordingMbid = _musicBrainzClient.GetAudioItemMetadata(item).RecordingMbid;
-            }
-            catch (OperationCanceledException)
-            {
-                _logger.LogInformation("Task has been cancelled");
-                throw;
             }
             catch (Exception e)
             {
@@ -177,7 +188,7 @@ public class LovedTracksSyncTask : IScheduledTask
 
     private IEnumerable<Guid> GetAllowedLibraries()
     {
-        var allLibraries = Plugin.GetConfiguration().LibraryConfigs;
+        var allLibraries = _configService.LibraryConfigs;
         if (allLibraries.Count > 0)
         {
             return allLibraries.Where(lc => lc.IsAllowed).Select(lc => lc.Id);
@@ -202,9 +213,9 @@ public class LovedTracksSyncTask : IScheduledTask
         _logger.LogDebug("Item {Name} has been marked as favorite for user {User}", item.Name, user.Username);
     }
 
-    private void Reset()
+    private void ResetProgress(int userCount)
     {
-        _userCountRatio = 100.0 / Plugin.GetConfiguration().UserConfigs.Count;
+        _userCountRatio = 100.0 / userCount;
         _progress = 0;
     }
 

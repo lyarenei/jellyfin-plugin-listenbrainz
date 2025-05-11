@@ -1,4 +1,5 @@
 using Jellyfin.Plugin.ListenBrainz.Managers;
+using Jellyfin.Plugin.ListenBrainz.Services;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Session;
 using Microsoft.Extensions.Hosting;
@@ -42,7 +43,7 @@ public sealed class PluginService : IHostedService, IDisposable
         _isActive = false;
 
         var listenBrainzLogger = loggerFactory.CreateLogger(Plugin.LoggerCategory + ".ListenBrainzApi");
-        var listenBrainzClient = ClientUtils.GetListenBrainzClient(listenBrainzLogger, clientFactory, libraryManager);
+        var listenBrainzClient = ClientUtils.GetListenBrainzClient(listenBrainzLogger, clientFactory);
 
         var musicBrainzLogger = loggerFactory.CreateLogger(Plugin.LoggerCategory + ".MusicBrainzApi");
         var musicBrainzClient = ClientUtils.GetMusicBrainzClient(musicBrainzLogger, clientFactory);
@@ -50,14 +51,27 @@ public sealed class PluginService : IHostedService, IDisposable
         var backupLogger = loggerFactory.CreateLogger(Plugin.LoggerCategory + ".Backup");
         var backupManager = new BackupManager(backupLogger);
 
+        var pluginConfigService = new DefaultPluginConfigService();
+
+        var favoriteSyncLogger = loggerFactory.CreateLogger(Plugin.LoggerCategory + ".FavoriteSync");
+        var favoriteSyncService = new DefaultFavoriteSyncService(
+            favoriteSyncLogger,
+            listenBrainzClient,
+            musicBrainzClient,
+            pluginConfigService,
+            libraryManager,
+            userManager,
+            userDataManager);
+
         _plugin = new PluginImplementation(
             loggerFactory.CreateLogger(Plugin.LoggerCategory),
             listenBrainzClient,
             musicBrainzClient,
-            userDataManager,
             userManager,
             libraryManager,
-            backupManager);
+            backupManager,
+            pluginConfigService,
+            favoriteSyncService);
     }
 
     /// <summary>
