@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Managers;
@@ -35,7 +36,7 @@ public class ListensCacheTests
     }
 
     [Fact]
-    public async void ListenCache_AddListenAsync()
+    public async Task ListenCache_AddListenAsync()
     {
         const int Ts = 10;
         await _cache.AddListenAsync(_exampleUser.JellyfinUserId, _exampleAudio, null, Ts);
@@ -60,7 +61,7 @@ public class ListensCacheTests
     }
 
     [Fact]
-    public async void ListenCache_AddListenDuplicateAsync()
+    public async Task ListenCache_AddListenDuplicateAsync()
     {
         const int Ts = 10;
 
@@ -92,7 +93,7 @@ public class ListensCacheTests
     }
 
     [Fact]
-    public async void ListenCache_RemoveListenAsync()
+    public async Task ListenCache_RemoveListenAsync()
     {
         const int Ts = 10;
         await _cache.AddListenAsync(_exampleUser.JellyfinUserId, _exampleAudio, null, Ts);
@@ -125,7 +126,7 @@ public class ListensCacheTests
     }
 
     [Fact]
-    public async void ListenCache_RemoveListenNotExistsAsync()
+    public async Task ListenCache_RemoveListenNotExistsAsync()
     {
         await _cache.AddListenAsync(_exampleUser.JellyfinUserId, _exampleAudio, null, 10);
 
@@ -160,7 +161,7 @@ public class ListensCacheTests
     }
 
     [Fact]
-    public async void ListenCache_RemoveListenWithDifferentTsAsync()
+    public async Task ListenCache_RemoveListenWithDifferentTsAsync()
     {
         const int Ts1 = 10;
         const int Ts2 = 11;
