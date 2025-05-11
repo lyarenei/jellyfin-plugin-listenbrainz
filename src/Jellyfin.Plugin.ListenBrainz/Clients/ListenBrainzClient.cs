@@ -90,6 +90,11 @@ public class ListenBrainzClient : IListenBrainzClient
         string? recordingMbid = null,
         string? recordingMsid = null)
     {
+        if (string.IsNullOrEmpty(recordingMbid) && string.IsNullOrEmpty(recordingMsid))
+        {
+            throw new ArgumentException("No recording MBID or MSID provided");
+        }
+
         var request = new RecordingFeedbackRequest
         {
             ApiToken = config.PlaintextApiToken,
