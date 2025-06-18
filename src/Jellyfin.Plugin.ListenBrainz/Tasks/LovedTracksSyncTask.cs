@@ -157,7 +157,7 @@ public class LovedTracksSyncTask : IScheduledTask
 
         var items = _libraryManager
             .GetItemList(q, allowedLibraries.ToList())
-            .Where(i => !_userDataManager.GetUserData(user, i).IsFavorite)
+            .Where(i => !_userDataManager.GetUserData(user, i)?.IsFavorite ?? false)
             .Where(i => i.GetRecordingMbid() is not null || i.GetTrackMbid() is not null)
             .ToList();
 
@@ -206,6 +206,15 @@ public class LovedTracksSyncTask : IScheduledTask
     {
         _logger.LogDebug("Marking item {Name} as favorite for user {User}", item.Name, user.Username);
         var userData = _userDataManager.GetUserData(user, item);
+        if (userData is null)
+        {
+            _logger.LogInformation(
+                "Could not mark item {Name} as favorite for user {User}: no user data available",
+                item.Name,
+                user.Username);
+            return;
+        }
+
         userData.IsFavorite = true;
 
         _userDataManager.SaveUserData(user, item, userData, UserDataSaveReason.UpdateUserRating, cancellationToken);
