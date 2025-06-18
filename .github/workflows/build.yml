@@ -7,7 +7,7 @@ on:
       dotnet-version:
         type: string
         required: false
-        default: "8.0"
+        default: "9.0"
       dotnet-target:
         type: string
         required: false
