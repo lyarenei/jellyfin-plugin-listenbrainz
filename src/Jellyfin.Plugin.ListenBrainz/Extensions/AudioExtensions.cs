@@ -55,7 +55,7 @@ public static class AudioExtensions
                     ReleaseMbid = item.ProviderIds.GetValueOrDefault("MusicBrainzAlbum"),
                     ArtistMbids = item.ProviderIds.GetValueOrDefault("MusicBrainzArtist")?.Split(';', '/', ',', (char)0x1F).Select(s => s.Trim()).ToArray(),
                     ReleaseGroupMbid = item.ProviderIds.GetValueOrDefault("MusicBrainzReleaseGroup"),
-                    RecordingMbid = itemMetadata?.RecordingMbid,
+                    RecordingMbid = item.GetRecordingMbid() ?? itemMetadata?.RecordingMbid,
                     TrackMbid = item.ProviderIds.GetValueOrDefault("MusicBrainzTrack"),
                     WorkMbids = null,
                     TrackNumber = item.IndexNumber,
