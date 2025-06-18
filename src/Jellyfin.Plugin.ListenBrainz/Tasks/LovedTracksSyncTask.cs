@@ -158,7 +158,7 @@ public class LovedTracksSyncTask : IScheduledTask
         var items = _libraryManager
             .GetItemList(q, allowedLibraries.ToList())
             .Where(i => !_userDataManager.GetUserData(user, i).IsFavorite)
-            .Where(i => i.GetRecordingMbid() is not null || i.ProviderIds.GetValueOrDefault("MusicBrainzTrack") is not null)
+            .Where(i => i.GetRecordingMbid() is not null || i.GetTrackMbid() is not null)
             .ToList();
 
         foreach (var item in items)
