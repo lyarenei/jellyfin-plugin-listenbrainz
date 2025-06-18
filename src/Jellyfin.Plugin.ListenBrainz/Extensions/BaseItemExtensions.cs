@@ -17,6 +17,13 @@ public static class BaseItemExtensions
     public static string? GetTrackMbid(this BaseItem item) => item.ProviderIds.GetValueOrDefault("MusicBrainzTrack");
 
     /// <summary>
+    /// Convenience method to get a MusicBrainz recording ID for this item.
+    /// </summary>
+    /// <param name="item">Audion item.</param>
+    /// <returns>Recording MBID. Null if not available.</returns>
+    public static string? GetRecordingMbid(this BaseItem item) => item.ProviderIds.GetValueOrDefault("MusicBrainzRecording");
+
+    /// <summary>
     /// Item runtime in seconds.
     /// </summary>
     /// <param name="item">Audio item.</param>
