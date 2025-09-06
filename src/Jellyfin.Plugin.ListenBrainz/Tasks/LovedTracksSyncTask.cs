@@ -94,8 +94,7 @@ public class LovedTracksSyncTask : IScheduledTask
 
         if (!_configService.IsMusicBrainzEnabled)
         {
-            _logger.LogInformation("MusicBrainz integration is disabled, cannot sync favorites");
-            return;
+            _logger.LogInformation("MusicBrainz integration is disabled, some favorites may not be synced");
         }
 
         if (_configService.UserConfigs.Count == 0)
