@@ -39,4 +39,9 @@ public static class Endpoints
     /// Endpoint for user listens.
     /// </summary>
     public const string ListensEndpoint = UserEndpointBase + "/{0}/listens";
+
+    /// <summary>
+    /// Edpoint for user collaborator playlists.
+    /// </summary>
+    public const string CollaboratorPlaylistsEndpoint = UserEndpointBase + "/{0}/playlists/collaborator";
 }
