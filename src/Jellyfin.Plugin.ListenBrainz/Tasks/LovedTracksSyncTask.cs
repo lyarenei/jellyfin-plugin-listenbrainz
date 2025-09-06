@@ -82,6 +82,13 @@ public class LovedTracksSyncTask : IScheduledTask
     public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
         using var logScope = BeginLogScope();
+        if (_configService.UserConfigs.Count == 0)
+        {
+            _logger.LogInformation("No users have been configured, nothing to sync");
+            progress.Report(100);
+            return;
+        }
+
         if (_favoriteSyncService is null)
         {
             _favoriteSyncService = DefaultFavoriteSyncService.Instance;
@@ -95,13 +102,6 @@ public class LovedTracksSyncTask : IScheduledTask
         if (!_configService.IsMusicBrainzEnabled)
         {
             _logger.LogInformation("MusicBrainz integration is disabled, some favorites may not be synced");
-        }
-
-        if (_configService.UserConfigs.Count == 0)
-        {
-            _logger.LogInformation("No users have been configured, nothing to sync");
-            progress.Report(100);
-            return;
         }
 
         _logger.LogInformation("Starting favorite sync from ListenBrainz...");
