@@ -20,7 +20,7 @@ public class GetCollaboratorPlaylistsRequest : IListenBrainzRequest
     /// <param name="playlistsCount">Number of playlists to fetch.</param>
     public GetCollaboratorPlaylistsRequest(string userName, int playlistsCount = 10)
     {
-        _endpointFormat = CompositeFormat.Parse(Endpoints.CollaboratorPlaylistsEndpoint);
+        _endpointFormat = CompositeFormat.Parse(Endpoints.CollaboratorPlaylists);
         _userName = userName;
         BaseUrl = General.BaseUrl;
         QueryDict = new Dictionary<string, string> { { "count", playlistsCount.ToString(NumberFormatInfo.InvariantInfo) } };
