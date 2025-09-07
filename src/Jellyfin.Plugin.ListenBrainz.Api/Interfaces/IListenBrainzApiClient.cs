@@ -47,4 +47,12 @@ public interface IListenBrainzApiClient
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Request response.</returns>
     public Task<GetUserFeedbackResponse> GetUserFeedback(GetUserFeedbackRequest request, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Get collaborator playlists of a specified user.
+    /// </summary>
+    /// <param name="request">Collaborator playlists request.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Request response.</returns>
+    public Task<GetCollaboratorPlaylistsResponse> GetCollaboratorPlaylists(GetCollaboratorPlaylistsRequest request, CancellationToken cancellationToken);
 }
