@@ -1,5 +1,6 @@
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace Jellyfin.Plugin.ListenBrainz.Api.Models;
 
@@ -13,23 +14,19 @@ public class Playlist
     /// </summary>
     public Playlist()
     {
-        Annotation = string.Empty;
-        Creator = string.Empty;
-        Extension = new Dictionary<string, object>();
-        Identifier = string.Empty;
-        Title = string.Empty;
-        Source = string.Empty;
+        ExtensionData = new Dictionary<string, object>();
+        JspfPlaylist = new JspfPlaylist();
     }
 
     /// <summary>
     /// Gets or sets annotation.
     /// </summary>
-    public string Annotation { get; set; }
+    public required string Annotation { get; set; }
 
     /// <summary>
     /// Gets or sets creator.
     /// </summary>
-    public string Creator { get; set; }
+    public required string Creator { get; set; }
 
     /// <summary>
     /// Gets or sets creation date.
@@ -40,42 +37,90 @@ public class Playlist
     /// <summary>
     /// Gets or sets identifier.
     /// </summary>
-    public string Identifier { get; set; }
+    public required string Identifier { get; set; }
 
     /// <summary>
     /// Gets or sets title.
     /// </summary>
-    public string Title { get; set; }
+    public required string Title { get; set; }
 
     /// <summary>
-    /// Gets or sets algorithm source patch.
+    /// Gets or sets JSPF extension data.
     /// </summary>
-    public string Source { get; set; }
+    public JspfPlaylist JspfPlaylist { get; set; }
 
     /// <summary>
     /// Gets or sets extension data.
     /// </summary>
     [JsonExtensionData]
-    private Dictionary<string, object> Extension { get; set; }
+    private Dictionary<string, object> ExtensionData { get; set; }
 
     [OnDeserialized]
     private void OnDeserialized(StreamingContext context)
     {
+        ExtensionData.TryGetValue("extension", out var extObject);
+        if (extObject is null)
+        {
+            return;
+        }
+
+        var serializerSettings = new JsonSerializerSettings
+        {
+            NullValueHandling = NullValueHandling.Ignore,
+            DefaultValueHandling = DefaultValueHandling.Include,
+            ContractResolver = new DefaultContractResolver { NamingStrategy = new SnakeCaseNamingStrategy() }
+        };
+
+        var rawJspf = JsonConvert.DeserializeObject<Dictionary<string, object>>(
+            extObject.ToString() ?? string.Empty,
+            serializerSettings);
+
+        if (rawJspf is null)
+        {
+            return;
+        }
+
         var jspfKey = "https://musicbrainz.org/doc/jspf#playlist";
-        var jspfData = (JspfData)Extension[jspfKey];
-        Source = jspfData.SourcePatch;
+        rawJspf.TryGetValue(jspfKey, out var serializedJspf);
+        if (serializedJspf is null)
+        {
+            return;
+        }
+
+        var jspfPlaylist = JsonConvert.DeserializeObject<JspfPlaylist>(
+            serializedJspf.ToString() ?? string.Empty,
+            serializerSettings);
+
+        if (jspfPlaylist is null)
+        {
+            return;
+        }
+
+        JspfPlaylist = jspfPlaylist;
     }
 }
 
 /// <summary>
-/// JSPF playlist data.
+/// JSPF extension data.
 /// </summary>
-internal class JspfData
+public class JspfPlaylist
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="JspfPlaylist"/> class.
+    /// </summary>
+    public JspfPlaylist()
+    {
+        AdditionalMetadata = new JspfAdditionalMetadata();
+        Collaborators = new List<string>();
+        CreatedFor = string.Empty;
+        Creator = string.Empty;
+    }
+
     /// <summary>
     /// Gets or sets additional metadata.
     /// </summary>
-    private Dictionary<string, object> AdditionalMetadata { get; set; }
+    [JsonProperty("additional_metadata")]
+    private JspfAdditionalMetadata AdditionalMetadata { get; set; }
 
     /// <summary>
     /// Gets or sets playlist collaborators.
@@ -101,31 +146,14 @@ internal class JspfData
     /// Gets or sets a value indicating whether the playlist is public.
     /// </summary>
     public bool Public { get; set; }
+}
 
-    public string SourcePatch
-    {
-        get
-        {
-            try
-            {
-                var ok = AdditionalMetadata.TryGetValue("algorithm_metadata", out var algoMetadata);
-                if (!ok || algoMetadata is null)
-                {
-                    return string.Empty;
-                }
+internal class JspfAdditionalMetadata
+{
+    public JspfAlgorithmMetadata AlgorithmMetadata { get; set; }
+}
 
-                ok = ((Dictionary<string, object>)algoMetadata).TryGetValue("source_patch", out var source);
-                if (!ok || source is null)
-                {
-                    return string.Empty;
-                }
-
-                return (string)source;
-            }
-            catch (InvalidCastException)
-            {
-                return string.Empty;
-            }
-        }
-    }
+internal class JspfAlgorithmMetadata
+{
+    public string SourcePatch { get; set; }
 }

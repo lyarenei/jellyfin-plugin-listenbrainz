@@ -1,4 +1,5 @@
 using Jellyfin.Plugin.ListenBrainz.Api.Interfaces;
+using Newtonsoft.Json;
 
 namespace Jellyfin.Plugin.ListenBrainz.Api.Models.Responses;
 
@@ -12,7 +13,7 @@ public class GetCollaboratorPlaylistsResponse : IListenBrainzResponse
     /// </summary>
     public GetCollaboratorPlaylistsResponse()
     {
-        Playlists = new List<Playlist>();
+        WrappedPlaylists = new List<WrappedPlaylist>();
     }
 
     /// <inheritdoc />
@@ -37,7 +38,16 @@ public class GetCollaboratorPlaylistsResponse : IListenBrainzResponse
     public int PlaylistCount { get; set; }
 
     /// <summary>
-    /// Gets or sets playlists data.
+    /// Gets playlists data.
     /// </summary>
-    public IEnumerable<Playlist> Playlists { get; set; }
+    [JsonIgnore]
+    public IEnumerable<Playlist> Playlists => WrappedPlaylists.Select(wp => wp.Playlist);
+
+    [JsonProperty("playlists")]
+    private IEnumerable<WrappedPlaylist> WrappedPlaylists { get; set; }
+}
+
+internal class WrappedPlaylist
+{
+    public required Playlist Playlist { get; set; }
 }
