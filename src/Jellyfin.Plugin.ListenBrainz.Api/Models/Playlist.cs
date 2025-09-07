@@ -62,8 +62,6 @@ public class Playlist
     private void OnDeserialized(StreamingContext context)
     {
         var jspfKey = "https://musicbrainz.org/doc/jspf#playlist";
-        // SAMAccountName is not deserialized to any property
-        // and so it is added to the extension data dictionary
         var jspfData = (JspfData)Extension[jspfKey];
         Source = jspfData.SourcePatch;
     }
