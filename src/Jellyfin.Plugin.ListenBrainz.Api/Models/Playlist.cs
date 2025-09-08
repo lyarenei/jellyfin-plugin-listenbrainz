@@ -150,10 +150,20 @@ public class JspfPlaylist
 
 internal class JspfAdditionalMetadata
 {
+    internal JspfAdditionalMetadata()
+    {
+        AlgorithmMetadata = new JspfAlgorithmMetadata();
+    }
+
     public JspfAlgorithmMetadata AlgorithmMetadata { get; set; }
 }
 
 internal class JspfAlgorithmMetadata
 {
+    internal JspfAlgorithmMetadata()
+    {
+        SourcePatch = string.Empty;
+    }
+
     public string SourcePatch { get; set; }
 }
