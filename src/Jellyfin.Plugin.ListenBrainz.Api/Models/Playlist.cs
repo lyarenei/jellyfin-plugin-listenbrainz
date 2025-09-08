@@ -105,7 +105,7 @@ public class Playlist
 }
 
 /// <summary>
-/// JSPF extension data.
+/// JSPF playlist extension data.
 /// </summary>
 public class JspfPlaylist
 {
