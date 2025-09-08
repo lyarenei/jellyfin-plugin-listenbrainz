@@ -16,6 +16,7 @@ public class Playlist
     {
         ExtensionData = new Dictionary<string, object>();
         JspfPlaylist = new JspfPlaylist();
+        Tracks = new List<object>();
     }
 
     /// <summary>
@@ -45,13 +46,16 @@ public class Playlist
     public required string Title { get; set; }
 
     /// <summary>
-    /// Gets or sets JSPF extension data.
+    /// Gets or sets playlist tracks.
+    /// </summary>
+    [JsonProperty("track")]
+    public IEnumerable<object> Tracks { get; set; }
+
+    /// <summary>
+    /// Gets or sets JSPF playlist extension data.
     /// </summary>
     public JspfPlaylist JspfPlaylist { get; set; }
 
-    /// <summary>
-    /// Gets or sets extension data.
-    /// </summary>
     [JsonExtensionData]
     private Dictionary<string, object> ExtensionData { get; set; }
 
