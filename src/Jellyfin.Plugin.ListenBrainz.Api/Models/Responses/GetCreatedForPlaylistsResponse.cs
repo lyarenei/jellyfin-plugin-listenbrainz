@@ -4,14 +4,14 @@ using Newtonsoft.Json;
 namespace Jellyfin.Plugin.ListenBrainz.Api.Models.Responses;
 
 /// <summary>
-/// User listens response.
+/// 'Created for' playlists response.
 /// </summary>
-public class GetCollaboratorPlaylistsResponse : IListenBrainzResponse
+public class GetCreatedForPlaylistsResponse : IListenBrainzResponse
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="GetCollaboratorPlaylistsResponse"/> class.
+    /// Initializes a new instance of the <see cref="GetCreatedForPlaylistsResponse"/> class.
     /// </summary>
-    public GetCollaboratorPlaylistsResponse()
+    public GetCreatedForPlaylistsResponse()
     {
         WrappedPlaylists = new List<WrappedPlaylist>();
     }

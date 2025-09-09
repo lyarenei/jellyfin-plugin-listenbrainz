@@ -55,8 +55,8 @@ public class ListenBrainzApiClient : IListenBrainzApiClient
     }
 
     /// <inheritdoc />
-    public async Task<GetCollaboratorPlaylistsResponse> GetCollaboratorPlaylists(GetCollaboratorPlaylistsRequest request, CancellationToken cancellationToken)
+    public async Task<GetCreatedForPlaylistsResponse> GetCreatedForPlaylists(GetCreatedForPlaylistsRequest request, CancellationToken cancellationToken)
     {
-        return await _apiClient.SendGetRequest<GetCollaboratorPlaylistsRequest, GetCollaboratorPlaylistsResponse>(request, cancellationToken);
+        return await _apiClient.SendGetRequest<GetCreatedForPlaylistsRequest, GetCreatedForPlaylistsResponse>(request, cancellationToken);
     }
 }

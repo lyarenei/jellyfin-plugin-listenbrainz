@@ -6,21 +6,21 @@ using Jellyfin.Plugin.ListenBrainz.Api.Resources;
 namespace Jellyfin.Plugin.ListenBrainz.Api.Models.Requests;
 
 /// <summary>
-/// Collaborator playlists request.
+/// 'Created for' playlists request.
 /// </summary>
-public class GetCollaboratorPlaylistsRequest : IListenBrainzRequest
+public class GetCreatedForPlaylistsRequest : IListenBrainzRequest
 {
     private readonly string _userName;
     private readonly CompositeFormat _endpointFormat;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="GetCollaboratorPlaylistsRequest"/> class.
+    /// Initializes a new instance of the <see cref="GetCreatedForPlaylistsRequest"/> class.
     /// </summary>
-    /// <param name="userName">Name of the user (collaborator).</param>
+    /// <param name="userName">Name of the user for who the playlists were created for.</param>
     /// <param name="playlistsCount">Number of playlists to fetch.</param>
-    public GetCollaboratorPlaylistsRequest(string userName, int playlistsCount = 10)
+    public GetCreatedForPlaylistsRequest(string userName, int playlistsCount = 10)
     {
-        _endpointFormat = CompositeFormat.Parse(Endpoints.CollaboratorPlaylists);
+        _endpointFormat = CompositeFormat.Parse(Endpoints.CreatedForPlaylists);
         _userName = userName;
         BaseUrl = General.BaseUrl;
         QueryDict = new Dictionary<string, string> { { "count", playlistsCount.ToString(NumberFormatInfo.InvariantInfo) } };
