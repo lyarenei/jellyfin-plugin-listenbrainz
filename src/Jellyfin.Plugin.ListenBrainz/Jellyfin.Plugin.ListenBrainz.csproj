@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -11,9 +11,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Jellyfin.Controller" Version="10.10.0" />
-      <PackageReference Include="Jellyfin.Data" Version="10.10.0" />
-      <PackageReference Include="Jellyfin.Model" Version="10.10.0" />
+      <PackageReference Include="Jellyfin.Controller" Version="10.11.0-rc5" />
+      <PackageReference Include="Jellyfin.Data" Version="10.11.0-rc5" />
+      <PackageReference Include="Jellyfin.Model" Version="10.11.0-rc5" />
       <PackageReference Include="SerilogAnalyzer" Version="0.15.0" />
       <PackageReference Include="SmartAnalyzers.ExceptionAnalyzer" Version="1.0.10" />
       <PackageReference Include="SmartAnalyzers.MultithreadingAnalyzer" Version="1.1.31" />

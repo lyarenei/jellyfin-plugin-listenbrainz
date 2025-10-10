@@ -47,16 +47,18 @@ recommended to use the "main" repository, which will always contain the latest v
 latest major Jellyfin server. Otherwise you can use the specific ones to avoid breakage with the server version you are
 using.
 
-| Jellyfin version               | Repo URL                                              |
-|--------------------------------|-------------------------------------------------------|
-| Latest major version           | `https://repo.xkrivo.net/jellyfin/manifest.json`      |
-| Jellyfin 10.9.x                | `https://repo.xkrivo.net/jellyfin-10-9/manifest.json` |
-| Jellyfin 10.8.x                | `https://repo.xkrivo.net/jellyfin-10-8/manifest.json` |
-| Unstable - development builds  | `https://repo.xkrivo.net/jellyfin-dev/manifest.json`  |
+| Jellyfin version              | Repo URL                                               |
+|-------------------------------|--------------------------------------------------------|
+| Latest major version          | `https://repo.xkrivo.net/jellyfin/manifest.json`       |
+| Jellyfin 10.10.x              | `https://repo.xkrivo.net/jellyfin-10-10/manifest.json` |
+| Jellyfin 10.9.x               | `https://repo.xkrivo.net/jellyfin-10-9/manifest.json`  |
+| Jellyfin 10.8.x               | `https://repo.xkrivo.net/jellyfin-10-8/manifest.json`  |
+| Unstable - development builds | `https://repo.xkrivo.net/jellyfin-dev/manifest.json`   |
 
 The development repo is listed here just for the sake of completeness.
-It should not be used, unless you are fine with all the risks of running unstable releases of software or you have been
-explicitly asked to.
+It should not be used, unless:
+1. You are fine with all the risks of running unstable releases of software
+2. Or you have been explicitly asked to use it
 
 ### Adding the repository
 
@@ -70,13 +72,14 @@ plugin [configuration](doc/configuration.md).
 
 Plugin and Jellyfin versions compatibility table:
 
-| Plugin  | Jellyfin | Status        |
-|---------|----------|---------------|
-| 1.x.y.z | 10.7.a   | Unsupported   |
-| 2.x.y.z | 10.8.a   | Unsupported   |
-| 3.x.y.z | 10.8.a   | Unsupported   |
-| 4.x.y.z | 10.9.a   | Bugfixes only |
-| 5.x.y.z | 10.10.a  | Active        |
+| Plugin  | Jellyfin | Status      |
+|---------|----------|-------------|
+| 1.x.y.z | 10.7.a   | Unsupported |
+| 2.x.y.z | 10.8.a   | Unsupported |
+| 3.x.y.z | 10.8.a   | Unsupported |
+| 4.x.y.z | 10.9.a   | Unsupported |
+| 5.x.y.z | 10.10.a  | Unsupported |
+| 6.x.y.z | 10.11.a  | Active      |
 
 ## Configuration
 
@@ -153,7 +156,7 @@ dotnet publish -c Release
 ```
 
 Once the build is completed, the compiled DLLs should be available at:
-`src/Jellyfin.Plugin.Listenbrainz/bin/<Debug|Release>/net8.0/`
+`src/Jellyfin.Plugin.Listenbrainz/bin/<Debug|Release>/net9.0/`
 
 To install the plugin for the first time, copy all **DLL** files starting with `Jellyfin.Plugin.ListenBrainz` to the
 plugin directory in your Jellyfin config directory (`${CONFIG_DIR}/plugins/ListenBrainz_1.0.0.0`).

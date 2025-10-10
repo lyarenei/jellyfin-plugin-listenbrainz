@@ -7,11 +7,11 @@ on:
       dotnet-version:
         type: string
         required: false
-        default: "8.0"
+        default: "9.0"
       dotnet-target:
         type: string
         required: false
-        default: "net8.0"
+        default: "net9.0"
 
 jobs:
   build:
@@ -24,6 +24,13 @@ jobs:
         uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # v4.0.1
         with:
           dotnet-version: "${{ inputs.dotnet-version }}"
+
+      - name: Add Jellyfin GitHub NuGet package source
+        uses: deitry/add-nuget-source-action@v2.0.0
+        with:
+          url: https://nuget.pkg.github.com/jellyfin/index.json
+          username: lyarenei
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Jellyfin Plugin
         uses: oddstr13/jellyfin-plugin-repository-manager@9497a0a499416cc572ed2e07a391d9f943a37b4d # v1.1.1

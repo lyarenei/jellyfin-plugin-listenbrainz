@@ -15,7 +15,7 @@ jobs:
   test:
     uses: jellyfin/jellyfin-meta-plugins/.github/workflows/test.yaml@master
     with:
-      dotnet-version: ${{ vars.DOTNET_8 }}
+      dotnet-version: ${{ vars.DOTNET_9 }}
 
   build:
     uses: ./.github/workflows/build.yml
