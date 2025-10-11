@@ -20,7 +20,7 @@ public class Playlist
         Title = string.Empty;
         ExtensionData = new Dictionary<string, object>();
         JspfPlaylist = new JspfPlaylist();
-        Tracks = new List<object>();
+        Tracks = new List<PlaylistTrack>();
     }
 
     /// <summary>
@@ -53,7 +53,7 @@ public class Playlist
     /// Gets or sets playlist tracks.
     /// </summary>
     [JsonProperty("track")]
-    public IEnumerable<object> Tracks { get; set; }
+    public IEnumerable<PlaylistTrack> Tracks { get; set; }
 
     /// <summary>
     /// Gets or sets JSPF playlist extension data.
