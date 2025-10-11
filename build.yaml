@@ -1,7 +1,7 @@
 ---
 name: "ListenBrainz"
 guid: "59B20823-AAFE-454C-A393-17427F518631"
-version: "6.0.0.2"
+version: "6.0.1.1"
 targetAbi: "10.11.0.0"
 framework: "net9.0"
 overview: "Track your music habits with ListenBrainz."
@@ -18,3 +18,4 @@ artifacts:
 changelog: >
   Maintenance
     - Compatibility for Jellyfin 10.11.0
+    - Use local recording MBIDs when available (fallback to MusicBrainz lookup if not)

@@ -82,6 +82,13 @@ public class LovedTracksSyncTask : IScheduledTask
     public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
         using var logScope = BeginLogScope();
+        if (_configService.UserConfigs.Count == 0)
+        {
+            _logger.LogInformation("No users have been configured, nothing to sync");
+            progress.Report(100);
+            return;
+        }
+
         if (_favoriteSyncService is null)
         {
             _favoriteSyncService = DefaultFavoriteSyncService.Instance;
@@ -94,15 +101,7 @@ public class LovedTracksSyncTask : IScheduledTask
 
         if (!_configService.IsMusicBrainzEnabled)
         {
-            _logger.LogInformation("MusicBrainz integration is disabled, cannot sync favorites");
-            return;
-        }
-
-        if (_configService.UserConfigs.Count == 0)
-        {
-            _logger.LogInformation("No users have been configured, nothing to sync");
-            progress.Report(100);
-            return;
+            _logger.LogInformation("MusicBrainz integration is disabled, some favorites may not be synced");
         }
 
         _logger.LogInformation("Starting favorite sync from ListenBrainz...");
@@ -157,8 +156,8 @@ public class LovedTracksSyncTask : IScheduledTask
 
         var items = _libraryManager
             .GetItemList(q, allowedLibraries.ToList())
-            .Where(i => !_userDataManager.GetUserData(user, i).IsFavorite)
-            .Where(i => i.ProviderIds.GetValueOrDefault("MusicBrainzTrack") is not null)
+            .Where(i => !_userDataManager.GetUserData(user, i)?.IsFavorite ?? false)
+            .Where(i => i.GetRecordingMbid() is not null || i.GetTrackMbid() is not null)
             .ToList();
 
         foreach (var item in items)
@@ -168,14 +167,23 @@ public class LovedTracksSyncTask : IScheduledTask
 
             try
             {
-                recordingMbid = _musicBrainzClient.GetAudioItemMetadata(item).RecordingMbid;
+                recordingMbid = item.GetRecordingMbid();
+                if (string.IsNullOrEmpty(recordingMbid) && _configService.IsMusicBrainzEnabled)
+                {
+                    _logger.LogDebug("Fetching recording MBID for item {ItemId} from MusicBrainz", item.Id);
+                    recordingMbid = _musicBrainzClient.GetAudioItemMetadata(item).RecordingMbid;
+                }
+                else
+                {
+                    _logger.LogDebug("Recording MBID for item {ItemId} is not available, skipping", item.Id);
+                }
             }
             catch (Exception e)
             {
-                _logger.LogWarning("Failed to get metadata for item {ItemId}: {Error}", item.Id, e.Message);
+                _logger.LogWarning("Processing item {ItemId} failed: {Error}", item.Id, e.Message);
             }
 
-            if (lovedTracksIds.Contains(recordingMbid))
+            if (lovedTracksIds.Contains(recordingMbid ?? string.Empty))
             {
                 MarkAsFavorite(user, item, cancellationToken);
             }
@@ -206,6 +214,15 @@ public class LovedTracksSyncTask : IScheduledTask
     {
         _logger.LogDebug("Marking item {Name} as favorite for user {User}", item.Name, user.Username);
         var userData = _userDataManager.GetUserData(user, item);
+        if (userData is null)
+        {
+            _logger.LogInformation(
+                "Could not mark item {Name} as favorite for user {User}: no user data available",
+                item.Name,
+                user.Username);
+            return;
+        }
+
         userData.IsFavorite = true;
 
         _userDataManager.SaveUserData(user, item, userData, UserDataSaveReason.UpdateUserRating, cancellationToken);

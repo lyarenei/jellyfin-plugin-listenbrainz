@@ -53,17 +53,18 @@ Currently used metadata from MusicBrainz:
 - **Recording MBID**
 
   This MBID is used to link the listen of specific track with MusicBrainz entry.
-  Jellyfin currently does not support this, even if it's included in the track file metadata.
-  The closest is the Track MBID, but these are not the same.
-  If the fetching is not enabled, then, in ListenBrainz, you will see a plaintext track name in a listen, instead of a
-  hyperlink to MusicBrainz entry.
+  If this ID is not available, then, in ListenBrainz, you will see a plaintext track name in a listen, instead of a
+  hyperlink to MusicBrainz entry. In some cases, ListenBrainz may be able to automatically link the listen to a
+  MusicBrainz entry, but it may not be precise.
+
+  > From Jellyfin 10.11 onwards, the recording MBIDs should be stored in the Jellyfin metadata database.
+  > Recording MBID from this lookup is only used if the MBID is not already present in the local metadata database.
 
 - **Multiple artists credit**
 
   Recognizing multiple artists of a song is unfortunately a mess, as it's not standardized.
   However, this is only a part of the problem. Even if Jellyfin would recognize artists correctly, it still does not
   store join phrases to be able to reconstruct the correct artist credit string.
-  As you can guess, MusicBrainz provides this information, so the plugin makes use of that.
   Please note that, usually, the default names will be used instead of alternative ones (for example transliterated
   asian names), so if you have customized artist names in your metadata, it will be ignored.
   If the fetching is not enabled, the plugin will default to sending all artist names, separated by a comma.
@@ -71,7 +72,7 @@ Currently used metadata from MusicBrainz:
 - **ISRCs**
 
   ISRC stands for `International Standard Recording Code` and is a code uniquely identifying a specific recording.
-  There is not much to add here. Jellyfin does not store this code, so the only option is to ask MusicBrainz.
+  Jellyfin does not store this code, so the only option is to ask MusicBrainz.
   In some cases, there may be multiple ISRCs stored in MusicBrainz for a specific recording. In these cases, the plugin
   simply chooses the first one.
 
