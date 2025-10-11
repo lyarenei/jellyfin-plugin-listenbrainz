@@ -14,6 +14,10 @@ public class Playlist
     /// </summary>
     public Playlist()
     {
+        Annotation = string.Empty;
+        Creator = string.Empty;
+        Identifier = string.Empty;
+        Title = string.Empty;
         ExtensionData = new Dictionary<string, object>();
         JspfPlaylist = new JspfPlaylist();
         Tracks = new List<object>();
@@ -22,12 +26,12 @@ public class Playlist
     /// <summary>
     /// Gets or sets annotation.
     /// </summary>
-    public required string Annotation { get; set; }
+    public string Annotation { get; set; }
 
     /// <summary>
     /// Gets or sets creator.
     /// </summary>
-    public required string Creator { get; set; }
+    public string Creator { get; set; }
 
     /// <summary>
     /// Gets or sets creation date.
@@ -38,12 +42,12 @@ public class Playlist
     /// <summary>
     /// Gets or sets identifier.
     /// </summary>
-    public required string Identifier { get; set; }
+    public string Identifier { get; set; }
 
     /// <summary>
     /// Gets or sets title.
     /// </summary>
-    public required string Title { get; set; }
+    public string Title { get; set; }
 
     /// <summary>
     /// Gets or sets playlist tracks.

@@ -55,4 +55,12 @@ public interface IListenBrainzApiClient
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Request response.</returns>
     public Task<GetCreatedForPlaylistsResponse> GetCreatedForPlaylists(GetCreatedForPlaylistsRequest request, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Get detailed information for a specific playlist.
+    /// </summary>
+    /// <param name="request">Playlist details request.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Request response.</returns>
+    public Task<GetPlaylistResponse> GetPlaylist(GetPlaylistRequest request, CancellationToken cancellationToken);
 }

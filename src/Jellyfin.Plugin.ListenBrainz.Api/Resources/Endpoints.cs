@@ -44,4 +44,9 @@ public static class Endpoints
     /// Edpoint for user collaborator playlists.
     /// </summary>
     public const string CreatedForPlaylists = UserEndpointBase + "/{0}/playlists/createdfor";
+
+    /// <summary>
+    /// Endpoint for playlist details.
+    /// </summary>
+    public const string PlaylistDetails = "playlist/{0}";
 }

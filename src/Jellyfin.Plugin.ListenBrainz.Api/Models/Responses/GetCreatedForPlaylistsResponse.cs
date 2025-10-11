@@ -46,8 +46,3 @@ public class GetCreatedForPlaylistsResponse : IListenBrainzResponse
     [JsonProperty("playlists")]
     private IEnumerable<WrappedPlaylist> WrappedPlaylists { get; set; }
 }
-
-internal class WrappedPlaylist
-{
-    public required Playlist Playlist { get; set; }
-}
