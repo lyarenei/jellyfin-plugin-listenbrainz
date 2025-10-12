@@ -154,7 +154,7 @@ public class SyncPlaylistsTask : IScheduledTask
 
                 try
                 {
-                    var playlist = await _listenBrainzClient.GetPlaylistAsync(pl.PlaylistId, cancellationToken);
+                    var playlist = await _listenBrainzClient.GetPlaylistAsync(userConfig, pl.PlaylistId, cancellationToken);
                     await SyncPlaylist(user, playlist, cancellationToken);
                 }
                 catch (Exception e)

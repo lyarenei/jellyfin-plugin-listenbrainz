@@ -245,9 +245,14 @@ public class ListenBrainzClient : IListenBrainzClient
     }
 
     /// <inheritdoc />
-    public async Task<Playlist> GetPlaylistAsync(string playlistId, CancellationToken cancellationToken)
+    public async Task<Playlist> GetPlaylistAsync(UserConfig config, string playlistId, CancellationToken cancellationToken)
     {
-        var request = new GetPlaylistRequest(playlistId) { BaseUrl = _pluginConfig.ListenBrainzApiUrl };
+        var request = new GetPlaylistRequest(playlistId, false)
+        {
+            ApiToken = config.PlaintextApiToken,
+            BaseUrl = _pluginConfig.ListenBrainzApiUrl,
+        };
+
         GetPlaylistResponse response;
         try
         {

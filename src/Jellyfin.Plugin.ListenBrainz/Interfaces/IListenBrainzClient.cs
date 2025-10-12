@@ -83,8 +83,9 @@ public interface IListenBrainzClient
     /// <summary>
     /// Get a specific playlist including tracks in it.
     /// </summary>
+    /// <param name="config">ListenBrainz user configuration.</param>
     /// <param name="playlistId">ListenBrainz playlist ID (MBID).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Playlist data.</returns>
-    public Task<Playlist> GetPlaylistAsync(string playlistId, CancellationToken cancellationToken);
+    public Task<Playlist> GetPlaylistAsync(UserConfig config, string playlistId, CancellationToken cancellationToken);
 }
