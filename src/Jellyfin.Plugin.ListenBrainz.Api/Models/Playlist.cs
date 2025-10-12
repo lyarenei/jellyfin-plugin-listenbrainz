@@ -60,6 +60,22 @@ public class Playlist
     /// </summary>
     public JspfPlaylist JspfPlaylist { get; set; }
 
+    /// <summary>
+    /// Gets a playlist ID from the <see cref="Identifier"/>.
+    /// </summary>
+    [JsonIgnore]
+    public string PlaylistId
+    {
+        get
+        {
+            // ListenBrainz playlist URL is in format
+            // https://listenbrainz.org/playlist/{ID}
+
+            var parts = Identifier.Split('/');
+            return parts.Length > 1 ? parts[^1] : string.Empty;
+        }
+    }
+
     [JsonExtensionData]
     private Dictionary<string, object> ExtensionData { get; set; }
 
