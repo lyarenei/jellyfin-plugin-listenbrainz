@@ -19,3 +19,4 @@ changelog: >
   Maintenance
     - Compatibility for Jellyfin 10.11.0
     - Use local recording MBIDs when available (fallback to MusicBrainz lookup if not)
+    - Sync playlists from ListenBrainz
