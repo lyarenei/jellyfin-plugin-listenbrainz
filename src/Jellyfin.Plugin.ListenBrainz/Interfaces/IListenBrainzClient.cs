@@ -79,4 +79,12 @@ public interface IListenBrainzClient
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>List of playlists created for the user.</returns>
     public Task<IEnumerable<Playlist>> GetCreatedForPlaylistsAsync(UserConfig config, int count, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Get a specific playlist including tracks in it.
+    /// </summary>
+    /// <param name="playlistId">ListenBrainz playlist ID (MBID).</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Playlist data.</returns>
+    public Task<Playlist> GetPlaylistAsync(string playlistId, CancellationToken cancellationToken);
 }

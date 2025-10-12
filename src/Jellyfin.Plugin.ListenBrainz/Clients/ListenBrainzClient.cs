@@ -243,6 +243,29 @@ public class ListenBrainzClient : IListenBrainzClient
 
         return response.Playlists;
     }
+
+    /// <inheritdoc />
+    public async Task<Playlist> GetPlaylistAsync(string playlistId, CancellationToken cancellationToken)
+    {
+        var request = new GetPlaylistRequest(playlistId) { BaseUrl = _pluginConfig.ListenBrainzApiUrl };
+        GetPlaylistResponse response;
+        try
+        {
+            response = await _apiClient.GetPlaylist(request, cancellationToken);
+        }
+        catch (Exception e)
+        {
+            throw new PluginException("GetPlaylist failed", e);
+        }
+
+        if (response.IsNotOk)
+        {
+            throw new PluginException("Getting playlist failed");
+        }
+
+        return response.Playlist;
+    }
+
     /// <summary>
     /// Fetch ListenBrainz username using the API token.
     /// </summary>
