@@ -135,8 +135,12 @@ public class SyncPlaylistsTask : IScheduledTask
 
         try
         {
-            var playlists = (await _listenBrainzClient.GetCreatedForPlaylistsAsync(userConfig, 25, cancellationToken))
-                .ToList();
+            var playlists = (
+                await _listenBrainzClient.GetCreatedForPlaylistsAsync(
+                    userConfig,
+                    25,
+                    cancellationToken)
+            ).ToList();
             _logger.LogInformation("Found {Count} playlists for user {Username}", playlists.Count, userConfig.UserName);
 
             if (playlists.Count == 0)
@@ -198,7 +202,7 @@ public class SyncPlaylistsTask : IScheduledTask
             .WhereNotNull()
             .ToList();
 
-        var query = new InternalItemsQuery(user) { MediaTypes = new[] { MediaType.Audio } };
+        var query = new InternalItemsQuery(user) { MediaTypes = [MediaType.Audio] };
         var allAudioItems = _libraryManager.GetItemList(query, allowedLibraries).ToList();
 
         foreach (var track in tracks)
@@ -243,9 +247,7 @@ public class SyncPlaylistsTask : IScheduledTask
         var playlistName = $"[LB] {playlist.Title}";
         var playlistQuery = new InternalItemsQuery
         {
-            IncludeItemTypes = [BaseItemKind.Playlist],
-            Name = playlistName,
-            User = user,
+            IncludeItemTypes = [BaseItemKind.Playlist], Name = playlistName, User = user,
         };
         var existingPlaylist = _libraryManager.GetItemList(playlistQuery).FirstOrDefault();
         if (existingPlaylist is not null)
