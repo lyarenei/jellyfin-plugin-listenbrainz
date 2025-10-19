@@ -79,12 +79,11 @@ number of users which have favorite syncing enabled (assuming all users have acc
 
 Every week, on Monday, ListenBrainz automatically generates several playlists for all users. If the user has enabled
 playlists sync in settings, the plugin automatically recreates these playlists in Jellyfin. By default, only playlists "
-from the past" are recreated (weekly jams and top discoveries). Syncing all playlists can be enabled in the plugin
-settings.
+from the past" are recreated (weekly jams and top discoveries). Syncing of all playlists can be enabled in the plugin
+settings. Empty playlists are always ignored.
 
 This feature **requires** a `recording MBID` in the song/audio metadata for sucessfully identifying and assinging a
-song to a playlist. There is no fallback to `MusicBrainz` API like other features have. If the playlist would end up
-empty (no song is recognized in the Jellyfin library), it will not be created.
+song to a playlist. There is no fallback to `MusicBrainz` API like other features have.
 
 A sync is triggered automatically every Monday. However, the time of the day is randomized on every server start, to
 spread out the load on ListenBrainz servers. If necessary, the sync task can be also run manually at any time from the
