@@ -65,7 +65,8 @@ When using MSID for the sync, the plugin tries to find the correct MSID at expon
 #### From ListenBrainz to Jellyfin
 
 Currently, only a manual task is available at this moment. This is because of an absence of recording MBIDs which make
-matching MBIDs to tracks a very expensive operation (in terms of time) and so it is impractical to run this sync regularly.
+matching MBIDs to tracks a very expensive operation (in terms of time) and so it is impractical to run this sync
+regularly.
 
 You can run the sync task from the Jellyfin administration menu (under scheduled tasks). The task pulls loved listens
 for all users which have favorite synchronization enabled. Keep in mind, that the task can take a long time to complete.
@@ -73,3 +74,22 @@ Hopefully this will change at some point in the future.
 
 For reference, a library of approximately 4000 tracks takes around 70 minutes to complete. This is then multiplied by
 number of users which have favorite syncing enabled (assuming all users have access to all tracks on the server).
+
+## Syncing playlists
+
+Every week, on Monday, ListenBrainz automatically generates several playlists for all users. If the user has enabled
+playlists sync in settings, the plugin automatically recreates these playlists in Jellyfin. By default, only playlists "
+from the past" are recreated (weekly jams and top discoveries). Syncing all playlists can be enabled in the plugin
+settings.
+
+This feature **requires** a `recording MBID` in the song/audio metadata for sucessfully identifying and assinging a
+song to a playlist. There is no fallback to `MusicBrainz` API like other features have. If the playlist would end up
+empty (no song is recognized in the Jellyfin library), it will not be created.
+
+A sync is triggered automatically every Monday. However, the time of the day is randomized on every server start, to
+spread out the load on ListenBrainz servers. If necessary, the sync task can be also run manually at any time from the
+Jellyfin administration UI.
+
+If there is an already existing playlist with the same name, it will be automatically deleted and recreated. The
+playlists created by the plugin will always have a `[LB]` prefix followed by the playlist name. If, for some reason, you
+want to preserve a playlist, simply rename it in Jellyfin and the playlist will be ignored by the plugin.

@@ -135,6 +135,11 @@ Modifies the behavior of favorite sync feature. If enabled, the favorite status 
 ListenBrainz. Standard favorite sync (after playback of track finishes) is not affected. This feature only works if a
 track has required metadata (track MBID) and the MusicBrainz integration is enabled.
 
+##### Playlists sync
+
+Enable or disable playlist sync for the user. Requires `recording MBID` in the song/audio metadata to work - there is
+no fallback to MusicBrainz like in other features.
+
 ##### Backup of listens
 
 Save listen locally before it is sent to ListenBrainz. To configure backups, first select the path where the backups
