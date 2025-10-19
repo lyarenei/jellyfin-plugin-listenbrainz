@@ -57,6 +57,13 @@
                             </label>
                         </div>
                         <div class="checkboxContainer bootstrap-wrapper row no-gutters">
+                            <label class="inputLabel inputLabelUnfocused" for="IsPlaylistsSyncEnabled">
+                                <input is="emby-checkbox" type="checkbox" id="IsPlaylistsSyncEnabled"
+                                       name="IsPlaylistsSyncEnabled"/>
+                                <span>Enable syncing playlists</span>
+                            </label>
+                        </div>
+                        <div class="checkboxContainer bootstrap-wrapper row no-gutters">
                             <label class="inputLabel inputLabelUnfocused" for="IsUserBackupEnabled">
                                 <input is="emby-checkbox" type="checkbox" id="IsUserBackupEnabled"
                                        name="IsUserBackupEnabled"/>
@@ -171,6 +178,7 @@
                 ApiToken: "",
                 IsListenSubmitEnabled: false,
                 IsFavoritesSyncEnabled: false,
+                IsPlaylistsSyncEnabled: false,
                 IsUserBackupEnabled: false,
             },
         };
@@ -462,6 +470,7 @@
                 ApiToken: btoa(getApiToken()),
                 IsListenSubmitEnabled: document.querySelector('#IsListenSubmitEnabled').checked,
                 IsFavoritesSyncEnabled: document.querySelector('#IsFavoritesSyncEnabled').checked,
+                IsPlaylistsSyncEnabled: document.querySelector('#IsPlaylistsSyncEnabled').checked,
                 IsBackupEnabled: document.querySelector('#IsUserBackupEnabled').checked,
                 UserName: userName,
             }
