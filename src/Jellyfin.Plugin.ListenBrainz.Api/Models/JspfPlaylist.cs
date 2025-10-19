@@ -48,6 +48,11 @@ public class JspfPlaylist
     /// Gets or sets a value indicating whether the playlist is public.
     /// </summary>
     public bool Public { get; set; }
+
+    /// <summary>
+    /// Gets a playlist's source patch.
+    /// </summary>
+    public string SourcePatch { get => AdditionalMetadata.AlgorithmMetadata.SourcePatch; }
 }
 
 internal class JspfAdditionalMetadata
