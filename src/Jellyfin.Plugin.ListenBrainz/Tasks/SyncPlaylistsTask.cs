@@ -154,7 +154,10 @@ public class SyncPlaylistsTask : IScheduledTask
 
                 try
                 {
-                    var playlist = await _listenBrainzClient.GetPlaylistAsync(userConfig, pl.PlaylistId, cancellationToken);
+                    var playlist = await _listenBrainzClient.GetPlaylistAsync(
+                        userConfig,
+                        pl.PlaylistId,
+                        cancellationToken);
                     await SyncPlaylist(user, playlist, cancellationToken);
                 }
                 catch (Exception e)
@@ -240,7 +243,9 @@ public class SyncPlaylistsTask : IScheduledTask
         var playlistName = $"[LB] {playlist.Title}";
         var playlistQuery = new InternalItemsQuery
         {
-            IncludeItemTypes = [BaseItemKind.Playlist], Name = playlistName, User = user,
+            IncludeItemTypes = [BaseItemKind.Playlist],
+            Name = playlistName,
+            User = user,
         };
         var existingPlaylist = _libraryManager.GetItemList(playlistQuery).FirstOrDefault();
         if (existingPlaylist is not null)
