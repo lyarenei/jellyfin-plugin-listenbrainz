@@ -5,6 +5,7 @@ on:
   pull_request:
     branches:
       - main
+      - jf-10.11.x
     paths-ignore:
       - '**/*.md'
       - '**/*.yml'
