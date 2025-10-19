@@ -238,6 +238,18 @@ public class SyncPlaylistsTask : IScheduledTask
             playlist.Title);
 
         var playlistName = $"[LB] {playlist.Title}";
+        var playlistQuery = new InternalItemsQuery
+        {
+            IncludeItemTypes = [BaseItemKind.Playlist], Name = playlistName, User = user,
+        };
+        var existingPlaylist = _libraryManager.GetItemList(playlistQuery).FirstOrDefault();
+        if (existingPlaylist is not null)
+        {
+            _logger.LogDebug("Deleting already existing playlist {Title}", playlist.Title);
+            _libraryManager.DeleteItem(
+                existingPlaylist,
+                new DeleteOptions { DeleteFileLocation = false });
+        }
 
         _logger.LogDebug("Creating playlist {Name} with {Count} items", playlistName, jellyfinPlaylistTracks.Count);
         await _playlistManager.CreatePlaylist(new PlaylistCreationRequest
