@@ -237,7 +237,7 @@ public class SyncPlaylistsTask : IScheduledTask
             playlist.Tracks.Count(),
             playlist.Title);
 
-        var playlistName = $"[ListenBrainz] {playlist.Title}";
+        var playlistName = $"[LB] {playlist.Title}";
 
         _logger.LogDebug("Creating playlist {Name} with {Count} items", playlistName, jellyfinPlaylistTracks.Count);
         await _playlistManager.CreatePlaylist(new PlaylistCreationRequest
