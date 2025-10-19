@@ -42,6 +42,9 @@ public class DefaultPluginConfigService : IPluginConfigService
     }
 
     /// <inheritdoc />
+    public bool IsAllPlaylistsSyncEnabled => Config.IsAllPlaylistsSyncEnabled;
+
+    /// <inheritdoc />
     public Collection<LibraryConfig> LibraryConfigs
     {
         get => Config.LibraryConfigs;

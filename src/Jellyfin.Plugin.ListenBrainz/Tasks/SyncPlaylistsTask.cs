@@ -155,6 +155,13 @@ public class SyncPlaylistsTask : IScheduledTask
             foreach (var pl in playlists)
             {
                 cancellationToken.ThrowIfCancellationRequested();
+                if (!ShouldSyncPlaylist(pl.JspfPlaylist.SourcePatch) && !_configService.IsAllPlaylistsSyncEnabled)
+                {
+                    _logger.LogDebug(
+                        "Skipping sync of playlist {PlaylistId} of type {PlaylistType}: syncing all playlists is disabled",
+                        pl.Identifier,
+                        pl.JspfPlaylist.SourcePatch);
+                }
 
                 try
                 {
@@ -293,5 +300,19 @@ public class SyncPlaylistsTask : IScheduledTask
     private IDisposable? BeginLogScope()
     {
         return _logger.BeginScope(new Dictionary<string, object> { { "EventId", "SyncPlaylistsTask" } });
+    }
+
+    private static bool ShouldSyncPlaylist(string sourcePatch)
+    {
+        string[] allowedPatches =
+        [
+            "weekly-jams",
+            "top-discoveries-of",
+            "top-discoveries-for-year",
+            "top-new-recordings-for-year",
+            "top-recordings-for-year"
+        ];
+
+        return allowedPatches.Any(patch => sourcePatch.Contains(patch, StringComparison.InvariantCultureIgnoreCase));
     }
 }
