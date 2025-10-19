@@ -101,7 +101,7 @@ public class SyncPlaylistsTask : IScheduledTask
             foreach (var userConfig in _configService.UserConfigs)
             {
                 _logger.LogInformation("Syncing playlists for user {Username}", userConfig.UserName);
-                if (!userConfig.IsPlaylistSyncEnabled)
+                if (!userConfig.IsPlaylistsSyncEnabled)
                 {
                     _logger.LogInformation("User has not playlist syncing enabled, skipping");
                     _progress += _userCountRatio;

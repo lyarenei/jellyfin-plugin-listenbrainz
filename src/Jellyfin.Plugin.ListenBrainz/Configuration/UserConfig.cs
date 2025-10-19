@@ -61,7 +61,7 @@ public class UserConfig
     /// <summary>
     /// Gets or sets a value indicating whether ListenBrainz playlist sync is enabled.
     /// </summary>
-    public bool IsPlaylistSyncEnabled { get; set; }
+    public bool IsPlaylistsSyncEnabled { get; set; }
 
     /// <summary>
     /// Gets or sets a ListenBrainz username.
