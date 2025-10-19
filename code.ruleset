@@ -102,6 +102,8 @@
         <Rule Id="CA1303" Action="None" />
         <!-- disable warning CA1308: Normalize strings to uppercase -->
         <Rule Id="CA1308" Action="None" />
+        <!-- disable warning CA1826: Do not use Enumerable methods on indexable collections -->
+        <Rule Id="CA1826" Action="None" />
         <!-- disable warning CA1848: Use the LoggerMessage delegates -->
         <Rule Id="CA1848" Action="None" />
         <!-- disable warning CA2007: Consider calling ConfigureAwait on the awaited task
