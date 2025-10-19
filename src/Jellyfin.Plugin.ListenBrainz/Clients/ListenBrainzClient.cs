@@ -222,6 +222,55 @@ public class ListenBrainzClient : IListenBrainzClient
         return recordingMbids;
     }
 
+    /// <inheritdoc />
+    public async Task<IEnumerable<Playlist>> GetCreatedForPlaylistsAsync(UserConfig config, int count, CancellationToken cancellationToken)
+    {
+        var request = new GetCreatedForPlaylistsRequest(config.UserName, count) { BaseUrl = _pluginConfig.ListenBrainzApiUrl };
+        GetCreatedForPlaylistsResponse response;
+        try
+        {
+            response = await _apiClient.GetCreatedForPlaylists(request, cancellationToken);
+        }
+        catch (Exception e)
+        {
+            throw new PluginException("GetCreatedForPlaylists failed", e);
+        }
+
+        if (response.IsNotOk)
+        {
+            throw new PluginException("Getting 'created for' playlists failed");
+        }
+
+        return response.Playlists;
+    }
+
+    /// <inheritdoc />
+    public async Task<Playlist> GetPlaylistAsync(UserConfig config, string playlistId, CancellationToken cancellationToken)
+    {
+        var request = new GetPlaylistRequest(playlistId, false)
+        {
+            ApiToken = config.PlaintextApiToken,
+            BaseUrl = _pluginConfig.ListenBrainzApiUrl,
+        };
+
+        GetPlaylistResponse response;
+        try
+        {
+            response = await _apiClient.GetPlaylist(request, cancellationToken);
+        }
+        catch (Exception e)
+        {
+            throw new PluginException("GetPlaylist failed", e);
+        }
+
+        if (response.IsNotOk)
+        {
+            throw new PluginException("Getting playlist failed");
+        }
+
+        return response.Playlist;
+    }
+
     /// <summary>
     /// Fetch ListenBrainz username using the API token.
     /// </summary>
