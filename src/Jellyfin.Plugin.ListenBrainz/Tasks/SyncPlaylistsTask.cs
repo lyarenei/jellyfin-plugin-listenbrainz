@@ -237,14 +237,6 @@ public class SyncPlaylistsTask : IScheduledTask
             jellyfinPlaylistTracks.Add(item);
         }
 
-        if (jellyfinPlaylistTracks.Count == 0)
-        {
-            _logger.LogInformation(
-                "No matching tracks found in Jellyfin for playlist {Title}, skipping playlist creation",
-                playlist.Title);
-            return;
-        }
-
         _logger.LogInformation(
             "Found {Count} (out of {TotalCount}) matching tracks for playlist {Title}",
             jellyfinPlaylistTracks.Count,
