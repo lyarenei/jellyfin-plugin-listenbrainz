@@ -72,15 +72,15 @@ public class SyncPlaylistsTask : IScheduledTask
     public string Category => "ListenBrainz";
 
     /// <inheritdoc />
-    public IEnumerable<TaskTriggerInfo> GetDefaultTriggers() => new[]
-    {
-        new TaskTriggerInfo
+    public IEnumerable<TaskTriggerInfo> GetDefaultTriggers() =>
+    [
+        new()
         {
             Type = TaskTriggerInfoType.WeeklyTrigger,
             DayOfWeek = DayOfWeek.Monday,
             TimeOfDayTicks = Utils.GetRandomMinute() * TimeSpan.TicksPerMinute,
         }
-    };
+    ];
 
     /// <inheritdoc />
     public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
