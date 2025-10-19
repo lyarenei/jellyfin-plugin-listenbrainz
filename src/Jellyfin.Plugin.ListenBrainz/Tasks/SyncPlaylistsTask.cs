@@ -51,7 +51,7 @@ public class SyncPlaylistsTask : IScheduledTask
         IListenBrainzClient? listenBrainzClient = null,
         IPluginConfigService? configService = null)
     {
-        _logger = loggerFactory.CreateLogger($"{Plugin.LoggerCategory}.PlaylistSyncTask");
+        _logger = loggerFactory.CreateLogger($"{Plugin.LoggerCategory}.SyncPlaylistsTask");
         _listenBrainzClient = listenBrainzClient ?? ClientUtils.GetListenBrainzClient(_logger, clientFactory);
         _libraryManager = libraryManager;
         _userManager = userManager;
