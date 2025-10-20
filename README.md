@@ -41,21 +41,15 @@ the [releases page][RELEASES].
 
 ## Install via repository
 
-Currently, the server will always try installing newest plugin version, even if it's not compatible with its version.
-Until [this issue][VERSION_ISSUE] is fixed, there will be multiple repositories for each Jellyfin server version. It is
-recommended to use the "main" repository, which will always contain the latest version of the plugin compatible with the
-latest major Jellyfin server. Otherwise you can use the specific ones to avoid breakage with the server version you are
-using.
+There are two repositories available for the plugin - stable and unstable. It is recommended to only use the stable
+repository.
 
-| Jellyfin version              | Repo URL                                               |
-|-------------------------------|--------------------------------------------------------|
-| Latest major version          | `https://repo.xkrivo.net/jellyfin/manifest.json`       |
-| Jellyfin 10.10.x              | `https://repo.xkrivo.net/jellyfin-10-10/manifest.json` |
-| Jellyfin 10.9.x               | `https://repo.xkrivo.net/jellyfin-10-9/manifest.json`  |
-| Jellyfin 10.8.x               | `https://repo.xkrivo.net/jellyfin-10-8/manifest.json`  |
-| Unstable - development builds | `https://repo.xkrivo.net/jellyfin-dev/manifest.json`   |
+| Plugin build type    | Repo URL                                               |
+|----------------------|--------------------------------------------------------|
+| Stable               | `https://repo.xkrivo.net/jellyfin/manifest.json`       |
+| Unstable/development | `https://repo.xkrivo.net/jellyfin-dev/manifest.json`   |
 
-The development repo is listed here just for the sake of completeness.
+Unstable repository contains development versions of the plugin, which may not work correctly or be straight up broken.
 It should not be used, unless:
 1. You are fine with all the risks of running unstable releases of software
 2. Or you have been explicitly asked to use it
@@ -70,16 +64,18 @@ After you add the repository, you should be able to see `ListenBrainz` plugin in
 Select the version you want to install and restart the server as asked. Continue with
 plugin [configuration](doc/configuration.md).
 
-Plugin and Jellyfin versions compatibility table:
+A major plugin version is always compatible with latest minor Jellyfin version, unless in some exceptional situations.
+Since Jellyfin treats semver minor version as a major one, the mapping between plugin versions and Jellyfin versions is
+as follows:
 
-| Plugin  | Jellyfin | Status      |
-|---------|----------|-------------|
-| 1.x.y.z | 10.7.a   | Unsupported |
-| 2.x.y.z | 10.8.a   | Unsupported |
-| 3.x.y.z | 10.8.a   | Unsupported |
-| 4.x.y.z | 10.9.a   | Unsupported |
-| 5.x.y.z | 10.10.a  | Unsupported |
-| 6.x.y.z | 10.11.a  | Active      |
+| Plugin  | Jellyfin |
+|---------|----------|
+| 1.x.y.z | 10.7.a   |
+| 2.x.y.z | 10.8.a   |
+| 3.x.y.z | 10.8.a   |
+| 4.x.y.z | 10.9.a   |
+| 5.x.y.z | 10.10.a  |
+| 6.x.y.z | 10.11.a  |
 
 ## Configuration
 
