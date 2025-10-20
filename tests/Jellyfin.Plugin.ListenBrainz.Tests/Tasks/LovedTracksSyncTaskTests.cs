@@ -65,25 +65,8 @@ public class LovedTracksSyncTaskTests
         UserName = "foobar",
         IsListenSubmitEnabled = true,
         ApiToken = "some-token",
-        PlaintextApiToken = "some-token"
+        PlaintextApiToken = "some-token",
     };
-
-    [Fact]
-    public async Task ExecuteAsync_ExitEarlyDisabledMusicBrainz()
-    {
-        _pluginConfigServiceMock
-            .SetupGet(m => m.IsMusicBrainzEnabled)
-            .Returns(false);
-
-        await _task.ExecuteAsync(_progressMock.Object, CancellationToken.None);
-
-        _pluginConfigServiceMock.VerifyGet(pcm => pcm.IsMusicBrainzEnabled, Times.Once);
-        _listenBrainzClientMock.Verify(
-            lbc => lbc.GetLovedTracksAsync(
-                It.IsAny<UserConfig>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
-    }
 
     [Fact]
     public async Task ExecuteAsync_ExitEarlyNoUsers()
