@@ -393,12 +393,15 @@
         }
 
         function buildUsersDropdown(jellyfinUsers) {
+            const dropdown = document.getElementById("JellyfinUser");
+            dropdown.innerHTML = "";
+
             let html = "";
             jellyfinUsers.forEach((user) => {
                 html += "<option value='" + user.Id + "'>" + user.Name + "</option>";
             })
 
-            document.getElementById("JellyfinUser").innerHTML = html;
+            dropdown.innerHTML = html;
         }
 
         function fillGeneralConfig(data) {
@@ -524,6 +527,9 @@
         }
 
         async function buildAllowedLibrariesList(libraryConfigs) {
+            const container = document.getElementById('LibrariesList');
+            container.innerHTML = "";
+
             const allLibraries = await ApiClient.GetAllLibraries();
 
             function isAllowed(libraryId) {
@@ -555,7 +561,7 @@
 
                 label.appendChild(input);
                 label.appendChild(span);
-                document.getElementById('LibrariesList').appendChild(label);
+                container.appendChild(label);
             })
         }
 
