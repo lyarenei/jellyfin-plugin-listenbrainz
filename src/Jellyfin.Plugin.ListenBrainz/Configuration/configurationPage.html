@@ -166,6 +166,9 @@
         // Cannot use let because of redeclaration.
         var ListenBrainzConfig = {
             PluginUniqueId: "59B20823-AAFE-454C-A393-17427F518631",
+            IsLoaded: false,
+            loadedUsers: new Set(),
+            loadedLibraries: new Set(),
             UserDefaults: {
                 JellyfinUserId: "",
                 ApiToken: "",
@@ -217,14 +220,27 @@
             });
 
         function onPageShow() {
-            loadCss('bootstrap-grid.min.css');
-            loadCss('styles.css');
+            if (!ListenBrainzConfig.IsLoaded) {
+                loadCss('bootstrap-grid.min.css');
+                loadCss('styles.css');
+                ListenBrainzConfig.IsLoaded = true;
+            }
 
             Dashboard.showLoadingMsg();
 
             ApiClient.getUsers()
                 .then((users) => {
-                    buildUsersDropdown(users);
+                    let loadedSet = new Set(ListenBrainzConfig.loadedUsers);
+                    let usersSet = new Set(users.map(u => u.Id));
+                    let resultSet = usersSet.difference(loadedSet)
+
+                    if (resultSet.size === 0) {
+                        loadConfig(users[0].Id)
+                        return;
+                    }
+
+                    ListenBrainzConfig.loadedUsers = resultSet;
+                    buildUsersDropdown(users.filter(u => resultSet.has(u.Id)));
                     loadConfig(users[0].Id)
                 })
                 .catch((reason) => {
