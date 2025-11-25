@@ -155,25 +155,27 @@ public class SyncPlaylistsTask : IScheduledTask
             foreach (var pl in playlists)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                if (!ShouldSyncPlaylist(pl.JspfPlaylist.SourcePatch) && !_configService.IsAllPlaylistsSyncEnabled)
+                if (ShouldSyncPlaylist(pl.JspfPlaylist.SourcePatch) || _configService.IsAllPlaylistsSyncEnabled)
+                {
+                    try
+                    {
+                        var playlist = await _listenBrainzClient.GetPlaylistAsync(
+                            userConfig,
+                            pl.PlaylistId,
+                            cancellationToken);
+                        await SyncPlaylist(user, playlist, cancellationToken);
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogWarning("Failed to sync playlist {PlaylistId}: {Error}", pl.Identifier, e.Message);
+                    }
+                }
+                else
                 {
                     _logger.LogDebug(
                         "Skipping sync of playlist {PlaylistId} of type {PlaylistType}: syncing all playlists is disabled",
                         pl.Identifier,
                         pl.JspfPlaylist.SourcePatch);
-                }
-
-                try
-                {
-                    var playlist = await _listenBrainzClient.GetPlaylistAsync(
-                        userConfig,
-                        pl.PlaylistId,
-                        cancellationToken);
-                    await SyncPlaylist(user, playlist, cancellationToken);
-                }
-                catch (Exception e)
-                {
-                    _logger.LogWarning("Failed to sync playlist {PlaylistId}: {Error}", pl.Identifier, e.Message);
                 }
 
                 _progress += playlistRatio;
