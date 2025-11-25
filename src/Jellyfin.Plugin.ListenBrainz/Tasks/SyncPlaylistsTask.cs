@@ -254,7 +254,9 @@ public class SyncPlaylistsTask : IScheduledTask
         var playlistName = $"[LB] {playlist.Title}";
         var playlistQuery = new InternalItemsQuery
         {
-            IncludeItemTypes = [BaseItemKind.Playlist], Name = playlistName, User = user,
+            IncludeItemTypes = [BaseItemKind.Playlist],
+            Name = playlistName,
+            User = user,
         };
         var existingPlaylist = _libraryManager.GetItemList(playlistQuery).FirstOrDefault();
         if (existingPlaylist is not null)
