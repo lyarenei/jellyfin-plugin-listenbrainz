@@ -155,6 +155,12 @@ public class SyncPlaylistsTask : IScheduledTask
             foreach (var pl in playlists)
             {
                 cancellationToken.ThrowIfCancellationRequested();
+
+                _logger.LogDebug(
+                    "Processing playlist {PlaylistId} of type {PlaylistType}",
+                    pl.Identifier,
+                    pl.JspfPlaylist.SourcePatch);
+
                 if (ShouldSyncPlaylist(pl.JspfPlaylist.SourcePatch) || _configService.IsAllPlaylistsSyncEnabled)
                 {
                     try
