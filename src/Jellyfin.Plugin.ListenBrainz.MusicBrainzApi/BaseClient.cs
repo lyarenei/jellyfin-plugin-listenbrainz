@@ -105,12 +105,23 @@ public class BaseClient : HttpClient, IDisposable
         where TRequest : IMusicBrainzRequest
         where TResponse : IMusicBrainzResponse
     {
-        var query = ToMusicbrainzQuery(request.SearchQuery);
+        var query = HttpUtility.ParseQueryString(string.Empty);
+        foreach (var param in request.SearchQuery)
+        {
+            query[param.Key] = param.Value;
+        }
+
+        var luceneSearchQuery = request.LuceneSearchQueryString;
+        if (!string.IsNullOrEmpty(luceneSearchQuery))
+        {
+            query["query"] = luceneSearchQuery;
+        }
+
         var requestUri = BuildRequestUri(request.BaseUrl, request.Endpoint);
         var requestMessage = new HttpRequestMessage
         {
             Method = HttpMethod.Get,
-            RequestUri = new Uri($"{requestUri}?query={query}&limit=1")
+            RequestUri = new Uri($"{requestUri}?{query}"),
         };
 
         var productValue = new ProductInfoHeaderValue(_clientName, _clientVersion);
