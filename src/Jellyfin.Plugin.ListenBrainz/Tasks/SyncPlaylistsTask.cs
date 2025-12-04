@@ -339,8 +339,7 @@ public class SyncPlaylistsTask : IScheduledTask
 
         _logger.LogDebug("Looking up related recordings for recording MBID {Mbid}", recordingMbid);
 
-        var relatedRecordingMbids =
-            await _musicBrainzClient.GetRelatedRecordingMbidsAsync(recordingMbid, cancellationToken);
+        var relatedRecordingMbids = await _musicBrainzClient.GetRelatedRecordingMbidsAsync(recordingMbid, cancellationToken);
         foreach (var relatedMbid in relatedRecordingMbids)
         {
             cancellationToken.ThrowIfCancellationRequested();
