@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Text;
 using Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.Resources;
 
@@ -8,26 +10,25 @@ namespace Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.Models.Requests;
 /// </summary>
 public class RecordingRelationsRequest : IMusicBrainzRequest
 {
+    private readonly string _recordingMbid;
+    private readonly CompositeFormat _endpointFormat;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="RecordingRelationsRequest"/> class.
     /// </summary>
     /// <param name="recordingMbid">Recording MBID.</param>
     public RecordingRelationsRequest(string recordingMbid)
     {
+        _recordingMbid = recordingMbid;
+        _endpointFormat = CompositeFormat.Parse(Endpoints.RecordingData);
         BaseUrl = Api.BaseUrl;
-        RecordingMbid = recordingMbid;
     }
 
     /// <inheritdoc />
-    public string Endpoint => Endpoints.Recording;
+    public string Endpoint => string.Format(CultureInfo.InvariantCulture, _endpointFormat, _recordingMbid);
 
     /// <inheritdoc />
     public string BaseUrl { get; init; }
-
-    /// <summary>
-    /// Gets recording MBID.
-    /// </summary>
-    public string RecordingMbid { get; }
 
     /// <inheritdoc />
     public Dictionary<string, string> SearchQuery => new() { { "inc", "recording-rels" } };
