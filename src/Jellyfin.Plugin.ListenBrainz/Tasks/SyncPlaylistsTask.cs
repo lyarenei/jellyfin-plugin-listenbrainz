@@ -25,6 +25,7 @@ public class SyncPlaylistsTask : IScheduledTask
 {
     private readonly ILogger _logger;
     private readonly IListenBrainzClient _listenBrainzClient;
+    private readonly IMusicBrainzClient _musicBrainzClient;
     private readonly ILibraryManager _libraryManager;
     private readonly IUserManager _userManager;
     private readonly IPlaylistManager _playlistManager;
@@ -41,6 +42,7 @@ public class SyncPlaylistsTask : IScheduledTask
     /// <param name="userManager">User manager.</param>
     /// <param name="playlistManager">Playlist manager.</param>
     /// <param name="listenBrainzClient">ListenBrainz client.</param>
+    /// <param name="musicBrainzClient">MusicBrainz client.</param>
     /// <param name="configService">Plugin configuration service.</param>
     public SyncPlaylistsTask(
         ILoggerFactory loggerFactory,
@@ -49,10 +51,12 @@ public class SyncPlaylistsTask : IScheduledTask
         IUserManager userManager,
         IPlaylistManager playlistManager,
         IListenBrainzClient? listenBrainzClient = null,
+        IMusicBrainzClient? musicBrainzClient = null,
         IPluginConfigService? configService = null)
     {
         _logger = loggerFactory.CreateLogger($"{Plugin.LoggerCategory}.SyncPlaylistsTask");
         _listenBrainzClient = listenBrainzClient ?? ClientUtils.GetListenBrainzClient(_logger, clientFactory);
+        _musicBrainzClient = musicBrainzClient ?? ClientUtils.GetMusicBrainzClient(_logger, clientFactory);
         _libraryManager = libraryManager;
         _userManager = userManager;
         _playlistManager = playlistManager;
@@ -231,8 +235,7 @@ public class SyncPlaylistsTask : IScheduledTask
                 continue;
             }
 
-            // Find item with matching recording MBID
-            var item = allAudioItems.FirstOrDefault(i => i.GetRecordingMbid() == recordingMbid);
+            var item = await FindJellyfinItemForRecordingMbid(allAudioItems, recordingMbid, cancellationToken);
             if (item is null)
             {
                 _logger.LogDebug(
@@ -316,5 +319,39 @@ public class SyncPlaylistsTask : IScheduledTask
         ];
 
         return allowedPatches.Any(patch => sourcePatch.Contains(patch, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    private async Task<BaseItem?> FindJellyfinItemForRecordingMbid(
+        List<BaseItem> allAudioItems,
+        string recordingMbid,
+        CancellationToken cancellationToken)
+    {
+        var item = allAudioItems.FirstOrDefault(i => i.GetRecordingMbid() == recordingMbid);
+        if (item is not null)
+        {
+            return item;
+        }
+
+        if (!_configService.IsMusicBrainzEnabled)
+        {
+            return null;
+        }
+
+        _logger.LogDebug("Looking up related recordings for recording MBID {Mbid}", recordingMbid);
+
+        var relatedRecordingMbids =
+            await _musicBrainzClient.GetRelatedRecordingMbidsAsync(recordingMbid, cancellationToken);
+        foreach (var relatedMbid in relatedRecordingMbids)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            item = allAudioItems.FirstOrDefault(i => i.GetRecordingMbid() == relatedMbid);
+            if (item is not null)
+            {
+                return item;
+            }
+        }
+
+        return null;
     }
 }
