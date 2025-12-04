@@ -236,7 +236,7 @@ public class SyncPlaylistsTask : IScheduledTask
             if (item is null)
             {
                 _logger.LogDebug(
-                    "No Jellyfin item found for recording MBID {MBID} (track: {ID})",
+                    "No Jellyfin item found for recording MBID {Mbid} (track: {ID})",
                     recordingMbid,
                     track.Identifier);
                 continue;
