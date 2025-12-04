@@ -161,7 +161,7 @@ public class SyncPlaylistsTask : IScheduledTask
                     pl.Identifier,
                     pl.JspfPlaylist.SourcePatch);
 
-                if (ShouldSyncPlaylist(pl.JspfPlaylist.SourcePatch) || _configService.IsAllPlaylistsSyncEnabled)
+                if (_configService.IsAllPlaylistsSyncEnabled || ShouldSyncPlaylist(pl.JspfPlaylist.SourcePatch))
                 {
                     try
                     {
