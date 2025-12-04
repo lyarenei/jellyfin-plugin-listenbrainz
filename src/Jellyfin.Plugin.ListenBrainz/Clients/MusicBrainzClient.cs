@@ -61,4 +61,13 @@ public class MusicBrainzClient : IMusicBrainzClient
 
         return new AudioItemMetadata(task.Result.Recordings.First());
     }
+
+    /// <inheritdoc />
+    public async Task<IEnumerable<string>> GetRelatedRecordingMbidsAsync(string recordingMbid, CancellationToken cancellationToken)
+    {
+        var config = Plugin.GetConfiguration();
+        var request = new RecordingRelationsRequest(recordingMbid) { BaseUrl = config.MusicBrainzApiUrl };
+        var response = await _apiClient.GetRecordingRelationsAsync(request, cancellationToken);
+        return response.Relations.Select(rel => rel.Recording.Mbid);
+    }
 }
