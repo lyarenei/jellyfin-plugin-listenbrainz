@@ -235,7 +235,7 @@ public class SyncPlaylistsTask : IScheduledTask
                 continue;
             }
 
-            var item = await FindJellyfinItemForRecordingMbid(allAudioItems, recordingMbid, cancellationToken);
+            var item = await FindJellyfinItemByRecordingMbid(allAudioItems, recordingMbid, cancellationToken);
             if (item is null)
             {
                 _logger.LogDebug(
@@ -321,7 +321,7 @@ public class SyncPlaylistsTask : IScheduledTask
         return allowedPatches.Any(patch => sourcePatch.Contains(patch, StringComparison.InvariantCultureIgnoreCase));
     }
 
-    private async Task<BaseItem?> FindJellyfinItemForRecordingMbid(
+    private async Task<BaseItem?> FindJellyfinItemByRecordingMbid(
         List<BaseItem> allAudioItems,
         string recordingMbid,
         CancellationToken cancellationToken)
