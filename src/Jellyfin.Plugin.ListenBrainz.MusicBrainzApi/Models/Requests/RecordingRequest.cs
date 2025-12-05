@@ -30,5 +30,8 @@ public class RecordingRequest : IMusicBrainzRequest
     public string TrackMbid { get; }
 
     /// <inheritdoc />
-    public Dictionary<string, string> SearchQuery => new() { { "tid", this.TrackMbid } };
+    public Dictionary<string, string> SearchQuery => new() { { "limit", "1" } };
+
+    /// <inheritdoc />
+    public Dictionary<string, string> LuceneSearchQuery => new() { { "tid", this.TrackMbid } };
 }

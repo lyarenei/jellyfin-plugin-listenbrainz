@@ -35,6 +35,11 @@ public interface IPluginConfigService
     bool IsImmediateFavoriteSyncEnabled { get; }
 
     /// <summary>
+    /// Gets a value indicating whether all playlists from ListenBrainz should be synced.
+    /// </summary>
+    bool IsAllPlaylistsSyncEnabled { get; }
+
+    /// <summary>
     /// Gets library configurations.
     /// </summary>
     Collection<LibraryConfig> LibraryConfigs { get; }

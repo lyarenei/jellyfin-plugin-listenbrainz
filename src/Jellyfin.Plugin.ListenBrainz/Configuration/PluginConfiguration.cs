@@ -16,6 +16,7 @@ public class PluginConfiguration : BasePluginConfiguration
     private bool? _isMusicBrainzEnabledOverride;
     private bool? _isAlternativeModeEnabled;
     private bool? _isImmediateFavoriteSyncEnabled;
+    private bool? _isAllPlaylistsSyncEnabled;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PluginConfiguration"/> class.
@@ -107,4 +108,13 @@ public class PluginConfiguration : BasePluginConfiguration
     [JsonIgnore]
     [XmlIgnore]
     public bool IsBackupEnabled => !string.IsNullOrEmpty(BackupPath);
+
+    /// <summary>
+    /// Gets or sets a value indicating whether syncing of all playlists is enabled.
+    /// </summary>
+    public bool IsAllPlaylistsSyncEnabled
+    {
+        get => _isAllPlaylistsSyncEnabled ?? false;
+        set => _isAllPlaylistsSyncEnabled = value;
+    }
 }
