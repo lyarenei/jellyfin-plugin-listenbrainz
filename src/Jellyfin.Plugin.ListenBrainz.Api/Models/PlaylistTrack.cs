@@ -13,6 +13,7 @@ public class PlaylistTrack
     public PlaylistTrack()
     {
         Identifier = new List<string>();
+        Title = string.Empty;
     }
 
     /// <summary>
@@ -20,6 +21,11 @@ public class PlaylistTrack
     /// For some reason, this is an array.
     /// </summary>
     public IEnumerable<string> Identifier { get; set; }
+
+    /// <summary>
+    /// Gets or sets track title.
+    /// </summary>
+    public string Title { get; set; }
 
     /// <summary>
     /// Gets recording MBID from the identifier URL.
