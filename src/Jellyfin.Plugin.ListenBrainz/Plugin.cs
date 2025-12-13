@@ -32,7 +32,6 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// <param name="userDataManager">User data manager.</param>
     /// <param name="libraryManager">Library manager.</param>
     /// <param name="userManager">User manager.</param>
-    /// <param name="pluginService">Plugin service.</param>
     public Plugin(
         IApplicationPaths paths,
         IXmlSerializer xmlSerializer,
