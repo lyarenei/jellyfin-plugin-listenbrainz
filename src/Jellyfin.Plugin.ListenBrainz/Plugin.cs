@@ -8,7 +8,6 @@ using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Session;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.ListenBrainz;
@@ -19,7 +18,7 @@ namespace Jellyfin.Plugin.ListenBrainz;
 public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 {
     private static Plugin? _thisInstance;
-    private readonly IHostedService _service;
+    private readonly PluginService _service;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Plugin"/> class.
