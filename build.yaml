@@ -1,7 +1,7 @@
 ---
 name: "ListenBrainz"
 guid: "59B20823-AAFE-454C-A393-17427F518631"
-version: "5.2.0.4"
+version: "5.2.1.1"
 targetAbi: "10.10.0.0"
 framework: "net8.0"
 overview: "Track your music habits with ListenBrainz."
@@ -16,5 +16,5 @@ artifacts:
   - "Jellyfin.Plugin.ListenBrainz.Http.dll"
   - "Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.dll"
 changelog: >
-  Maintenance/fix
-    - Reimplementation of loved sync task (#124 @lyarenei)
+  Maintenance
+    - Fix duplication of items in plugin config
