@@ -15,10 +15,11 @@ namespace Jellyfin.Plugin.ListenBrainz;
 /// <summary>
 /// ListenBrainz Plugin definition for Jellyfin.
 /// </summary>
-public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
+public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
 {
     private static Plugin? _thisInstance;
     private readonly PluginService _service;
+    private bool _isDisposed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Plugin"/> class.
@@ -55,7 +56,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// <summary>
     /// Finalizes an instance of the <see cref="Plugin"/> class.
     /// </summary>
-    ~Plugin() => _service.StopAsync(CancellationToken.None);
+    ~Plugin() => Dispose(false);
 
     /// <inheritdoc />
     public override string Name => "ListenBrainz";
@@ -166,5 +167,31 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     public static void UpdateConfig(BasePluginConfiguration newConfiguration)
     {
         _thisInstance?.UpdateConfiguration(newConfiguration);
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Dispose unmanaged (own) and optionally managed resources.
+    /// </summary>
+    /// <param name="disposing">Dispose managed resources.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_isDisposed)
+        {
+            return;
+        }
+
+        if (disposing)
+        {
+            _service.Dispose();
+        }
+
+        _isDisposed = true;
     }
 }
