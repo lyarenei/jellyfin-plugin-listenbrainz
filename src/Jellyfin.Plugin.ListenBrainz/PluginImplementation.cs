@@ -104,7 +104,6 @@ public class PluginImplementation : IDisposable
     /// <param name="args">Event args.</param>
     public void OnPlaybackStart(object? sender, PlaybackProgressEventArgs args)
     {
-        using var logScope = BeginLogScope();
         _logger.LogDebug("Picking up playback start event for item {Item}", args.Item.Name);
         EventData data;
         try
@@ -186,7 +185,6 @@ public class PluginImplementation : IDisposable
     /// <param name="args">Event args.</param>
     public void OnPlaybackStop(object? sender, PlaybackStopEventArgs args)
     {
-        using var logScope = BeginLogScope();
         _logger.LogDebug("Picking up playback stop event for item {Item}", args.Item.Name);
         if (_configService.IsAlternativeModeEnabled)
         {
@@ -293,7 +291,7 @@ public class PluginImplementation : IDisposable
     /// <param name="args">Event args.</param>
     public void OnUserDataSave(object? sender, UserDataSaveEventArgs args)
     {
-        using var logScope = BeginLogScope();
+        // using var logScope = BeginLogScope();
         _logger.LogDebug("Picking up user data save event for item {Item}", args.Item.Name);
 
         EventData data;
@@ -612,12 +610,6 @@ public class PluginImplementation : IDisposable
         }
 
         _logger.LogDebug("Requirements were met");
-    }
-
-    private IDisposable? BeginLogScope()
-    {
-        var eventId = Guid.NewGuid().ToString("N")[..7];
-        return _logger.BeginScope(new Dictionary<string, object> { { "EventId", eventId } });
     }
 
     private struct EventData
