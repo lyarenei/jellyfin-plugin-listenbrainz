@@ -89,16 +89,16 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// <inheritdoc />
     public IEnumerable<PluginPageInfo> GetPages()
     {
-        return new[]
-        {
+        return
+        [
             new PluginPageInfo
             {
                 Name = Name,
                 EmbeddedResourcePath = $"{GetType().Namespace}.Configuration.configurationPage.html",
                 EnableInMainMenu = false,
-                MenuIcon = "music_note"
-            }
-        };
+                MenuIcon = "music_note",
+            },
+        ];
     }
 
     /// <summary>
@@ -110,7 +110,11 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     public static PluginConfiguration GetConfiguration()
     {
         var config = _thisInstance?.Configuration;
-        if (config is not null) return config;
+        if (config is not null)
+        {
+            return config;
+        }
+
         throw new PluginException("Plugin instance is not available");
     }
 
@@ -125,7 +129,11 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
         // var path = _thisInstance?.DataFolderPath;
         var pluginDirName = string.Format(CultureInfo.InvariantCulture, "{0}_{1}", _thisInstance?.Name, Version);
         var path = Path.Join(_thisInstance?.ApplicationPaths.PluginsPath, pluginDirName);
-        if (path is null) throw new PluginException("Plugin instance is not available");
+        if (path is null)
+        {
+            throw new PluginException("Plugin instance is not available");
+        }
+
         return path;
     }
 
@@ -137,9 +145,17 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     public static string GetConfigDirPath()
     {
         var path = _thisInstance?.ConfigurationFilePath;
-        if (path is null) throw new PluginException("Plugin instance is not available");
+        if (path is null)
+        {
+            throw new PluginException("Plugin instance is not available");
+        }
+
         var dirName = Path.GetDirectoryName(path);
-        if (dirName is null) throw new PluginException("Could not get a config directory name");
+        if (dirName is null)
+        {
+            throw new PluginException("Could not get a config directory name");
+        }
+
         return dirName;
     }
 
