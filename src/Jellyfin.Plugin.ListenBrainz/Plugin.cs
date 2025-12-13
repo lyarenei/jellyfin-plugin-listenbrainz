@@ -2,6 +2,8 @@ using System.Globalization;
 using System.Reflection;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
+using Jellyfin.Plugin.ListenBrainz.Managers;
+using Jellyfin.Plugin.ListenBrainz.Services;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Controller.Library;
@@ -9,6 +11,7 @@ using MediaBrowser.Controller.Session;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
 using Microsoft.Extensions.Logging;
+using ClientUtils = Jellyfin.Plugin.ListenBrainz.Clients.Utils;
 
 namespace Jellyfin.Plugin.ListenBrainz;
 
@@ -18,8 +21,12 @@ namespace Jellyfin.Plugin.ListenBrainz;
 public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
 {
     private static Plugin? _thisInstance;
-    private readonly PluginService _service;
+    private readonly ILogger<Plugin> _logger;
+    private readonly ISessionManager _sessionManager;
+    private readonly IUserDataManager _userDataManager;
+    private readonly PluginEventHandler _pluginEventHandler;
     private bool _isDisposed;
+    private bool _isRegistered;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Plugin"/> class.
@@ -43,14 +50,46 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
         IUserManager userManager) : base(paths, xmlSerializer)
     {
         _thisInstance = this;
-        _service = new PluginService(
-            sessionManager,
-            loggerFactory,
-            clientFactory,
-            userDataManager,
+        _logger = loggerFactory.CreateLogger<Plugin>();
+        _sessionManager = sessionManager;
+        _userDataManager = userDataManager;
+
+        var listenBrainzLogger = loggerFactory.CreateLogger(LoggerCategory + ".ListenBrainzApi");
+        var listenBrainzClient = ClientUtils.GetListenBrainzClient(listenBrainzLogger, clientFactory);
+
+        var musicBrainzLogger = loggerFactory.CreateLogger(LoggerCategory + ".MusicBrainzApi");
+        var musicBrainzClient = ClientUtils.GetMusicBrainzClient(musicBrainzLogger, clientFactory);
+
+        var backupLogger = loggerFactory.CreateLogger(LoggerCategory + ".Backup");
+        var backupManager = new BackupManager(backupLogger);
+
+        var pluginConfigService = new DefaultPluginConfigService();
+
+        var favoriteSyncLogger = loggerFactory.CreateLogger(LoggerCategory + ".FavoriteSync");
+        var favoriteSyncService = new DefaultFavoriteSyncService(
+            favoriteSyncLogger,
+            listenBrainzClient,
+            musicBrainzClient,
+            pluginConfigService,
             libraryManager,
-            userManager);
-        _service.StartAsync(CancellationToken.None);
+            userManager,
+            userDataManager);
+
+        var pluginImplLogger = loggerFactory.CreateLogger(LoggerCategory);
+        var pluginImpl = new PluginImplementation(
+            pluginImplLogger,
+            listenBrainzClient,
+            musicBrainzClient,
+            userManager,
+            libraryManager,
+            backupManager,
+            pluginConfigService,
+            favoriteSyncService);
+
+        var eventHandlerLogger = loggerFactory.CreateLogger(LoggerCategory + ".EventHandler");
+        _pluginEventHandler = new PluginEventHandler(eventHandlerLogger, pluginImpl);
+
+        RegisterEventHandlers();
     }
 
     /// <summary>
@@ -187,11 +226,51 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
             return;
         }
 
+        UnregisterEventHandlers();
+
         if (disposing)
         {
-            _service.Dispose();
+            _pluginEventHandler.Dispose();
         }
 
         _isDisposed = true;
+    }
+
+    /// <summary>
+    /// Register event handlers for the plugin.
+    /// </summary>
+    private void RegisterEventHandlers()
+    {
+        if (_isRegistered)
+        {
+            _logger.LogDebug("Plugin event handlers are already registered");
+            return;
+        }
+
+        _sessionManager.PlaybackStart += _pluginEventHandler.OnPlaybackStart;
+        _sessionManager.PlaybackStopped += _pluginEventHandler.OnPlaybackStop;
+        _userDataManager.UserDataSaved += _pluginEventHandler.OnUserDataSave;
+
+        _isRegistered = true;
+        _logger.LogDebug("Plugin event handlers have been registered");
+    }
+
+    /// <summary>
+    /// Unregister event handlers for the plugin.
+    /// </summary>
+    private void UnregisterEventHandlers()
+    {
+        if (!_isRegistered)
+        {
+            _logger.LogDebug("Plugin event handlers are already unregistered");
+            return;
+        }
+
+        _sessionManager.PlaybackStart -= _pluginEventHandler.OnPlaybackStart;
+        _sessionManager.PlaybackStopped -= _pluginEventHandler.OnPlaybackStop;
+        _userDataManager.UserDataSaved -= _pluginEventHandler.OnUserDataSave;
+
+        _isRegistered = false;
+        _logger.LogInformation("Plugin event handlers have been unregistered");
     }
 }
