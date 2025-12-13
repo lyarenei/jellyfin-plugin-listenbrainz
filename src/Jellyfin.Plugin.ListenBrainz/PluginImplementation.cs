@@ -82,7 +82,7 @@ public class PluginImplementation : IDisposable
     /// Dispose managed and unmanaged (own) resources.
     /// </summary>
     /// <param name="disposing">Dispose managed resources.</param>
-    private void Dispose(bool disposing)
+    protected virtual void Dispose(bool disposing)
     {
         if (_isDisposed)
         {
