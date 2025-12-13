@@ -382,23 +382,30 @@
 
         function loadCss(fileName) {
             let path = 'ListenBrainzPlugin/internal/styles/' + fileName;
+            let exists = document.querySelector('style[data-lb-css="' + fileName + '"]');
+            if (exists) return;
+
             ApiClient.ajax({
                 type: "GET",
                 url: ApiClient.getUrl(path),
             }).then((cssValue) => {
                 let styleTag = document.createElement("style");
+                styleTag.setAttribute('data-lb-css', fileName);
                 styleTag.innerText = cssValue;
                 document.getElementsByTagName("head")[0].appendChild(styleTag);
             });
         }
 
         function buildUsersDropdown(jellyfinUsers) {
+            const dropdown = document.getElementById("JellyfinUser");
+            dropdown.innerHTML = "";
+
             let html = "";
             jellyfinUsers.forEach((user) => {
                 html += "<option value='" + user.Id + "'>" + user.Name + "</option>";
             })
 
-            document.getElementById("JellyfinUser").innerHTML = html;
+            dropdown.innerHTML = html;
         }
 
         function fillGeneralConfig(data) {
@@ -524,6 +531,9 @@
         }
 
         async function buildAllowedLibrariesList(libraryConfigs) {
+            const container = document.getElementById('LibrariesList');
+            container.innerHTML = "";
+
             const allLibraries = await ApiClient.GetAllLibraries();
 
             function isAllowed(libraryId) {
@@ -555,7 +565,7 @@
 
                 label.appendChild(input);
                 label.appendChild(span);
-                document.getElementById('LibrariesList').appendChild(label);
+                container.appendChild(label);
             })
         }
 
