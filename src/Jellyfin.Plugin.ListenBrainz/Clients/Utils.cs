@@ -40,6 +40,7 @@ public static class Utils
     {
         var clientName = string.Join(string.Empty, Plugin.FullName.Split(' ').Select(s => s.Capitalize()));
         var apiClient = new MusicBrainzApiClient(clientName, Plugin.Version, Plugin.SourceUrl, clientFactory, logger);
-        return new MusicBrainzClient(logger, apiClient);
+        var pluginConfig = new DefaultPluginConfigService();
+        return new MusicBrainzClient(logger, apiClient, pluginConfig);
     }
 }

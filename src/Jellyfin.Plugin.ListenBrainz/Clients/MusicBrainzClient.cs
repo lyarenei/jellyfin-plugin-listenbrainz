@@ -16,16 +16,19 @@ public class MusicBrainzClient : IMusicBrainzClient
 {
     private readonly ILogger _logger;
     private readonly IMusicBrainzApiClient _apiClient;
+    private readonly IPluginConfigService _pluginConfig;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MusicBrainzClient"/> class.
     /// </summary>
     /// <param name="logger">Logger instance.</param>
     /// <param name="apiClient">MusicBrainz API client.</param>
-    public MusicBrainzClient(ILogger logger, IMusicBrainzApiClient apiClient)
+    /// <param name="pluginConfig">Plugin configuration service.</param>
+    public MusicBrainzClient(ILogger logger, IMusicBrainzApiClient apiClient, IPluginConfigService pluginConfig)
     {
         _logger = logger;
         _apiClient = apiClient;
+        _pluginConfig = pluginConfig;
     }
 
     /// <inheritdoc />
@@ -40,8 +43,7 @@ public class MusicBrainzClient : IMusicBrainzClient
             throw new ArgumentException("Audio item does not have a track MBID");
         }
 
-        var config = Plugin.GetConfiguration();
-        var request = new RecordingRequest(trackMbid) { BaseUrl = config.MusicBrainzApiUrl };
+        var request = new RecordingRequest(trackMbid) { BaseUrl = _pluginConfig.MusicBrainzApiUrl };
         var task = _apiClient.GetRecordingAsync(request, CancellationToken.None);
         task.Wait();
         if (task.Exception is not null)
