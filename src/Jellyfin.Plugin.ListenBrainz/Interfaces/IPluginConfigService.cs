@@ -20,6 +20,12 @@ public interface IPluginConfigService
     public string ListenBrainzApiUrl { get; }
 
     /// <summary>
+    /// Gets configured MusicBrainz API URL.
+    /// </summary>
+    /// <returns>MusicBrainz API URL.</returns>
+    public string MusicBrainzApiUrl { get; }
+
+    /// <summary>
     /// Gets a value indicating whether listen backup feature is enabled.
     /// </summary>
     bool IsBackupEnabled { get; }

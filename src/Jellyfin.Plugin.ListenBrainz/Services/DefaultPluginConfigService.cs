@@ -24,6 +24,12 @@ public class DefaultPluginConfigService : IPluginConfigService
     }
 
     /// <inheritdoc />
+    public string MusicBrainzApiUrl
+    {
+        get => Config.MusicBrainzApiUrl;
+    }
+
+    /// <inheritdoc />
     public bool IsBackupEnabled
     {
         get => Config.IsBackupEnabled;
