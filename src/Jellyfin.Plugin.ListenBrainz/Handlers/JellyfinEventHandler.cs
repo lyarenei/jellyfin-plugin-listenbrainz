@@ -33,6 +33,7 @@ public abstract class JellyfinEventHandler<TEventArgs>
     public void HandleEvent(object? sender, TEventArgs args)
     {
         using var logScope = BeginLogScope();
+        _logger.LogTrace("Handling event of type {EventType}", typeof(TEventArgs).Name);
         AsyncWrapper(sender, args).Forget();
     }
 
@@ -53,7 +54,7 @@ public abstract class JellyfinEventHandler<TEventArgs>
         }
         catch (PluginException e)
         {
-            _logger.LogInformation("Event was not handled: {ExceptionMessage}", e.Message);
+            _logger.LogInformation("Event handling finished with error: {ExceptionMessage}", e.Message);
         }
         catch (OperationCanceledException)
         {
