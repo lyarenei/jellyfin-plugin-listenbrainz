@@ -3,6 +3,7 @@ using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
 using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
+using MediaBrowser.Model.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.ListenBrainz.Handlers;
@@ -115,6 +116,15 @@ public abstract class JellyfinEventHandler<TEventArgs>
             throw new PluginException("Event is not for an audio item");
         }
 
+        switch (args.SaveReason)
+        {
+            case UserDataSaveReason.PlaybackFinished:
+            case UserDataSaveReason.UpdateUserRating:
+                break;
+            default:
+                throw new PluginException("Event save reason is not supported");
+        }
+
         var jellyfinUser = _userManager.GetUserById(args.UserId);
         if (jellyfinUser is null)
         {
@@ -125,6 +135,7 @@ public abstract class JellyfinEventHandler<TEventArgs>
         {
             Item = item,
             JellyfinUser = jellyfinUser,
+            SaveReason = args.SaveReason,
         };
     }
 
@@ -148,5 +159,11 @@ public abstract class JellyfinEventHandler<TEventArgs>
         /// Gets jellyfin user associated with the event.
         /// </summary>
         public User JellyfinUser { get; init; }
+
+        /// <summary>
+        /// Gets the reason for user data save.
+        /// Only set if event data are parsed from <see cref="UserDataSaveEventArgs"/>.
+        /// </summary>
+        public UserDataSaveReason? SaveReason { get; init; }
     }
 }
