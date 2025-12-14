@@ -32,13 +32,15 @@ public class PlaybackStartHandler : JellyfinEventHandler<PlaybackProgressEventAr
     /// <param name="musicBrainzClient">MusicBrainz client.</param>
     /// <param name="listenBrainzClient">ListenBrainz client.</param>
     /// <param name="playbackTracker">Playback tracker instance.</param>
+    /// <param name="userManager">User manager.</param>
     public PlaybackStartHandler(
         ILogger logger,
         DefaultValidationService defaultValidationService,
         IPluginConfigService configService,
         IMusicBrainzClient musicBrainzClient,
         IListenBrainzClient listenBrainzClient,
-        PlaybackTrackingManager playbackTracker) : base(logger)
+        PlaybackTrackingManager playbackTracker,
+        IUserManager userManager) : base(logger, userManager)
     {
         _logger = logger;
         _configService = configService;

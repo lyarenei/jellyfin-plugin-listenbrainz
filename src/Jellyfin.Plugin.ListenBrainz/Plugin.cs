@@ -103,7 +103,8 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
             pluginConfigService,
             musicBrainzClient,
             listenBrainzClient,
-            PlaybackTrackingManager.Instance);
+            PlaybackTrackingManager.Instance,
+            userManager);
 
         RegisterEventHandlers();
     }
