@@ -19,6 +19,7 @@ public interface IMusicBrainzClient
     /// Get additional metadata for specified audio item.
     /// </summary>
     /// <param name="item">Audio item.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Audio item metadata.</returns>
-    public Task<AudioItemMetadata> GetAudioItemMetadataAsync(BaseItem item);
+    public Task<AudioItemMetadata> GetAudioItemMetadataAsync(BaseItem item, CancellationToken cancellationToken);
 }

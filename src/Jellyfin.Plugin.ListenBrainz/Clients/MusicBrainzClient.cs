@@ -65,7 +65,7 @@ public class MusicBrainzClient : IMusicBrainzClient
     }
 
     /// <inheritdoc />
-    public async Task<AudioItemMetadata> GetAudioItemMetadataAsync(BaseItem item)
+    public async Task<AudioItemMetadata> GetAudioItemMetadataAsync(BaseItem item, CancellationToken cancellationToken)
     {
         var trackMbid = item.GetTrackMbid();
         if (trackMbid is null)
@@ -74,7 +74,7 @@ public class MusicBrainzClient : IMusicBrainzClient
         }
 
         var request = new RecordingRequest(trackMbid) { BaseUrl = _pluginConfig.MusicBrainzApiUrl };
-        var resp = await _apiClient.GetRecordingAsync(request, CancellationToken.None);
+        var resp = await _apiClient.GetRecordingAsync(request, cancellationToken);
         return new AudioItemMetadata(resp.Recordings.First());
     }
 }
