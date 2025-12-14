@@ -26,17 +26,6 @@ public sealed class PluginEventHandler : IDisposable
     ~PluginEventHandler() => Dispose(false);
 
     /// <summary>
-    /// Send 'playing now' listen to ListenBrainz.
-    /// </summary>
-    /// <param name="sender">Event sender.</param>
-    /// <param name="args">Event args.</param>
-    public void OnPlaybackStart(object? sender, PlaybackProgressEventArgs args)
-    {
-        using var logScope = BeginLogScope();
-        _plugin.OnPlaybackStart(sender, args);
-    }
-
-    /// <summary>
     /// Send listen of track to ListenBrainz if conditions have been met.
     /// </summary>
     /// <param name="sender">Event sender.</param>

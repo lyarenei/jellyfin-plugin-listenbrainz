@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Reflection;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
+using Jellyfin.Plugin.ListenBrainz.Handlers;
 using Jellyfin.Plugin.ListenBrainz.Managers;
 using Jellyfin.Plugin.ListenBrainz.Services;
 using MediaBrowser.Common.Configuration;
@@ -25,6 +26,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
     private readonly ISessionManager _sessionManager;
     private readonly IUserDataManager _userDataManager;
     private readonly PluginEventHandler _pluginEventHandler;
+    private readonly JellyfinEventHandler<PlaybackProgressEventArgs> _playbackStartHandler;
     private bool _isDisposed;
     private bool _isRegistered;
 
@@ -86,8 +88,22 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
             pluginConfigService,
             favoriteSyncService);
 
+        var validationLogger = loggerFactory.CreateLogger(LoggerCategory + ".Validation");
+        var validationService = new DefaultValidationService(
+            validationLogger,
+            pluginConfigService,
+            libraryManager);
+
         var eventHandlerLogger = loggerFactory.CreateLogger(LoggerCategory + ".EventHandler");
         _pluginEventHandler = new PluginEventHandler(eventHandlerLogger, pluginImpl);
+
+        _playbackStartHandler = new PlaybackStartHandler(
+            pluginImplLogger,
+            validationService,
+            pluginConfigService,
+            musicBrainzClient,
+            listenBrainzClient,
+            PlaybackTrackingManager.Instance);
 
         RegisterEventHandlers();
     }
@@ -247,7 +263,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
             return;
         }
 
-        _sessionManager.PlaybackStart += _pluginEventHandler.OnPlaybackStart;
+        _sessionManager.PlaybackStart += _playbackStartHandler.HandleEvent;
         _sessionManager.PlaybackStopped += _pluginEventHandler.OnPlaybackStop;
         _userDataManager.UserDataSaved += _pluginEventHandler.OnUserDataSave;
 
@@ -266,7 +282,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
             return;
         }
 
-        _sessionManager.PlaybackStart -= _pluginEventHandler.OnPlaybackStart;
+        _sessionManager.PlaybackStart -= _playbackStartHandler.HandleEvent;
         _sessionManager.PlaybackStopped -= _pluginEventHandler.OnPlaybackStop;
         _userDataManager.UserDataSaved -= _pluginEventHandler.OnUserDataSave;
 
