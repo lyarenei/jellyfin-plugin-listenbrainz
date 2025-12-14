@@ -14,4 +14,11 @@ public interface IMusicBrainzClient
     /// <param name="item">Audio item.</param>
     /// <returns>Audio item metadata.</returns>
     public AudioItemMetadata GetAudioItemMetadata(BaseItem item);
+
+    /// <summary>
+    /// Get additional metadata for specified audio item.
+    /// </summary>
+    /// <param name="item">Audio item.</param>
+    /// <returns>Audio item metadata.</returns>
+    public Task<AudioItemMetadata> GetAudioItemMetadataAsync(BaseItem item);
 }

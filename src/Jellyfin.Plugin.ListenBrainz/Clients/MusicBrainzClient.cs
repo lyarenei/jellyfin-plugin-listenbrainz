@@ -63,4 +63,18 @@ public class MusicBrainzClient : IMusicBrainzClient
 
         return new AudioItemMetadata(task.Result.Recordings.First());
     }
+
+    /// <inheritdoc />
+    public async Task<AudioItemMetadata> GetAudioItemMetadataAsync(BaseItem item)
+    {
+        var trackMbid = item.GetTrackMbid();
+        if (trackMbid is null)
+        {
+            throw new ArgumentException("Audio item does not have a track MBID");
+        }
+
+        var request = new RecordingRequest(trackMbid) { BaseUrl = _pluginConfig.MusicBrainzApiUrl };
+        var resp = await _apiClient.GetRecordingAsync(request, CancellationToken.None);
+        return new AudioItemMetadata(resp.Recordings.First());
+    }
 }
