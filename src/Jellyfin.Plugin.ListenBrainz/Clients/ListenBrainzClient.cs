@@ -60,6 +60,21 @@ public class ListenBrainzClient : IListenBrainzClient
     }
 
     /// <inheritdoc />
+    public async Task<bool> SendNowPlayingAsync(UserConfig config, Audio item, AudioItemMetadata? audioMetadata)
+    {
+        var request = new SubmitListensRequest
+        {
+            ApiToken = config.PlaintextApiToken,
+            ListenType = ListenType.PlayingNow,
+            Payload = [item.AsListen(itemMetadata: audioMetadata)],
+            BaseUrl = _pluginConfig.ListenBrainzApiUrl,
+        };
+
+        var resp = await _apiClient.SubmitListens(request, CancellationToken.None);
+        return resp.IsOk;
+    }
+
+    /// <inheritdoc />
     public void SendListen(UserConfig config, Audio item, AudioItemMetadata? metadata, long listenedAt)
     {
         var request = new SubmitListensRequest

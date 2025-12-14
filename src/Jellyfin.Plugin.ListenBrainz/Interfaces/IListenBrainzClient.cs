@@ -20,6 +20,16 @@ public interface IListenBrainzClient
     public void SendNowPlaying(UserConfig config, Audio item, AudioItemMetadata? audioMetadata);
 
     /// <summary>
+    /// Send 'now playing' listen of specified item.
+    /// </summary>
+    /// <param name="config">ListenBrainz user configuration.</param>
+    /// <param name="item">Audio item currently being listened to.</param>
+    /// <param name="audioMetadata">Additional metadata for this audio item.</param>
+    /// <exception cref="AggregateException">Sending failed.</exception>
+    /// <returns>Task representing the operation. Result value indicates success.</returns>
+    public Task<bool> SendNowPlayingAsync(UserConfig config, Audio item, AudioItemMetadata? audioMetadata);
+
+    /// <summary>
     /// Send a single listen of specified item.
     /// </summary>
     /// <param name="config">ListenBrainz user configuration.</param>
