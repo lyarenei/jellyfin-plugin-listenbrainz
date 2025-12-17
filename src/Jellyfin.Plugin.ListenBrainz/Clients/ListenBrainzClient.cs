@@ -225,6 +225,23 @@ public class ListenBrainzClient : IListenBrainzClient
     }
 
     /// <inheritdoc />
+    public async Task<string> GetRecordingMsidByListenTsAsync(UserConfig config, long ts, CancellationToken cancellationToken)
+    {
+        var userName = config.UserName;
+        if (string.IsNullOrEmpty(userName))
+        {
+            // Earlier 3.x plugin configurations did not store the username
+            _logger.LogDebug("ListenBrainz username is not available, getting it via token validation");
+            userName = GetListenBrainzUsername(config.PlaintextApiToken);
+        }
+
+        var request = new GetUserListensRequest(userName);
+        var response = await _apiClient.GetUserListens(request, cancellationToken);
+        var recordingMsid = response.Payload.Listens.FirstOrDefault(l => l.ListenedAt == ts)?.RecordingMsid;
+        return recordingMsid ?? throw new PluginException("No listen matching the timestamp found");
+    }
+
+    /// <inheritdoc />
     public async Task<IEnumerable<string>> GetLovedTracksAsync(UserConfig config, CancellationToken cancellationToken)
     {
         var recordingMbids = new List<string>();
