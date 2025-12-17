@@ -1,4 +1,5 @@
 using Jellyfin.Plugin.ListenBrainz.Configuration;
+using Jellyfin.Plugin.ListenBrainz.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using MediaBrowser.Controller.Library;
 using Microsoft.Extensions.Logging;
@@ -132,6 +133,81 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
     }
 
     /// <inheritdoc />
+    public async Task SyncToListenBrainzAsync(
+        Guid itemId,
+        Guid jellyfinUserId,
+        long? listenTs,
+        CancellationToken cancellationToken)
+    {
+        if (!IsEnabled)
+        {
+            _logger.LogTrace("Favorite sync service is disabled, nothing to do");
+            return;
+        }
+
+        var item = _libraryManager.GetItemById(itemId);
+        if (item is null)
+        {
+            _logger.LogWarning("Item with ID {ItemId} not found", itemId);
+            return;
+        }
+
+        var userConfig = _pluginConfigService.GetUserConfig(jellyfinUserId);
+        if (userConfig is null)
+        {
+            _logger.LogDebug("ListenBrainz config for user ID {UserId} not found", jellyfinUserId);
+            return;
+        }
+
+        var jellyfinUser = _userManager.GetUserById(jellyfinUserId);
+        if (jellyfinUser is null)
+        {
+            _logger.LogWarning("User with ID {UserId} not found", jellyfinUserId);
+            return;
+        }
+
+        var userItemData = _userDataManager.GetUserData(jellyfinUser, item);
+
+        var recordingMbid = item.GetRecordingMbid();
+        if (string.IsNullOrEmpty(recordingMbid) && _pluginConfigService.IsMusicBrainzEnabled)
+        {
+            _logger.LogTrace("Recording MBID is not available, attempting to get from MusicBrainz");
+            try
+            {
+                var metadata = await _musicBrainzClient.GetAudioItemMetadataAsync(item, cancellationToken);
+                recordingMbid = metadata.RecordingMbid;
+            }
+            catch (Exception e)
+            {
+                _logger.LogDebug(e, "Failed to get recording MBID");
+            }
+        }
+
+        string? recordingMsid = null;
+        if (string.IsNullOrEmpty(recordingMbid))
+        {
+            _logger.LogTrace("Recording MBID is not available, switching to recording MSID method");
+            if (listenTs is null)
+            {
+                _logger.LogInformation("Favorite sync failed, cannot get recording MSID");
+                return;
+            }
+
+            recordingMsid = await GetRecordingMsidAsync(userConfig, listenTs.Value, cancellationToken);
+        }
+
+        _logger.LogTrace("Attempting to sync favorite status");
+        await _listenBrainzClient.SendFeedbackAsync(
+            userConfig,
+            userItemData.IsFavorite,
+            recordingMbid,
+            recordingMsid,
+            cancellationToken);
+
+        _logger.LogInformation("Favorite sync has been successful");
+    }
+
+    /// <inheritdoc />
     public void Enable()
     {
         IsEnabled = true;
@@ -175,6 +251,41 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
                 sleepSecs);
 
             Thread.Sleep(sleepSecs * 1000);
+        }
+
+        return null;
+    }
+
+    private async Task<string?> GetRecordingMsidAsync(UserConfig userConfig, long listenTs, CancellationToken cancellationToken)
+    {
+        const int MaxAttempts = 4;
+        const int BackOffSecs = 5;
+        var sleepSecs = 1;
+
+        // Delay to maximize the chance of getting it on first try
+        await Task.Delay(500, cancellationToken);
+        for (int i = 0; i < MaxAttempts; i++)
+        {
+            _logger.LogTrace("Attempt number {Attempt} to get recording MSID", i + 1);
+            try
+            {
+                _logger.LogDebug("Attempting to get recording MSID");
+                return await _listenBrainzClient.GetRecordingMsidByListenTsAsync(userConfig, listenTs, cancellationToken);
+            }
+            catch (Exception e)
+            {
+                _logger.LogDebug("Failed to get recording MSID: {Reason}", e.Message);
+                _logger.LogTrace(e, "Failed to get recording MSID");
+            }
+
+            sleepSecs *= BackOffSecs;
+            sleepSecs += new Random().Next(20);
+            _logger.LogDebug(
+                "Recording MSID with listen timestamp {Ts} not found, will retry in {Secs} seconds",
+                listenTs,
+                sleepSecs);
+
+            await Task.Delay(sleepSecs * 1000, cancellationToken);
         }
 
         return null;
