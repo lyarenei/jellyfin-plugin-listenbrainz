@@ -27,6 +27,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
     private readonly IUserDataManager _userDataManager;
     private readonly PluginEventHandler _pluginEventHandler;
     private readonly JellyfinEventHandler<PlaybackProgressEventArgs> _playbackStartHandler;
+    private readonly JellyfinEventHandler<UserDataSaveEventArgs> _userDataSaveHandler;
     private bool _isDisposed;
     private bool _isRegistered;
 
@@ -105,6 +106,12 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
             listenBrainzClient,
             PlaybackTrackingManager.Instance,
             userManager);
+
+        _userDataSaveHandler = new UserDataSaveHandler(
+            pluginImplLogger,
+            userManager,
+            pluginConfigService,
+            favoriteSyncService);
 
         RegisterEventHandlers();
     }
@@ -266,7 +273,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
 
         _sessionManager.PlaybackStart += _playbackStartHandler.HandleEvent;
         _sessionManager.PlaybackStopped += _pluginEventHandler.OnPlaybackStop;
-        _userDataManager.UserDataSaved += _pluginEventHandler.OnUserDataSave;
+        _userDataManager.UserDataSaved += _userDataSaveHandler.HandleEvent;
 
         _isRegistered = true;
         _logger.LogDebug("Plugin event handlers have been registered");
@@ -285,7 +292,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
 
         _sessionManager.PlaybackStart -= _playbackStartHandler.HandleEvent;
         _sessionManager.PlaybackStopped -= _pluginEventHandler.OnPlaybackStop;
-        _userDataManager.UserDataSaved -= _pluginEventHandler.OnUserDataSave;
+        _userDataManager.UserDataSaved -= _userDataSaveHandler.HandleEvent;
 
         _isRegistered = false;
         _logger.LogInformation("Plugin event handlers have been unregistered");
