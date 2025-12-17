@@ -50,6 +50,17 @@ public interface IListenBrainzClient
     public void SendFeedback(UserConfig config, bool isFavorite, string? recordingMbid = null, string? recordingMsid = null);
 
     /// <summary>
+    /// Send a feedback for a specific recording, identified by either a MBID or MSID.
+    /// </summary>
+    /// <param name="config">ListenBrainz user configuration.</param>
+    /// <param name="isFavorite">The recording is marked as favorite.</param>
+    /// <param name="recordingMbid">MusicBrainz ID identifying the recording.</param>
+    /// <param name="recordingMsid">MessyBrainz ID identifying the recording.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <exception cref="AggregateException">Sending failed.</exception>
+    public Task SendFeedbackAsync(UserConfig config, bool isFavorite, string? recordingMbid = null, string? recordingMsid = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Send multiple listens ('import') to ListenBrainz.
     /// </summary>
     /// <param name="config">ListenBrainz user configuration.</param>

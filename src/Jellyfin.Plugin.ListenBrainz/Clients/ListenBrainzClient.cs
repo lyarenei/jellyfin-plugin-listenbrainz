@@ -133,6 +133,31 @@ public class ListenBrainzClient : IListenBrainzClient
     }
 
     /// <inheritdoc />
+    public async Task SendFeedbackAsync(
+        UserConfig config,
+        bool isFavorite,
+        string? recordingMbid = null,
+        string? recordingMsid = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrEmpty(recordingMbid) && string.IsNullOrEmpty(recordingMsid))
+        {
+            throw new ArgumentException("No recording MBID or MSID provided");
+        }
+
+        var request = new RecordingFeedbackRequest
+        {
+            ApiToken = config.PlaintextApiToken,
+            RecordingMbid = recordingMbid,
+            RecordingMsid = recordingMsid,
+            Score = isFavorite ? FeedbackScore.Loved : FeedbackScore.Neutral,
+            BaseUrl = _pluginConfig.ListenBrainzApiUrl,
+        };
+
+        await _apiClient.SubmitRecordingFeedback(request, CancellationToken.None);
+    }
+
+    /// <inheritdoc />
     /// <exception cref="PluginException">Sending listens failed.</exception>
     public async Task SendListensAsync(
         UserConfig config,
