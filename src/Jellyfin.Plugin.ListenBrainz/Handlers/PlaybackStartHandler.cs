@@ -2,7 +2,6 @@ using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.Managers;
-using Jellyfin.Plugin.ListenBrainz.Services;
 using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Session;
@@ -16,7 +15,7 @@ namespace Jellyfin.Plugin.ListenBrainz.Handlers;
 public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
 {
     private readonly ILogger _logger;
-    private readonly DefaultValidationService _defaultValidationService;
+    private readonly IValidationService _validationService;
     private readonly IPluginConfigService _configService;
     private readonly IMusicBrainzClient _musicBrainzClient;
     private readonly IListenBrainzClient _listenBrainzClient;
@@ -26,7 +25,7 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
     /// Initializes a new instance of the <see cref="PlaybackStartHandler"/> class.
     /// </summary>
     /// <param name="logger">Logger instance.</param>
-    /// <param name="defaultValidationService">Validation service.</param>
+    /// <param name="validationService">Validation service.</param>
     /// <param name="configService">Plugin configuration service.</param>
     /// <param name="musicBrainzClient">MusicBrainz client.</param>
     /// <param name="listenBrainzClient">ListenBrainz client.</param>
@@ -34,7 +33,7 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
     /// <param name="userManager">User manager.</param>
     public PlaybackStartHandler(
         ILogger logger,
-        DefaultValidationService defaultValidationService,
+        IValidationService validationService,
         IPluginConfigService configService,
         IMusicBrainzClient musicBrainzClient,
         IListenBrainzClient listenBrainzClient,
@@ -43,7 +42,7 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
     {
         _logger = logger;
         _configService = configService;
-        _defaultValidationService = defaultValidationService;
+        _validationService = validationService;
         _musicBrainzClient = musicBrainzClient;
         _listenBrainzClient = listenBrainzClient;
         _playbackTracker = playbackTracker;
@@ -86,14 +85,14 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
 
     private bool ValidateItemRequirements(Audio item)
     {
-        var isAllowed = _defaultValidationService.ValidateInAllowedLibrary(item);
+        var isAllowed = _validationService.ValidateInAllowedLibrary(item);
         if (!isAllowed)
         {
             _logger.LogTrace("Item is not in an allowed library");
             return false;
         }
 
-        var canSend = _defaultValidationService.ValidateForPlayingNow(item);
+        var canSend = _validationService.ValidateForPlayingNow(item);
         if (!canSend)
         {
             _logger.LogTrace("Item does not have sufficient metadata for 'playing now' listen");
