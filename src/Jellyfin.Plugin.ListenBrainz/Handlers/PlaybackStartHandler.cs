@@ -53,7 +53,7 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
     protected override async Task DoHandleAsync(EventData data)
     {
         _logger.LogDebug(
-            "Processing playback start event of {ItemName} for user {UserName}",
+            "Processing playback start event for {ItemName}, associated with user {UserName}",
             data.Item.Name,
             data.JellyfinUser.Username);
 
