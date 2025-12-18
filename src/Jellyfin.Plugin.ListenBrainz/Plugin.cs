@@ -295,6 +295,6 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
         _userDataManager.UserDataSaved -= _userDataSaveHandler.HandleEvent;
 
         _isRegistered = false;
-        _logger.LogInformation("Plugin event handlers have been unregistered");
+        _logger.LogDebug("Plugin event handlers have been unregistered");
     }
 }
