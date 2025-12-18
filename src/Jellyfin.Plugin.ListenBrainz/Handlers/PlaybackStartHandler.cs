@@ -1,6 +1,5 @@
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
-using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.Managers;
 using Jellyfin.Plugin.ListenBrainz.Services;
@@ -58,8 +57,26 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
             data.Item.Name,
             data.JellyfinUser.Username);
 
-        ValidateItemRequirements(data.Item);
-        var userConfig = GetValidUserConfig(data.JellyfinUser.Id);
+        var isValid = ValidateItemRequirements(data.Item);
+        if (!isValid)
+        {
+            _logger.LogDebug("Item did not meet validation requirements, skipping");
+            return;
+        }
+
+        var userConfig = _configService.GetUserConfig(data.JellyfinUser.Id);
+        if (userConfig is null)
+        {
+            _logger.LogDebug("No user config found, skipping");
+            return;
+        }
+
+        if (!userConfig.IsListenSubmitEnabled)
+        {
+            _logger.LogDebug("Listen submission is not enabled for user, skipping");
+            return;
+        }
+
         var metadata = await GetMusicBrainzMetadata(data.Item);
         await SendPlayingNow(userConfig, data.Item, metadata);
 
@@ -67,42 +84,30 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
         StartTrackingItem(data.JellyfinUser.Id, data.Item);
     }
 
-    private void ValidateItemRequirements(Audio item)
+    private bool ValidateItemRequirements(Audio item)
     {
         var isAllowed = _defaultValidationService.ValidateInAllowedLibrary(item);
         if (!isAllowed)
         {
-            throw new PluginException("Item is not in allowed library");
+            _logger.LogTrace("Item is not in an allowed library");
+            return false;
         }
 
         var canSend = _defaultValidationService.ValidateForPlayingNow(item);
         if (!canSend)
         {
-            throw new PluginException("Item does not have sufficient metadata for 'playing now' listen");
-        }
-    }
-
-    private UserConfig GetValidUserConfig(Guid userId)
-    {
-        var userConfig = _configService.GetUserConfig(userId);
-        if (userConfig is null)
-        {
-            throw new PluginException("No user config available");
+            _logger.LogTrace("Item does not have sufficient metadata for 'playing now' listen");
+            return false;
         }
 
-        if (!userConfig.IsListenSubmitEnabled)
-        {
-            throw new PluginException("Listen submission is not enabled for user");
-        }
-
-        return userConfig;
+        return true;
     }
 
     private async Task<AudioItemMetadata?> GetMusicBrainzMetadata(Audio item)
     {
         if (!_configService.IsMusicBrainzEnabled)
         {
-            _logger.LogTrace("MusicBrainz integration is disabled, skipping metadata retrieval");
+            _logger.LogDebug("MusicBrainz integration is disabled, skipping metadata retrieval");
             return null;
         }
 
