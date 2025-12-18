@@ -53,7 +53,6 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
     /// <inheritdoc/>
     protected override async Task DoHandleAsync(EventData data)
     {
-        _logger.LogTrace("Handling playback start event");
         _logger.LogDebug(
             "Processing playback start event of {ItemName} for user {UserName}",
             data.Item.Name,
