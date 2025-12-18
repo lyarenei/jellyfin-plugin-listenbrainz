@@ -9,21 +9,21 @@ using Microsoft.Extensions.Logging;
 namespace Jellyfin.Plugin.ListenBrainz.Handlers;
 
 /// <summary>
-/// Event handler interface.
+/// A generic handler for Jellyfin events.
 /// </summary>
 /// <typeparam name="TEventArgs">Event arguments.</typeparam>
-public abstract class JellyfinEventHandler<TEventArgs>
+public abstract class GenericHandler<TEventArgs>
     where TEventArgs : EventArgs
 {
     private readonly ILogger _logger;
     private readonly IUserManager _userManager;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="JellyfinEventHandler{TEventArgs}"/> class.
+    /// Initializes a new instance of the <see cref="GenericHandler{TEventArgs}"/> class.
     /// </summary>
     /// <param name="logger">Logger instance.</param>
     /// <param name="userManager">User manager.</param>
-    protected JellyfinEventHandler(ILogger logger, IUserManager userManager)
+    protected GenericHandler(ILogger logger, IUserManager userManager)
     {
         _logger = logger;
         _userManager = userManager;

@@ -26,8 +26,8 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
     private readonly ISessionManager _sessionManager;
     private readonly IUserDataManager _userDataManager;
     private readonly PluginEventHandler _pluginEventHandler;
-    private readonly JellyfinEventHandler<PlaybackProgressEventArgs> _playbackStartHandler;
-    private readonly JellyfinEventHandler<UserDataSaveEventArgs> _userDataSaveHandler;
+    private readonly GenericHandler<PlaybackProgressEventArgs> _playbackStartHandler;
+    private readonly GenericHandler<UserDataSaveEventArgs> _userDataSaveHandler;
     private bool _isDisposed;
     private bool _isRegistered;
 

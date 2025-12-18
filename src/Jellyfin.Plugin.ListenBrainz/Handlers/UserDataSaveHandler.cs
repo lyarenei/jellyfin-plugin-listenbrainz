@@ -9,7 +9,7 @@ namespace Jellyfin.Plugin.ListenBrainz.Handlers;
 /// <summary>
 /// Handler for <see cref="IUserDataManager.UserDataSaved"/> events.
 /// </summary>
-public class UserDataSaveHandler : JellyfinEventHandler<UserDataSaveEventArgs>
+public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
 {
     private readonly ILogger _logger;
     private readonly IPluginConfigService _configService;

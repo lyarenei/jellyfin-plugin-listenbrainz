@@ -14,7 +14,7 @@ namespace Jellyfin.Plugin.ListenBrainz.Handlers;
 /// <summary>
 /// Handler for <see cref="ISessionManager.PlaybackStart"/> events.
 /// </summary>
-public class PlaybackStartHandler : JellyfinEventHandler<PlaybackProgressEventArgs>
+public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
 {
     private readonly ILogger _logger;
     private readonly DefaultValidationService _defaultValidationService;
