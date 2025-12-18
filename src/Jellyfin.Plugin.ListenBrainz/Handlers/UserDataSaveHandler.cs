@@ -36,7 +36,6 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
     /// <inheritdoc />
     protected override async Task DoHandleAsync(EventData data)
     {
-        _logger.LogTrace("Handling user data save event");
         _logger.LogDebug(
             "Processing user data save event of {ItemName} for user {UserName} with reason {SaveReason}",
             data.Item.Name,
@@ -46,6 +45,7 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
         switch (data.SaveReason)
         {
             case UserDataSaveReason.UpdateUserRating:
+                _logger.LogTrace("Attempting favorite sync");
                 await HandleFavoriteUpdated(data, CancellationToken.None);
                 return;
             default:
@@ -57,10 +57,10 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
     {
         if (!_configService.IsImmediateFavoriteSyncEnabled)
         {
-            throw new PluginException("Immediate favorite sync is disabled");
+            _logger.LogDebug("Immediate favorite sync is disabled, skipping sync");
+            return;
         }
 
-        _logger.LogTrace("Reason is user rating update, attempting favorite sync");
         await _favoriteSyncService.SyncToListenBrainzAsync(
             data.Item.Id,
             data.JellyfinUser.Id,
