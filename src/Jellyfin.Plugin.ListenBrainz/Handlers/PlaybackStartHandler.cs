@@ -57,13 +57,6 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
             data.Item.Name,
             data.JellyfinUser.Username);
 
-        var isValid = ValidateItemRequirements(data.Item);
-        if (!isValid)
-        {
-            _logger.LogDebug("Item did not meet validation requirements, skipping");
-            return;
-        }
-
         var userConfig = _configService.GetUserConfig(data.JellyfinUser.Id);
         if (userConfig is null)
         {
@@ -74,6 +67,13 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
         if (!userConfig.IsListenSubmitEnabled)
         {
             _logger.LogDebug("Listen submission is not enabled for user, skipping");
+            return;
+        }
+
+        var isValid = ValidateItemRequirements(data.Item);
+        if (!isValid)
+        {
+            _logger.LogDebug("Item did not meet validation requirements, skipping");
             return;
         }
 
