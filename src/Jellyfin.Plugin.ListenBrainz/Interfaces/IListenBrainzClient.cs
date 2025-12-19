@@ -70,6 +70,7 @@ public interface IListenBrainzClient
     /// <param name="recordingMsid">MessyBrainz ID identifying the recording.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <exception cref="AggregateException">Sending failed.</exception>
+    /// <returns>Task representing asynchronous operation.</returns>
     public Task SendFeedbackAsync(UserConfig config, bool isFavorite, string? recordingMbid = null, string? recordingMsid = null, CancellationToken cancellationToken = default);
 
     /// <summary>
