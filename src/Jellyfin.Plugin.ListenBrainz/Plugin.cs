@@ -111,7 +111,13 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
             pluginImplLogger,
             userManager,
             pluginConfigService,
-            favoriteSyncService);
+            favoriteSyncService,
+            validationService,
+            musicBrainzClient,
+            backupManager,
+            listenBrainzClient,
+            ListensCacheManager.Instance,
+            PlaybackTrackingManager.Instance);
 
         RegisterEventHandlers();
     }
