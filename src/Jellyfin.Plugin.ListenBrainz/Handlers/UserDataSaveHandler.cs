@@ -1,7 +1,6 @@
 using Jellyfin.Plugin.ListenBrainz.Common;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
-using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.Managers;
 using MediaBrowser.Controller.Entities.Audio;
@@ -80,7 +79,8 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
                 await HandlePlaybackFinished(data, CancellationToken.None);
                 return;
             default:
-                throw new PluginException("Unsupported data save reason");
+                _logger.LogDebug("Unsupported data save reason");
+                return;
         }
     }
 
