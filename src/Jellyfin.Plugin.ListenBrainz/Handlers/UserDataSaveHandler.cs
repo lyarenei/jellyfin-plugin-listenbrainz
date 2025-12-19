@@ -26,8 +26,6 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
     private readonly ListensCacheManager _listensCache;
     private readonly PlaybackTrackingManager _playbackTracker;
 
-    private readonly object _userDataSaveLock = new();
-
     /// <summary>
     /// Initializes a new instance of the <see cref="UserDataSaveHandler"/> class.
     /// </summary>
@@ -177,17 +175,12 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
 
         try
         {
-            Monitor.Enter(_userDataSaveLock);
             return ValidatePlaybackCondition(item, userId.ToString());
         }
         catch (Exception e)
         {
             _logger.LogDebug(e, "Exception occurred while validating playback condition");
             return false;
-        }
-        finally
-        {
-            Monitor.Exit(_userDataSaveLock);
         }
     }
 
