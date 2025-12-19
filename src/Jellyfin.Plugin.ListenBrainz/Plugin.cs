@@ -27,7 +27,6 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
     private readonly ILogger<Plugin> _logger;
     private readonly ISessionManager _sessionManager;
     private readonly IUserDataManager _userDataManager;
-    private readonly PluginEventHandler _pluginEventHandler;
     private readonly GenericHandler<PlaybackProgressEventArgs> _playbackStartHandler;
     private readonly GenericHandler<PlaybackStopEventArgs> _playbackStopHandler;
     private readonly GenericHandler<UserDataSaveEventArgs> _userDataSaveHandler;
@@ -91,24 +90,12 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
             userDataManager);
 
         var pluginImplLogger = loggerFactory.CreateLogger(LoggerCategory);
-        var pluginImpl = new PluginImplementation(
-            pluginImplLogger,
-            listenBrainzClient,
-            musicBrainzClient,
-            userManager,
-            libraryManager,
-            backupManager,
-            pluginConfigService,
-            favoriteSyncService);
 
         var validationLogger = loggerFactory.CreateLogger(LoggerCategory + ".Validation");
         var validationService = new DefaultValidationService(
             validationLogger,
             pluginConfigService,
             libraryManager);
-
-        var eventHandlerLogger = loggerFactory.CreateLogger(LoggerCategory + ".EventHandler");
-        _pluginEventHandler = new PluginEventHandler(eventHandlerLogger, pluginImpl);
 
         _playbackStartHandler = new PlaybackStartHandler(
             pluginImplLogger,
@@ -283,7 +270,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
 
         if (disposing)
         {
-            _pluginEventHandler.Dispose();
+            // Dispose managed resources here.
         }
 
         _isDisposed = true;
