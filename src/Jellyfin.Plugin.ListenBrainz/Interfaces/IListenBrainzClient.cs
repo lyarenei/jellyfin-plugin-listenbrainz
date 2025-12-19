@@ -40,6 +40,18 @@ public interface IListenBrainzClient
     public void SendListen(UserConfig config, Audio item, AudioItemMetadata? metadata, long listenedAt);
 
     /// <summary>
+    /// Send a single listen of specified item.
+    /// </summary>
+    /// <param name="config">ListenBrainz user configuration.</param>
+    /// <param name="item">Audio item of the listen.</param>
+    /// <param name="metadata">Additional metadata for this audio item.</param>
+    /// <param name="listenedAt">Timestamp of the listen.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <exception cref="AggregateException">Sending failed.</exception>
+    /// <returns>Task representing asynchronous operation.</returns>
+    public Task SendListenAsync(UserConfig config, Audio item, AudioItemMetadata? metadata, long listenedAt, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Send a feedback for a specific recording, identified by either a MBID or MSID.
     /// </summary>
     /// <param name="config">ListenBrainz user configuration.</param>
