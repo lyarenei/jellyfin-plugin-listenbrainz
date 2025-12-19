@@ -92,7 +92,7 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
             return false;
         }
 
-        var canSend = _validationService.ValidateForPlayingNow(item);
+        var canSend = _validationService.ValidateBasicMetadata(item);
         if (!canSend)
         {
             _logger.LogTrace("Item does not have sufficient metadata for 'playing now' listen");

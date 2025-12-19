@@ -16,9 +16,17 @@ public interface IValidationService
     public bool ValidateInAllowedLibrary(Audio item);
 
     /// <summary>
-    /// Check if an audio item has sufficient metadata for a 'playing now' listen.
+    /// Check if an audio item has basic metadata available for a listen.
     /// </summary>
     /// <param name="item">Audio item to check.</param>
     /// <returns>Validation passed.</returns>
-    public bool ValidateForPlayingNow(Audio item);
+    public bool ValidateBasicMetadata(Audio item);
+
+    /// <summary>
+    /// Check if delta ticks meet ListenBrainz submission conditions, respective to the runtime.
+    /// </summary>
+    /// <param name="playedTicks">Playback time in ticks.</param>
+    /// <param name="runtime">Played item runtime in ticks.</param>
+    /// <returns>Validation passed.</returns>
+    public bool ValidateSubmitConditions(long playedTicks, long runtime);
 }

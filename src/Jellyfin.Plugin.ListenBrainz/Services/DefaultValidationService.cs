@@ -1,3 +1,4 @@
+using Jellyfin.Plugin.ListenBrainz.Api.Resources;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using MediaBrowser.Controller.Entities.Audio;
@@ -53,9 +54,9 @@ public class DefaultValidationService : IValidationService
     }
 
     /// <inheritdoc />
-    public bool ValidateForPlayingNow(Audio item)
+    public bool ValidateBasicMetadata(Audio item)
     {
-        _logger.LogTrace("Checking item metadata for 'playing now' listen");
+        _logger.LogTrace("Checking item metadata required for a listen");
 
         try
         {
@@ -63,12 +64,32 @@ public class DefaultValidationService : IValidationService
         }
         catch (ArgumentException e)
         {
-            _logger.LogTrace("Validation failed: {Message}", e.Message);
+            _logger.LogDebug("Validation failed: {Message}", e.Message);
+            _logger.LogTrace(e, "Exception stacktrace");
             return false;
         }
 
-        _logger.LogTrace("Item metadata valid for 'playing now' listen");
+        _logger.LogTrace("Item has valid metadata for a listen");
         return true;
+    }
+
+    /// <inheritdoc />
+    public bool ValidateSubmitConditions(long playedTicks, long runtime)
+    {
+        _logger.LogTrace("Checking listen submit conditions for playback time");
+
+        try
+        {
+            Limits.AssertSubmitConditions(playedTicks, runtime);
+            _logger.LogTrace("Submit listen playback condition is met");
+            return true;
+        }
+        catch (Exception e)
+        {
+            _logger.LogDebug("Submit listen playback condition not met: {Message}", e.Message);
+            _logger.LogTrace(e, "Exception stacktrace");
+            return false;
+        }
     }
 
     private IEnumerable<Guid> GetAllowedLibraries()
