@@ -29,6 +29,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
     private readonly IUserDataManager _userDataManager;
     private readonly PluginEventHandler _pluginEventHandler;
     private readonly GenericHandler<PlaybackProgressEventArgs> _playbackStartHandler;
+    private readonly GenericHandler<PlaybackStopEventArgs> _playbackStopHandler;
     private readonly GenericHandler<UserDataSaveEventArgs> _userDataSaveHandler;
     private bool _isDisposed;
     private bool _isRegistered;
@@ -117,6 +118,17 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
             listenBrainzClient,
             PlaybackTrackingManager.Instance,
             userManager);
+
+        _playbackStopHandler = new PlaybackStopHandler(
+            pluginImplLogger,
+            userManager,
+            pluginConfigService,
+            favoriteSyncService,
+            validationService,
+            metadataProviderService,
+            backupManager,
+            listenBrainzClient,
+            ListensCacheManager.Instance);
 
         _userDataSaveHandler = new UserDataSaveHandler(
             pluginImplLogger,
@@ -289,7 +301,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
         }
 
         _sessionManager.PlaybackStart += _playbackStartHandler.HandleEvent;
-        _sessionManager.PlaybackStopped += _pluginEventHandler.OnPlaybackStop;
+        _sessionManager.PlaybackStopped += _playbackStopHandler.HandleEvent;
         _userDataManager.UserDataSaved += _userDataSaveHandler.HandleEvent;
 
         _isRegistered = true;
@@ -308,7 +320,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
         }
 
         _sessionManager.PlaybackStart -= _playbackStartHandler.HandleEvent;
-        _sessionManager.PlaybackStopped -= _pluginEventHandler.OnPlaybackStop;
+        _sessionManager.PlaybackStopped -= _playbackStopHandler.HandleEvent;
         _userDataManager.UserDataSaved -= _userDataSaveHandler.HandleEvent;
 
         _isRegistered = false;

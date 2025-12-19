@@ -46,7 +46,6 @@ public abstract class GenericHandler<TEventArgs>
     /// </summary>
     /// <param name="data">Event data.</param>
     /// <returns>Task handle.</returns>
-    /// <exception cref="PluginException">Requirements for operation were not met.</exception>
     protected abstract Task DoHandleAsync(EventData data);
 
     private async Task AsyncWrapper(object? sender, TEventArgs args)
@@ -82,16 +81,38 @@ public abstract class GenericHandler<TEventArgs>
     /// </summary>
     /// <param name="sender">Event sender.</param>
     /// <param name="args">Event args.</param>
-    /// <returns>Event data.</returns>
-    /// <exception cref="PluginException">Event is not valid.</exception>
-    /// <exception cref="ArgumentException">Event is not supported.</exception>
+    /// <returns>Event data. Null on error.</returns>
     private EventData? ParseEventData(object? sender, TEventArgs args)
     {
         return args switch
         {
+            PlaybackStopEventArgs eventArgs => ParseEventArgs(sender, eventArgs),
             PlaybackProgressEventArgs eventArgs => ParseEventArgs(sender, eventArgs),
             UserDataSaveEventArgs eventArgs => ParseEventArgs(sender, eventArgs),
             _ => null,
+        };
+    }
+
+    private EventData? ParseEventArgs(object? sender, PlaybackStopEventArgs args)
+    {
+        if (args.Item is not Audio item)
+        {
+            _logger.LogTrace("Event is not for an audio item");
+            return null;
+        }
+
+        var jellyfinUser = args.Users.FirstOrDefault();
+        if (jellyfinUser is null)
+        {
+            _logger.LogTrace("No user associated with this event");
+            return null;
+        }
+
+        return new EventData
+        {
+            Item = item,
+            JellyfinUser = jellyfinUser,
+            PositionTicks = args.PlaybackPositionTicks,
         };
     }
 
@@ -176,5 +197,11 @@ public abstract class GenericHandler<TEventArgs>
         /// Only set if event data are parsed from <see cref="UserDataSaveEventArgs"/>.
         /// </summary>
         public UserDataSaveReason? SaveReason { get; init; }
+
+        /// <summary>
+        /// Gets the playback position in ticks.
+        /// Might be non-null only if event data are parsed from <see cref="PlaybackStopEventArgs"/>.
+        /// </summary>
+        public long? PositionTicks { get; init; }
     }
 }
