@@ -36,17 +36,6 @@ public sealed class PluginEventHandler : IDisposable
         _plugin.OnPlaybackStop(sender, args);
     }
 
-    /// <summary>
-    /// Send listen of track to ListenBrainz if conditions have been met.
-    /// </summary>
-    /// <param name="sender">Event sender.</param>
-    /// <param name="args">Event args.</param>
-    public void OnUserDataSave(object? sender, UserDataSaveEventArgs args)
-    {
-        using var logScope = BeginLogScope();
-        _plugin.OnUserDataSave(sender, args);
-    }
-
     /// <inheritdoc />
     public void Dispose()
     {

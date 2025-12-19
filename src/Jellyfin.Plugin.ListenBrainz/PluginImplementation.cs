@@ -10,7 +10,6 @@ using Jellyfin.Plugin.ListenBrainz.Managers;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
-using MediaBrowser.Model.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.ListenBrainz;
@@ -203,148 +202,6 @@ public class PluginImplementation : IDisposable
         }
     }
 
-    /// <summary>
-    /// Sends listen of track to ListenBrainz if conditions have been met.
-    /// </summary>
-    /// <param name="sender">Event sender.</param>
-    /// <param name="args">Event args.</param>
-    public void OnUserDataSave(object? sender, UserDataSaveEventArgs args)
-    {
-        // using var logScope = BeginLogScope();
-        _logger.LogDebug("Picking up user data save event for item {Item}", args.Item.Name);
-
-        EventData data;
-        try
-        {
-            data = GetEventData(args);
-        }
-        catch (Exception e)
-        {
-            _logger.LogDebug(e, "Dropping event");
-            return;
-        }
-
-        switch (args.SaveReason)
-        {
-            case UserDataSaveReason.UpdateUserRating:
-                if (!_configService.IsImmediateFavoriteSyncEnabled)
-                {
-                    _logger.LogDebug("Dropping event - immediate favorite sync is disabled");
-                    return;
-                }
-
-                _logger.LogDebug("Reason is user rating update, attempting favorite sync");
-                _favoriteSyncService.SyncToListenBrainz(data.Item.Id, data.JellyfinUser.Id);
-                return;
-            case UserDataSaveReason.PlaybackFinished:
-                _logger.LogDebug("Reason is playback finished, evaluating listen conditions");
-                HandlePlaybackFinished(data);
-                return;
-            default:
-                _logger.LogDebug("Dropping event - unsupported data save reason");
-                return;
-        }
-    }
-
-    /// <summary>
-    /// Handle playback finished event (alternative recognition of listens).
-    /// </summary>
-    /// <param name="data">Event data.</param>
-    private void HandlePlaybackFinished(EventData data)
-    {
-        if (!_configService.IsAlternativeModeEnabled)
-        {
-            _logger.LogDebug("Dropping event - alternative mode is disabled");
-            return;
-        }
-
-        _logger.LogInformation(
-            "Processing playback finished event for item {Item} associated with user {Username}",
-            data.Item.Name,
-            data.JellyfinUser.Username);
-
-        var userConfig = _configService.GetUserConfig(data.JellyfinUser.Id);
-        if (userConfig is null)
-        {
-            _logger.LogInformation("Dropping event, user configuration is not available");
-            return;
-        }
-
-        try
-        {
-            AssertInAllowedLibrary(data.Item);
-            AssertSubmissionEnabled(userConfig);
-            AssertBasicMetadataRequirements(data.Item);
-
-            Monitor.Enter(_userDataSaveLock);
-            EvaluateConditionsIfTracked(data.Item, data.JellyfinUser);
-        }
-        catch (Exception e)
-        {
-            _logger.LogInformation("Dropping event: {Reason}", e.Message);
-            _logger.LogDebug(e, "Dropping event");
-            return;
-        }
-        finally
-        {
-            Monitor.Exit(_userDataSaveLock);
-        }
-
-        _logger.LogDebug("All checks passed, preparing for sending listen");
-        var now = DateUtils.CurrentTimestamp;
-
-        AudioItemMetadata? metadata = null;
-        try
-        {
-            AssertMusicBrainzIsEnabled();
-            _logger.LogInformation("Getting additional metadata...");
-            metadata = _musicBrainzClient.GetAudioItemMetadata(data.Item);
-            _logger.LogInformation("Additional metadata successfully received");
-        }
-        catch (Exception e)
-        {
-            _logger.LogInformation("Additional metadata are not available: {Reason}", e.Message);
-            _logger.LogDebug(e, "Additional metadata are not available");
-        }
-
-        if (_configService.IsBackupEnabled && userConfig.IsBackupEnabled)
-        {
-            try
-            {
-                _logger.LogInformation("Adding listen to backups...");
-                _backupManager.Backup(userConfig.UserName, data.Item, metadata, now);
-                _logger.LogInformation("Listen successfully backed up");
-            }
-            catch (Exception e)
-            {
-                _logger.LogInformation("Listen backup failed: {Reason}", e.Message);
-                _logger.LogDebug(e, "Listen backup failed");
-            }
-        }
-
-        try
-        {
-            _logger.LogInformation("Sending listen...");
-            _listenBrainzClient.SendListen(userConfig, data.Item, metadata, now);
-            _logger.LogInformation("Listen successfully sent");
-        }
-        catch (Exception e)
-        {
-            _logger.LogInformation("Failed to send listen: {Reason}", e.Message);
-            _logger.LogDebug(e, "Failed to send listen");
-
-            _listensCache.AddListen(data.JellyfinUser.Id, data.Item, metadata, now);
-            _listensCache.Save();
-            _logger.LogInformation("Listen has been added to the cache");
-            return;
-        }
-
-        if (userConfig.IsFavoritesSyncEnabled)
-        {
-            HandleFavoriteSync(data, userConfig, now);
-        }
-    }
-
     private void HandleFavoriteSync(EventData data, UserConfig userConfig, long listenTs)
     {
         _logger.LogInformation(
@@ -397,32 +254,6 @@ public class PluginImplementation : IDisposable
     }
 
     /// <summary>
-    /// Verifies the event.
-    /// </summary>
-    /// <param name="eventArgs">Event arguments.</param>
-    /// <returns>Event data.</returns>
-    /// <exception cref="ArgumentException">Event data are not valid.</exception>
-    private EventData GetEventData(UserDataSaveEventArgs eventArgs)
-    {
-        if (eventArgs.Item is not Audio item)
-        {
-            throw new ArgumentException("Event item is not an Audio item");
-        }
-
-        var jellyfinUser = _userManager.GetUserById(eventArgs.UserId);
-        if (jellyfinUser is null)
-        {
-            throw new ArgumentException("No user is associated with this event");
-        }
-
-        return new EventData
-        {
-            Item = item,
-            JellyfinUser = jellyfinUser
-        };
-    }
-
-    /// <summary>
     /// Check if the item has basic metadata.
     /// </summary>
     /// <param name="item">Item to be checked.</param>
@@ -456,33 +287,6 @@ public class PluginImplementation : IDisposable
         }
 
         _logger.LogDebug("ListenBrainz submission is enabled for the user");
-    }
-
-    /// <summary>
-    /// Evaluate listen submit conditions if the played item is tracked.
-    /// </summary>
-    /// <param name="item">Item to be tracked.</param>
-    /// <param name="user">User associated with the listen.</param>
-    /// <exception cref="PluginException">Item is not tracked or tracking is not valid.</exception>
-    private void EvaluateConditionsIfTracked(BaseItem item, User user)
-    {
-        var trackedItem = _playbackTracker.GetItem(user.Id.ToString(), item.Id.ToString());
-        if (trackedItem is null)
-        {
-            _logger.LogDebug("Playback is not tracked for this item, assuming offline playback");
-            return;
-        }
-
-        if (!trackedItem.IsValid)
-        {
-            throw new PluginException("Playback tracking is not valid for this item");
-        }
-
-        var delta = DateUtils.CurrentTimestamp - trackedItem.StartedAt;
-        var deltaTicks = delta * TimeSpan.TicksPerSecond;
-        var runtime = item.RunTimeTicks ?? 0;
-        Limits.AssertSubmitConditions(deltaTicks, runtime);
-        _playbackTracker.InvalidateItem(user.Id.ToString(), trackedItem);
     }
 
     /// <summary>
