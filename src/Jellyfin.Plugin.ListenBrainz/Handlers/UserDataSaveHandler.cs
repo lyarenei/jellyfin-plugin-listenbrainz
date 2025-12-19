@@ -20,7 +20,7 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
     private readonly IPluginConfigService _configService;
     private readonly IFavoriteSyncService _favoriteSyncService;
     private readonly IValidationService _validationService;
-    private readonly IMusicBrainzClient _musicBrainzClient;
+    private readonly IMetadataProviderService _metadataProvider;
     private readonly IBackupManager _backupManager;
     private readonly IListenBrainzClient _listenBrainzClient;
     private readonly ListensCacheManager _listensCache;
@@ -34,7 +34,7 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
     /// <param name="configService">Plugin config service.</param>
     /// <param name="favoriteSyncService">Favorite sync service.</param>
     /// <param name="validationService">Validation service.</param>
-    /// <param name="musicBrainzClient">MusicBrainz client.</param>
+    /// <param name="metadataProvider">Metadata provider.</param>
     /// <param name="backupManager">Backup manager.</param>
     /// <param name="listenBrainzClient">ListenBrainz client.</param>
     /// <param name="listensCache">Listen cache manager.</param>
@@ -45,7 +45,7 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
         IPluginConfigService configService,
         IFavoriteSyncService favoriteSyncService,
         IValidationService validationService,
-        IMusicBrainzClient musicBrainzClient,
+        IMetadataProviderService metadataProvider,
         IBackupManager backupManager,
         IListenBrainzClient listenBrainzClient,
         ListensCacheManager listensCache,
@@ -55,7 +55,7 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
         _configService = configService;
         _favoriteSyncService = favoriteSyncService;
         _validationService = validationService;
-        _musicBrainzClient = musicBrainzClient;
+        _metadataProvider = metadataProvider;
         _backupManager = backupManager;
         _listenBrainzClient = listenBrainzClient;
         _listensCache = listensCache;
@@ -134,7 +134,7 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
         _logger.LogTrace("All checks passed, preparing to send listen");
 
         var now = DateUtils.CurrentTimestamp;
-        var metadata = await GetMusicBrainzMetadata(data.Item);
+        var metadata = await _metadataProvider.GetAudioItemMetadataAsync(data.Item, cancellationToken);
 
         if (_configService.IsBackupEnabled && userConfig.IsBackupEnabled)
         {
@@ -181,28 +181,6 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
         {
             _logger.LogDebug(e, "Exception occurred while validating playback condition");
             return false;
-        }
-    }
-
-    private async Task<AudioItemMetadata?> GetMusicBrainzMetadata(Audio item)
-    {
-        // TODO: move this into a service (and remove duplicates)
-
-        if (!_configService.IsMusicBrainzEnabled)
-        {
-            _logger.LogDebug("MusicBrainz integration is disabled, skipping metadata retrieval");
-            return null;
-        }
-
-        try
-        {
-            return await _musicBrainzClient.GetAudioItemMetadataAsync(item, CancellationToken.None);
-        }
-        catch (Exception e)
-        {
-            _logger.LogDebug("Could not get MusicBrainz metadata: {Message}", e.Message);
-            _logger.LogTrace(e, "Exception occurred while getting MusicBrainz metadata");
-            return null;
         }
     }
 

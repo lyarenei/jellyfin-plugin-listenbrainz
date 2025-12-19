@@ -17,7 +17,7 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
     private readonly ILogger _logger;
     private readonly IValidationService _validationService;
     private readonly IPluginConfigService _configService;
-    private readonly IMusicBrainzClient _musicBrainzClient;
+    private readonly IMetadataProviderService _metadataProvider;
     private readonly IListenBrainzClient _listenBrainzClient;
     private readonly PlaybackTrackingManager _playbackTracker;
 
@@ -27,7 +27,7 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
     /// <param name="logger">Logger instance.</param>
     /// <param name="validationService">Validation service.</param>
     /// <param name="configService">Plugin configuration service.</param>
-    /// <param name="musicBrainzClient">MusicBrainz client.</param>
+    /// <param name="metadataProvider">Metadata provider.</param>
     /// <param name="listenBrainzClient">ListenBrainz client.</param>
     /// <param name="playbackTracker">Playback tracker instance.</param>
     /// <param name="userManager">User manager.</param>
@@ -35,7 +35,7 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
         ILogger logger,
         IValidationService validationService,
         IPluginConfigService configService,
-        IMusicBrainzClient musicBrainzClient,
+        IMetadataProviderService metadataProvider,
         IListenBrainzClient listenBrainzClient,
         PlaybackTrackingManager playbackTracker,
         IUserManager userManager) : base(logger, userManager)
@@ -43,7 +43,7 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
         _logger = logger;
         _configService = configService;
         _validationService = validationService;
-        _musicBrainzClient = musicBrainzClient;
+        _metadataProvider = metadataProvider;
         _listenBrainzClient = listenBrainzClient;
         _playbackTracker = playbackTracker;
     }
@@ -76,7 +76,7 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
             return;
         }
 
-        var metadata = await GetMusicBrainzMetadata(data.Item);
+        var metadata = await _metadataProvider.GetAudioItemMetadataAsync(data.Item, CancellationToken.None);
         await SendPlayingNow(userConfig, data.Item, metadata);
 
         // TODO: Only in strict mode (new option)
@@ -100,26 +100,6 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
         }
 
         return true;
-    }
-
-    private async Task<AudioItemMetadata?> GetMusicBrainzMetadata(Audio item)
-    {
-        if (!_configService.IsMusicBrainzEnabled)
-        {
-            _logger.LogDebug("MusicBrainz integration is disabled, skipping metadata retrieval");
-            return null;
-        }
-
-        try
-        {
-            return await _musicBrainzClient.GetAudioItemMetadataAsync(item, CancellationToken.None);
-        }
-        catch (Exception e)
-        {
-            _logger.LogDebug("Could not get MusicBrainz metadata: {Message}", e.Message);
-            _logger.LogTrace(e, "Exception occurred while getting MusicBrainz metadata");
-            return null;
-        }
     }
 
     private async Task SendPlayingNow(UserConfig config, Audio item, AudioItemMetadata? audioMetadata)

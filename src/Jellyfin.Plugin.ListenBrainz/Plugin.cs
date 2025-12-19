@@ -1,9 +1,11 @@
 using System.Globalization;
 using System.Reflection;
+using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Handlers;
 using Jellyfin.Plugin.ListenBrainz.Managers;
+using Jellyfin.Plugin.ListenBrainz.MusicBrainzApi;
 using Jellyfin.Plugin.ListenBrainz.Services;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
@@ -57,16 +59,25 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
         _sessionManager = sessionManager;
         _userDataManager = userDataManager;
 
+        var pluginConfigService = new DefaultPluginConfigService();
+
         var listenBrainzLogger = loggerFactory.CreateLogger(LoggerCategory + ".ListenBrainzApi");
         var listenBrainzClient = ClientUtils.GetListenBrainzClient(listenBrainzLogger, clientFactory);
 
         var musicBrainzLogger = loggerFactory.CreateLogger(LoggerCategory + ".MusicBrainzApi");
         var musicBrainzClient = ClientUtils.GetMusicBrainzClient(musicBrainzLogger, clientFactory);
 
+        var clientName = string.Join(string.Empty, Plugin.FullName.Split(' ').Select(s => s.Capitalize()));
+        var apiClient = new MusicBrainzApiClient(clientName, Plugin.Version, Plugin.SourceUrl, clientFactory, musicBrainzLogger);
+
+        var metadataProviderLogger = loggerFactory.CreateLogger(LoggerCategory + ".MetadataProvider");
+        var metadataProviderService = new DefaultMetadataProviderService(
+            metadataProviderLogger,
+            apiClient,
+            new DefaultPluginConfigService());
+
         var backupLogger = loggerFactory.CreateLogger(LoggerCategory + ".Backup");
         var backupManager = new BackupManager(backupLogger);
-
-        var pluginConfigService = new DefaultPluginConfigService();
 
         var favoriteSyncLogger = loggerFactory.CreateLogger(LoggerCategory + ".FavoriteSync");
         var favoriteSyncService = new DefaultFavoriteSyncService(
@@ -102,7 +113,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
             pluginImplLogger,
             validationService,
             pluginConfigService,
-            musicBrainzClient,
+            metadataProviderService,
             listenBrainzClient,
             PlaybackTrackingManager.Instance,
             userManager);
@@ -113,7 +124,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
             pluginConfigService,
             favoriteSyncService,
             validationService,
-            musicBrainzClient,
+            metadataProviderService,
             backupManager,
             listenBrainzClient,
             ListensCacheManager.Instance,
