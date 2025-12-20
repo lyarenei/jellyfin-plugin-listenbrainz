@@ -72,7 +72,7 @@ public abstract class GenericHandler<TEventArgs>
         catch (Exception e)
         {
             _logger.LogWarning("Exception occurred while handling event: {ExceptionMessage}", e.Message);
-            _logger.LogTrace(e, "Could not handle event");
+            _logger.LogDebug(e, "Could not handle event");
         }
     }
 
@@ -97,14 +97,14 @@ public abstract class GenericHandler<TEventArgs>
     {
         if (args.Item is not Audio item)
         {
-            _logger.LogTrace("Event is not for an audio item");
+            _logger.LogDebug("Event is not for an audio item");
             return null;
         }
 
         var jellyfinUser = args.Users.FirstOrDefault();
         if (jellyfinUser is null)
         {
-            _logger.LogTrace("No user associated with this event");
+            _logger.LogDebug("No user associated with this event");
             return null;
         }
 
@@ -120,14 +120,14 @@ public abstract class GenericHandler<TEventArgs>
     {
         if (args.Item is not Audio item)
         {
-            _logger.LogTrace("Event is not for an audio item");
+            _logger.LogDebug("Event is not for an audio item");
             return null;
         }
 
         var jellyfinUser = args.Users.FirstOrDefault();
         if (jellyfinUser is null)
         {
-            _logger.LogTrace("No user associated with this event");
+            _logger.LogDebug("No user associated with this event");
             return null;
         }
 
@@ -142,7 +142,7 @@ public abstract class GenericHandler<TEventArgs>
     {
         if (args.Item is not Audio item)
         {
-            _logger.LogTrace("Event is not for an audio item");
+            _logger.LogDebug("Event is not for an audio item");
             return null;
         }
 
@@ -152,14 +152,14 @@ public abstract class GenericHandler<TEventArgs>
             case UserDataSaveReason.UpdateUserRating:
                 break;
             default:
-                _logger.LogTrace("Event save reason {SaveReason} is not supported", args.SaveReason);
+                _logger.LogDebug("Event save reason {SaveReason} is not supported", args.SaveReason);
                 return null;
         }
 
         var jellyfinUser = _userManager.GetUserById(args.UserId);
         if (jellyfinUser is null)
         {
-            _logger.LogTrace("No user associated with this event");
+            _logger.LogDebug("No user associated with this event");
             return null;
         }
 
