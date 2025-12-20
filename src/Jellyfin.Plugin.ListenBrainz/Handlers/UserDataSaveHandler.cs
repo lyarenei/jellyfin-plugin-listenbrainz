@@ -1,6 +1,7 @@
 using Jellyfin.Plugin.ListenBrainz.Common;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
+using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.Managers;
 using MediaBrowser.Controller.Entities.Audio;
@@ -114,24 +115,16 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
         var userConfig = _configService.GetUserConfig(data.JellyfinUser.Id);
         if (userConfig is null)
         {
-            _logger.LogDebug("User config not found, skipping");
-            return;
+            throw new PluginException("User config not found");
         }
 
         if (!userConfig.IsListenSubmitEnabled)
         {
-            _logger.LogDebug("Listen submission is not enabled for user, skipping");
-            return;
+            throw new PluginException("Listen submission is not enabled for user");
         }
 
-        var isValid = ValidateItemRequirements(data.Item, data.JellyfinUser.Id);
-        if (!isValid)
-        {
-            _logger.LogDebug("Item did not meet required conditions, skipping");
-            return;
-        }
-
-        _logger.LogTrace("All checks passed, preparing to send listen");
+        ValidateItemRequirements(data.Item, data.JellyfinUser.Id);
+        _logger.LogDebug("All checks passed, preparing to send listen");
 
         var now = DateUtils.CurrentTimestamp;
         var metadata = await _metadataProvider.GetAudioItemMetadataAsync(data.Item, cancellationToken);
@@ -157,30 +150,24 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
         }
     }
 
-    private bool ValidateItemRequirements(Audio item, Guid userId)
+    private void ValidateItemRequirements(Audio item, Guid userId)
     {
         var isAllowed = _validationService.ValidateInAllowedLibrary(item);
         if (!isAllowed)
         {
-            _logger.LogTrace("Item is not in an allowed library");
-            return false;
+            throw new PluginException("Item is not in an allowed library");
         }
 
         var canSend = _validationService.ValidateBasicMetadata(item);
         if (!canSend)
         {
-            _logger.LogTrace("Item does not have minimal metadata for a valid listen");
-            return false;
+            throw new PluginException("Item does not have minimal metadata for a valid listen");
         }
 
-        try
+        var isOk = ValidatePlaybackCondition(item, userId.ToString());
+        if (!isOk)
         {
-            return ValidatePlaybackCondition(item, userId.ToString());
-        }
-        catch (Exception e)
-        {
-            _logger.LogDebug(e, "Exception occurred while validating playback condition");
-            return false;
+            throw new PluginException("Playback conditions for listen submission are not met");
         }
     }
 
@@ -195,7 +182,7 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
         catch (Exception e)
         {
             _logger.LogInformation("Listen backup failed: {Reason}", e.Message);
-            _logger.LogTrace(e, "Listen backup failed");
+            _logger.LogDebug(e, "Listen backup failed");
         }
     }
 
@@ -208,7 +195,7 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
     {
         try
         {
-            _logger.LogTrace("Sending listen...");
+            _logger.LogDebug("Sending listen...");
             await _listenBrainzClient.SendListenAsync(userConfig, item, metadata, now, cancellationToken);
             _logger.LogInformation("Listen successfully sent");
             return true;
@@ -216,14 +203,14 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
         catch (Exception e)
         {
             _logger.LogInformation("Failed to send listen: {Reason}", e.Message);
-            _logger.LogTrace(e, "Failed to send listen");
+            _logger.LogDebug(e, "Failed to send listen");
             return false;
         }
     }
 
     private async Task SaveToListenCache(Guid userId, Audio item, AudioItemMetadata? metadata, long now)
     {
-        _logger.LogTrace("Saving listen to cache...");
+        _logger.LogDebug("Saving listen to cache...");
         await _listensCache.AddListenAsync(userId, item, metadata, now);
         await _listensCache.SaveAsync();
         _logger.LogInformation("Listen has been added to the cache");
@@ -245,7 +232,7 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
 
         if (!trackedItem.IsValid)
         {
-            _logger.LogTrace("Playback tracking is not valid for this item");
+            _logger.LogDebug("Playback tracking is not valid for this item");
             return false;
         }
 
