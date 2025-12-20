@@ -1,5 +1,6 @@
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
+using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.Managers;
 using MediaBrowser.Controller.Entities.Audio;
@@ -51,7 +52,7 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
     /// <inheritdoc/>
     protected override async Task DoHandleAsync(EventData data)
     {
-        _logger.LogDebug(
+        _logger.LogInformation(
             "Processing playback start event for {ItemName}, associated with user {UserName}",
             data.Item.Name,
             data.JellyfinUser.Username);
@@ -59,22 +60,15 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
         var userConfig = _configService.GetUserConfig(data.JellyfinUser.Id);
         if (userConfig is null)
         {
-            _logger.LogDebug("No user config found, skipping");
-            return;
+            throw new PluginException("No user config found");
         }
 
         if (!userConfig.IsListenSubmitEnabled)
         {
-            _logger.LogDebug("Listen submission is not enabled for user, skipping");
-            return;
+            throw new PluginException("Listen submission is not enabled for user");
         }
 
-        var isValid = ValidateItemRequirements(data.Item);
-        if (!isValid)
-        {
-            _logger.LogDebug("Item did not meet validation requirements, skipping");
-            return;
-        }
+        ValidateItemRequirements(data.Item);
 
         var metadata = await _metadataProvider.GetAudioItemMetadataAsync(data.Item, CancellationToken.None);
         await SendPlayingNow(userConfig, data.Item, metadata);
@@ -83,23 +77,19 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
         StartTrackingItem(data.JellyfinUser.Id, data.Item);
     }
 
-    private bool ValidateItemRequirements(Audio item)
+    private void ValidateItemRequirements(Audio item)
     {
         var isAllowed = _validationService.ValidateInAllowedLibrary(item);
         if (!isAllowed)
         {
-            _logger.LogTrace("Item is not in an allowed library");
-            return false;
+            throw new PluginException("Item is not in an allowed library");
         }
 
         var canSend = _validationService.ValidateBasicMetadata(item);
         if (!canSend)
         {
-            _logger.LogTrace("Item does not have sufficient metadata for 'playing now' listen");
-            return false;
+            throw new PluginException("Item does not have sufficient metadata for 'playing now' listen");
         }
-
-        return true;
     }
 
     private async Task SendPlayingNow(UserConfig config, Audio item, AudioItemMetadata? audioMetadata)
@@ -111,8 +101,8 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
         }
         catch (Exception e)
         {
-            _logger.LogInformation("Sending 'playing now' listen failed: {Message}", e.Message);
-            _logger.LogTrace(e, "Exception occurred while sending 'playing now' listen");
+            _logger.LogDebug(e, "Exception occurred while sending 'playing now' listen");
+            throw new PluginException("Failed to send 'playing now' listen", e);
         }
     }
 
