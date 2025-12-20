@@ -1,6 +1,7 @@
 using Jellyfin.Plugin.ListenBrainz.Common;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
+using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.Managers;
 using MediaBrowser.Controller.Entities.Audio;
@@ -65,7 +66,7 @@ public class PlaybackStopHandler : GenericHandler<PlaybackStopEventArgs>
             return;
         }
 
-        _logger.LogDebug(
+        _logger.LogInformation(
             "Processing playback stop event for {ItemName} associated with user {UserName}",
             data.Item.Name,
             data.JellyfinUser.Username);
@@ -73,24 +74,16 @@ public class PlaybackStopHandler : GenericHandler<PlaybackStopEventArgs>
         var userConfig = _configService.GetUserConfig(data.JellyfinUser.Id);
         if (userConfig is null)
         {
-            _logger.LogDebug("User config not found, skipping");
-            return;
+            throw new PluginException("User config not found");
         }
 
         if (!userConfig.IsListenSubmitEnabled)
         {
-            _logger.LogDebug("Listen submission is not enabled for user, skipping");
-            return;
+            throw new PluginException("Listen submission is not enabled for user");
         }
 
-        var isValid = ValidateItemRequirements(data.Item, data.PositionTicks);
-        if (!isValid)
-        {
-            _logger.LogDebug("Item did not meet required conditions, skipping");
-            return;
-        }
-
-        _logger.LogTrace("All checks passed, preparing to send listen");
+        ValidateItemRequirements(data.Item, data.PositionTicks);
+        _logger.LogDebug("All checks passed, preparing to send listen");
 
         var now = DateUtils.CurrentTimestamp;
         var metadata = await _metadataProvider.GetAudioItemMetadataAsync(data.Item, CancellationToken.None);
@@ -116,30 +109,30 @@ public class PlaybackStopHandler : GenericHandler<PlaybackStopEventArgs>
         }
     }
 
-    private bool ValidateItemRequirements(Audio item, long? playbackPositionTicks)
+    private void ValidateItemRequirements(Audio item, long? playbackPositionTicks)
     {
         var isAllowed = _validationService.ValidateInAllowedLibrary(item);
         if (!isAllowed)
         {
-            _logger.LogTrace("Item is not in an allowed library");
-            return false;
+            throw new PluginException("Item is not in an allowed library");
         }
 
         var canSend = _validationService.ValidateBasicMetadata(item);
         if (!canSend)
         {
-            _logger.LogTrace("Item does not have minimal metadata for a valid listen");
-            return false;
+            throw new PluginException("Item does not have minimal metadata for a valid listen");
         }
 
-        try
+        if (playbackPositionTicks is null)
         {
-            return ValidatePlaybackCondition(item, playbackPositionTicks);
+            throw new PluginException("Playback position is not set");
         }
-        catch (Exception e)
+
+        var runtime = item.RunTimeTicks ?? 0;
+        var isValid = _validationService.ValidateSubmitConditions(playbackPositionTicks.Value, runtime);
+        if (!isValid)
         {
-            _logger.LogDebug(e, "Exception occurred while validating playback condition");
-            return false;
+            throw new PluginException("Playback time does not meet listen submission conditions");
         }
     }
 
@@ -154,7 +147,7 @@ public class PlaybackStopHandler : GenericHandler<PlaybackStopEventArgs>
         catch (Exception e)
         {
             _logger.LogInformation("Listen backup failed: {Reason}", e.Message);
-            _logger.LogTrace(e, "Listen backup failed");
+            _logger.LogDebug(e, "Listen backup failed");
         }
     }
 
@@ -167,7 +160,7 @@ public class PlaybackStopHandler : GenericHandler<PlaybackStopEventArgs>
     {
         try
         {
-            _logger.LogTrace("Sending listen...");
+            _logger.LogDebug("Sending listen...");
             await _listenBrainzClient.SendListenAsync(userConfig, item, metadata, now, cancellationToken);
             _logger.LogInformation("Listen successfully sent");
             return true;
@@ -175,33 +168,16 @@ public class PlaybackStopHandler : GenericHandler<PlaybackStopEventArgs>
         catch (Exception e)
         {
             _logger.LogInformation("Failed to send listen: {Reason}", e.Message);
-            _logger.LogTrace(e, "Failed to send listen");
+            _logger.LogDebug(e, "Failed to send listen");
             return false;
         }
     }
 
     private async Task SaveToListenCache(Guid userId, Audio item, AudioItemMetadata? metadata, long now)
     {
-        _logger.LogTrace("Saving listen to cache...");
+        _logger.LogDebug("Saving listen to cache...");
         await _listensCache.AddListenAsync(userId, item, metadata, now);
         await _listensCache.SaveAsync();
         _logger.LogInformation("Listen has been added to the cache");
-    }
-
-    /// <summary>
-    /// Evaluate listen submit conditions if the played item is tracked.
-    /// </summary>
-    /// <param name="item">Item to be tracked.</param>
-    /// <param name="playbackPositionTicks">Playback position in ticks.</param>
-    private bool ValidatePlaybackCondition(Audio item, long? playbackPositionTicks)
-    {
-        if (playbackPositionTicks is null)
-        {
-            _logger.LogDebug("Playback position is not set");
-            return false;
-        }
-
-        var runtime = item.RunTimeTicks ?? 0;
-        return _validationService.ValidateSubmitConditions(playbackPositionTicks.Value, runtime);
     }
 }
