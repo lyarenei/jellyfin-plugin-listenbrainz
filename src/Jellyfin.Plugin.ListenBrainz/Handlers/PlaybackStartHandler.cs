@@ -73,7 +73,6 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
         var metadata = await _metadataProvider.GetAudioItemMetadataAsync(data.Item, CancellationToken.None);
         await SendPlayingNow(userConfig, data.Item, metadata);
 
-        // TODO: Only in strict mode (new option)
         StartTrackingItem(data.JellyfinUser.Id, data.Item);
     }
 
