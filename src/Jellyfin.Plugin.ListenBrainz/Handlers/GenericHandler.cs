@@ -1,4 +1,5 @@
 using Jellyfin.Database.Implementations.Entities;
+using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
 using MediaBrowser.Controller.Entities.Audio;
@@ -63,15 +64,16 @@ public abstract class GenericHandler<TEventArgs>
         }
         catch (PluginException e)
         {
-            _logger.LogInformation("Encountered error during event handling: {ExceptionMessage}", e.Message);
+            _logger.LogInformation("Encountered error: {ExceptionMessage}", e.Message);
+            _logger.LogDebug("Exception occurred: {ExceptionMessage}", e.GetFullMessage());
         }
         catch (OperationCanceledException)
         {
-            _logger.LogInformation("Event handling was cancelled");
+            _logger.LogInformation("Operation was cancelled");
         }
         catch (Exception e)
         {
-            _logger.LogWarning("Exception occurred while handling event: {ExceptionMessage}", e.Message);
+            _logger.LogWarning("Exception occurred: {ExceptionMessage}", e.Message);
             _logger.LogDebug(e, "Could not handle event");
         }
     }
