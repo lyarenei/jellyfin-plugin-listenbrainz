@@ -130,7 +130,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
             validationService,
             metadataProviderService,
             backupManager,
-            listenBrainzClient,
+            listenBrainzService,
             ListensCacheManager.Instance,
             PlaybackTrackingManager.Instance);
 

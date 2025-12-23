@@ -22,7 +22,7 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
     private readonly IValidationService _validationService;
     private readonly IMetadataProviderService _metadataProvider;
     private readonly IBackupManager _backupManager;
-    private readonly IListenBrainzClient _listenBrainzClient;
+    private readonly IListenBrainzService _listenBrainzService;
     private readonly ListensCacheManager _listensCache;
     private readonly PlaybackTrackingManager _playbackTracker;
 
@@ -36,7 +36,7 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
     /// <param name="validationService">Validation service.</param>
     /// <param name="metadataProvider">Metadata provider.</param>
     /// <param name="backupManager">Backup manager.</param>
-    /// <param name="listenBrainzClient">ListenBrainz client.</param>
+    /// <param name="listenBrainzService">ListenBrainz service.</param>
     /// <param name="listensCache">Listen cache manager.</param>
     /// <param name="playbackTracker">Playback tracker.</param>
     public UserDataSaveHandler(
@@ -47,7 +47,7 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
         IValidationService validationService,
         IMetadataProviderService metadataProvider,
         IBackupManager backupManager,
-        IListenBrainzClient listenBrainzClient,
+        IListenBrainzService listenBrainzService,
         ListensCacheManager listensCache,
         PlaybackTrackingManager playbackTracker) : base(logger, userManager)
     {
@@ -57,7 +57,7 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
         _validationService = validationService;
         _metadataProvider = metadataProvider;
         _backupManager = backupManager;
-        _listenBrainzClient = listenBrainzClient;
+        _listenBrainzService = listenBrainzService;
         _listensCache = listensCache;
         _playbackTracker = playbackTracker;
     }
@@ -193,19 +193,14 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
         long now,
         CancellationToken cancellationToken)
     {
-        try
+        _logger.LogDebug("Sending listen...");
+        var isOk = await _listenBrainzService.SendListenAsync(userConfig, item, metadata, now, cancellationToken);
+        if (isOk)
         {
-            _logger.LogDebug("Sending listen...");
-            await _listenBrainzClient.SendListenAsync(userConfig, item, metadata, now, cancellationToken);
             _logger.LogInformation("Listen successfully sent");
-            return true;
         }
-        catch (Exception e)
-        {
-            _logger.LogInformation("Failed to send listen: {Reason}", e.Message);
-            _logger.LogDebug(e, "Failed to send listen");
-            return false;
-        }
+
+        return isOk;
     }
 
     private async Task SaveToListenCache(Guid userId, Audio item, AudioItemMetadata? metadata, long now)
