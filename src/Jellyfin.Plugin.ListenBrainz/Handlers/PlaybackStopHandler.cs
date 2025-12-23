@@ -21,7 +21,7 @@ public class PlaybackStopHandler : GenericHandler<PlaybackStopEventArgs>
     private readonly IValidationService _validationService;
     private readonly IMetadataProviderService _metadataProvider;
     private readonly IBackupManager _backupManager;
-    private readonly IListenBrainzClient _listenBrainzClient;
+    private readonly IListenBrainzService _listenBrainzService;
     private readonly ListensCacheManager _listensCache;
 
     /// <summary>
@@ -34,7 +34,7 @@ public class PlaybackStopHandler : GenericHandler<PlaybackStopEventArgs>
     /// <param name="validationService">Validation service.</param>
     /// <param name="metadataProvider">Metadata provider.</param>
     /// <param name="backupManager">Backup manager.</param>
-    /// <param name="listenBrainzClient">ListenBrainz client.</param>
+    /// <param name="listenBrainzService">ListenBrainz service.</param>
     /// <param name="listensCache">Listen cache manager.</param>
     public PlaybackStopHandler(
         ILogger logger,
@@ -44,7 +44,7 @@ public class PlaybackStopHandler : GenericHandler<PlaybackStopEventArgs>
         IValidationService validationService,
         IMetadataProviderService metadataProvider,
         IBackupManager backupManager,
-        IListenBrainzClient listenBrainzClient,
+        IListenBrainzService listenBrainzService,
         ListensCacheManager listensCache) : base(logger, userManager)
     {
         _logger = logger;
@@ -53,7 +53,7 @@ public class PlaybackStopHandler : GenericHandler<PlaybackStopEventArgs>
         _validationService = validationService;
         _metadataProvider = metadataProvider;
         _backupManager = backupManager;
-        _listenBrainzClient = listenBrainzClient;
+        _listenBrainzService = listenBrainzService;
         _listensCache = listensCache;
     }
 
@@ -158,19 +158,14 @@ public class PlaybackStopHandler : GenericHandler<PlaybackStopEventArgs>
         long now,
         CancellationToken cancellationToken)
     {
-        try
+        _logger.LogDebug("Sending listen...");
+        var isOk = await _listenBrainzService.SendListenAsync(userConfig, item, metadata, now, cancellationToken);
+        if (isOk)
         {
-            _logger.LogDebug("Sending listen...");
-            await _listenBrainzClient.SendListenAsync(userConfig, item, metadata, now, cancellationToken);
             _logger.LogInformation("Listen successfully sent");
-            return true;
         }
-        catch (Exception e)
-        {
-            _logger.LogInformation("Failed to send listen: {Reason}", e.Message);
-            _logger.LogDebug(e, "Failed to send listen");
-            return false;
-        }
+
+        return isOk;
     }
 
     private async Task SaveToListenCache(Guid userId, Audio item, AudioItemMetadata? metadata, long now)
