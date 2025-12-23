@@ -60,9 +60,16 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
         _userDataManager = userDataManager;
 
         var pluginConfigService = new DefaultPluginConfigService();
+        var pluginImplLogger = loggerFactory.CreateLogger(LoggerCategory);
 
         var listenBrainzLogger = loggerFactory.CreateLogger(LoggerCategory + ".ListenBrainzApi");
         var listenBrainzClient = ClientUtils.GetListenBrainzClient(listenBrainzLogger, clientFactory);
+
+        var listenBrainzApiClient = ClientUtils.GetListenBrainzApiClient(listenBrainzLogger, clientFactory);
+        var listenBrainzService = new DefaultListenBrainzService(
+            pluginImplLogger,
+            listenBrainzApiClient,
+            pluginConfigService);
 
         var musicBrainzLogger = loggerFactory.CreateLogger(LoggerCategory + ".MusicBrainzApi");
         var musicBrainzClient = ClientUtils.GetMusicBrainzClient(musicBrainzLogger, clientFactory);
@@ -89,8 +96,6 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
             userManager,
             userDataManager);
 
-        var pluginImplLogger = loggerFactory.CreateLogger(LoggerCategory);
-
         var validationLogger = loggerFactory.CreateLogger(LoggerCategory + ".Validation");
         var validationService = new DefaultValidationService(
             validationLogger,
@@ -102,7 +107,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
             validationService,
             pluginConfigService,
             metadataProviderService,
-            listenBrainzClient,
+            listenBrainzService,
             PlaybackTrackingManager.Instance,
             userManager);
 

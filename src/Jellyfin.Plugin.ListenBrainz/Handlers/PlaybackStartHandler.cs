@@ -1,5 +1,3 @@
-using Jellyfin.Plugin.ListenBrainz.Configuration;
-using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.Managers;
@@ -19,7 +17,7 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
     private readonly IValidationService _validationService;
     private readonly IPluginConfigService _configService;
     private readonly IMetadataProviderService _metadataProvider;
-    private readonly IListenBrainzClient _listenBrainzClient;
+    private readonly IListenBrainzService _listenBrainzService;
     private readonly PlaybackTrackingManager _playbackTracker;
 
     /// <summary>
@@ -29,7 +27,7 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
     /// <param name="validationService">Validation service.</param>
     /// <param name="configService">Plugin configuration service.</param>
     /// <param name="metadataProvider">Metadata provider.</param>
-    /// <param name="listenBrainzClient">ListenBrainz client.</param>
+    /// <param name="listenBrainzService">ListenBrainz service.</param>
     /// <param name="playbackTracker">Playback tracker instance.</param>
     /// <param name="userManager">User manager.</param>
     public PlaybackStartHandler(
@@ -37,7 +35,7 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
         IValidationService validationService,
         IPluginConfigService configService,
         IMetadataProviderService metadataProvider,
-        IListenBrainzClient listenBrainzClient,
+        IListenBrainzService listenBrainzService,
         PlaybackTrackingManager playbackTracker,
         IUserManager userManager) : base(logger, userManager)
     {
@@ -45,7 +43,7 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
         _configService = configService;
         _validationService = validationService;
         _metadataProvider = metadataProvider;
-        _listenBrainzClient = listenBrainzClient;
+        _listenBrainzService = listenBrainzService;
         _playbackTracker = playbackTracker;
     }
 
@@ -71,7 +69,8 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
         ValidateItemRequirements(data.Item);
 
         var metadata = await _metadataProvider.GetAudioItemMetadataAsync(data.Item, CancellationToken.None);
-        await SendPlayingNow(userConfig, data.Item, metadata);
+        await _listenBrainzService.SendNowPlayingAsync(userConfig, data.Item, metadata, CancellationToken.None);
+        _logger.LogInformation("Successfully sent 'playing now' listen");
 
         StartTrackingItem(data.JellyfinUser.Id, data.Item);
     }
@@ -88,20 +87,6 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
         if (!canSend)
         {
             throw new PluginException("Item does not have sufficient metadata for 'playing now' listen");
-        }
-    }
-
-    private async Task SendPlayingNow(UserConfig config, Audio item, AudioItemMetadata? audioMetadata)
-    {
-        try
-        {
-            await _listenBrainzClient.SendNowPlayingAsync(config, item, audioMetadata);
-            _logger.LogInformation("Successfully sent 'playing now' listen");
-        }
-        catch (Exception e)
-        {
-            _logger.LogDebug(e, "Exception occurred while sending 'playing now' listen");
-            throw new PluginException("Failed to send 'playing now' listen", e);
         }
     }
 
