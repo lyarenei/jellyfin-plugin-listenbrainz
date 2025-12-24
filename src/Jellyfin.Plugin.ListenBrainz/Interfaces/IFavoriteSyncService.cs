@@ -30,7 +30,8 @@ public interface IFavoriteSyncService
     /// <param name="jellyfinUserId">ID of the Jellyfin user.</param>
     /// <param name="listenTs">Listen timestamp. If specified, MSID sync will be attempted if recording MBID is not available.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    public Task SyncToListenBrainzAsync(Guid itemId, Guid jellyfinUserId, long? listenTs = null, CancellationToken cancellationToken = default);
+    /// <returns>Sync has been successful.</returns>
+    public Task<bool> SyncToListenBrainzAsync(Guid itemId, Guid jellyfinUserId, long? listenTs = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Enables the service.

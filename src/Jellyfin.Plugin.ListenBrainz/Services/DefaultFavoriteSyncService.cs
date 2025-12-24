@@ -1,6 +1,7 @@
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
+using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
 using Microsoft.Extensions.Logging;
 
@@ -14,6 +15,7 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
     private readonly ILogger _logger;
     private readonly IListenBrainzClient _listenBrainzClient;
     private readonly IMusicBrainzClient _musicBrainzClient;
+    private readonly IMetadataProviderService _metadataProvider;
     private readonly IPluginConfigService _pluginConfigService;
     private readonly ILibraryManager _libraryManager;
     private readonly IUserManager _userManager;
@@ -25,6 +27,7 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
     /// <param name="logger">Logger.</param>
     /// <param name="listenBrainzClient">ListenBrainz client.</param>
     /// <param name="musicBrainzClient">MusicBrainz client.</param>
+    /// <param name="metadataProvider">Metadata provider.</param>
     /// <param name="pluginConfigService">Plugin config service.</param>
     /// <param name="libraryManager">Library manager.</param>
     /// <param name="userManager">User manager.</param>
@@ -33,6 +36,7 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
         ILogger logger,
         IListenBrainzClient listenBrainzClient,
         IMusicBrainzClient musicBrainzClient,
+        IMetadataProviderService metadataProvider,
         IPluginConfigService pluginConfigService,
         ILibraryManager libraryManager,
         IUserManager userManager,
@@ -41,6 +45,7 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
         _logger = logger;
         _listenBrainzClient = listenBrainzClient;
         _musicBrainzClient = musicBrainzClient;
+        _metadataProvider = metadataProvider;
         _pluginConfigService = pluginConfigService;
         _libraryManager = libraryManager;
         _userManager = userManager;
@@ -133,7 +138,7 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
     }
 
     /// <inheritdoc />
-    public async Task SyncToListenBrainzAsync(
+    public async Task<bool> SyncToListenBrainzAsync(
         Guid itemId,
         Guid jellyfinUserId,
         long? listenTs,
@@ -141,62 +146,67 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
     {
         if (!IsEnabled)
         {
-            _logger.LogTrace("Favorite sync service is disabled, nothing to do");
-            return;
+            _logger.LogDebug("Favorite sync service is disabled, nothing to do");
+            return false;
         }
 
         var item = _libraryManager.GetItemById(itemId);
         if (item is null)
         {
             _logger.LogWarning("Item with ID {ItemId} not found", itemId);
-            return;
+            return false;
         }
 
         var userConfig = _pluginConfigService.GetUserConfig(jellyfinUserId);
         if (userConfig is null)
         {
             _logger.LogDebug("ListenBrainz config for user ID {UserId} not found", jellyfinUserId);
-            return;
+            return false;
         }
 
         var jellyfinUser = _userManager.GetUserById(jellyfinUserId);
         if (jellyfinUser is null)
         {
             _logger.LogWarning("User with ID {UserId} not found", jellyfinUserId);
-            return;
+            return false;
         }
 
         var userItemData = _userDataManager.GetUserData(jellyfinUser, item);
+        if (item is not Audio audioItem)
+        {
+            _logger.LogDebug("Not supported item type for favorite sync: {ItemType}", item.GetType().Name);
+            return false;
+        }
 
         var recordingMbid = item.GetRecordingMbid();
         if (string.IsNullOrEmpty(recordingMbid) && _pluginConfigService.IsMusicBrainzEnabled)
         {
-            _logger.LogTrace("Recording MBID is not available, attempting to get from MusicBrainz");
+            _logger.LogDebug("Recording MBID is not available, attempting to get it from MusicBrainz");
             try
             {
-                var metadata = await _musicBrainzClient.GetAudioItemMetadataAsync(item, cancellationToken);
-                recordingMbid = metadata.RecordingMbid;
+                var metadata = await _metadataProvider.GetAudioItemMetadataAsync(audioItem, cancellationToken);
+                recordingMbid = metadata?.RecordingMbid;
             }
             catch (Exception e)
             {
-                _logger.LogDebug(e, "Failed to get recording MBID");
+                _logger.LogDebug("Failed to get recording MBID: {Reason}", e.Message);
             }
         }
 
         string? recordingMsid = null;
         if (string.IsNullOrEmpty(recordingMbid))
         {
-            _logger.LogTrace("Recording MBID is not available, switching to recording MSID method");
+            _logger.LogDebug("Recording MBID is not available, switching to recording MSID method");
             if (listenTs is null)
             {
-                _logger.LogInformation("Favorite sync failed, cannot get recording MSID");
-                return;
+                _logger.LogDebug("Listen timestamp is not available, cannot get recording MSID");
+                return false;
             }
 
             recordingMsid = await GetRecordingMsidAsync(userConfig, listenTs.Value, cancellationToken);
         }
 
-        _logger.LogTrace("Attempting to sync favorite status");
+        _logger.LogDebug("Attempting to sync favorite status");
         await _listenBrainzClient.SendFeedbackAsync(
             userConfig,
             userItemData.IsFavorite,
@@ -205,6 +215,7 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
             cancellationToken);
 
         _logger.LogInformation("Favorite sync has been successful");
+        return true;
     }
 
     /// <inheritdoc />
@@ -266,7 +277,7 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
         await Task.Delay(500, cancellationToken);
         for (int i = 0; i < MaxAttempts; i++)
         {
-            _logger.LogTrace("Attempt number {Attempt} to get recording MSID", i + 1);
+            _logger.LogDebug("Attempt number {Attempt} to get recording MSID", i + 1);
             try
             {
                 _logger.LogDebug("Attempting to get recording MSID");

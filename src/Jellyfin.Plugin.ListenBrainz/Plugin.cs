@@ -91,6 +91,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
             favoriteSyncLogger,
             listenBrainzClient,
             musicBrainzClient,
+            metadataProviderService,
             pluginConfigService,
             libraryManager,
             userManager,
