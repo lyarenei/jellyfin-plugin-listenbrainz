@@ -1,11 +1,9 @@
 using System.Globalization;
 using System.Reflection;
-using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Handlers;
 using Jellyfin.Plugin.ListenBrainz.Managers;
-using Jellyfin.Plugin.ListenBrainz.MusicBrainzApi;
 using Jellyfin.Plugin.ListenBrainz.Services;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
@@ -14,7 +12,6 @@ using MediaBrowser.Controller.Session;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
 using Microsoft.Extensions.Logging;
-using ClientUtils = Jellyfin.Plugin.ListenBrainz.Clients.Utils;
 
 namespace Jellyfin.Plugin.ListenBrainz;
 
@@ -59,51 +56,25 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
         _sessionManager = sessionManager;
         _userDataManager = userDataManager;
 
-        var pluginConfigService = new DefaultPluginConfigService();
-        var pluginImplLogger = loggerFactory.CreateLogger(LoggerCategory);
-
-        var listenBrainzLogger = loggerFactory.CreateLogger(LoggerCategory + ".ListenBrainzApi");
-        var listenBrainzClient = ClientUtils.GetListenBrainzClient(listenBrainzLogger, clientFactory);
-
-        var listenBrainzApiClient = ClientUtils.GetListenBrainzApiClient(listenBrainzLogger, clientFactory);
-        var listenBrainzService = new DefaultListenBrainzService(
-            pluginImplLogger,
-            listenBrainzApiClient,
+        var serviceFactory = new ServiceFactory(loggerFactory, clientFactory);
+        var listenBrainzService = serviceFactory.GetDefaultListenBrainzService();
+        var metadataProviderService = serviceFactory.GetDefaultMetadataProviderService();
+        var pluginConfigService = serviceFactory.GetDefaultPluginConfigService();
+        var favoriteSyncService = serviceFactory.GetDefaultFavoriteSyncService(
+            libraryManager,
+            userManager,
+            userDataManager,
+            listenBrainzService,
+            metadataProviderService,
             pluginConfigService);
-
-        var musicBrainzLogger = loggerFactory.CreateLogger(LoggerCategory + ".MusicBrainzApi");
-        var musicBrainzClient = ClientUtils.GetMusicBrainzClient(musicBrainzLogger, clientFactory);
-
-        var clientName = string.Join(string.Empty, Plugin.FullName.Split(' ').Select(s => s.Capitalize()));
-        var apiClient = new MusicBrainzApiClient(clientName, Plugin.Version, Plugin.SourceUrl, clientFactory, musicBrainzLogger);
-
-        var metadataProviderLogger = loggerFactory.CreateLogger(LoggerCategory + ".MetadataProvider");
-        var metadataProviderService = new DefaultMetadataProviderService(
-            metadataProviderLogger,
-            apiClient,
-            new DefaultPluginConfigService());
+        var validationService = serviceFactory.GetDefaultValidationService(libraryManager, pluginConfigService);
 
         var backupLogger = loggerFactory.CreateLogger(LoggerCategory + ".Backup");
         var backupManager = new BackupManager(backupLogger);
 
-        var favoriteSyncLogger = loggerFactory.CreateLogger(LoggerCategory + ".FavoriteSync");
-        var favoriteSyncService = new DefaultFavoriteSyncService(
-            favoriteSyncLogger,
-            listenBrainzService,
-            metadataProviderService,
-            pluginConfigService,
-            libraryManager,
-            userManager,
-            userDataManager);
-
-        var validationLogger = loggerFactory.CreateLogger(LoggerCategory + ".Validation");
-        var validationService = new DefaultValidationService(
-            validationLogger,
-            pluginConfigService,
-            libraryManager);
-
+        var playbackStartLogger = loggerFactory.CreateLogger(LoggerCategory + ".PlaybackStartHandler");
         _playbackStartHandler = new PlaybackStartHandler(
-            pluginImplLogger,
+            playbackStartLogger,
             validationService,
             pluginConfigService,
             metadataProviderService,
@@ -111,8 +82,9 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
             PlaybackTrackingManager.Instance,
             userManager);
 
+        var playbackStopLogger = loggerFactory.CreateLogger(LoggerCategory + ".PlaybackStopHandler");
         _playbackStopHandler = new PlaybackStopHandler(
-            pluginImplLogger,
+            playbackStopLogger,
             userManager,
             pluginConfigService,
             favoriteSyncService,
@@ -122,8 +94,9 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
             listenBrainzService,
             ListensCacheManager.Instance);
 
+        var userDataSaveLogger = loggerFactory.CreateLogger(LoggerCategory + ".UserDataSaveHandler");
         _userDataSaveHandler = new UserDataSaveHandler(
-            pluginImplLogger,
+            userDataSaveLogger,
             userManager,
             pluginConfigService,
             favoriteSyncService,
