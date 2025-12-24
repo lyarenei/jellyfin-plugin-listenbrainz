@@ -91,6 +91,29 @@ public class DefaultListenBrainzService : IListenBrainzService
     }
 
     /// <inheritdoc />
+    public async Task<bool> SendListenAsync(UserConfig config, Listen listen, CancellationToken cancellationToken)
+    {
+        var request = new SubmitListensRequest
+        {
+            ApiToken = config.PlaintextApiToken,
+            ListenType = ListenType.Single,
+            Payload = [listen],
+            BaseUrl = _pluginConfig.ListenBrainzApiUrl,
+        };
+
+        try
+        {
+            var response = await _apiClient.SubmitListens(request, cancellationToken);
+            return response.IsOk;
+        }
+        catch (Exception e)
+        {
+            _logger.LogDebug("Exception when sending listen: {Message}", e.Message);
+            throw new ServiceException("Sending listen failed", e);
+        }
+    }
+
+    /// <inheritdoc />
     public async Task<bool> SendFeedbackAsync(
         UserConfig config,
         bool isFavorite,

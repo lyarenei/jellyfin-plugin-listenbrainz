@@ -41,6 +41,15 @@ public interface IListenBrainzService
         CancellationToken cancellationToken);
 
     /// <summary>
+    /// Send a single listen.
+    /// </summary>
+    /// <param name="config">ListenBrainz user configuration.</param>
+    /// <param name="listen">Listen to send.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Success.</returns>
+    public Task<bool> SendListenAsync(UserConfig config, Listen listen, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Send a feedback for a specific recording, identified by either a MBID or MSID.
     /// </summary>
     /// <param name="config">ListenBrainz user configuration.</param>
