@@ -89,7 +89,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
         var favoriteSyncLogger = loggerFactory.CreateLogger(LoggerCategory + ".FavoriteSync");
         var favoriteSyncService = new DefaultFavoriteSyncService(
             favoriteSyncLogger,
-            listenBrainzClient,
+            listenBrainzService,
             metadataProviderService,
             pluginConfigService,
             libraryManager,

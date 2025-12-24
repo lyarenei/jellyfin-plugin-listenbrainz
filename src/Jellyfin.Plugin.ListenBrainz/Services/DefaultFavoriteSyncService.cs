@@ -13,7 +13,7 @@ namespace Jellyfin.Plugin.ListenBrainz.Services;
 public class DefaultFavoriteSyncService : IFavoriteSyncService
 {
     private readonly ILogger _logger;
-    private readonly IListenBrainzClient _listenBrainzClient;
+    private readonly IListenBrainzService _listenBrainz;
     private readonly IMetadataProviderService _metadataProvider;
     private readonly IPluginConfigService _pluginConfigService;
     private readonly ILibraryManager _libraryManager;
@@ -24,7 +24,7 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
     /// Initializes a new instance of the <see cref="DefaultFavoriteSyncService"/> class.
     /// </summary>
     /// <param name="logger">Logger.</param>
-    /// <param name="listenBrainzClient">ListenBrainz client.</param>
+    /// <param name="listenBrainz">ListenBrainz service.</param>
     /// <param name="metadataProvider">Metadata provider.</param>
     /// <param name="pluginConfigService">Plugin config service.</param>
     /// <param name="libraryManager">Library manager.</param>
@@ -32,7 +32,7 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
     /// <param name="userDataManager">User data manager.</param>
     public DefaultFavoriteSyncService(
         ILogger logger,
-        IListenBrainzClient listenBrainzClient,
+        IListenBrainzService listenBrainz,
         IMetadataProviderService metadataProvider,
         IPluginConfigService pluginConfigService,
         ILibraryManager libraryManager,
@@ -40,7 +40,7 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
         IUserDataManager userDataManager)
     {
         _logger = logger;
-        _listenBrainzClient = listenBrainzClient;
+        _listenBrainz = listenBrainz;
         _metadataProvider = metadataProvider;
         _pluginConfigService = pluginConfigService;
         _libraryManager = libraryManager;
@@ -137,15 +137,31 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
         }
 
         _logger.LogDebug("Attempting to sync favorite status");
-        await _listenBrainzClient.SendFeedbackAsync(
-            userConfig,
-            userItemData.IsFavorite,
-            recordingMbid,
-            recordingMsid,
-            cancellationToken);
+        try
+        {
+            var isOk = await _listenBrainz.SendFeedbackAsync(
+                userConfig,
+                userItemData.IsFavorite,
+                recordingMbid,
+                recordingMsid,
+                cancellationToken);
 
-        _logger.LogInformation("Favorite sync has been successful");
-        return true;
+            if (isOk)
+            {
+                _logger.LogInformation("Favorite sync has been successful");
+            }
+            else
+            {
+                _logger.LogInformation("Favorite sync failed");
+            }
+
+            return isOk;
+        }
+        catch (Exception e)
+        {
+            _logger.LogDebug("Failed to sync favorite status: {Reason}", e.Message);
+            return false;
+        }
     }
 
     /// <inheritdoc />
@@ -179,7 +195,7 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
             try
             {
                 _logger.LogDebug("Attempting to get recording MSID");
-                return await _listenBrainzClient.GetRecordingMsidByListenTsAsync(
+                return await _listenBrainz.GetRecordingMsidByListenTsAsync(
                     userConfig,
                     listenTs,
                     cancellationToken);
