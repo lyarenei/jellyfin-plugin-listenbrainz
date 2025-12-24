@@ -90,7 +90,6 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
         var favoriteSyncService = new DefaultFavoriteSyncService(
             favoriteSyncLogger,
             listenBrainzClient,
-            musicBrainzClient,
             metadataProviderService,
             pluginConfigService,
             libraryManager,
