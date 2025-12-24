@@ -56,18 +56,18 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
         _sessionManager = sessionManager;
         _userDataManager = userDataManager;
 
-        var serviceFactory = new ServiceFactory(loggerFactory, clientFactory);
-        var listenBrainzService = serviceFactory.GetDefaultListenBrainzService();
-        var metadataProviderService = serviceFactory.GetDefaultMetadataProviderService();
-        var pluginConfigService = serviceFactory.GetDefaultPluginConfigService();
-        var favoriteSyncService = serviceFactory.GetDefaultFavoriteSyncService(
+        var serviceFactory = new DefaultServiceFactory(loggerFactory, clientFactory);
+        var listenBrainzService = serviceFactory.GetListenBrainzService();
+        var metadataProviderService = serviceFactory.GetMetadataProviderService();
+        var pluginConfigService = serviceFactory.GetPluginConfigService();
+        var favoriteSyncService = serviceFactory.GetFavoriteSyncService(
             libraryManager,
             userManager,
             userDataManager,
             listenBrainzService,
             metadataProviderService,
             pluginConfigService);
-        var validationService = serviceFactory.GetDefaultValidationService(libraryManager, pluginConfigService);
+        var validationService = serviceFactory.GetValidationService(libraryManager, pluginConfigService);
 
         var backupLogger = loggerFactory.CreateLogger(LoggerCategory + ".Backup");
         var backupManager = new BackupManager(backupLogger);

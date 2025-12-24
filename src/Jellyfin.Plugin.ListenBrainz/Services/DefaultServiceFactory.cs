@@ -9,19 +9,19 @@ using UnderlyingClient = Jellyfin.Plugin.ListenBrainz.Http.HttpClient;
 namespace Jellyfin.Plugin.ListenBrainz.Services;
 
 /// <summary>
-/// Service factory.
+/// A default implementation of <see cref="IServiceFactory"/>.
 /// </summary>
-public class ServiceFactory
+public class DefaultServiceFactory : IServiceFactory
 {
     private readonly ILoggerFactory _loggerFactory;
     private readonly IHttpClientFactory _httpClientFactory;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ServiceFactory"/> class.
+    /// Initializes a new instance of the <see cref="DefaultServiceFactory"/> class.
     /// </summary>
     /// <param name="loggerFactory">Logger factory.</param>
     /// <param name="httpClientFactory">HTTP client factory.</param>
-    public ServiceFactory(ILoggerFactory loggerFactory, IHttpClientFactory httpClientFactory)
+    public DefaultServiceFactory(ILoggerFactory loggerFactory, IHttpClientFactory httpClientFactory)
     {
         _loggerFactory = loggerFactory;
         _httpClientFactory = httpClientFactory;
@@ -29,11 +29,8 @@ public class ServiceFactory
 
     private static string LoggerCategory => "Jellyfin.Plugin.ListenBrainz";
 
-    /// <summary>
-    /// Get a default ListenBrainz service.
-    /// </summary>
-    /// <returns>ListenBrainz service.</returns>
-    public IListenBrainzService GetDefaultListenBrainzService()
+    /// <inheritdoc />
+    public IListenBrainzService GetListenBrainzService()
     {
         var httpLogger = _loggerFactory.CreateLogger(LoggerCategory + ".HttpClient");
         var apiLogger = _loggerFactory.CreateLogger(LoggerCategory + ".Api");
@@ -44,16 +41,13 @@ public class ServiceFactory
         using var baseClient = new BaseApiClient(wrapper, apiLogger, null);
         var apiClient = new ListenBrainzApiClient(baseClient, apiLogger);
 
-        var pluginConfig = GetDefaultPluginConfigService();
+        var pluginConfig = GetPluginConfigService();
 
         return new DefaultListenBrainzService(serviceLogger, apiClient, pluginConfig);
     }
 
-    /// <summary>
-    /// Get a default Metadata provider service.
-    /// </summary>
-    /// <returns>Metadata provider service.</returns>
-    public IMetadataProviderService GetDefaultMetadataProviderService()
+    /// <inheritdoc />
+    public IMetadataProviderService GetMetadataProviderService()
     {
         var apiLogger = _loggerFactory.CreateLogger(LoggerCategory + ".MusicBrainzApi");
         var serviceLogger = _loggerFactory.CreateLogger(LoggerCategory + ".MetadataProvider");
@@ -66,22 +60,13 @@ public class ServiceFactory
             _httpClientFactory,
             apiLogger);
 
-        var pluginConfig = GetDefaultPluginConfigService();
+        var pluginConfig = GetPluginConfigService();
 
         return new DefaultMetadataProviderService(serviceLogger, apiClient, pluginConfig);
     }
 
-    /// <summary>
-    /// Get a default Favorite sync service.
-    /// </summary>
-    /// <param name="libraryManager">Jellyfin library manager.</param>
-    /// <param name="userManager">Jellyfin user manager.</param>
-    /// <param name="userDataManager">Jellyfin user data manager.</param>
-    /// <param name="listenBrainzService">ListenBrainz service.</param>
-    /// <param name="metadataProviderService">Metadata provider service.</param>
-    /// <param name="pluginConfigService">Plugin configuration service.</param>
-    /// <returns>Favorite sync service.</returns>
-    public IFavoriteSyncService GetDefaultFavoriteSyncService(
+    /// <inheritdoc />
+    public IFavoriteSyncService GetFavoriteSyncService(
         ILibraryManager libraryManager,
         IUserManager userManager,
         IUserDataManager userDataManager,
@@ -91,9 +76,9 @@ public class ServiceFactory
     {
         var serviceLogger = _loggerFactory.CreateLogger(LoggerCategory + ".FavoriteSync");
 
-        var listenBrainz = listenBrainzService ?? GetDefaultListenBrainzService();
-        var metadataProvider = metadataProviderService ?? GetDefaultMetadataProviderService();
-        var pluginConfig = pluginConfigService ?? GetDefaultPluginConfigService();
+        var listenBrainz = listenBrainzService ?? GetListenBrainzService();
+        var metadataProvider = metadataProviderService ?? GetMetadataProviderService();
+        var pluginConfig = pluginConfigService ?? GetPluginConfigService();
 
         return new DefaultFavoriteSyncService(
             serviceLogger,
@@ -105,28 +90,20 @@ public class ServiceFactory
             userDataManager);
     }
 
-    /// <summary>
-    /// Get a default Plugin configuration service.
-    /// </summary>
-    /// <returns>Plugin configuration service.</returns>
-    public IPluginConfigService GetDefaultPluginConfigService()
+    /// <inheritdoc />
+    public IPluginConfigService GetPluginConfigService()
     {
         return new DefaultPluginConfigService();
     }
 
-    /// <summary>
-    /// Get a default Validation service.
-    /// </summary>
-    /// <param name="libraryManager">Jellyfin library manager.</param>
-    /// <param name="pluginConfigService">Plugin configuration service.</param>
-    /// <returns>Validation service.</returns>
-    public IValidationService GetDefaultValidationService(
+    /// <inheritdoc />
+    public IValidationService GetValidationService(
         ILibraryManager libraryManager,
         IPluginConfigService? pluginConfigService)
     {
         var validationLogger = _loggerFactory.CreateLogger(LoggerCategory + ".Validation");
 
-        var pluginConfig = pluginConfigService ?? GetDefaultPluginConfigService();
+        var pluginConfig = pluginConfigService ?? GetPluginConfigService();
 
         return new DefaultValidationService(validationLogger, pluginConfig, libraryManager);
     }
