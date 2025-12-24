@@ -16,6 +16,7 @@ namespace Jellyfin.Plugin.ListenBrainz.Clients;
 /// <summary>
 /// ListenBrainz client for plugin.
 /// </summary>
+[Obsolete("Use IListenBrainzService instead")]
 public class ListenBrainzClient : IListenBrainzClient
 {
     private readonly ILogger _logger;

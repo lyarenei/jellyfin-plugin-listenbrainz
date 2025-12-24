@@ -12,6 +12,7 @@ namespace Jellyfin.Plugin.ListenBrainz.Clients;
 /// <summary>
 /// MusicBrainz client for plugin.
 /// </summary>
+[Obsolete("Use IMetadataProviderService instead")]
 public class MusicBrainzClient : IMusicBrainzClient
 {
     private readonly ILogger _logger;

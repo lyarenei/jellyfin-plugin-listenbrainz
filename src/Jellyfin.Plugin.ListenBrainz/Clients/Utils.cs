@@ -20,6 +20,7 @@ public static class Utils
     /// <param name="logger">Logger instance.</param>
     /// <param name="clientFactory">HTTP client factory.</param>
     /// <returns>ListenBrainz client.</returns>
+    [Obsolete("Use IListenBrainzService instead")]
     public static IListenBrainzClient GetListenBrainzClient(
         ILogger logger,
         IHttpClientFactory clientFactory)
@@ -52,6 +53,7 @@ public static class Utils
     /// <param name="logger">Logger instance.</param>
     /// <param name="clientFactory">HTTP client factory.</param>
     /// <returns>Instance of <see cref="IMusicBrainzClient"/>.</returns>
+    [Obsolete("Use IMetadataProviderService instead")]
     public static IMusicBrainzClient GetMusicBrainzClient(ILogger logger, IHttpClientFactory clientFactory)
     {
         var clientName = string.Join(string.Empty, Plugin.FullName.Split(' ').Select(s => s.Capitalize()));
