@@ -28,7 +28,10 @@ public class DefaultListenBrainzService : IListenBrainzService
     /// <param name="logger">Logger instance.</param>
     /// <param name="apiClient">ListenBrainz API client.</param>
     /// <param name="pluginConfig">Plugin configuration.</param>
-    public DefaultListenBrainzService(ILogger logger, IListenBrainzApiClient apiClient, IPluginConfigService pluginConfig)
+    public DefaultListenBrainzService(
+        ILogger logger,
+        IListenBrainzApiClient apiClient,
+        IPluginConfigService pluginConfig)
     {
         _logger = logger;
         _apiClient = apiClient;
