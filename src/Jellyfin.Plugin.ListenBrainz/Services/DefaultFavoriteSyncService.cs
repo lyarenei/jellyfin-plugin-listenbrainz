@@ -81,6 +81,12 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
             return false;
         }
 
+        if (item is not Audio audioItem)
+        {
+            _logger.LogDebug("Not supported item type for favorite sync: {ItemType}", item.GetType().Name);
+            return false;
+        }
+
         var userConfig = _pluginConfigService.GetUserConfig(jellyfinUserId);
         if (userConfig is null)
         {
@@ -96,9 +102,9 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
         }
 
         var userItemData = _userDataManager.GetUserData(jellyfinUser, item);
-        if (item is not Audio audioItem)
+        if (userItemData is null)
         {
-            _logger.LogDebug("Not supported item type for favorite sync: {ItemType}", item.GetType().Name);
+            _logger.LogDebug("No user data available for item");
             return false;
         }
 
