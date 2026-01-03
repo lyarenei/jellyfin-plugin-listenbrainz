@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace Jellyfin.Plugin.ListenBrainz.Services;
 
 /// <summary>
-/// Defult implementation of metadata provider service.
+/// Default implementation of metadata provider service.
 /// </summary>
 public class DefaultMetadataProviderService : IMetadataProviderService
 {
