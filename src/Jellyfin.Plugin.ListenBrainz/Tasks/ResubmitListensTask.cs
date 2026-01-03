@@ -1,8 +1,8 @@
+using Jellyfin.Plugin.ListenBrainz.Api.Models;
 using Jellyfin.Plugin.ListenBrainz.Api.Resources;
 using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
-using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.Managers;
@@ -152,30 +152,29 @@ public class ResubmitListensTask : IScheduledTask
         }
     }
 
-    internal async Task ProcessChunkOfListens(StoredListen[] listenChunk, UserConfig userConfig, CancellationToken cancellationToken)
+    internal async Task ProcessChunkOfListens(StoredListen[] storedListens, UserConfig userConfig, CancellationToken cancellationToken)
     {
         var listensToRemove = new List<StoredListen>();
-        var listensToSend = listenChunk.Select(l =>
+        var listensToSend = new List<Listen>();
+        foreach (var storedListen in storedListens)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (_pluginConfig.IsMusicBrainzEnabled && !storedListen.HasRecordingMbid)
             {
-                cancellationToken.ThrowIfCancellationRequested();
+                storedListen.Metadata = await GetAudioItemMetadataAsync(storedListen, cancellationToken);
+            }
 
-                if (_pluginConfig.IsMusicBrainzEnabled && !l.HasRecordingMbid)
-                {
-                    l.Metadata = GetAudioItemMetadata(l, cancellationToken);
-                }
+            var listen = _libraryManager.ToListen(storedListen);
+            if (listen is null)
+            {
+                _logger.LogDebug("Failed to recreate listen of item {ItemId}", storedListen.Id);
+                continue;
+            }
 
-                var listen = _libraryManager.ToListen(l);
-                if (listen is null)
-                {
-                    _logger.LogDebug("Failed to recreate listen of item {ItemId}", l.Id);
-                    return null;
-                }
-
-                listensToRemove.Add(l);
-                return listen;
-            })
-            .WhereNotNull()
-            .ToList();
+            listensToRemove.Add(storedListen);
+            listensToSend.Add(listen);
+        }
 
         if (listensToSend.Count < 1)
         {
@@ -208,14 +207,14 @@ public class ResubmitListensTask : IScheduledTask
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        var task = _metadataProvider.GetAudioItemMetadataAsync(item, cancellationToken);
-        task.Wait(cancellationToken);
-        if (task.Exception?.InnerException is not null)
+        try
         {
-            _logger.LogDebug("Fetching additional metadata failed: {Reason}", task.Exception.GetFullMessage());
-            // throw new ServiceException("Fetching additional metadata failed", task.Exception.InnerException);
+            return await _metadataProvider.GetAudioItemMetadataAsync(item, cancellationToken);
         }
-
-        return task.Result;
+        catch (Exception ex)
+        {
+            _logger.LogDebug("Fetching additional metadata failed: {Reason}", ex.GetFullMessage());
+            return null;
+        }
     }
 }

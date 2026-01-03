@@ -12,7 +12,7 @@ namespace Jellyfin.Plugin.ListenBrainz.Tests.Tasks.ResubmitListens;
 public sealed class GetAudioItemMetadataTests : TestBase
 {
     [Fact]
-    public void ReturnsNull_WhenItemIsNotAudio()
+    public async Task ReturnsNull_WhenItemIsNotAudio()
     {
         var listen = new StoredListen { Id = Guid.Empty };
 
@@ -20,7 +20,7 @@ public sealed class GetAudioItemMetadataTests : TestBase
             .Setup(x => x.GetItemById(listen.Id))
             .Returns(new Movie());
 
-        var result = _task.GetAudioItemMetadata(listen, CancellationToken.None);
+        var result = await _task.GetAudioItemMetadataAsync(listen, CancellationToken.None);
 
         Assert.Null(result);
         _metadataProviderServiceMock.Verify(
@@ -29,7 +29,7 @@ public sealed class GetAudioItemMetadataTests : TestBase
     }
 
     [Fact]
-    public void ReturnsMetadata_WhenProviderSucceeds()
+    public async Task ReturnsMetadata_WhenProviderSucceeds()
     {
         var listen = new StoredListen { Id = Guid.Empty };
         var audio = new Mock<Audio>().Object;
@@ -43,7 +43,7 @@ public sealed class GetAudioItemMetadataTests : TestBase
             .Setup(x => x.GetAudioItemMetadataAsync(audio, CancellationToken.None))
             .ReturnsAsync(expected);
 
-        var actual = _task.GetAudioItemMetadata(listen, CancellationToken.None);
+        var actual = await _task.GetAudioItemMetadataAsync(listen, CancellationToken.None);
 
         Assert.Same(expected, actual);
         _metadataProviderServiceMock.Verify(
@@ -52,7 +52,7 @@ public sealed class GetAudioItemMetadataTests : TestBase
     }
 
     [Fact]
-    public void ThrowsServiceException_WhenProviderFails()
+    public async Task ReturnsNull_WhenProviderThrows()
     {
         var listen = new StoredListen { Id = Guid.Empty };
         var audio = new Audio();
@@ -63,9 +63,9 @@ public sealed class GetAudioItemMetadataTests : TestBase
 
         _metadataProviderServiceMock
             .Setup(x => x.GetAudioItemMetadataAsync(audio, CancellationToken.None))
-            .Returns(Task.FromResult<AudioItemMetadata?>(null));
+            .ThrowsAsync(new InvalidOperationException("boom"));
 
-        Assert.Null(_task.GetAudioItemMetadata(listen, CancellationToken.None));
+        Assert.Null(await _task.GetAudioItemMetadataAsync(listen, CancellationToken.None));
         _libraryManagerMock.Verify(x => x.GetItemById(listen.Id), Times.Once);
         _metadataProviderServiceMock.Verify(
             x => x.GetAudioItemMetadataAsync(audio, CancellationToken.None),
