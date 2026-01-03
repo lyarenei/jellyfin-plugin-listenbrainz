@@ -186,17 +186,17 @@ public class ResubmitListensTask : IScheduledTask
         var isOk = await _listenBrainz.SendListensAsync(userConfig, listensToSend, cancellationToken);
         if (isOk)
         {
-            _logger.LogInformation("Successfully resubmitted {Count} listen(s)", listenChunk.Length);
+            _logger.LogInformation("Successfully resubmitted {Count} listen(s)", listensToSend.Count);
             await _listensCache.RemoveListensAsync(userConfig.JellyfinUserId, listensToRemove);
             await _listensCache.SaveAsync();
         }
         else
         {
-            _logger.LogInformation("Failed to resubmit {Count} listen(s)", listenChunk.Length);
+            _logger.LogInformation("Failed to resubmit {Count} listen(s)", listensToSend.Count);
         }
     }
 
-    internal AudioItemMetadata? GetAudioItemMetadata(
+    internal async Task<AudioItemMetadata?> GetAudioItemMetadataAsync(
         StoredListen listen,
         CancellationToken cancellationToken)
     {
