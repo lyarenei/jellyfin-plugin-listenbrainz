@@ -1,6 +1,5 @@
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
-using Jellyfin.Plugin.ListenBrainz.Managers;
 using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Session;
@@ -18,7 +17,7 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
     private readonly IPluginConfigService _configService;
     private readonly IMetadataProviderService _metadataProvider;
     private readonly IListenBrainzService _listenBrainzService;
-    private readonly PlaybackTrackingManager _playbackTracker;
+    private readonly IPlaybackTrackingService _playbackTracker;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PlaybackStartHandler"/> class.
@@ -36,7 +35,7 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
         IPluginConfigService configService,
         IMetadataProviderService metadataProvider,
         IListenBrainzService listenBrainzService,
-        PlaybackTrackingManager playbackTracker,
+        IPlaybackTrackingService playbackTracker,
         IUserManager userManager) : base(logger, userManager)
     {
         _logger = logger;
@@ -72,7 +71,7 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
         await _listenBrainzService.SendNowPlayingAsync(userConfig, data.Item, metadata, CancellationToken.None);
         _logger.LogInformation("Successfully sent 'playing now' listen");
 
-        StartTrackingItem(data.JellyfinUser.Id, data.Item);
+        await StartTrackingItemAsync(data.JellyfinUser.Id, data.Item);
     }
 
     private void ValidateItemRequirements(Audio item)
@@ -90,12 +89,12 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
         }
     }
 
-    private void StartTrackingItem(Guid userId, Audio item)
+    private async Task StartTrackingItemAsync(Guid userId, Audio item)
     {
         if (_configService.IsAlternativeModeEnabled)
         {
             _logger.LogDebug("Alternative mode is enabled, adding item to playback tracker");
-            _playbackTracker.AddItem(userId.ToString(), item);
+            await _playbackTracker.AddItemAsync(userId.ToString(), item, CancellationToken.None);
         }
     }
 }

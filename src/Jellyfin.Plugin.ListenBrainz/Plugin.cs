@@ -79,7 +79,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
             pluginConfigService,
             metadataProviderService,
             listenBrainzService,
-            PlaybackTrackingManager.Instance,
+            DefaultPlaybackTrackingService.Instance,
             userManager);
 
         var playbackStopLogger = loggerFactory.CreateLogger(LoggerCategory + ".PlaybackStopHandler");
@@ -105,7 +105,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
             backupManager,
             listenBrainzService,
             ListensCacheManager.Instance,
-            PlaybackTrackingManager.Instance);
+            DefaultPlaybackTrackingService.Instance);
 
         RegisterEventHandlers();
     }

@@ -24,7 +24,7 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
     private readonly IBackupManager _backupManager;
     private readonly IListenBrainzService _listenBrainzService;
     private readonly ListensCacheManager _listensCache;
-    private readonly PlaybackTrackingManager _playbackTracker;
+    private readonly IPlaybackTrackingService _playbackTracker;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UserDataSaveHandler"/> class.
@@ -49,7 +49,7 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
         IBackupManager backupManager,
         IListenBrainzService listenBrainzService,
         ListensCacheManager listensCache,
-        PlaybackTrackingManager playbackTracker) : base(logger, userManager)
+        IPlaybackTrackingService playbackTracker) : base(logger, userManager)
     {
         _logger = logger;
         _configService = configService;
@@ -123,7 +123,7 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
             throw new PluginException("Listen submission is not enabled for user");
         }
 
-        ValidateItemRequirements(data.Item, data.JellyfinUser.Id);
+        await ValidateItemRequirementsAsync(data.Item, data.JellyfinUser.Id, cancellationToken);
         _logger.LogDebug("All checks passed, preparing to send listen");
 
         var now = DateUtils.CurrentTimestamp;
@@ -150,7 +150,7 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
         }
     }
 
-    private void ValidateItemRequirements(Audio item, Guid userId)
+    private async Task ValidateItemRequirementsAsync(Audio item, Guid userId, CancellationToken cancellationToken)
     {
         var isAllowed = _validationService.ValidateInAllowedLibrary(item);
         if (!isAllowed)
@@ -164,7 +164,7 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
             throw new PluginException("Item does not have minimal metadata for a valid listen");
         }
 
-        var isOk = ValidatePlaybackCondition(item, userId.ToString());
+        var isOk = await ValidatePlaybackConditionAsync(item, userId.ToString(), cancellationToken);
         if (!isOk)
         {
             throw new PluginException("Playback conditions for listen submission are not met");
@@ -216,9 +216,13 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
     /// </summary>
     /// <param name="item">Item to be tracked.</param>
     /// <param name="userId">ID of the user associated with the listen.</param>
-    private bool ValidatePlaybackCondition(Audio item, string userId)
+    /// <param name="cancellationToken">Cancellation token.</param>
+    private async Task<bool> ValidatePlaybackConditionAsync(
+        Audio item,
+        string userId,
+        CancellationToken cancellationToken)
     {
-        var trackedItem = _playbackTracker.GetItem(userId, item.Id.ToString());
+        var trackedItem = await _playbackTracker.GetItemAsync(userId, item.Id.ToString(), cancellationToken);
         if (trackedItem is null)
         {
             _logger.LogDebug("Playback is not tracked for this item, assuming offline playback");
@@ -235,7 +239,7 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
         var deltaTicks = delta * TimeSpan.TicksPerSecond;
         var runtime = item.RunTimeTicks ?? 0;
         var isOk = _validationService.ValidateSubmitConditions(deltaTicks, runtime);
-        _playbackTracker.InvalidateItem(userId, trackedItem);
+        await _playbackTracker.InvalidateItemAsync(userId, trackedItem, cancellationToken);
         return isOk;
     }
 }
