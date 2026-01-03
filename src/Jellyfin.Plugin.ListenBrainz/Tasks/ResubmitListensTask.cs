@@ -127,7 +127,7 @@ public class ResubmitListensTask : IScheduledTask
             userConfig.JellyfinUserId);
 
         var validListens = userListens
-            .TakeWhile(IsValidListen)
+            .Where(IsValidListen)
             .WhereNotNull()
             .ToList();
 
