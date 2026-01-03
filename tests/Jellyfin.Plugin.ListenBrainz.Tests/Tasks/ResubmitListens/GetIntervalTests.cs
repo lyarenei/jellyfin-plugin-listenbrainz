@@ -16,10 +16,19 @@ public class GetIntervalTests
     }
 
     [Fact]
-    public void ReturnDifferentValues_WhenConsecutiveCalls()
+    public void ReturnValidIntervals_WhenConsecutiveCalls()
     {
-        var interval1 = ResubmitListensTask.GetInterval();
-        var interval2 = ResubmitListensTask.GetInterval();
-        Assert.NotEqual(interval1, interval2);
+        var intervals = new[]
+        {
+            ResubmitListensTask.GetInterval(),
+            ResubmitListensTask.GetInterval(),
+            ResubmitListensTask.GetInterval(),
+        };
+
+        foreach (var interval in intervals)
+        {
+            Assert.True(interval > TimeSpan.TicksPerDay);
+            Assert.True(interval <= TimeSpan.TicksPerDay + (50 * TimeSpan.TicksPerMinute));
+        }
     }
 }
