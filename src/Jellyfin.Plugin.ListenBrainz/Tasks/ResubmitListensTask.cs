@@ -207,12 +207,13 @@ public class ResubmitListensTask : IScheduledTask
         }
 
         cancellationToken.ThrowIfCancellationRequested();
+
         var task = _metadataProvider.GetAudioItemMetadataAsync(item, cancellationToken);
         task.Wait(cancellationToken);
         if (task.Exception?.InnerException is not null)
         {
             _logger.LogDebug("Fetching additional metadata failed: {Reason}", task.Exception.GetFullMessage());
-            throw new ServiceException("Fetching additional metadata failed", task.Exception.InnerException);
+            // throw new ServiceException("Fetching additional metadata failed", task.Exception.InnerException);
         }
 
         return task.Result;
