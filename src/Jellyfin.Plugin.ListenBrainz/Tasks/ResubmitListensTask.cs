@@ -134,39 +134,7 @@ public class ResubmitListensTask : IScheduledTask
         var listenChunks = validListens.Chunk(Limits.MaxListensPerRequest);
         foreach (var listenChunk in listenChunks)
         {
-            var listensToRemove = new List<StoredListen>();
-            var listensToSend = listenChunk.Select(l =>
-                {
-                    ct.ThrowIfCancellationRequested();
-
-                    if (_pluginConfig.IsMusicBrainzEnabled && !l.HasRecordingMbid)
-                    {
-                        l.Metadata = GetAudioItemMetadata(l, ct);
-                    }
-
-                    var listen = _libraryManager.ToListen(l);
-                    if (listen is null)
-                    {
-                        _logger.LogDebug("Failed to recreate listen of item {ItemId}", l.Id);
-                        return null;
-                    }
-
-                    listensToRemove.Add(l);
-                    return listen;
-                })
-                .WhereNotNull();
-
-            var isOk = await _listenBrainz.SendListensAsync(userConfig, listensToSend, ct);
-            if (isOk)
-            {
-                _logger.LogInformation("Successfully resubmitted {Count} listen(s)", listenChunk.Length);
-                await _listensCache.RemoveListensAsync(userConfig.JellyfinUserId, listensToRemove);
-                await _listensCache.SaveAsync();
-            }
-            else
-            {
-                _logger.LogInformation("Failed to resubmit {Count} listen(s)", listenChunk.Length);
-            }
+            await ProcessChunkOfListens(listenChunk, userConfig, ct);
         }
     }
 
@@ -184,7 +152,51 @@ public class ResubmitListensTask : IScheduledTask
         }
     }
 
-    private AudioItemMetadata? GetAudioItemMetadata(
+    internal async Task ProcessChunkOfListens(StoredListen[] listenChunk, UserConfig userConfig, CancellationToken cancellationToken)
+    {
+        var listensToRemove = new List<StoredListen>();
+        var listensToSend = listenChunk.Select(l =>
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if (_pluginConfig.IsMusicBrainzEnabled && !l.HasRecordingMbid)
+                {
+                    l.Metadata = GetAudioItemMetadata(l, cancellationToken);
+                }
+
+                var listen = _libraryManager.ToListen(l);
+                if (listen is null)
+                {
+                    _logger.LogDebug("Failed to recreate listen of item {ItemId}", l.Id);
+                    return null;
+                }
+
+                listensToRemove.Add(l);
+                return listen;
+            })
+            .WhereNotNull()
+            .ToList();
+
+        if (listensToSend.Count < 1)
+        {
+            _logger.LogInformation("No listens to resubmit in the current chunk");
+            return;
+        }
+
+        var isOk = await _listenBrainz.SendListensAsync(userConfig, listensToSend, cancellationToken);
+        if (isOk)
+        {
+            _logger.LogInformation("Successfully resubmitted {Count} listen(s)", listenChunk.Length);
+            await _listensCache.RemoveListensAsync(userConfig.JellyfinUserId, listensToRemove);
+            await _listensCache.SaveAsync();
+        }
+        else
+        {
+            _logger.LogInformation("Failed to resubmit {Count} listen(s)", listenChunk.Length);
+        }
+    }
+
+    internal AudioItemMetadata? GetAudioItemMetadata(
         StoredListen listen,
         CancellationToken cancellationToken)
     {
