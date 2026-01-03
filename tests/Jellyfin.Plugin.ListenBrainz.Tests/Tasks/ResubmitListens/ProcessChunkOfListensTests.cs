@@ -153,4 +153,29 @@ public class ProcessChunkOfListensTests : TestBase
 
         _listensCacheManagerMock.Verify(lcm => lcm.SaveAsync(), Times.Once);
     }
+
+    [Fact]
+    public async Task ShouldNotRemove_WhenSendFails()
+    {
+        var token = CancellationToken.None;
+        var listens = GetStoredListens();
+        var user = GetUser();
+        var userConfig = GetUserConfig(user.Id);
+
+        _libraryManagerMock
+            .Setup(lm => lm.GetItemById(It.IsAny<Guid>()))
+            .Returns(new Audio());
+
+        _listenBrainzServiceMock
+            .Setup(lsm => lsm.SendListensAsync(
+                userConfig,
+                It.Is<IEnumerable<Listen>>(l => l.Count() == 2),
+                token))
+            .Returns(Task.FromResult(false));
+
+        await _task.ProcessChunkOfListens(listens, userConfig, token);
+
+        _listensCacheManagerMock.Verify(lcm => lcm.RemoveListensAsync(It.IsAny<Guid>(), It.IsAny<IEnumerable<StoredListen>>()), Times.Never);
+        _listensCacheManagerMock.Verify(lcm => lcm.SaveAsync(), Times.Never);
+    }
 }
