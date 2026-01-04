@@ -92,7 +92,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
             metadataProviderService,
             backupManager,
             listenBrainzService,
-            ListensCacheManager.Instance);
+            DefaultListensCachingService.Instance);
 
         var userDataSaveLogger = loggerFactory.CreateLogger(LoggerCategory + ".UserDataSaveHandler");
         _userDataSaveHandler = new UserDataSaveHandler(
@@ -104,7 +104,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
             metadataProviderService,
             backupManager,
             listenBrainzService,
-            ListensCacheManager.Instance,
+            DefaultListensCachingService.Instance,
             DefaultPlaybackTrackingService.Instance);
 
         RegisterEventHandlers();

@@ -109,8 +109,8 @@ public class ProcessChunkOfListensTests : TestBase
                     token),
             Times.Once);
 
-        _listensCacheManagerMock.Verify(lcm => lcm.RemoveListensAsync(userConfig.JellyfinUserId, listens), Times.Once);
-        _listensCacheManagerMock.Verify(lcm => lcm.SaveAsync(), Times.Once);
+        _listensCachingServiceMock.Verify(lcm => lcm.RemoveListensAsync(userConfig.JellyfinUserId, listens), Times.Once);
+        _listensCachingServiceMock.Verify(lcm => lcm.SaveAsync(), Times.Once);
     }
 
     [Fact]
@@ -145,13 +145,13 @@ public class ProcessChunkOfListensTests : TestBase
                     token),
             Times.Once);
 
-        _listensCacheManagerMock.Verify(lcm =>
+        _listensCachingServiceMock.Verify(lcm =>
                 lcm.RemoveListensAsync(
                     userConfig.JellyfinUserId,
                     It.Is<IEnumerable<StoredListen>>(l => l.Count() == 1 && l.First() == listens[0])),
             Times.Once);
 
-        _listensCacheManagerMock.Verify(lcm => lcm.SaveAsync(), Times.Once);
+        _listensCachingServiceMock.Verify(lcm => lcm.SaveAsync(), Times.Once);
     }
 
     [Fact]
@@ -175,7 +175,7 @@ public class ProcessChunkOfListensTests : TestBase
 
         await _task.ProcessChunkOfListens(listens, userConfig, token);
 
-        _listensCacheManagerMock.Verify(lcm => lcm.RemoveListensAsync(It.IsAny<Guid>(), It.IsAny<IEnumerable<StoredListen>>()), Times.Never);
-        _listensCacheManagerMock.Verify(lcm => lcm.SaveAsync(), Times.Never);
+        _listensCachingServiceMock.Verify(lcm => lcm.RemoveListensAsync(It.IsAny<Guid>(), It.IsAny<IEnumerable<StoredListen>>()), Times.Never);
+        _listensCachingServiceMock.Verify(lcm => lcm.SaveAsync(), Times.Never);
     }
 }

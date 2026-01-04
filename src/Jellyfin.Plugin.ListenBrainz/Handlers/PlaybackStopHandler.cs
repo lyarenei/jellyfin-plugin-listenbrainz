@@ -3,7 +3,6 @@ using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
-using Jellyfin.Plugin.ListenBrainz.Managers;
 using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
 using Microsoft.Extensions.Logging;
@@ -22,7 +21,7 @@ public class PlaybackStopHandler : GenericHandler<PlaybackStopEventArgs>
     private readonly IMetadataProviderService _metadataProvider;
     private readonly IBackupManager _backupManager;
     private readonly IListenBrainzService _listenBrainzService;
-    private readonly ListensCacheManager _listensCache;
+    private readonly IListensCachingService _listensCache;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PlaybackStopHandler"/> class.
@@ -45,7 +44,7 @@ public class PlaybackStopHandler : GenericHandler<PlaybackStopEventArgs>
         IMetadataProviderService metadataProvider,
         IBackupManager backupManager,
         IListenBrainzService listenBrainzService,
-        ListensCacheManager listensCache) : base(logger, userManager)
+        IListensCachingService listensCache) : base(logger, userManager)
     {
         _logger = logger;
         _configService = configService;

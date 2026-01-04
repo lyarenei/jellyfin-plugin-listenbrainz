@@ -5,7 +5,6 @@ using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
-using Jellyfin.Plugin.ListenBrainz.Managers;
 using Jellyfin.Plugin.ListenBrainz.Services;
 using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
@@ -20,7 +19,7 @@ namespace Jellyfin.Plugin.ListenBrainz.Tasks;
 public class ResubmitListensTask : IScheduledTask
 {
     private readonly ILogger _logger;
-    private readonly IListensCacheManager _listensCache;
+    private readonly IListensCachingService _listensCache;
     private readonly IListenBrainzService _listenBrainz;
     private readonly IMetadataProviderService _metadataProvider;
     private readonly IPluginConfigService _pluginConfig;
@@ -32,18 +31,18 @@ public class ResubmitListensTask : IScheduledTask
     /// <param name="loggerFactory">Logger factory.</param>
     /// <param name="clientFactory">HTTP client factory.</param>
     /// <param name="libraryManager">Library manager.</param>
-    /// <param name="listensCacheManager">Listens cache instance.</param>
+    /// <param name="listensCache">Listens cache instance.</param>
     /// <param name="serviceFactory">Service factory.</param>
     public ResubmitListensTask(
         ILoggerFactory loggerFactory,
         IHttpClientFactory clientFactory,
         ILibraryManager libraryManager,
-        IListensCacheManager? listensCacheManager = null,
+        IListensCachingService? listensCache = null,
         IServiceFactory? serviceFactory = null)
     {
         _logger = loggerFactory.CreateLogger($"{Plugin.LoggerCategory}.ResubmitListensTask");
         _libraryManager = libraryManager;
-        _listensCache = listensCacheManager ?? ListensCacheManager.Instance;
+        _listensCache = listensCache ?? DefaultListensCachingService.Instance;
 
         var factory = serviceFactory ?? new DefaultServiceFactory(loggerFactory, clientFactory);
         _listenBrainz = factory.GetListenBrainzService();
@@ -66,8 +65,6 @@ public class ResubmitListensTask : IScheduledTask
     /// <inheritdoc />
     public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
-        await _listensCache.RestoreAsync();
-
         try
         {
             foreach (var userConfig in _pluginConfig.UserConfigs)

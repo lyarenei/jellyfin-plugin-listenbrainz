@@ -3,7 +3,6 @@ using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
-using Jellyfin.Plugin.ListenBrainz.Managers;
 using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Entities;
@@ -23,7 +22,7 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
     private readonly IMetadataProviderService _metadataProvider;
     private readonly IBackupManager _backupManager;
     private readonly IListenBrainzService _listenBrainzService;
-    private readonly ListensCacheManager _listensCache;
+    private readonly IListensCachingService _listensCache;
     private readonly IPlaybackTrackingService _playbackTracker;
 
     /// <summary>
@@ -48,7 +47,7 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
         IMetadataProviderService metadataProvider,
         IBackupManager backupManager,
         IListenBrainzService listenBrainzService,
-        ListensCacheManager listensCache,
+        IListensCachingService listensCache,
         IPlaybackTrackingService playbackTracker) : base(logger, userManager)
     {
         _logger = logger;

@@ -14,7 +14,7 @@ public class TestBase
 {
     protected readonly Mock<IHttpClientFactory> _clientFactoryMock;
     protected readonly Mock<ILibraryManager> _libraryManagerMock;
-    protected readonly Mock<IListensCacheManager> _listensCacheManagerMock;
+    protected readonly Mock<IListensCachingService> _listensCachingServiceMock;
     protected readonly Mock<IListenBrainzService> _listenBrainzServiceMock;
     protected readonly Mock<IMetadataProviderService> _metadataProviderServiceMock;
     protected readonly Mock<IPluginConfigService> _pluginConfigServiceMock;
@@ -30,7 +30,7 @@ public class TestBase
 
         _clientFactoryMock = new Mock<IHttpClientFactory>();
         _libraryManagerMock = new Mock<ILibraryManager>();
-        _listensCacheManagerMock = new Mock<IListensCacheManager>();
+        _listensCachingServiceMock = new Mock<IListensCachingService>();
         _listenBrainzServiceMock = new Mock<IListenBrainzService>();
         _metadataProviderServiceMock = new Mock<IMetadataProviderService>();
         _pluginConfigServiceMock = new Mock<IPluginConfigService>();
@@ -44,7 +44,7 @@ public class TestBase
             loggerFactoryMock.Object,
             _clientFactoryMock.Object,
             _libraryManagerMock.Object,
-            _listensCacheManagerMock.Object,
+            _listensCachingServiceMock.Object,
             _serviceFactoryMock.Object);
     }
 
