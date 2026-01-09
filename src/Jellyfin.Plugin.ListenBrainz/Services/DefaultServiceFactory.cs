@@ -1,5 +1,6 @@
 using Jellyfin.Plugin.ListenBrainz.Api;
 using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
+using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.MusicBrainzApi;
 using MediaBrowser.Controller.Library;
@@ -7,6 +8,13 @@ using Microsoft.Extensions.Logging;
 using UnderlyingClient = Jellyfin.Plugin.ListenBrainz.Http.HttpClient;
 
 namespace Jellyfin.Plugin.ListenBrainz.Services;
+
+using ListenCacheData = System.Collections.Generic.Dictionary<
+    System.Guid,
+    System.Collections.Generic.List<
+        Jellyfin.Plugin.ListenBrainz.Dtos.StoredListen
+    >
+>;
 
 /// <summary>
 /// A default implementation of <see cref="IServiceFactory"/>.
@@ -106,5 +114,22 @@ public class DefaultServiceFactory : IServiceFactory
         var pluginConfig = pluginConfigService ?? GetPluginConfigService();
 
         return new DefaultValidationService(validationLogger, pluginConfig, libraryManager);
+    }
+
+    /// <inheritdoc />
+    public IListensCachingService GetListensCachingService(
+        IPersistentJsonService<ListenCacheData>? persistentService = null)
+    {
+        try
+        {
+            return DefaultListensCachingService.GetInstance();
+        }
+        catch (ServiceException)
+        {
+            var cacheLogger = _loggerFactory.CreateLogger(LoggerCategory + ".ListensCache");
+            var filePath = Path.Join(Plugin.GetDataPath(), "cache.json");
+            var storage = persistentService ?? new DefaultPersistentJsonService<ListenCacheData>(filePath);
+            return new DefaultListensCachingService(cacheLogger, storage);
+        }
     }
 }

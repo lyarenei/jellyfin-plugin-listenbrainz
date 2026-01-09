@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
@@ -9,6 +10,13 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
 namespace Jellyfin.Plugin.ListenBrainz.Tests.Tasks.ResubmitListens;
+
+using ListenCacheData = Dictionary<
+    Guid,
+    List<
+        StoredListen
+    >
+>;
 
 public class TestBase
 {
@@ -39,12 +47,12 @@ public class TestBase
         _serviceFactoryMock.Setup(m => m.GetListenBrainzService()).Returns(_listenBrainzServiceMock.Object);
         _serviceFactoryMock.Setup(m => m.GetMetadataProviderService()).Returns(_metadataProviderServiceMock.Object);
         _serviceFactoryMock.Setup(m => m.GetPluginConfigService()).Returns(_pluginConfigServiceMock.Object);
+        _serviceFactoryMock.Setup(m => m.GetListensCachingService(It.IsAny<IPersistentJsonService<ListenCacheData>>())).Returns(_listensCachingServiceMock.Object);
 
         _task = new ResubmitListensTask(
             loggerFactoryMock.Object,
             _clientFactoryMock.Object,
             _libraryManagerMock.Object,
-            _listensCachingServiceMock.Object,
             _serviceFactoryMock.Object);
     }
 

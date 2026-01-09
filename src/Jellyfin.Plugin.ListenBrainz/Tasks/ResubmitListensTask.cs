@@ -31,23 +31,21 @@ public class ResubmitListensTask : IScheduledTask
     /// <param name="loggerFactory">Logger factory.</param>
     /// <param name="clientFactory">HTTP client factory.</param>
     /// <param name="libraryManager">Library manager.</param>
-    /// <param name="listensCache">Listens cache instance.</param>
     /// <param name="serviceFactory">Service factory.</param>
     public ResubmitListensTask(
         ILoggerFactory loggerFactory,
         IHttpClientFactory clientFactory,
         ILibraryManager libraryManager,
-        IListensCachingService? listensCache = null,
         IServiceFactory? serviceFactory = null)
     {
         _logger = loggerFactory.CreateLogger($"{Plugin.LoggerCategory}.ResubmitListensTask");
         _libraryManager = libraryManager;
-        _listensCache = listensCache ?? DefaultListensCachingService.Instance;
 
         var factory = serviceFactory ?? new DefaultServiceFactory(loggerFactory, clientFactory);
         _listenBrainz = factory.GetListenBrainzService();
         _metadataProvider = factory.GetMetadataProviderService();
         _pluginConfig = factory.GetPluginConfigService();
+        _listensCache = factory.GetListensCachingService();
     }
 
     /// <inheritdoc />

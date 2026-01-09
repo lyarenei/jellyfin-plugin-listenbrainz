@@ -2,6 +2,13 @@ using MediaBrowser.Controller.Library;
 
 namespace Jellyfin.Plugin.ListenBrainz.Interfaces;
 
+using ListenCacheData = System.Collections.Generic.Dictionary<
+    System.Guid,
+    System.Collections.Generic.List<
+        Jellyfin.Plugin.ListenBrainz.Dtos.StoredListen
+    >
+>;
+
 /// <summary>
 /// A service factory interface.
 /// </summary>
@@ -52,4 +59,12 @@ public interface IServiceFactory
     public IValidationService GetValidationService(
         ILibraryManager libraryManager,
         IPluginConfigService? pluginConfigService);
+
+    /// <summary>
+    /// Get a default Listens caching service.
+    /// </summary>
+    /// <param name="persistentService">Cache backing storage service.</param>
+    /// <returns>Listens caching service.</returns>
+    public IListensCachingService GetListensCachingService(
+        IPersistentJsonService<ListenCacheData>? persistentService = null);
 }

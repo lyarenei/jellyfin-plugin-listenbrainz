@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
-using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.Services;
+using Jellyfin.Plugin.ListenBrainz.Tests.Utils.Services;
 using MediaBrowser.Controller.Entities.Audio;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 namespace Jellyfin.Plugin.ListenBrainz.Tests.Services;
@@ -14,42 +15,6 @@ using ListenCacheData = Dictionary<Guid, List<StoredListen>>;
 
 public class ListensCachingServiceTests
 {
-    private sealed class DummyPersistentJsonService : IPersistentJsonService<ListenCacheData>
-    {
-        public ListenCacheData? ReadData { get; set; }
-
-        public ListenCacheData? LastSavedData { get; private set; }
-
-        public int SaveAsyncCalls { get; private set; }
-
-        public void Save(ListenCacheData data) => LastSavedData = Clone(data);
-
-        public Task SaveAsync(ListenCacheData data)
-        {
-            SaveAsyncCalls++;
-            LastSavedData = Clone(data);
-            return Task.CompletedTask;
-        }
-
-        public ListenCacheData Read() => ReadData ?? new ListenCacheData();
-
-        public Task<ListenCacheData> ReadAsync() => Task.FromResult(Read());
-
-        private static ListenCacheData Clone(ListenCacheData data)
-        {
-            return data.ToDictionary(
-                pair => pair.Key,
-                pair => pair.Value
-                    .Select(sl => new StoredListen
-                    {
-                        Id = sl.Id,
-                        ListenedAt = sl.ListenedAt,
-                        Metadata = sl.Metadata,
-                    })
-                    .ToList());
-        }
-    }
-
     private static Audio GetAudio()
     {
         return new Audio
@@ -58,6 +23,13 @@ public class ListensCachingServiceTests
             Artists = ["artist"],
         };
     }
+
+    private static DefaultListensCachingService GetService(
+        DummyPersistentJsonService storage,
+        bool restore = true) => new(
+            new NullLogger<DefaultListensCachingService>(),
+            storage,
+            restore);
 
     [Fact]
     public void Constructor_RestoresCache_WhenReadSucceeds()
@@ -74,7 +46,7 @@ public class ListensCachingServiceTests
         };
         var storedData = new ListenCacheData { [userId] = storedListens };
         var storage = new DummyPersistentJsonService { ReadData = storedData };
-        var service = new DefaultListensCachingService(storage);
+        var service = GetService(storage);
 
         var listens = service.GetListens(userId).ToList();
         Assert.Single(listens);
@@ -85,7 +57,7 @@ public class ListensCachingServiceTests
     public void AddListen_AddsEntry()
     {
         var storage = new DummyPersistentJsonService();
-        var service = new DefaultListensCachingService(storage, restore: false);
+        var service = GetService(storage, restore: false);
         var userId = Guid.NewGuid();
         var audio = GetAudio();
 
@@ -101,7 +73,7 @@ public class ListensCachingServiceTests
     public async Task AddListenAsync_AddsEntry()
     {
         var storage = new DummyPersistentJsonService();
-        var service = new DefaultListensCachingService(storage, restore: false);
+        var service = GetService(storage, restore: false);
         var userId = Guid.NewGuid();
         var audio = GetAudio();
 
@@ -116,7 +88,7 @@ public class ListensCachingServiceTests
     public void RemoveListen_RemovesMatchingEntry()
     {
         var storage = new DummyPersistentJsonService();
-        var service = new DefaultListensCachingService(storage, restore: false);
+        var service = GetService(storage, restore: false);
         var userId = Guid.NewGuid();
         var audio = GetAudio();
         var storedListen = new StoredListen
@@ -135,7 +107,7 @@ public class ListensCachingServiceTests
     public void RemoveListens_RemovesOnlyMatchingEntries()
     {
         var storage = new DummyPersistentJsonService();
-        var service = new DefaultListensCachingService(storage, restore: false);
+        var service = GetService(storage, restore: false);
         var userId = Guid.NewGuid();
         var audio1 = GetAudio();
         var audio2 = GetAudio();
@@ -161,7 +133,7 @@ public class ListensCachingServiceTests
     public async Task SaveAsync_PersistsCurrentState()
     {
         var storage = new DummyPersistentJsonService();
-        var service = new DefaultListensCachingService(storage, restore: false);
+        var service = GetService(storage, restore: false);
         var userId = Guid.NewGuid();
         var audio = GetAudio();
 

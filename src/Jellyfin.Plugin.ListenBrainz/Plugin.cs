@@ -69,6 +69,8 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
             pluginConfigService);
         var validationService = serviceFactory.GetValidationService(libraryManager, pluginConfigService);
 
+        var listensCachingService = serviceFactory.GetListensCachingService();
+
         var backupLogger = loggerFactory.CreateLogger(LoggerCategory + ".Backup");
         var backupManager = new BackupManager(backupLogger);
 
@@ -92,7 +94,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
             metadataProviderService,
             backupManager,
             listenBrainzService,
-            DefaultListensCachingService.Instance);
+            listensCachingService);
 
         var userDataSaveLogger = loggerFactory.CreateLogger(LoggerCategory + ".UserDataSaveHandler");
         _userDataSaveHandler = new UserDataSaveHandler(
@@ -104,7 +106,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
             metadataProviderService,
             backupManager,
             listenBrainzService,
-            DefaultListensCachingService.Instance,
+            listensCachingService,
             DefaultPlaybackTrackingService.Instance);
 
         RegisterEventHandlers();

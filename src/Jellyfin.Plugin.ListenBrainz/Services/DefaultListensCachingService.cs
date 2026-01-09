@@ -3,6 +3,7 @@ using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using MediaBrowser.Controller.Entities.Audio;
+using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.ListenBrainz.Services;
 
@@ -18,28 +19,32 @@ using ListenCacheData = System.Collections.Generic.Dictionary<
 /// </summary>
 public sealed class DefaultListensCachingService : IListensCachingService, IDisposable
 {
-    private const string CacheFileName = "cache.json";
-
-    private static readonly object _instanceLock = new();
     private static DefaultListensCachingService? _instance;
 
     private readonly SemaphoreSlim _lock;
     private readonly IPersistentJsonService<ListenCacheData> _persistentCache;
     private readonly ListenCacheData _listensCache;
+    private readonly ILogger _logger;
 
     private bool _isDisposed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DefaultListensCachingService"/> class.
     /// </summary>
+    /// <param name="logger">Logger instance.</param>
     /// <param name="persistentCache">Persistent cache service.</param>
     /// <param name="restore">Restore data from file.</param>
-    internal DefaultListensCachingService(IPersistentJsonService<ListenCacheData> persistentCache, bool restore = true)
+    public DefaultListensCachingService(
+        ILogger logger,
+        IPersistentJsonService<ListenCacheData> persistentCache,
+        bool restore = true)
     {
         _listensCache = new ListenCacheData();
         _lock = new SemaphoreSlim(1, 1);
         _isDisposed = false;
         _persistentCache = persistentCache;
+        _logger = logger;
+        _instance = this;
 
         if (!restore)
         {
@@ -50,9 +55,9 @@ public sealed class DefaultListensCachingService : IListensCachingService, IDisp
         {
             _listensCache = _persistentCache.Read();
         }
-        catch (ServiceException)
+        catch (ServiceException ex)
         {
-            // TODO: Log exception
+            _logger.LogDebug(ex, "Failed to restore listens cache from persistent storage");
         }
     }
 
@@ -64,33 +69,15 @@ public sealed class DefaultListensCachingService : IListensCachingService, IDisp
     /// <summary>
     /// Gets instance of the cache manager.
     /// </summary>
-    public static DefaultListensCachingService Instance
+    /// <returns>Singleton instance of <see cref="DefaultFavoriteSyncService"/>.</returns>
+    public static DefaultListensCachingService GetInstance()
     {
-        get
+        if (_instance is null)
         {
-            if (_instance is not null)
-            {
-                return _instance;
-            }
-
-            lock (_instanceLock)
-            {
-                if (_instance is not null)
-                {
-                    return _instance;
-                }
-
-                var path = Path.Join(Plugin.GetDataPath(), CacheFileName);
-                var persistentService = new DefaultPersistentJsonService<ListenCacheData>(path);
-                _instance = new DefaultListensCachingService(persistentService);
-                if (!File.Exists(path))
-                {
-                    persistentService.Save(_instance._listensCache);
-                }
-            }
-
-            return _instance;
+            throw new ServiceException("Service is not initialized");
         }
+
+        return _instance;
     }
 
     /// <inheritdoc />
