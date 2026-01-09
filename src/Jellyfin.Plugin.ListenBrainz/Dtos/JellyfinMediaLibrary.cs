@@ -22,6 +22,11 @@ public class JellyfinMediaLibrary
     /// <param name="item">Jellyfin item/folder.</param>
     public JellyfinMediaLibrary(CollectionFolder item)
     {
+        if (item.CollectionType is null)
+        {
+            throw new ArgumentException("Collection type cannot be null", nameof(item));
+        }
+
         Name = item.Name;
         Id = item.Id;
         LibraryType = item.CollectionType.Value.ToString();
