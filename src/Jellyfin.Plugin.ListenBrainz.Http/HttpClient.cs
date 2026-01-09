@@ -95,7 +95,7 @@ public class HttpClient
 
         if (responseMessage is null)
         {
-            _logger.LogError("No response available, request failed?");
+            _logger.LogWarning("No response available for the request");
             throw new InvalidResponseException("Response is null");
         }
 
