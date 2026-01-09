@@ -67,6 +67,11 @@ public abstract class GenericHandler<TEventArgs>
             _logger.LogInformation("Encountered error: {ExceptionMessage}", e.Message);
             _logger.LogDebug("Exception occurred: {ExceptionMessage}", e.GetFullMessage());
         }
+        catch (ServiceException e)
+        {
+            _logger.LogInformation("Encountered service error: {ExceptionMessage}", e.Message);
+            _logger.LogDebug("Service exception occurred: {ExceptionMessage}", e.GetFullMessage());
+        }
         catch (OperationCanceledException)
         {
             _logger.LogInformation("Operation was cancelled");
