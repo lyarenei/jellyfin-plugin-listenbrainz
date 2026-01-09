@@ -117,6 +117,7 @@ public sealed class DefaultListensCachingService : IListensCachingService, IDisp
 
         try
         {
+            _logger.LogDebug("Adding listen to cache for user {UserId} at {Timestamp}", userId, listenedAt);
             var storedListen = item.AsStoredListen(listenedAt, metadata);
             if (_listensCache.TryGetValue(userId, out var userListens))
             {
@@ -139,6 +140,7 @@ public sealed class DefaultListensCachingService : IListensCachingService, IDisp
 
         try
         {
+            _logger.LogDebug("Adding listen to cache for user {UserId} at {Timestamp}", userId, listenedAt);
             var storedListen = item.AsStoredListen(listenedAt, metadata);
             if (_listensCache.TryGetValue(userId, out var userListens))
             {
@@ -162,6 +164,7 @@ public sealed class DefaultListensCachingService : IListensCachingService, IDisp
         try
         {
             _listensCache.TryGetValue(userId, out var userListens);
+            _logger.LogDebug("Retrieved {Count} cached listens for user {UserId}", userListens?.Count ?? 0, userId);
             return userListens?.ToList() ?? Enumerable.Empty<StoredListen>();
         }
         finally
@@ -178,7 +181,8 @@ public sealed class DefaultListensCachingService : IListensCachingService, IDisp
         try
         {
             _listensCache.TryGetValue(userId, out var userListens);
-            userListens?.RemoveAll(l => l.Id == listen.Id && l.ListenedAt == listen.ListenedAt);
+            var removed = userListens?.RemoveAll(l => l.Id == listen.Id && l.ListenedAt == listen.ListenedAt) ?? 0;
+            _logger.LogDebug("Removed {Count} cached listen(s) for user {UserId}", removed, userId);
         }
         finally
         {
@@ -195,7 +199,8 @@ public sealed class DefaultListensCachingService : IListensCachingService, IDisp
         try
         {
             _listensCache.TryGetValue(userId, out var userListens);
-            userListens?.RemoveAll(sl => storedListens.Contains((sl.Id, sl.ListenedAt)));
+            var removed = userListens?.RemoveAll(sl => storedListens.Contains((sl.Id, sl.ListenedAt))) ?? 0;
+            _logger.LogDebug("Removed {Count} cached listen(s) for user {UserId}", removed, userId);
         }
         finally
         {
@@ -212,7 +217,8 @@ public sealed class DefaultListensCachingService : IListensCachingService, IDisp
         try
         {
             _listensCache.TryGetValue(userId, out var userListens);
-            userListens?.RemoveAll(sl => storedListens.Contains((sl.Id, sl.ListenedAt)));
+            var removed = userListens?.RemoveAll(sl => storedListens.Contains((sl.Id, sl.ListenedAt))) ?? 0;
+            _logger.LogDebug("Removed {Count} cached listen(s) for user {UserId}", removed, userId);
         }
         finally
         {
@@ -227,6 +233,7 @@ public sealed class DefaultListensCachingService : IListensCachingService, IDisp
         try
         {
             await _persistentCache.SaveAsync(_listensCache);
+            _logger.LogDebug("Saved listens cache");
         }
         finally
         {
