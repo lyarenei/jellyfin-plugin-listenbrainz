@@ -8,6 +8,7 @@ public static class TaskExtensions
     /// <summary>
     /// Observes the task to avoid the UnobservedTaskException event to be raised.
     /// </summary>
+    /// <param name="task">Task to forget.</param>
     public static void Forget(this Task task)
     {
         // From: https://www.meziantou.net/fire-and-forget-a-task-in-dotnet.htm
