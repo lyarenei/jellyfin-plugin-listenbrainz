@@ -77,6 +77,7 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
     /// <inheritdoc />
     public T Read()
     {
+        _lock.Wait();
         T? data;
         try
         {
