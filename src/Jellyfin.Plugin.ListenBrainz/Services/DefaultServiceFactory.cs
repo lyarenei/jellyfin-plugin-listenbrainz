@@ -46,7 +46,7 @@ public class DefaultServiceFactory : IServiceFactory
 
         var httpClient = new UnderlyingClient(_httpClientFactory, httpLogger, null);
         var wrapper = new HttpClientWrapper(httpClient);
-        using var baseClient = new BaseApiClient(wrapper, apiLogger, null);
+        var baseClient = new BaseApiClient(wrapper, apiLogger, null);
         var apiClient = new ListenBrainzApiClient(baseClient, apiLogger);
 
         var pluginConfig = GetPluginConfigService();
@@ -61,7 +61,7 @@ public class DefaultServiceFactory : IServiceFactory
         var serviceLogger = _loggerFactory.CreateLogger(LoggerCategory + ".MetadataProvider");
 
         var clientName = string.Join(string.Empty, Plugin.FullName.Split(' ').Select(s => s.Capitalize()));
-        using var apiClient = new MusicBrainzApiClient(
+        var apiClient = new MusicBrainzApiClient(
             clientName,
             Plugin.Version,
             Plugin.SourceUrl,
