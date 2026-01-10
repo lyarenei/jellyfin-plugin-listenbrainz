@@ -163,7 +163,7 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
         return string.IsNullOrWhiteSpace(filePath) ? _defaultFilePath : filePath;
     }
 
-    private void EnsureCacheDirectory(string filePath)
+    private static void EnsureCacheDirectory(string filePath)
     {
         var directory = Path.GetDirectoryName(filePath);
         if (string.IsNullOrWhiteSpace(directory))
