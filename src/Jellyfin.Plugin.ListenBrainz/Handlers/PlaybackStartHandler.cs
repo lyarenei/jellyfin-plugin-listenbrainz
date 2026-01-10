@@ -68,10 +68,16 @@ public class PlaybackStartHandler : GenericHandler<PlaybackProgressEventArgs>
         ValidateItemRequirements(data.Item);
 
         var metadata = await _metadataProvider.GetAudioItemMetadataAsync(data.Item, CancellationToken.None);
-        await _listenBrainzService.SendNowPlayingAsync(userConfig, data.Item, metadata, CancellationToken.None);
-        _logger.LogInformation("Successfully sent 'playing now' listen");
 
-        await StartTrackingItemAsync(data.JellyfinUser.Id, data.Item);
+        try
+        {
+            await _listenBrainzService.SendNowPlayingAsync(userConfig, data.Item, metadata, CancellationToken.None);
+            _logger.LogInformation("Successfully sent 'playing now' listen");
+        }
+        finally
+        {
+            await StartTrackingItemAsync(data.JellyfinUser.Id, data.Item);
+        }
     }
 
     private void ValidateItemRequirements(Audio item)
