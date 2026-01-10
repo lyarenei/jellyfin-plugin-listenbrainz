@@ -92,14 +92,20 @@ public class PlaybackStopHandler : GenericHandler<PlaybackStopEventArgs>
             BackupListen(data, userConfig, metadata, now);
         }
 
-        var isOk = await SendListen(userConfig, data.Item, metadata, now, CancellationToken.None);
-        if (!isOk)
+        var isOk = false;
+        try
         {
-            await SaveToListenCache(data.JellyfinUser.Id, data.Item, metadata, now);
-            return;
+            isOk = await SendListen(userConfig, data.Item, metadata, now, CancellationToken.None);
+        }
+        finally
+        {
+            if (!isOk)
+            {
+                await SaveToListenCache(data.JellyfinUser.Id, data.Item, metadata, now);
+            }
         }
 
-        if (userConfig.IsFavoritesSyncEnabled)
+        if (isOk && userConfig.IsFavoritesSyncEnabled)
         {
             await _favoriteSyncService.SyncToListenBrainzAsync(
                 data.Item.Id,
