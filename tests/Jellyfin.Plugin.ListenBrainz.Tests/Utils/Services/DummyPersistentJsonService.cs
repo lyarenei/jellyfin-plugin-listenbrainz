@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
@@ -17,7 +18,10 @@ public sealed class DummyPersistentJsonService : IPersistentJsonService<Dictiona
 
     public void Save(Dictionary<Guid, List<StoredListen>> data, string? filePath = null) => LastSavedData = Clone(data);
 
-    public Task SaveAsync(Dictionary<Guid, List<StoredListen>> data, string? filePath = null)
+    public Task SaveAsync(
+        Dictionary<Guid, List<StoredListen>> data,
+        string? filePath = null,
+        CancellationToken cancellationToken = default)
     {
         SaveAsyncCalls++;
         LastSavedData = Clone(data);
@@ -27,7 +31,9 @@ public sealed class DummyPersistentJsonService : IPersistentJsonService<Dictiona
     public Dictionary<Guid, List<StoredListen>> Read(string? filePath = null)
         => ReadData ?? new Dictionary<Guid, List<StoredListen>>();
 
-    public Task<Dictionary<Guid, List<StoredListen>>> ReadAsync(string? filePath = null)
+    public Task<Dictionary<Guid, List<StoredListen>>> ReadAsync(
+        string? filePath = null,
+        CancellationToken cancellationToken = default)
         => Task.FromResult(Read(filePath));
 
     private static Dictionary<Guid, List<StoredListen>> Clone(Dictionary<Guid, List<StoredListen>> data)

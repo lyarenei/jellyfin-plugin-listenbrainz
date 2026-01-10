@@ -57,15 +57,15 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
     }
 
     /// <inheritdoc />
-    public async Task SaveAsync(T data, string? filePath = null)
+    public async Task SaveAsync(T data, string? filePath = null, CancellationToken cancellationToken = default)
     {
         var path = ResolveFilePath(filePath);
         EnsureFileDirectory(path);
-        await _lock.WaitAsync();
+        await _lock.WaitAsync(cancellationToken);
         try
         {
             await using var stream = File.Create(path);
-            await JsonSerializer.SerializeAsync(stream, data, _serializerOptions);
+            await JsonSerializer.SerializeAsync(stream, data, _serializerOptions, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -106,15 +106,15 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
     }
 
     /// <inheritdoc />
-    public async Task<T> ReadAsync(string? filePath = null)
+    public async Task<T> ReadAsync(string? filePath = null, CancellationToken cancellationToken = default)
     {
         var path = ResolveFilePath(filePath);
-        await _lock.WaitAsync();
+        await _lock.WaitAsync(cancellationToken);
         T? data;
         try
         {
             await using var stream = File.OpenRead(path);
-            data = await JsonSerializer.DeserializeAsync<T>(stream, _serializerOptions);
+            data = await JsonSerializer.DeserializeAsync<T>(stream, _serializerOptions, cancellationToken);
         }
         catch (Exception ex)
         {
