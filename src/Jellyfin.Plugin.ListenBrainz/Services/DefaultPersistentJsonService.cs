@@ -10,25 +10,26 @@ namespace Jellyfin.Plugin.ListenBrainz.Services;
 /// <typeparam name="T">Data type.</typeparam>
 public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>, IDisposable
 {
-    private readonly string _defaultFilePath;
-    private readonly SemaphoreSlim _lock;
-    private bool _isDisposed;
-
-    /// <summary>
-    /// JSON serializer options.
-    /// </summary>
-    private static readonly JsonSerializerOptions _serializerOptions = new()
+    private static readonly JsonSerializerOptions _defaultSerializerOptions = new()
     {
         WriteIndented = true,
     };
+
+    private readonly string _defaultFilePath;
+    private readonly JsonSerializerOptions _serializerOptions;
+    private readonly SemaphoreSlim _lock;
+
+    private bool _isDisposed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DefaultPersistentJsonService{T}"/> class.
     /// </summary>
     /// <param name="defaultFilePath">Default path to the file.</param>
-    public DefaultPersistentJsonService(string defaultFilePath)
+    /// <param name="serializerOptions">JSON serializer options.</param>
+    public DefaultPersistentJsonService(string defaultFilePath, JsonSerializerOptions? serializerOptions = null)
     {
         _defaultFilePath = defaultFilePath;
+        _serializerOptions = serializerOptions ?? _defaultSerializerOptions;
         _lock = new SemaphoreSlim(1, 1);
     }
 
