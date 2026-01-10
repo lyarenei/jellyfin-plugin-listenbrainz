@@ -90,6 +90,7 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
         }
 
         var userItemData = _userDataManager.GetUserData(jellyfinUser, item);
+        var userParentItemData = _userDataManager.GetUserData(jellyfinUser, item.GetParent());
 
         var recordingMbid = item.ProviderIds.GetValueOrDefault("MusicBrainzRecording");
         if (string.IsNullOrEmpty(recordingMbid) && _pluginConfigService.IsMusicBrainzEnabled)
@@ -121,7 +122,7 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
         try
         {
             _logger.LogInformation("Attempting to sync favorite status");
-            _listenBrainzClient.SendFeedback(userConfig, userItemData.IsFavorite, recordingMbid, recordingMsid);
+            _listenBrainzClient.SendFeedback(userConfig, userItemData.IsFavorite || userParentItemData.IsFavorite, recordingMbid, recordingMsid);
             _logger.LogInformation("Favorite sync has been successful");
         }
         catch (Exception e)
