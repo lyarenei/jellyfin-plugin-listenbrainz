@@ -38,7 +38,7 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
     public void Save(T data, string? filePath = null)
     {
         var path = ResolveFilePath(filePath);
-        EnsureCacheDirectory(path);
+        EnsureFileDirectory(path);
         _lock.Wait();
         try
         {
@@ -59,7 +59,7 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
     public async Task SaveAsync(T data, string? filePath = null)
     {
         var path = ResolveFilePath(filePath);
-        EnsureCacheDirectory(path);
+        EnsureFileDirectory(path);
         await _lock.WaitAsync();
         try
         {
@@ -163,7 +163,7 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
         return string.IsNullOrWhiteSpace(filePath) ? _defaultFilePath : filePath;
     }
 
-    private static void EnsureCacheDirectory(string filePath)
+    private static void EnsureFileDirectory(string filePath)
     {
         var directory = Path.GetDirectoryName(filePath);
         if (string.IsNullOrWhiteSpace(directory))
