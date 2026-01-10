@@ -187,7 +187,7 @@ public abstract class GenericHandler<TEventArgs>
     /// <summary>
     /// Convenience struct for event data.
     /// </summary>
-    protected struct EventData
+    protected struct EventData : IEquatable<EventData>
     {
         /// <summary>
         /// Gets audio item associated with the event.
@@ -210,5 +210,50 @@ public abstract class GenericHandler<TEventArgs>
         /// Might be non-null only if event data are parsed from <see cref="PlaybackStopEventArgs"/>.
         /// </summary>
         public long? PositionTicks { get; init; }
+
+        /// <summary>
+        /// Equality operator.
+        /// </summary>
+        /// <param name="left">Left side.</param>
+        /// <param name="right">Right side.</param>
+        /// <returns>Left and right sides are equal.</returns>
+        public static bool operator ==(EventData left, EventData right)
+        {
+            return left.Equals(right);
+        }
+
+        /// <summary>
+        /// Inequality operator.
+        /// </summary>
+        /// <param name="left">Left side.</param>
+        /// <param name="right">Right side.</param>
+        /// <returns>Left and right sides are not equal.</returns>
+        public static bool operator !=(EventData left, EventData right)
+        {
+            return !(left == right);
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object? obj)
+        {
+            if (obj is not EventData other)
+            {
+                return false;
+            }
+
+            return Item.Equals(other.Item) &&
+                   JellyfinUser.Equals(other.JellyfinUser) &&
+                   SaveReason == other.SaveReason &&
+                   PositionTicks == other.PositionTicks;
+        }
+
+        /// <inheritdoc />
+        public bool Equals(EventData other) => Equals(other as object);
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Item, JellyfinUser, SaveReason, PositionTicks);
+        }
     }
 }
