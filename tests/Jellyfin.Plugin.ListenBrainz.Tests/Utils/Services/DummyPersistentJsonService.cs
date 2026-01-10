@@ -15,18 +15,20 @@ public sealed class DummyPersistentJsonService : IPersistentJsonService<Dictiona
 
     public int SaveAsyncCalls { get; private set; }
 
-    public void Save(Dictionary<Guid, List<StoredListen>> data) => LastSavedData = Clone(data);
+    public void Save(Dictionary<Guid, List<StoredListen>> data, string? filePath = null) => LastSavedData = Clone(data);
 
-    public Task SaveAsync(Dictionary<Guid, List<StoredListen>> data)
+    public Task SaveAsync(Dictionary<Guid, List<StoredListen>> data, string? filePath = null)
     {
         SaveAsyncCalls++;
         LastSavedData = Clone(data);
         return Task.CompletedTask;
     }
 
-    public Dictionary<Guid, List<StoredListen>> Read() => ReadData ?? new Dictionary<Guid, List<StoredListen>>();
+    public Dictionary<Guid, List<StoredListen>> Read(string? filePath = null)
+        => ReadData ?? new Dictionary<Guid, List<StoredListen>>();
 
-    public Task<Dictionary<Guid, List<StoredListen>>> ReadAsync() => Task.FromResult(Read());
+    public Task<Dictionary<Guid, List<StoredListen>>> ReadAsync(string? filePath = null)
+        => Task.FromResult(Read(filePath));
 
     private static Dictionary<Guid, List<StoredListen>> Clone(Dictionary<Guid, List<StoredListen>> data)
     {

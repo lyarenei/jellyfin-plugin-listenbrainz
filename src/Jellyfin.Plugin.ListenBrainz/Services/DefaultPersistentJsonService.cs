@@ -10,7 +10,7 @@ namespace Jellyfin.Plugin.ListenBrainz.Services;
 /// <typeparam name="T">Data type.</typeparam>
 public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>, IDisposable
 {
-    private readonly string _cacheFilePath;
+    private readonly string _defaultFilePath;
     private readonly SemaphoreSlim _lock;
     private bool _isDisposed;
 
@@ -25,23 +25,24 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
     /// <summary>
     /// Initializes a new instance of the <see cref="DefaultPersistentJsonService{T}"/> class.
     /// </summary>
-    /// <param name="cacheFilePath">Path to the file.</param>
-    public DefaultPersistentJsonService(string cacheFilePath)
+    /// <param name="defaultFilePath">Default path to the file.</param>
+    public DefaultPersistentJsonService(string defaultFilePath)
     {
-        _cacheFilePath = cacheFilePath;
+        _defaultFilePath = defaultFilePath;
         _lock = new SemaphoreSlim(1, 1);
     }
 
     ~DefaultPersistentJsonService() => Dispose(false);
 
     /// <inheritdoc />
-    public void Save(T data)
+    public void Save(T data, string? filePath = null)
     {
-        EnsureCacheDirectory();
+        var path = ResolveFilePath(filePath);
+        EnsureCacheDirectory(path);
         _lock.Wait();
         try
         {
-            using var stream = File.Create(_cacheFilePath);
+            using var stream = File.Create(path);
             JsonSerializer.Serialize(stream, data, _serializerOptions);
         }
         catch (Exception ex)
@@ -55,13 +56,14 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
     }
 
     /// <inheritdoc />
-    public async Task SaveAsync(T data)
+    public async Task SaveAsync(T data, string? filePath = null)
     {
-        EnsureCacheDirectory();
+        var path = ResolveFilePath(filePath);
+        EnsureCacheDirectory(path);
         await _lock.WaitAsync();
         try
         {
-            await using var stream = File.Create(_cacheFilePath);
+            await using var stream = File.Create(path);
             await JsonSerializer.SerializeAsync(stream, data, _serializerOptions);
         }
         catch (Exception ex)
@@ -75,13 +77,14 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
     }
 
     /// <inheritdoc />
-    public T Read()
+    public T Read(string? filePath = null)
     {
+        var path = ResolveFilePath(filePath);
         _lock.Wait();
         T? data;
         try
         {
-            using var stream = File.OpenRead(_cacheFilePath);
+            using var stream = File.OpenRead(path);
             data = JsonSerializer.Deserialize<T>(stream, _serializerOptions);
         }
         catch (Exception ex)
@@ -102,13 +105,14 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
     }
 
     /// <inheritdoc />
-    public async Task<T> ReadAsync()
+    public async Task<T> ReadAsync(string? filePath = null)
     {
+        var path = ResolveFilePath(filePath);
         await _lock.WaitAsync();
         T? data;
         try
         {
-            await using var stream = File.OpenRead(_cacheFilePath);
+            await using var stream = File.OpenRead(path);
             data = await JsonSerializer.DeserializeAsync<T>(stream, _serializerOptions);
         }
         catch (Exception ex)
@@ -154,9 +158,14 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
         _isDisposed = true;
     }
 
-    private void EnsureCacheDirectory()
+    private string ResolveFilePath(string? filePath)
     {
-        var directory = Path.GetDirectoryName(_cacheFilePath);
+        return string.IsNullOrWhiteSpace(filePath) ? _defaultFilePath : filePath;
+    }
+
+    private void EnsureCacheDirectory(string filePath)
+    {
+        var directory = Path.GetDirectoryName(filePath);
         if (string.IsNullOrWhiteSpace(directory))
         {
             return;
