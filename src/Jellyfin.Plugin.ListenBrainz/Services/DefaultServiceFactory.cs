@@ -1,4 +1,7 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Jellyfin.Plugin.ListenBrainz.Api;
+using Jellyfin.Plugin.ListenBrainz.Api.Models;
 using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
@@ -131,5 +134,28 @@ public class DefaultServiceFactory : IServiceFactory
             var storage = persistentService ?? new DefaultPersistentJsonService<ListenCacheData>(filePath);
             return new DefaultListensCachingService(cacheLogger, storage);
         }
+    }
+
+    /// <inheritdoc />
+    public IListenBackupService GetListenBackupService(
+        string backupBasePath,
+        IPersistentJsonService<List<Listen>>? persistentService = null)
+    {
+        var backupLogger = _loggerFactory.CreateLogger(LoggerCategory + ".ListensBackup");
+        if (persistentService is not null)
+        {
+            return new DefaultListenBackupService(backupLogger, backupBasePath, persistentService);
+        }
+
+        var serializerOptions = new JsonSerializerOptions
+        {
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+            WriteIndented = true,
+        };
+
+        var dummyFilePath = Path.Combine(backupBasePath, "not-a-backup.json");
+        var defaultPersistentService = new DefaultPersistentJsonService<List<Listen>>(dummyFilePath, serializerOptions);
+        return new DefaultListenBackupService(backupLogger, backupBasePath, defaultPersistentService);
     }
 }

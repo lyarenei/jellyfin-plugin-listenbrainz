@@ -1,3 +1,4 @@
+using Jellyfin.Plugin.ListenBrainz.Api.Models;
 using MediaBrowser.Controller.Library;
 
 namespace Jellyfin.Plugin.ListenBrainz.Interfaces;
@@ -67,4 +68,14 @@ public interface IServiceFactory
     /// <returns>Listens caching service.</returns>
     public IListensCachingService GetListensCachingService(
         IPersistentJsonService<ListenCacheData>? persistentService = null);
+
+    /// <summary>
+    /// Get a default Listens backup service.
+    /// </summary>
+    /// <param name="backupBasePath">Path to the backup folder root.</param>
+    /// <param name="persistentService">Persistent backing storage.</param>
+    /// <returns>Listens backup service.</returns>
+    public IListenBackupService GetListenBackupService(
+        string backupBasePath,
+        IPersistentJsonService<List<Listen>>? persistentService = null);
 }
