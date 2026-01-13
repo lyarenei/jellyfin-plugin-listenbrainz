@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
+using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.Services;
-using Jellyfin.Plugin.ListenBrainz.Tests.Utils.Services;
 using MediaBrowser.Controller.Entities.Audio;
 using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
 using Xunit;
 
 namespace Jellyfin.Plugin.ListenBrainz.Tests.Services;
@@ -25,11 +27,15 @@ public class ListensCachingServiceTests
     }
 
     private static DefaultListensCachingService GetService(
-        DummyPersistentJsonService storage,
-        bool restore = true) => new(
+        IPersistentJsonService<ListenCacheData>? storage = null,
+        bool restore = true)
+    {
+        var storageMock = new Mock<IPersistentJsonService<ListenCacheData>>();
+        return new DefaultListensCachingService(
             new NullLogger<DefaultListensCachingService>(),
-            storage,
+            storage ?? storageMock.Object,
             restore);
+    }
 
     [Fact]
     public void Constructor_RestoresCache_WhenReadSucceeds()
@@ -45,8 +51,9 @@ public class ListensCachingServiceTests
             },
         };
         var storedData = new ListenCacheData { [userId] = storedListens };
-        var storage = new DummyPersistentJsonService { ReadData = storedData };
-        var service = GetService(storage);
+        var storageMock = new Mock<IPersistentJsonService<ListenCacheData>>();
+        storageMock.Setup(storage => storage.Read(It.IsAny<string?>())).Returns(storedData);
+        var service = GetService(storageMock.Object);
 
         var listens = service.GetListens(userId).ToList();
         Assert.Single(listens);
@@ -56,8 +63,7 @@ public class ListensCachingServiceTests
     [Fact]
     public void AddListen_AddsEntry()
     {
-        var storage = new DummyPersistentJsonService();
-        var service = GetService(storage, restore: false);
+        var service = GetService(null, false);
         var userId = Guid.NewGuid();
         var audio = GetAudio();
 
@@ -72,8 +78,7 @@ public class ListensCachingServiceTests
     [Fact]
     public async Task AddListenAsync_AddsEntry()
     {
-        var storage = new DummyPersistentJsonService();
-        var service = GetService(storage, restore: false);
+        var service = GetService(null, false);
         var userId = Guid.NewGuid();
         var audio = GetAudio();
 
@@ -87,8 +92,7 @@ public class ListensCachingServiceTests
     [Fact]
     public void RemoveListen_RemovesMatchingEntry()
     {
-        var storage = new DummyPersistentJsonService();
-        var service = GetService(storage, restore: false);
+        var service = GetService(null, false);
         var userId = Guid.NewGuid();
         var audio = GetAudio();
         var storedListen = new StoredListen
@@ -106,8 +110,7 @@ public class ListensCachingServiceTests
     [Fact]
     public void RemoveListens_RemovesOnlyMatchingEntries()
     {
-        var storage = new DummyPersistentJsonService();
-        var service = GetService(storage, restore: false);
+        var service = GetService(null, false);
         var userId = Guid.NewGuid();
         var audio1 = GetAudio();
         var audio2 = GetAudio();
@@ -132,18 +135,23 @@ public class ListensCachingServiceTests
     [Fact]
     public async Task SaveAsync_PersistsCurrentState()
     {
-        var storage = new DummyPersistentJsonService();
-        var service = GetService(storage, restore: false);
+        var storageMock = new Mock<IPersistentJsonService<ListenCacheData>>();
+        var service = GetService(storageMock.Object, restore: false);
         var userId = Guid.NewGuid();
         var audio = GetAudio();
 
         await service.AddListenAsync(userId, audio, null, 123);
         await service.SaveAsync();
 
-        Assert.Equal(1, storage.SaveAsyncCalls);
-        Assert.NotNull(storage.LastSavedData);
-        Assert.True(storage.LastSavedData.TryGetValue(userId, out var savedListens));
-        Assert.Single(savedListens);
-        Assert.Equal(audio.Id, savedListens[0].Id);
+        List<StoredListen>? savedListens;
+        storageMock.Verify(
+            storage => storage.SaveAsync(
+                It.Is<ListenCacheData>(data =>
+                    data.TryGetValue(userId, out savedListens) &&
+                    savedListens.Count == 1 &&
+                    savedListens[0].Id == audio.Id),
+                It.IsAny<string?>(),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 }
