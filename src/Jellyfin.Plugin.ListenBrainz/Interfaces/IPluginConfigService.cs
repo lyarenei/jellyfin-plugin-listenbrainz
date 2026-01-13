@@ -51,6 +51,11 @@ public interface IPluginConfigService
     Collection<UserConfig> UserConfigs { get; }
 
     /// <summary>
+    /// Gets the path to the backup directory.
+    /// </summary>
+    string BackupPath { get; }
+
+    /// <summary>
     /// Get a configuration for a specified Jellyfin user ID.
     /// </summary>
     /// <param name="jellyfinUserId">ID of the Jellyfin user.</param>
