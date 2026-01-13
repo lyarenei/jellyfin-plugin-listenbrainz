@@ -3,7 +3,6 @@ using System.Reflection;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Handlers;
-using Jellyfin.Plugin.ListenBrainz.Managers;
 using Jellyfin.Plugin.ListenBrainz.Services;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
@@ -70,9 +69,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
         var validationService = serviceFactory.GetValidationService(libraryManager, pluginConfigService);
 
         var listensCachingService = serviceFactory.GetListensCachingService();
-
-        var backupLogger = loggerFactory.CreateLogger(LoggerCategory + ".Backup");
-        var backupManager = new BackupManager(backupLogger);
+        var listensBackupService = serviceFactory.GetListenBackupService(pluginConfigService.BackupPath);
 
         var playbackStartLogger = loggerFactory.CreateLogger(LoggerCategory + ".PlaybackStartHandler");
         _playbackStartHandler = new PlaybackStartHandler(
@@ -92,7 +89,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
             favoriteSyncService,
             validationService,
             metadataProviderService,
-            backupManager,
+            listensBackupService,
             listenBrainzService,
             listensCachingService);
 
@@ -104,7 +101,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
             favoriteSyncService,
             validationService,
             metadataProviderService,
-            backupManager,
+            listensBackupService,
             listenBrainzService,
             listensCachingService,
             DefaultPlaybackTrackingService.Instance);

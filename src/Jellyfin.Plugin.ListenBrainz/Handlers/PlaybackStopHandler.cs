@@ -19,7 +19,7 @@ public class PlaybackStopHandler : GenericHandler<PlaybackStopEventArgs>
     private readonly IFavoriteSyncService _favoriteSyncService;
     private readonly IValidationService _validationService;
     private readonly IMetadataProviderService _metadataProvider;
-    private readonly IBackupManager _backupManager;
+    private readonly IListenBackupService _backupService;
     private readonly IListenBrainzService _listenBrainzService;
     private readonly IListensCachingService _listensCache;
 
@@ -32,7 +32,7 @@ public class PlaybackStopHandler : GenericHandler<PlaybackStopEventArgs>
     /// <param name="favoriteSyncService">Favorite sync service.</param>
     /// <param name="validationService">Validation service.</param>
     /// <param name="metadataProvider">Metadata provider.</param>
-    /// <param name="backupManager">Backup manager.</param>
+    /// <param name="backupService">Backup service.</param>
     /// <param name="listenBrainzService">ListenBrainz service.</param>
     /// <param name="listensCache">Listen cache manager.</param>
     public PlaybackStopHandler(
@@ -42,7 +42,7 @@ public class PlaybackStopHandler : GenericHandler<PlaybackStopEventArgs>
         IFavoriteSyncService favoriteSyncService,
         IValidationService validationService,
         IMetadataProviderService metadataProvider,
-        IBackupManager backupManager,
+        IListenBackupService backupService,
         IListenBrainzService listenBrainzService,
         IListensCachingService listensCache) : base(logger, userManager)
     {
@@ -51,7 +51,7 @@ public class PlaybackStopHandler : GenericHandler<PlaybackStopEventArgs>
         _favoriteSyncService = favoriteSyncService;
         _validationService = validationService;
         _metadataProvider = metadataProvider;
-        _backupManager = backupManager;
+        _backupService = backupService;
         _listenBrainzService = listenBrainzService;
         _listensCache = listensCache;
     }
@@ -89,7 +89,7 @@ public class PlaybackStopHandler : GenericHandler<PlaybackStopEventArgs>
 
         if (_configService.IsBackupEnabled && userConfig.IsBackupEnabled)
         {
-            BackupListen(data, userConfig, metadata, now);
+            await BackupListen(data, userConfig, metadata, now, CancellationToken.None);
         }
 
         var isOk = false;
@@ -141,12 +141,17 @@ public class PlaybackStopHandler : GenericHandler<PlaybackStopEventArgs>
         }
     }
 
-    private void BackupListen(EventData data, UserConfig userConfig, AudioItemMetadata? metadata, long now)
+    private async Task BackupListen(
+        EventData data,
+        UserConfig userConfig,
+        AudioItemMetadata? metadata,
+        long now,
+        CancellationToken cancellationToken)
     {
         try
         {
             _logger.LogDebug("Adding listen to backups...");
-            _backupManager.Backup(userConfig.UserName, data.Item, metadata, now);
+            await _backupService.Backup(userConfig.UserName, data.Item, metadata, now, cancellationToken);
             _logger.LogInformation("Listen successfully backed up");
         }
         catch (Exception e)

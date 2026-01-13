@@ -20,7 +20,7 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
     private readonly IFavoriteSyncService _favoriteSyncService;
     private readonly IValidationService _validationService;
     private readonly IMetadataProviderService _metadataProvider;
-    private readonly IBackupManager _backupManager;
+    private readonly IListenBackupService _backupService;
     private readonly IListenBrainzService _listenBrainzService;
     private readonly IListensCachingService _listensCache;
     private readonly IPlaybackTrackingService _playbackTracker;
@@ -34,7 +34,7 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
     /// <param name="favoriteSyncService">Favorite sync service.</param>
     /// <param name="validationService">Validation service.</param>
     /// <param name="metadataProvider">Metadata provider.</param>
-    /// <param name="backupManager">Backup manager.</param>
+    /// <param name="backupService">Backup service.</param>
     /// <param name="listenBrainzService">ListenBrainz service.</param>
     /// <param name="listensCache">Listen cache manager.</param>
     /// <param name="playbackTracker">Playback tracker.</param>
@@ -45,7 +45,7 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
         IFavoriteSyncService favoriteSyncService,
         IValidationService validationService,
         IMetadataProviderService metadataProvider,
-        IBackupManager backupManager,
+        IListenBackupService backupService,
         IListenBrainzService listenBrainzService,
         IListensCachingService listensCache,
         IPlaybackTrackingService playbackTracker) : base(logger, userManager)
@@ -55,7 +55,7 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
         _favoriteSyncService = favoriteSyncService;
         _validationService = validationService;
         _metadataProvider = metadataProvider;
-        _backupManager = backupManager;
+        _backupService = backupService;
         _listenBrainzService = listenBrainzService;
         _listensCache = listensCache;
         _playbackTracker = playbackTracker;
@@ -130,7 +130,7 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
 
         if (_configService.IsBackupEnabled && userConfig.IsBackupEnabled)
         {
-            BackupListen(data, userConfig, metadata, now);
+            await BackupListen(data, userConfig, metadata, now, cancellationToken);
         }
 
         var isOk = false;
@@ -176,12 +176,17 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
         }
     }
 
-    private void BackupListen(EventData data, UserConfig userConfig, AudioItemMetadata? metadata, long now)
+    private async Task BackupListen(
+        EventData data,
+        UserConfig userConfig,
+        AudioItemMetadata? metadata,
+        long now,
+        CancellationToken cancellationToken)
     {
         try
         {
             _logger.LogDebug("Adding listen to backups...");
-            _backupManager.Backup(userConfig.UserName, data.Item, metadata, now);
+            await _backupService.Backup(userConfig.UserName, data.Item, metadata, now, cancellationToken);
             _logger.LogInformation("Listen successfully backed up");
         }
         catch (Exception e)
