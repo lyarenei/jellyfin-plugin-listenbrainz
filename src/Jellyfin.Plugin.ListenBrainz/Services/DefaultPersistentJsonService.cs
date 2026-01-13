@@ -33,6 +33,9 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
         _lock = new SemaphoreSlim(1, 1);
     }
 
+    /// <summary>
+    /// Finalizes an instance of the <see cref="DefaultPersistentJsonService{T}"/> class.
+    /// </summary>
     ~DefaultPersistentJsonService() => Dispose(false);
 
     /// <inheritdoc />
