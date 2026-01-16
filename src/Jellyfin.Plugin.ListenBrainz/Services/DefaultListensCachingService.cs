@@ -54,10 +54,11 @@ public sealed class DefaultListensCachingService : IListensCachingService, IDisp
         try
         {
             _listensCache = _persistentCache.Read();
+            _logger.LogDebug("Successfully restored listens cache from persistent storage");
         }
         catch (ServiceException ex)
         {
-            _logger.LogDebug(ex, "Failed to restore listens cache from persistent storage");
+            _logger.LogWarning(ex, "Failed to restore listens cache from persistent storage - cached listens may be lost");
         }
     }
 

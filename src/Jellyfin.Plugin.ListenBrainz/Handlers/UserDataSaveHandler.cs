@@ -191,7 +191,7 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
         }
         catch (Exception e)
         {
-            _logger.LogInformation("Listen backup failed: {Reason}", e.Message);
+            _logger.LogWarning("Listen backup failed: {Reason}", e.Message);
             _logger.LogDebug(e, "Listen backup failed");
         }
     }
