@@ -68,10 +68,10 @@ public class HttpClient
             {
                 responseMessage = await httpClient.SendAsync(request, cancellationToken);
             }
-            catch (OperationCanceledException ex)
+            catch (OperationCanceledException)
             {
                 _logger.LogWarning("Request has been cancelled");
-                _logger.LogDebug(ex, "A cancellation exception was thrown when sending a request");
+                throw;
             }
             catch (Exception ex)
             {

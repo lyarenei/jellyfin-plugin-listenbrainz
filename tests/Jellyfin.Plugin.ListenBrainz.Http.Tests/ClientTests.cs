@@ -111,7 +111,7 @@ public class ClientTests
     }
 
     [Fact]
-    public async Task Client_SendRequest_CancellationException_Timeout()
+    public async Task Client_SendRequest_CancellationException_Propagates()
     {
         var mockFactory = new Mock<IHttpClientFactory>();
         var mockHandler = new Mock<HttpMessageHandler>();
@@ -132,6 +132,6 @@ public class ClientTests
         var client = new TestClient(mockFactory.Object, logger.Object, sleepService.Object);
         var request = new HttpRequestMessage(HttpMethod.Post, RequestUri);
 
-        await Assert.ThrowsAsync<RetryException>(() => client.ExposedSendRequest(request));
+        await Assert.ThrowsAsync<TaskCanceledException>(() => client.ExposedSendRequest(request));
     }
 }
