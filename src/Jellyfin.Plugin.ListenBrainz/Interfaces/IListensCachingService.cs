@@ -4,9 +4,9 @@ using MediaBrowser.Controller.Entities.Audio;
 namespace Jellyfin.Plugin.ListenBrainz.Interfaces;
 
 /// <summary>
-/// Cache for storing listens.
+/// Cache for listens.
 /// </summary>
-public interface IListensCache
+public interface IListensCachingService
 {
     /// <summary>
     /// Add specified listen to cache.
@@ -55,4 +55,10 @@ public interface IListensCache
     /// <param name="listens">Listens to remove.</param>
     /// <returns>Task representing asynchronous operation.</returns>
     public Task RemoveListensAsync(Guid userId, IEnumerable<StoredListen> listens);
+
+    /// <summary>
+    /// Persist cached listens to disk.
+    /// </summary>
+    /// <returns>Task representing asynchronous operation.</returns>
+    public Task SaveAsync();
 }

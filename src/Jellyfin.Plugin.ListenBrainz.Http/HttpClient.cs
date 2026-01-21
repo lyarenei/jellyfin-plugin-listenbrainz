@@ -68,10 +68,10 @@ public class HttpClient
             {
                 responseMessage = await httpClient.SendAsync(request, cancellationToken);
             }
-            catch (OperationCanceledException ex)
+            catch (OperationCanceledException)
             {
                 _logger.LogWarning("Request has been cancelled");
-                _logger.LogDebug(ex, "A cancellation exception was thrown when sending a request");
+                throw;
             }
             catch (Exception ex)
             {
@@ -95,7 +95,7 @@ public class HttpClient
 
         if (responseMessage is null)
         {
-            _logger.LogError("No response available, request failed?");
+            _logger.LogWarning("No response available for the request");
             throw new InvalidResponseException("Response is null");
         }
 

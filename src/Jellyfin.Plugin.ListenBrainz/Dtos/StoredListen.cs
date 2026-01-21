@@ -1,5 +1,6 @@
 using MediaBrowser.Controller.Entities.Audio;
-using Newtonsoft.Json;
+using NewtonsoftJson = Newtonsoft.Json;
+using SystemJson = System.Text.Json.Serialization;
 
 namespace Jellyfin.Plugin.ListenBrainz.Dtos;
 
@@ -26,6 +27,7 @@ public class StoredListen
     /// <summary>
     /// Gets a value indicating whether this listen has MusicBrainz recording ID.
     /// </summary>
-    [JsonIgnore]
+    [NewtonsoftJson.JsonIgnore]
+    [SystemJson.JsonIgnore]
     public bool HasRecordingMbid => !string.IsNullOrEmpty(Metadata?.RecordingMbid);
 }

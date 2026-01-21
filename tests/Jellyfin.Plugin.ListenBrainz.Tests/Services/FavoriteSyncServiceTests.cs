@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Jellyfin.Data.Entities;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
@@ -15,8 +17,8 @@ namespace Jellyfin.Plugin.ListenBrainz.Tests.Services;
 
 public class FavoriteSyncServiceTests
 {
-    private readonly Mock<IListenBrainzClient> _listenBrainzClientMock;
-    private readonly Mock<IMusicBrainzClient> _musicBrainzClientMock;
+    private readonly Mock<IListenBrainzService> _listenBrainzServiceMock;
+    private readonly Mock<IMetadataProviderService> _metadataProviderMock;
     private readonly Mock<IPluginConfigService> _pluginConfigServiceMock;
     private readonly Mock<ILibraryManager> _libraryManagerMock;
     private readonly Mock<IUserManager> _userManagerMock;
@@ -46,8 +48,8 @@ public class FavoriteSyncServiceTests
 
     public FavoriteSyncServiceTests()
     {
-        _listenBrainzClientMock = new Mock<IListenBrainzClient>();
-        _musicBrainzClientMock = new Mock<IMusicBrainzClient>();
+        _listenBrainzServiceMock = new Mock<IListenBrainzService>();
+        _metadataProviderMock = new Mock<IMetadataProviderService>();
         _pluginConfigServiceMock = new Mock<IPluginConfigService>();
         _libraryManagerMock = new Mock<ILibraryManager>();
         _userManagerMock = new Mock<IUserManager>();
@@ -55,8 +57,8 @@ public class FavoriteSyncServiceTests
 
         _service = new DefaultFavoriteSyncService(
             new NullLogger<DefaultFavoriteSyncService>(),
-            _listenBrainzClientMock.Object,
-            _musicBrainzClientMock.Object,
+            _listenBrainzServiceMock.Object,
+            _metadataProviderMock.Object,
             _pluginConfigServiceMock.Object,
             _libraryManagerMock.Object,
             _userManagerMock.Object,
@@ -64,21 +66,22 @@ public class FavoriteSyncServiceTests
     }
 
     [Fact]
-    public void SyncToListenBrainz_IsDisabled()
+    public async Task SyncToListenBrainz_IsDisabled()
     {
         _service.Disable();
-        _service.SyncToListenBrainz(_item.Id, _jellyfinUser.Id);
+        await _service.SyncToListenBrainzAsync(_item.Id, _jellyfinUser.Id, cancellationToken: CancellationToken.None);
         _libraryManagerMock.Verify(m => m.GetItemById(It.IsAny<Guid>()), Times.Never);
-        _listenBrainzClientMock.Verify(m => m.SendFeedback(
+        _listenBrainzServiceMock.Verify(m => m.SendFeedbackAsync(
                 It.IsAny<UserConfig>(),
                 It.IsAny<bool>(),
                 It.IsAny<string>(),
-                It.IsAny<string>()),
+                It.IsAny<string>(),
+                CancellationToken.None),
             Times.Never);
     }
 
     [Fact]
-    public void SyncToListenBrainz_InvalidItemId()
+    public async Task SyncToListenBrainz_InvalidItemId()
     {
         _libraryManagerMock
             .Setup(m => m.GetItemById(It.IsAny<Guid>()))
@@ -87,20 +90,24 @@ public class FavoriteSyncServiceTests
         var invalidItemId = Guid.NewGuid();
         var jellyfinUserId = Guid.NewGuid();
 
-        _service.SyncToListenBrainz(invalidItemId, jellyfinUserId);
+        await _service.SyncToListenBrainzAsync(
+            invalidItemId,
+            jellyfinUserId,
+            cancellationToken: CancellationToken.None);
 
         _libraryManagerMock.Verify(m => m.GetItemById(invalidItemId), Times.Once);
         _pluginConfigServiceMock.Verify(m => m.GetUserConfig(It.IsAny<Guid>()), Times.Never);
-        _listenBrainzClientMock.Verify(m => m.SendFeedback(
+        _listenBrainzServiceMock.Verify(m => m.SendFeedbackAsync(
                 It.IsAny<UserConfig>(),
                 It.IsAny<bool>(),
                 It.IsAny<string>(),
-                It.IsAny<string>()),
+                It.IsAny<string>(),
+                CancellationToken.None),
             Times.Never);
     }
 
     [Fact]
-    public void SyncToListenBrainz_NoUserConfig()
+    public async Task SyncToListenBrainz_NoUserConfig()
     {
         _libraryManagerMock
             .Setup(m => m.GetItemById(_item.Id))
@@ -110,21 +117,25 @@ public class FavoriteSyncServiceTests
             .Setup(m => m.GetUserConfig(_userConfig.JellyfinUserId))
             .Returns((UserConfig?)null);
 
-        _service.SyncToListenBrainz(_item.Id, _userConfig.JellyfinUserId);
+        await _service.SyncToListenBrainzAsync(
+            _item.Id,
+            _userConfig.JellyfinUserId,
+            cancellationToken: CancellationToken.None);
 
         _libraryManagerMock.Verify(m => m.GetItemById(_item.Id), Times.Once);
         _pluginConfigServiceMock.Verify(m => m.GetUserConfig(_userConfig.JellyfinUserId), Times.Once);
         _userManagerMock.Verify(m => m.GetUserById(_userConfig.JellyfinUserId), Times.Never);
-        _listenBrainzClientMock.Verify(m => m.SendFeedback(
+        _listenBrainzServiceMock.Verify(m => m.SendFeedbackAsync(
                 It.IsAny<UserConfig>(),
                 It.IsAny<bool>(),
                 It.IsAny<string>(),
-                It.IsAny<string>()),
+                It.IsAny<string>(),
+                CancellationToken.None),
             Times.Never);
     }
 
     [Fact]
-    public void SyncToListenBrainz_JellyfinUserNotFound()
+    public async Task SyncToListenBrainz_JellyfinUserNotFound()
     {
         _libraryManagerMock
             .Setup(m => m.GetItemById(_item.Id))
@@ -138,22 +149,26 @@ public class FavoriteSyncServiceTests
             .Setup(m => m.GetUserById(_userConfig.JellyfinUserId))
             .Returns((User?)null);
 
-        _service.SyncToListenBrainz(_item.Id, _userConfig.JellyfinUserId);
+        await _service.SyncToListenBrainzAsync(
+            _item.Id,
+            _userConfig.JellyfinUserId,
+            cancellationToken: CancellationToken.None);
 
         _libraryManagerMock.Verify(m => m.GetItemById(_item.Id), Times.Once);
         _pluginConfigServiceMock.Verify(m => m.GetUserConfig(_userConfig.JellyfinUserId), Times.Once);
         _userManagerMock.Verify(m => m.GetUserById(_userConfig.JellyfinUserId), Times.Once);
         _userDataManagerMock.Verify(m => m.GetUserData(_jellyfinUser, _item), Times.Never);
-        _listenBrainzClientMock.Verify(m => m.SendFeedback(
+        _listenBrainzServiceMock.Verify(m => m.SendFeedbackAsync(
                 It.IsAny<UserConfig>(),
                 It.IsAny<bool>(),
                 It.IsAny<string>(),
-                It.IsAny<string>()),
+                It.IsAny<string>(),
+                CancellationToken.None),
             Times.Never);
     }
 
     [Fact]
-    public void SyncToListenBrainz_OK()
+    public async Task SyncToListenBrainz_OK()
     {
         _libraryManagerMock
             .Setup(m => m.GetItemById(_item.Id))
@@ -171,23 +186,24 @@ public class FavoriteSyncServiceTests
             .Setup(m => m.GetUserData(_jellyfinUser, _item))
             .Returns(_itemData);
 
-        _service.SyncToListenBrainz(_item.Id, _jellyfinUser.Id);
+        await _service.SyncToListenBrainzAsync(_item.Id, _jellyfinUser.Id, cancellationToken: CancellationToken.None);
 
         _libraryManagerMock.Verify(m => m.GetItemById(_item.Id), Times.Once);
         _pluginConfigServiceMock.Verify(m => m.GetUserConfig(_userConfig.JellyfinUserId), Times.Once);
         _userManagerMock.Verify(m => m.GetUserById(_userConfig.JellyfinUserId), Times.Once);
         _userDataManagerMock.Verify(m => m.GetUserData(_jellyfinUser, _item), Times.Once);
-        _musicBrainzClientMock.Verify(m => m.GetAudioItemMetadata(_item), Times.Never);
-        _listenBrainzClientMock.Verify(m => m.SendFeedback(
+        _metadataProviderMock.Verify(m => m.GetAudioItemMetadataAsync(_item, CancellationToken.None), Times.Never);
+        _listenBrainzServiceMock.Verify(m => m.SendFeedbackAsync(
                 _userConfig,
                 _itemData.IsFavorite,
                 _item.ProviderIds["MusicBrainzRecording"],
-                null),
+                null,
+                CancellationToken.None),
             Times.Once);
     }
 
     [Fact]
-    public void SyncToListenBrainz_RecordingMbidNotAvailable()
+    public async Task SyncToListenBrainz_RecordingMbidNotAvailable()
     {
         var noMbidItem = new Audio
         {
@@ -203,7 +219,6 @@ public class FavoriteSyncServiceTests
             .Setup(m => m.GetUserConfig(_userConfig.JellyfinUserId))
             .Returns(_userConfig);
 
-
         _userManagerMock
             .Setup(m => m.GetUserById(_userConfig.JellyfinUserId))
             .Returns(_jellyfinUser);
@@ -216,24 +231,25 @@ public class FavoriteSyncServiceTests
             .Setup(m => m.IsMusicBrainzEnabled)
             .Returns(true);
 
-        _musicBrainzClientMock
-            .Setup(m => m.GetAudioItemMetadata(_item))
-            .Returns(_metadata);
+        _metadataProviderMock
+            .Setup(m => m.GetAudioItemMetadataAsync(_item, It.IsAny<CancellationToken>()))
+            .Returns(Task.FromResult(_metadata)!);
 
-        _service.SyncToListenBrainz(_item.Id, _jellyfinUser.Id);
+        await _service.SyncToListenBrainzAsync(_item.Id, _jellyfinUser.Id, cancellationToken: CancellationToken.None);
 
         _libraryManagerMock.Verify(m => m.GetItemById(_item.Id), Times.Once);
-        _musicBrainzClientMock.Verify(m => m.GetAudioItemMetadata(_item), Times.Once);
-        _listenBrainzClientMock.Verify(m => m.SendFeedback(
+        _metadataProviderMock.Verify(m => m.GetAudioItemMetadataAsync(_item, CancellationToken.None), Times.Once);
+        _listenBrainzServiceMock.Verify(m => m.SendFeedbackAsync(
                 _userConfig,
                 _itemData.IsFavorite,
                 _metadata.RecordingMbid,
-                null),
+                null,
+                CancellationToken.None),
             Times.Once);
     }
 
     [Fact]
-    public void SyncToListenBrainz_MsidFallback()
+    public async Task SyncToListenBrainz_MsidFallback()
     {
         var noMbidItem = new Audio { Id = _item.Id };
 
@@ -257,23 +273,25 @@ public class FavoriteSyncServiceTests
             .Setup(m => m.GetUserData(_jellyfinUser, _item))
             .Returns(_itemData);
 
-        _listenBrainzClientMock
-            .Setup(m => m.GetRecordingMsidByListenTs(_userConfig, It.IsAny<long>()))
-            .Returns("fake-msid");
+        _listenBrainzServiceMock
+            .Setup(m => m.GetRecordingMsidByListenTsAsync(_userConfig, It.IsAny<long>(), CancellationToken.None))
+            .Returns(Task.FromResult("fake-msid"));
 
-        _service.SyncToListenBrainz(_item.Id, _jellyfinUser.Id, 12345);
+        await _service.SyncToListenBrainzAsync(_item.Id, _jellyfinUser.Id, 12345, CancellationToken.None);
 
         _libraryManagerMock.Verify(m => m.GetItemById(_item.Id), Times.Once);
-        _musicBrainzClientMock.Verify(m => m.GetAudioItemMetadata(_item), Times.Never);
-        _listenBrainzClientMock.Verify(m => m.GetRecordingMsidByListenTs(
+        _metadataProviderMock.Verify(m => m.GetAudioItemMetadataAsync(_item, CancellationToken.None), Times.Never);
+        _listenBrainzServiceMock.Verify(m => m.GetRecordingMsidByListenTsAsync(
                 _userConfig,
-                12345),
+                12345,
+                CancellationToken.None),
             Times.Once);
-        _listenBrainzClientMock.Verify(m => m.SendFeedback(
+        _listenBrainzServiceMock.Verify(m => m.SendFeedbackAsync(
                 _userConfig,
                 _itemData.IsFavorite,
                 null,
-                "fake-msid"),
+                "fake-msid",
+                CancellationToken.None),
             Times.Once);
     }
 }

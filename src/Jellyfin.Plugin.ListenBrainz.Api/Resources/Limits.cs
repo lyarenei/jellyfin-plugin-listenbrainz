@@ -60,6 +60,11 @@ public static class Limits
     /// <exception cref="ListenBrainzException">Conditions have not been met.</exception>
     public static void AssertSubmitConditions(long playbackPosition, long runtime)
     {
+        if (runtime <= 0)
+        {
+            throw new ListenBrainzException("Cannot validate submit conditions: runtime must be greater than 0");
+        }
+
         var playPercent = ((double)playbackPosition / runtime) * 100;
         if (playPercent >= MinPlayPercentage) return;
         if (playbackPosition >= MinPlayTimeTicks) return;

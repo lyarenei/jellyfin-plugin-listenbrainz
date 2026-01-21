@@ -2,13 +2,14 @@ using System.Globalization;
 using System.Reflection;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
+using Jellyfin.Plugin.ListenBrainz.Handlers;
+using Jellyfin.Plugin.ListenBrainz.Services;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Session;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.ListenBrainz;
@@ -16,10 +17,17 @@ namespace Jellyfin.Plugin.ListenBrainz;
 /// <summary>
 /// ListenBrainz Plugin definition for Jellyfin.
 /// </summary>
-public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
+public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
 {
     private static Plugin? _thisInstance;
-    private readonly IHostedService _service;
+    private readonly ILogger<Plugin> _logger;
+    private readonly ISessionManager _sessionManager;
+    private readonly IUserDataManager _userDataManager;
+    private readonly GenericHandler<PlaybackProgressEventArgs> _playbackStartHandler;
+    private readonly GenericHandler<PlaybackStopEventArgs> _playbackStopHandler;
+    private readonly GenericHandler<UserDataSaveEventArgs> _userDataSaveHandler;
+    private bool _isDisposed;
+    private bool _isRegistered;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Plugin"/> class.
@@ -32,7 +40,6 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// <param name="userDataManager">User data manager.</param>
     /// <param name="libraryManager">Library manager.</param>
     /// <param name="userManager">User manager.</param>
-    /// <param name="pluginService">Plugin service.</param>
     public Plugin(
         IApplicationPaths paths,
         IXmlSerializer xmlSerializer,
@@ -44,20 +51,68 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
         IUserManager userManager) : base(paths, xmlSerializer)
     {
         _thisInstance = this;
-        _service = new PluginService(
-            sessionManager,
-            loggerFactory,
-            clientFactory,
-            userDataManager,
+        _logger = loggerFactory.CreateLogger<Plugin>();
+        _sessionManager = sessionManager;
+        _userDataManager = userDataManager;
+
+        var serviceFactory = new DefaultServiceFactory(loggerFactory, clientFactory);
+        var listenBrainzService = serviceFactory.GetListenBrainzService();
+        var metadataProviderService = serviceFactory.GetMetadataProviderService();
+        var pluginConfigService = serviceFactory.GetPluginConfigService();
+        var favoriteSyncService = serviceFactory.GetFavoriteSyncService(
             libraryManager,
+            userManager,
+            userDataManager,
+            listenBrainzService,
+            metadataProviderService,
+            pluginConfigService);
+        var validationService = serviceFactory.GetValidationService(libraryManager, pluginConfigService);
+
+        var listensCachingService = serviceFactory.GetListensCachingService();
+        var listensBackupService = serviceFactory.GetListenBackupService(pluginConfigService.BackupPath);
+
+        var playbackStartLogger = loggerFactory.CreateLogger(LoggerCategory + ".PlaybackStartHandler");
+        _playbackStartHandler = new PlaybackStartHandler(
+            playbackStartLogger,
+            validationService,
+            pluginConfigService,
+            metadataProviderService,
+            listenBrainzService,
+            DefaultPlaybackTrackingService.Instance,
             userManager);
-        _service.StartAsync(CancellationToken.None);
+
+        var playbackStopLogger = loggerFactory.CreateLogger(LoggerCategory + ".PlaybackStopHandler");
+        _playbackStopHandler = new PlaybackStopHandler(
+            playbackStopLogger,
+            userManager,
+            pluginConfigService,
+            favoriteSyncService,
+            validationService,
+            metadataProviderService,
+            listensBackupService,
+            listenBrainzService,
+            listensCachingService);
+
+        var userDataSaveLogger = loggerFactory.CreateLogger(LoggerCategory + ".UserDataSaveHandler");
+        _userDataSaveHandler = new UserDataSaveHandler(
+            userDataSaveLogger,
+            userManager,
+            pluginConfigService,
+            favoriteSyncService,
+            validationService,
+            metadataProviderService,
+            listensBackupService,
+            listenBrainzService,
+            listensCachingService,
+            DefaultPlaybackTrackingService.Instance);
+
+        RegisterEventHandlers();
     }
 
     /// <summary>
     /// Finalizes an instance of the <see cref="Plugin"/> class.
     /// </summary>
-    ~Plugin() => _service.StopAsync(CancellationToken.None);
+    ~Plugin() => Dispose(false);
 
     /// <inheritdoc />
     public override string Name => "ListenBrainz";
@@ -91,16 +146,16 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// <inheritdoc />
     public IEnumerable<PluginPageInfo> GetPages()
     {
-        return new[]
-        {
+        return
+        [
             new PluginPageInfo
             {
                 Name = Name,
                 EmbeddedResourcePath = $"{GetType().Namespace}.Configuration.configurationPage.html",
                 EnableInMainMenu = false,
-                MenuIcon = "music_note"
-            }
-        };
+                MenuIcon = "music_note",
+            },
+        ];
     }
 
     /// <summary>
@@ -112,7 +167,11 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     public static PluginConfiguration GetConfiguration()
     {
         var config = _thisInstance?.Configuration;
-        if (config is not null) return config;
+        if (config is not null)
+        {
+            return config;
+        }
+
         throw new PluginException("Plugin instance is not available");
     }
 
@@ -127,7 +186,11 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
         // var path = _thisInstance?.DataFolderPath;
         var pluginDirName = string.Format(CultureInfo.InvariantCulture, "{0}_{1}", _thisInstance?.Name, Version);
         var path = Path.Join(_thisInstance?.ApplicationPaths.PluginsPath, pluginDirName);
-        if (path is null) throw new PluginException("Plugin instance is not available");
+        if (path is null)
+        {
+            throw new PluginException("Plugin instance is not available");
+        }
+
         return path;
     }
 
@@ -139,9 +202,17 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     public static string GetConfigDirPath()
     {
         var path = _thisInstance?.ConfigurationFilePath;
-        if (path is null) throw new PluginException("Plugin instance is not available");
+        if (path is null)
+        {
+            throw new PluginException("Plugin instance is not available");
+        }
+
         var dirName = Path.GetDirectoryName(path);
-        if (dirName is null) throw new PluginException("Could not get a config directory name");
+        if (dirName is null)
+        {
+            throw new PluginException("Could not get a config directory name");
+        }
+
         return dirName;
     }
 
@@ -152,5 +223,71 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     public static void UpdateConfig(BasePluginConfiguration newConfiguration)
     {
         _thisInstance?.UpdateConfiguration(newConfiguration);
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Dispose unmanaged (own) and optionally managed resources.
+    /// </summary>
+    /// <param name="disposing">Dispose managed resources.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_isDisposed)
+        {
+            return;
+        }
+
+        UnregisterEventHandlers();
+
+        if (disposing)
+        {
+            // Dispose managed resources here.
+        }
+
+        _isDisposed = true;
+    }
+
+    /// <summary>
+    /// Register event handlers for the plugin.
+    /// </summary>
+    private void RegisterEventHandlers()
+    {
+        if (_isRegistered)
+        {
+            _logger.LogDebug("Plugin event handlers are already registered");
+            return;
+        }
+
+        _sessionManager.PlaybackStart += _playbackStartHandler.HandleEvent;
+        _sessionManager.PlaybackStopped += _playbackStopHandler.HandleEvent;
+        _userDataManager.UserDataSaved += _userDataSaveHandler.HandleEvent;
+
+        _isRegistered = true;
+        _logger.LogDebug("Plugin event handlers have been registered");
+    }
+
+    /// <summary>
+    /// Unregister event handlers for the plugin.
+    /// </summary>
+    private void UnregisterEventHandlers()
+    {
+        if (!_isRegistered)
+        {
+            _logger.LogDebug("Plugin event handlers are already unregistered");
+            return;
+        }
+
+        _sessionManager.PlaybackStart -= _playbackStartHandler.HandleEvent;
+        _sessionManager.PlaybackStopped -= _playbackStopHandler.HandleEvent;
+        _userDataManager.UserDataSaved -= _userDataSaveHandler.HandleEvent;
+
+        _isRegistered = false;
+        _logger.LogDebug("Plugin event handlers have been unregistered");
     }
 }
