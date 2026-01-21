@@ -152,7 +152,7 @@ public class LovedTracksSyncTask : IScheduledTask
         }
 
         var allowedLibraries = GetAllowedLibraries().Select(al => _libraryManager.GetItemById(al)).WhereNotNull();
-        var q = new InternalItemsQuery(user) { MediaTypes = new[] { MediaType.Audio } };
+        var q = new InternalItemsQuery(user) { MediaTypes = [MediaType.Audio] };
 
         var items = _libraryManager
             .GetItemList(q, allowedLibraries.ToList())
@@ -171,7 +171,8 @@ public class LovedTracksSyncTask : IScheduledTask
                 if (string.IsNullOrEmpty(recordingMbid) && _configService.IsMusicBrainzEnabled)
                 {
                     _logger.LogDebug("Fetching recording MBID for item {ItemId} from MusicBrainz", item.Id);
-                    recordingMbid = _musicBrainzClient.GetAudioItemMetadata(item).RecordingMbid;
+                    var metadata = await _musicBrainzClient.GetAudioItemMetadataAsync(item, cancellationToken);
+                    recordingMbid = metadata.RecordingMbid;
                 }
                 else
                 {
