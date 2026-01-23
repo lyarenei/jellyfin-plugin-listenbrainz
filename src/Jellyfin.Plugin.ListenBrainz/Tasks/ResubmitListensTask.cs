@@ -155,9 +155,16 @@ public class ResubmitListensTask : IScheduledTask
         {
             cancellationToken.ThrowIfCancellationRequested();
 
+            var item = _libraryManager.GetItemById(storedListen.Id) as Audio;
+            if (item is null)
+            {
+                _logger.LogDebug("Item with ID {ItemId} is not an audio item", storedListen.Id);
+                continue;
+            }
+
             if (_pluginConfig.IsMusicBrainzEnabled && !storedListen.HasRecordingMbid)
             {
-                storedListen.Metadata = await GetAudioItemMetadataAsync(storedListen, cancellationToken);
+                storedListen.Metadata = await GetAudioItemMetadataAsync(item, cancellationToken);
             }
 
             var listen = _libraryManager.ToListen(storedListen);
@@ -191,15 +198,9 @@ public class ResubmitListensTask : IScheduledTask
     }
 
     internal async Task<AudioItemMetadata?> GetAudioItemMetadataAsync(
-        StoredListen listen,
+        Audio item,
         CancellationToken cancellationToken)
     {
-        if (_libraryManager.GetItemById(listen.Id) is not Audio item)
-        {
-            _logger.LogDebug("Item with ID {ListenID} is not an audio item", listen.Id);
-            return null;
-        }
-
         cancellationToken.ThrowIfCancellationRequested();
 
         try
