@@ -1,4 +1,5 @@
 using Jellyfin.Plugin.ListenBrainz.Api.Resources;
+using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using MediaBrowser.Controller.Entities.Audio;
@@ -88,6 +89,21 @@ public class DefaultValidationService : IValidationService
             _logger.LogDebug("Submit listen playback condition not met: {Message}", e.Message);
             return false;
         }
+    }
+
+    /// <inheritdoc />
+    public void ValidateStrictModeConditions(Audio item)
+    {
+        _logger.LogDebug("Checking strict mode conditions for item");
+
+        var recordingMbid = item.GetRecordingMbid();
+        if (string.IsNullOrEmpty(recordingMbid))
+        {
+            _logger.LogDebug("Strict mode validation failed: Missing recording MBID");
+            throw new ValidationException("Missing recording MBID");
+        }
+
+        _logger.LogDebug("Item meets strict mode conditions");
     }
 
     private IEnumerable<Guid> GetAllowedLibraries()

@@ -1,3 +1,4 @@
+using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using MediaBrowser.Controller.Entities.Audio;
 
 namespace Jellyfin.Plugin.ListenBrainz.Interfaces;
@@ -29,4 +30,11 @@ public interface IValidationService
     /// <param name="runtime">Played item runtime in ticks.</param>
     /// <returns>Validation passed.</returns>
     public bool ValidateSubmitConditions(long playedTicks, long runtime);
+
+    /// <summary>
+    /// Check if an audio item meets strict mode conditions.
+    /// </summary>
+    /// <param name="item">Audio item to validate.</param>
+    /// <throws cref="ValidationException">Thrown if strict mode conditions are not met.</throws>
+    public void ValidateStrictModeConditions(Audio item);
 }

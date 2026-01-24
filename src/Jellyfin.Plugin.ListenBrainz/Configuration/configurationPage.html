@@ -64,6 +64,14 @@
                             </label>
                             <div class="fieldDescription">Has no effect if backup path is not configured.</div>
                         </div>
+                        <div class="checkboxContainer bootstrap-wrapper row no-gutters">
+                            <label class="inputLabel inputLabelUnfocused" for="IsStrictModeEnabled">
+                                <input is="emby-checkbox" type="checkbox" id="IsStrictModeEnabled"
+                                       name="IsStrictModeEnabled"/>
+                                <span>Enable strict mode for listen submission.</span>
+                            </label>
+                            <div class="fieldDescription">Only submit listens when certain metadata are available. See plugin documentation for more details.</div>
+                        </div>
                         <div class="bootstrap-wrapper row no-gutters horizontal-center">
                             <button is="emby-button" type="submit" id="SaveUserConfig"
                                     class="raised button-submit block emby-button col-md-2">
@@ -172,6 +180,7 @@
                 IsListenSubmitEnabled: false,
                 IsFavoritesSyncEnabled: false,
                 IsUserBackupEnabled: false,
+                IsStrictModeEnabled: false,
             },
         };
 
@@ -451,6 +460,9 @@
 
             document.querySelector("#IsUserBackupEnabled")
                 .checked = data.IsBackupEnabled;
+
+            document.querySelector("#IsStrictModeEnabled")
+                .checked = data.IsStrictModeEnabled;
         }
 
         function getUserConfig(config, userId) {
@@ -471,6 +483,7 @@
                 IsFavoritesSyncEnabled: document.querySelector('#IsFavoritesSyncEnabled').checked,
                 IsBackupEnabled: document.querySelector('#IsUserBackupEnabled').checked,
                 UserName: userName,
+                IsStrictModeEnabled: document.querySelector('#IsStrictModeEnabled').checked,
             }
         }
 

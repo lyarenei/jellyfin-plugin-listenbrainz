@@ -136,6 +136,11 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
         var isOk = false;
         try
         {
+            if (userConfig.IsStrictModeEnabled)
+            {
+                ValidateStrictModeConditions(data.Item);
+            }
+
             isOk = await SendListen(userConfig, data.Item, metadata, now, cancellationToken);
         }
         finally
@@ -251,5 +256,12 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
         var isOk = _validationService.ValidateSubmitConditions(deltaTicks, runtime);
         await _playbackTracker.InvalidateItemAsync(userId, trackedItem, cancellationToken);
         return isOk;
+    }
+
+    private void ValidateStrictModeConditions(Audio item)
+    {
+        _logger.LogDebug("Strict mode enabled, validating strict mode conditions...");
+        _validationService.ValidateStrictModeConditions(item);
+        _logger.LogInformation("Strict mode validation passed");
     }
 }

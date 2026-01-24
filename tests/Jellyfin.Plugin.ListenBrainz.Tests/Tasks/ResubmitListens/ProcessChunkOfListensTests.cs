@@ -23,6 +23,7 @@ public class ProcessChunkOfListensTests : TestBase
         JellyfinUserId = userId,
         UserName = "foobar",
         IsListenSubmitEnabled = true,
+        IsStrictModeEnabled = false,
         ApiToken = "some-token",
         PlaintextApiToken = "some-token",
     };

@@ -72,6 +72,11 @@ public abstract class GenericHandler<TEventArgs>
             _logger.LogInformation("Encountered error: {ExceptionMessage}", e.Message);
             _logger.LogDebug("Service exception occurred: {ExceptionMessage}", e.GetFullMessage());
         }
+        catch (ValidationException e)
+        {
+            _logger.LogInformation("Validation failed: {ExceptionMessage}", e.Message);
+            _logger.LogDebug("Validation exception occurred: {ExceptionMessage}", e.GetFullMessage());
+        }
         catch (OperationCanceledException)
         {
             _logger.LogInformation("Operation was cancelled");
