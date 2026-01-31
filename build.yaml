@@ -16,7 +16,6 @@ artifacts:
   - "Jellyfin.Plugin.ListenBrainz.Http.dll"
   - "Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.dll"
 changelog: >
-  Maintenance release:
+  Maintenance release (backport from version 6.0.3.7):
     - Plugin maintenance / code cleanup
-    - Fix playback hanging when ListenBrainz server is unreachable
     - Fix duplication of items in plugin config
