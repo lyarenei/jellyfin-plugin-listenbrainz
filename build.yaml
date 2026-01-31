@@ -18,5 +18,4 @@ artifacts:
 changelog: >
   Maintenance release:
     - Plugin maintenance / code cleanup
-    - Fix playback hanging when ListenBrainz server is unreachable
     - Fix duplication of items in plugin config
