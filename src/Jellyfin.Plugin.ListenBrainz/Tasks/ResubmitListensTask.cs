@@ -3,6 +3,7 @@ using Jellyfin.Plugin.ListenBrainz.Api.Resources;
 using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
+using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.Services;
@@ -24,6 +25,7 @@ public class ResubmitListensTask : IScheduledTask
     private readonly IMetadataProviderService _metadataProvider;
     private readonly IPluginConfigService _pluginConfig;
     private readonly ILibraryManager _libraryManager;
+    private readonly IValidationService _validationService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ResubmitListensTask"/> class.
@@ -46,6 +48,7 @@ public class ResubmitListensTask : IScheduledTask
         _metadataProvider = factory.GetMetadataProviderService();
         _pluginConfig = factory.GetPluginConfigService();
         _listensCache = factory.GetListensCachingService();
+        _validationService = factory.GetValidationService(_libraryManager, _pluginConfig);
     }
 
     /// <inheritdoc />
@@ -147,7 +150,27 @@ public class ResubmitListensTask : IScheduledTask
         }
     }
 
-    internal async Task ProcessChunkOfListens(StoredListen[] storedListens, UserConfig userConfig, CancellationToken cancellationToken)
+    internal bool IsStrictModeValid(Audio item, StoredListen listen)
+    {
+        try
+        {
+            _validationService.ValidateStrictModeConditions(item);
+            return true;
+        }
+        catch (ValidationException e)
+        {
+            _logger.LogInformation(
+                "Strict mode validation failed for cached listen of item {ItemId}: {Reason}",
+                listen.Id,
+                e.Message);
+            return false;
+        }
+    }
+
+    internal async Task ProcessChunkOfListens(
+        StoredListen[] storedListens,
+        UserConfig userConfig,
+        CancellationToken cancellationToken)
     {
         var listensToRemove = new List<StoredListen>();
         var listensToSend = new List<Listen>();
@@ -155,9 +178,21 @@ public class ResubmitListensTask : IScheduledTask
         {
             cancellationToken.ThrowIfCancellationRequested();
 
+            var item = _libraryManager.GetItemById(storedListen.Id) as Audio;
+            if (item is null)
+            {
+                _logger.LogDebug("Item with ID {ItemId} is not an audio item", storedListen.Id);
+                continue;
+            }
+
+            if (userConfig.IsStrictModeEnabled && !IsStrictModeValid(item, storedListen))
+            {
+                continue;
+            }
+
             if (_pluginConfig.IsMusicBrainzEnabled && !storedListen.HasRecordingMbid)
             {
-                storedListen.Metadata = await GetAudioItemMetadataAsync(storedListen, cancellationToken);
+                storedListen.Metadata = await GetAudioItemMetadataAsync(item, cancellationToken);
             }
 
             var listen = _libraryManager.ToListen(storedListen);
@@ -191,15 +226,9 @@ public class ResubmitListensTask : IScheduledTask
     }
 
     internal async Task<AudioItemMetadata?> GetAudioItemMetadataAsync(
-        StoredListen listen,
+        Audio item,
         CancellationToken cancellationToken)
     {
-        if (_libraryManager.GetItemById(listen.Id) is not Audio item)
-        {
-            _logger.LogDebug("Item with ID {ListenID} is not an audio item", listen.Id);
-            return null;
-        }
-
         cancellationToken.ThrowIfCancellationRequested();
 
         try

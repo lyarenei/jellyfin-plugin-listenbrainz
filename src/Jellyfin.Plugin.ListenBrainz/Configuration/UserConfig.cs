@@ -18,6 +18,7 @@ public class UserConfig
         ApiToken = string.Empty;
         UserName = string.Empty;
         IsBackupEnabled = false;
+        IsStrictModeEnabled = false;
     }
 
     /// <summary>
@@ -74,4 +75,9 @@ public class UserConfig
     [JsonIgnore]
     [XmlIgnore]
     public bool IsNotBackupEnabled => !IsBackupEnabled;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether strict mode is enabled for listen submission.
+    /// </summary>
+    public bool IsStrictModeEnabled { get; set; }
 }
