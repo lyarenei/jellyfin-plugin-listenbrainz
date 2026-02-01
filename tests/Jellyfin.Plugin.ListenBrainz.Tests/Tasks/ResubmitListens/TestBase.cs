@@ -26,6 +26,7 @@ public class TestBase
     protected readonly Mock<IListenBrainzService> _listenBrainzServiceMock;
     protected readonly Mock<IMetadataProviderService> _metadataProviderServiceMock;
     protected readonly Mock<IPluginConfigService> _pluginConfigServiceMock;
+    protected readonly Mock<IValidationService> _validationServiceMock;
     protected readonly Mock<IServiceFactory> _serviceFactoryMock;
     protected readonly ResubmitListensTask _task;
 
@@ -42,12 +43,17 @@ public class TestBase
         _listenBrainzServiceMock = new Mock<IListenBrainzService>();
         _metadataProviderServiceMock = new Mock<IMetadataProviderService>();
         _pluginConfigServiceMock = new Mock<IPluginConfigService>();
+        _validationServiceMock = new Mock<IValidationService>();
 
         _serviceFactoryMock = new Mock<IServiceFactory>();
         _serviceFactoryMock.Setup(m => m.GetListenBrainzService()).Returns(_listenBrainzServiceMock.Object);
         _serviceFactoryMock.Setup(m => m.GetMetadataProviderService()).Returns(_metadataProviderServiceMock.Object);
         _serviceFactoryMock.Setup(m => m.GetPluginConfigService()).Returns(_pluginConfigServiceMock.Object);
         _serviceFactoryMock.Setup(m => m.GetListensCachingService(It.IsAny<IPersistentJsonService<ListenCacheData>>())).Returns(_listensCachingServiceMock.Object);
+        _serviceFactoryMock.Setup(m => m.GetValidationService(
+            It.IsAny<ILibraryManager>(),
+            It.IsAny<IPluginConfigService>()))
+            .Returns(_validationServiceMock.Object);
 
         _task = new ResubmitListensTask(
             loggerFactoryMock.Object,
