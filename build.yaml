@@ -16,4 +16,7 @@ artifacts:
   - "Jellyfin.Plugin.ListenBrainz.Http.dll"
   - "Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.dll"
 changelog: >
-  - Fix plugin settings error for mixed type libraries
+  Maintenance release:
+    - Plugin maintenance / code cleanup (backport from version 6.0.3.7)
+    - Fix duplication of items in plugin config (backport from version 6.0.3.7)
+    - Fix plugin settings error for mixed type libraries (backport from version 6.0.4.0)
