@@ -404,13 +404,9 @@ public class SyncPlaylistsTask : IScheduledTask
             }
         }
 
-        // 6. Title-only search
-        if (searchCandidates.Count > 0)
-        {
-            _logger.LogDebug("Matched track '{Title}' by title search (first result)", track.Title);
-            return searchCandidates[0];
-        }
+        // 6. Title-only search would lead to too many false positives so no point in doing that...
 
+        _logger.LogDebug("No match found for track '{Title}'", track.Title);
         return null;
     }
 
