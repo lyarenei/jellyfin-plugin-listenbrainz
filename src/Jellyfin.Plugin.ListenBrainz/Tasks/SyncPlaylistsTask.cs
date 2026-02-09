@@ -1,6 +1,7 @@
 using Jellyfin.Data.Enums;
 using Jellyfin.Database.Implementations.Entities;
 using Jellyfin.Plugin.ListenBrainz.Api.Models;
+using Jellyfin.Plugin.ListenBrainz.Api.Resources;
 using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
@@ -8,6 +9,7 @@ using Jellyfin.Plugin.ListenBrainz.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.Services;
 using MediaBrowser.Controller.Entities;
+using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Playlists;
 using MediaBrowser.Model.Playlists;
@@ -24,6 +26,15 @@ namespace Jellyfin.Plugin.ListenBrainz.Tasks;
 /// </summary>
 public class SyncPlaylistsTask : IScheduledTask
 {
+    private static readonly string[] _defaultAllowedPatches =
+    [
+        "weekly-jams",
+        "top-discoveries-of",
+        "top-discoveries-for-year",
+        "top-new-recordings-for-year",
+        "top-recordings-for-year",
+    ];
+
     private readonly ILogger _logger;
     private readonly IListenBrainzClient _listenBrainzClient;
     private readonly IMusicBrainzClient _musicBrainzClient;
@@ -84,7 +95,7 @@ public class SyncPlaylistsTask : IScheduledTask
             Type = TaskTriggerInfoType.WeeklyTrigger,
             DayOfWeek = DayOfWeek.Monday,
             TimeOfDayTicks = Utils.GetRandomMinute() * TimeSpan.TicksPerMinute,
-        }
+        },
     ];
 
     /// <inheritdoc />
@@ -143,7 +154,7 @@ public class SyncPlaylistsTask : IScheduledTask
             var playlists = (
                 await _listenBrainzClient.GetCreatedForPlaylistsAsync(
                     userConfig,
-                    25,
+                    Limits.MaxItemsPerGet,
                     cancellationToken)
             ).ToList();
             _logger.LogInformation("Found {Count} playlists for user {Username}", playlists.Count, userConfig.UserName);
@@ -156,6 +167,14 @@ public class SyncPlaylistsTask : IScheduledTask
             }
 
             var playlistRatio = _userCountRatio / playlists.Count;
+
+            var allowedLibraries = GetAllowedLibraries()
+                .Select(al => _libraryManager.GetItemById(al))
+                .WhereNotNull()
+                .ToList();
+
+            var query = new InternalItemsQuery(user) { MediaTypes = [MediaType.Audio] };
+            var allAudioItems = _libraryManager.GetItemList(query, allowedLibraries).ToList();
 
             foreach (var pl in playlists)
             {
@@ -174,7 +193,7 @@ public class SyncPlaylistsTask : IScheduledTask
                             userConfig,
                             pl.PlaylistId,
                             cancellationToken);
-                        await SyncPlaylist(user, playlist, cancellationToken);
+                        await SyncPlaylist(user, playlist, allAudioItems, cancellationToken);
                     }
                     catch (Exception e)
                     {
@@ -204,6 +223,7 @@ public class SyncPlaylistsTask : IScheduledTask
     private async Task SyncPlaylist(
         User user,
         Playlist playlist,
+        IReadOnlyList<BaseItem> allAudioItems,
         CancellationToken cancellationToken)
     {
         _logger.LogDebug("Syncing playlist: {Title}", playlist.Title);
@@ -217,31 +237,17 @@ public class SyncPlaylistsTask : IScheduledTask
 
         // Find Jellyfin items matching the recording MBIDs from the playlist
         var jellyfinPlaylistTracks = new List<BaseItem>();
-        var allowedLibraries = GetAllowedLibraries()
-            .Select(al => _libraryManager.GetItemById(al))
-            .WhereNotNull()
-            .ToList();
-
-        var query = new InternalItemsQuery(user) { MediaTypes = [MediaType.Audio] };
-        var allAudioItems = _libraryManager.GetItemList(query, allowedLibraries).ToList();
 
         foreach (var track in tracks)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var recordingMbid = track.RecordingMbid;
-            if (string.IsNullOrEmpty(recordingMbid))
-            {
-                _logger.LogDebug("Track {ID} has no recording MBID, skipping", track.Identifier);
-                continue;
-            }
-
             var item = await FindJellyfinItem(allAudioItems, user, track, cancellationToken);
             if (item is null)
             {
                 _logger.LogDebug(
-                    "No Jellyfin item found for recording MBID {Mbid} (track: {ID})",
-                    recordingMbid,
+                    "No Jellyfin item found for track: {Title} (ID: {ID})",
+                    track.Title,
                     track.Identifier);
                 continue;
             }
@@ -310,78 +316,105 @@ public class SyncPlaylistsTask : IScheduledTask
 
     private static bool ShouldSyncPlaylist(string sourcePatch)
     {
-        string[] allowedPatches =
-        [
-            "weekly-jams",
-            "top-discoveries-of",
-            "top-discoveries-for-year",
-            "top-new-recordings-for-year",
-            "top-recordings-for-year",
-        ];
-
-        return allowedPatches.Any(patch => sourcePatch.Contains(patch, StringComparison.InvariantCultureIgnoreCase));
+        return _defaultAllowedPatches.Any(patch =>
+            sourcePatch.Contains(patch, StringComparison.InvariantCultureIgnoreCase));
     }
 
     private async Task<BaseItem?> FindJellyfinItem(
-        List<BaseItem> allAudioItems,
+        IReadOnlyList<BaseItem> allAudioItems,
         User user,
         PlaylistTrack track,
         CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(track.RecordingMbid))
+        // 1. Best scenario: Exact match by recording MBID
+        if (!string.IsNullOrEmpty(track.RecordingMbid))
         {
-            _logger.LogDebug("Failed to read recording MBID from track {ID}", track.Identifier);
-            return null;
-        }
-
-        // Best scenario: Exact match by recording MBID
-        var item = allAudioItems.FirstOrDefault(i => i.GetRecordingMbid() == track.RecordingMbid);
-        if (item is not null)
-        {
-            return item;
-        }
-
-        // Fallback 1: match by title
-        item = SearchJellyfinItem(user, track.Title);
-        if (item is not null)
-        {
-            return item;
-        }
-
-        if (!_configService.IsMusicBrainzEnabled)
-        {
-            return null;
-        }
-
-        _logger.LogDebug("Looking up related recordings for recording MBID {Mbid}", track.RecordingMbid);
-
-        var relatedRecordingMbids = await _musicBrainzClient.GetRelatedRecordingMbidsAsync(
-            track.RecordingMbid,
-            cancellationToken);
-
-        foreach (var relatedMbid in relatedRecordingMbids)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            // Fallback 2: match by related recording MBIDs
-            item = allAudioItems.FirstOrDefault(i => i.GetRecordingMbid() == relatedMbid);
+            var item = allAudioItems.FirstOrDefault(i => i.GetRecordingMbid() == track.RecordingMbid);
             if (item is not null)
             {
+                _logger.LogDebug("Matched track '{Title}' by recording MBID", track.Title);
                 return item;
             }
+        }
 
-            // Fallback 3: Match by title of related recordings
-            item = SearchJellyfinItem(user, track.Title);
+        // 2. Match by Album MBID + Title
+        if (!string.IsNullOrEmpty(track.ReleaseMbid))
+        {
+            var item = allAudioItems.FirstOrDefault(i =>
+                i.ProviderIds.TryGetValue("MusicBrainzAlbum", out var albumMbid) &&
+                albumMbid == track.ReleaseMbid &&
+                i.Name.Equals(track.Title, StringComparison.OrdinalIgnoreCase));
             if (item is not null)
             {
+                _logger.LogDebug("Matched track '{Title}' by album MBID + title", track.Title);
                 return item;
             }
+        }
+
+        // 3. MusicBrainz related recordings (only if MBID available and MusicBrainz enabled)
+        if (!string.IsNullOrEmpty(track.RecordingMbid) && _configService.IsMusicBrainzEnabled)
+        {
+            _logger.LogDebug("Looking up related recordings for recording MBID {Mbid}", track.RecordingMbid);
+
+            var relatedRecordingMbids = await _musicBrainzClient.GetRelatedRecordingMbidsAsync(
+                track.RecordingMbid,
+                cancellationToken);
+
+            foreach (var relatedMbid in relatedRecordingMbids)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var item = allAudioItems.FirstOrDefault(i => i.GetRecordingMbid() == relatedMbid);
+                if (item is not null)
+                {
+                    _logger.LogDebug(
+                        "Matched track '{Title}' by related recording MBID {Mbid}",
+                        track.Title,
+                        relatedMbid);
+                    return item;
+                }
+            }
+        }
+
+        // At this point, no matching with IDs can be done, so try plaintext matching
+        // TODO: make this configurable
+        var searchCandidates = SearchJellyfinItems(user, track.Title);
+
+        // 4. Artist + Title search
+        if (!string.IsNullOrEmpty(track.Creator))
+        {
+            var item = searchCandidates.FirstOrDefault(i => ArtistMatches(i, track.Creator));
+            if (item is not null)
+            {
+                _logger.LogDebug("Matched track '{Title}' by artist + title search", track.Title);
+                return item;
+            }
+        }
+
+        // 5. Album name + Title search
+        if (!string.IsNullOrEmpty(track.Album))
+        {
+            var item = searchCandidates
+                .OfType<Audio>()
+                .FirstOrDefault(i => i.Album?.Equals(track.Album, StringComparison.OrdinalIgnoreCase) == true);
+            if (item is not null)
+            {
+                _logger.LogDebug("Matched track '{Title}' by album name + title search", track.Title);
+                return item;
+            }
+        }
+
+        // 6. Title-only search
+        if (searchCandidates.Count > 0)
+        {
+            _logger.LogDebug("Matched track '{Title}' by title search (first result)", track.Title);
+            return searchCandidates[0];
         }
 
         return null;
     }
 
-    private BaseItem? SearchJellyfinItem(User user, string searchTerm)
+    private IReadOnlyList<BaseItem> SearchJellyfinItems(User user, string searchTerm)
     {
         var searchItems = _libraryManager.GetItemList(new InternalItemsQuery(user)
         {
@@ -389,18 +422,28 @@ public class SyncPlaylistsTask : IScheduledTask
             SearchTerm = searchTerm,
         });
 
-        switch (searchItems.Count)
+        if (searchItems.Count == 0)
         {
-            case 1:
-                return searchItems[0];
-            case > 1:
-                _logger.LogDebug("Multiple tracks found for search term {Term}, using first result", searchTerm);
-                return searchItems[0];
-            case 0:
-                _logger.LogDebug("No tracks found for search term {Term}", searchTerm);
-                break;
+            _logger.LogDebug("No tracks found for search term '{Term}'", searchTerm);
+        }
+        else
+        {
+            _logger.LogDebug("Found {Count} tracks for search term '{Term}'", searchItems.Count, searchTerm);
         }
 
-        return null;
+        return searchItems;
+    }
+
+    private static bool ArtistMatches(BaseItem item, string artistName)
+    {
+        // Handle "Artist feat. Other" format - check if any artist is contained in creator string
+        if (item is not Audio audio || audio.Artists is null)
+        {
+            return false;
+        }
+
+        return audio.Artists
+            .TakeWhile(a => !string.IsNullOrEmpty(a))
+            .Any(a => artistName.Contains(a, StringComparison.OrdinalIgnoreCase));
     }
 }

@@ -225,23 +225,36 @@ public class ListenBrainzClient : IListenBrainzClient
     /// <inheritdoc />
     public async Task<IEnumerable<Playlist>> GetCreatedForPlaylistsAsync(UserConfig config, int count, CancellationToken cancellationToken)
     {
-        var request = new GetCreatedForPlaylistsRequest(config.UserName, count) { BaseUrl = _pluginConfig.ListenBrainzApiUrl };
+        var playlists = new List<Playlist>();
+        int offset = 0;
         GetCreatedForPlaylistsResponse response;
-        try
+        do
         {
-            response = await _apiClient.GetCreatedForPlaylists(request, cancellationToken);
-        }
-        catch (Exception e)
-        {
-            throw new PluginException("GetCreatedForPlaylists failed", e);
-        }
+            var request = new GetCreatedForPlaylistsRequest(config.UserName, count, offset)
+            {
+                BaseUrl = _pluginConfig.ListenBrainzApiUrl
+            };
 
-        if (response.IsNotOk)
-        {
-            throw new PluginException("Getting 'created for' playlists failed");
-        }
+            try
+            {
+                response = await _apiClient.GetCreatedForPlaylists(request, cancellationToken);
+            }
+            catch (Exception e)
+            {
+                throw new PluginException("GetCreatedForPlaylists failed", e);
+            }
 
-        return response.Playlists;
+            if (response.IsNotOk)
+            {
+                throw new PluginException("Getting 'created for' playlists failed");
+            }
+
+            playlists.AddRange(response.Playlists);
+            offset += response.Count;
+        }
+        while (offset < response.PlaylistCount);
+
+        return playlists;
     }
 
     /// <inheritdoc />

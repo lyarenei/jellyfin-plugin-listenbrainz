@@ -18,12 +18,17 @@ public class GetCreatedForPlaylistsRequest : IListenBrainzRequest
     /// </summary>
     /// <param name="userName">Name of the user for who the playlists were created for.</param>
     /// <param name="playlistsCount">Number of playlists to fetch.</param>
-    public GetCreatedForPlaylistsRequest(string userName, int playlistsCount = 10)
+    /// <param name="offset">Playlist list offset.</param>
+    public GetCreatedForPlaylistsRequest(string userName, int playlistsCount = Limits.DefaultItemsPerGet, int offset = 0)
     {
         _endpointFormat = CompositeFormat.Parse(Endpoints.CreatedForPlaylists);
         _userName = userName;
         BaseUrl = General.BaseUrl;
-        QueryDict = new Dictionary<string, string> { { "count", playlistsCount.ToString(NumberFormatInfo.InvariantInfo) } };
+        QueryDict = new Dictionary<string, string>
+        {
+            { "count", playlistsCount.ToString(NumberFormatInfo.InvariantInfo) },
+            { "offset", offset.ToString(NumberFormatInfo.InvariantInfo) }
+        };
     }
 
     /// <inheritdoc />
