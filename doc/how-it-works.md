@@ -1,7 +1,7 @@
 # How does the plugin work
 
 Here is a general description of how particular plugin features work. The plugin configuration is documented separately
-and can be found [here](configuration.md).
+and is available [here](configuration.md).
 
 ## Sending listens
 
@@ -78,17 +78,40 @@ number of users which have favorite syncing enabled (assuming all users have acc
 ## Syncing playlists
 
 Every week, on Monday, ListenBrainz automatically generates several playlists for all users. If the user has enabled
-playlists sync in settings, the plugin automatically recreates these playlists in Jellyfin. By default, only playlists "
-from the past" are recreated (weekly jams and top discoveries). Syncing of all playlists can be enabled in the plugin
-settings. Empty playlists are always ignored.
+playlists sync in settings, the plugin automatically recreates these playlists in Jellyfin. Currently, the sync is
+one-way only - from ListenBrainz to Jellyfin.
 
-This feature **requires** a `recording MBID` in the song/audio metadata for sucessfully identifying and assinging a
-song to a playlist. There is no fallback to `MusicBrainz` API like other features have.
+It is very much recommended to have recording MBIDs in your audio metadata for the best results. Otherwise, the plugin
+can only find the best possible match with plain text matching and the results will vary.
+
+By default, only playlists "from the past" are synced. These include `Weekly jams` and `Top discoveries of <year>`.
+
+Syncing of all playlists created for the user (including collaborative ones) can be enabled in the plugin settings.
+Empty playlists are always ignored.
 
 A sync is triggered automatically every Monday. However, the time of the day is randomized on every server start, to
 spread out the load on ListenBrainz servers. If necessary, the sync task can be also run manually at any time from the
-Jellyfin administration UI.
+Jellyfin administration UI (under scheduled tasks).
 
 If there is an already existing playlist with the same name, it will be automatically deleted and recreated. The
-playlists created by the plugin will always have a `[LB]` prefix followed by the playlist name. If, for some reason, you
-want to preserve a playlist, simply rename it in Jellyfin and the playlist will be ignored by the plugin.
+playlists created by the plugin will always have a `[LB]` prefix followed by the playlist name. If, you want to
+preserve a playlist, simply rename it, remove the `[LB]` prefix and the playlist will be ignored by the plugin.
+
+### Track matching
+
+For each track in a ListenBrainz playlist, the plugin attempts to find a corresponding track in the Jellyfin library.
+Since ListenBrainz allows users to send listens without recording MBIDs, the playlists are not guaranteed to have
+recording MBIDs of all tracks in your Jellyfin library. For this reason, the plugin attempts to find the best possible
+match for each track in a multi-stage approach, from highest to lowest confidence:
+
+1. **Recording MBID** - Best case - exact match by MusicBrainz recording ID.
+2. **Album MBID + Title** - Match by MusicBrainz album ID (release MBID) and a case-insensitive track name.
+3. **Related recordings** - Match through related recordings (e.g. different versions or remasters of the same song).
+Requires MusicBrainz integration to be enabled.
+4. **Artist + Title** - Searches Jellyfin library for tracks with a matching title and validates that the artist name is
+   contained in the track's artist credits.
+5. **Album name + Title** - Searches Jellyfin library by title and validates that the album name matches (case-insensitive).
+
+If no match is found after all stages, then either:
+- The track is no longer available in your Jellyfin library
+- ListenBrainz managed to include a track in the playlist without any connection to track in your library
