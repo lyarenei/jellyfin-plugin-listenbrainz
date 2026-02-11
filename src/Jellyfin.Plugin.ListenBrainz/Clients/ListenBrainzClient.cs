@@ -16,6 +16,7 @@ namespace Jellyfin.Plugin.ListenBrainz.Clients;
 /// <summary>
 /// ListenBrainz client for plugin.
 /// </summary>
+[Obsolete("Use IListenBrainzService instead")]
 public class ListenBrainzClient : IListenBrainzClient
 {
     private readonly ILogger _logger;
@@ -60,6 +61,21 @@ public class ListenBrainzClient : IListenBrainzClient
     }
 
     /// <inheritdoc />
+    public async Task<bool> SendNowPlayingAsync(UserConfig config, Audio item, AudioItemMetadata? audioMetadata)
+    {
+        var request = new SubmitListensRequest
+        {
+            ApiToken = config.PlaintextApiToken,
+            ListenType = ListenType.PlayingNow,
+            Payload = [item.AsListen(itemMetadata: audioMetadata)],
+            BaseUrl = _pluginConfig.ListenBrainzApiUrl,
+        };
+
+        var resp = await _apiClient.SubmitListens(request, CancellationToken.None);
+        return resp.IsOk;
+    }
+
+    /// <inheritdoc />
     public void SendListen(UserConfig config, Audio item, AudioItemMetadata? metadata, long listenedAt)
     {
         var request = new SubmitListensRequest
@@ -81,6 +97,20 @@ public class ListenBrainzClient : IListenBrainzClient
         {
             throw new PluginException("Sending listen failed");
         }
+    }
+
+    /// <inheritdoc />
+    public async Task SendListenAsync(UserConfig config, Audio item, AudioItemMetadata? metadata, long listenedAt, CancellationToken cancellationToken)
+    {
+        var request = new SubmitListensRequest
+        {
+            ApiToken = config.PlaintextApiToken,
+            ListenType = ListenType.Single,
+            Payload = [item.AsListen(listenedAt, metadata)],
+            BaseUrl = _pluginConfig.ListenBrainzApiUrl,
+        };
+
+        await _apiClient.SubmitListens(request, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -115,6 +145,31 @@ public class ListenBrainzClient : IListenBrainzClient
         {
             throw new PluginException("Sending feedback failed");
         }
+    }
+
+    /// <inheritdoc />
+    public async Task SendFeedbackAsync(
+        UserConfig config,
+        bool isFavorite,
+        string? recordingMbid = null,
+        string? recordingMsid = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrEmpty(recordingMbid) && string.IsNullOrEmpty(recordingMsid))
+        {
+            throw new ArgumentException("No recording MBID or MSID provided");
+        }
+
+        var request = new RecordingFeedbackRequest
+        {
+            ApiToken = config.PlaintextApiToken,
+            RecordingMbid = recordingMbid,
+            RecordingMsid = recordingMsid,
+            Score = isFavorite ? FeedbackScore.Loved : FeedbackScore.Neutral,
+            BaseUrl = _pluginConfig.ListenBrainzApiUrl,
+        };
+
+        await _apiClient.SubmitRecordingFeedback(request, CancellationToken.None);
     }
 
     /// <inheritdoc />
@@ -181,6 +236,23 @@ public class ListenBrainzClient : IListenBrainzClient
         }
 
         var recordingMsid = task.Result.Payload.Listens.FirstOrDefault(l => l.ListenedAt == ts)?.RecordingMsid;
+        return recordingMsid ?? throw new PluginException("No listen matching the timestamp found");
+    }
+
+    /// <inheritdoc />
+    public async Task<string> GetRecordingMsidByListenTsAsync(UserConfig config, long ts, CancellationToken cancellationToken)
+    {
+        var userName = config.UserName;
+        if (string.IsNullOrEmpty(userName))
+        {
+            // Earlier 3.x plugin configurations did not store the username
+            _logger.LogDebug("ListenBrainz username is not available, getting it via token validation");
+            userName = GetListenBrainzUsername(config.PlaintextApiToken);
+        }
+
+        var request = new GetUserListensRequest(userName);
+        var response = await _apiClient.GetUserListens(request, cancellationToken);
+        var recordingMsid = response.Payload.Listens.FirstOrDefault(l => l.ListenedAt == ts)?.RecordingMsid;
         return recordingMsid ?? throw new PluginException("No listen matching the timestamp found");
     }
 

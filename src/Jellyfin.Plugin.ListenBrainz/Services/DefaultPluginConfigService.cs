@@ -24,6 +24,12 @@ public class DefaultPluginConfigService : IPluginConfigService
     }
 
     /// <inheritdoc />
+    public string MusicBrainzApiUrl
+    {
+        get => Config.MusicBrainzApiUrl;
+    }
+
+    /// <inheritdoc />
     public bool IsBackupEnabled
     {
         get => Config.IsBackupEnabled;
@@ -55,6 +61,9 @@ public class DefaultPluginConfigService : IPluginConfigService
     {
         get => Config.UserConfigs;
     }
+
+    /// <inheritdoc />
+    public string BackupPath => Config.BackupPath;
 
     /// <inheritdoc />
     public UserConfig? GetUserConfig(Guid jellyfinUserId)

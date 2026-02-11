@@ -20,6 +20,12 @@ public interface IPluginConfigService
     public string ListenBrainzApiUrl { get; }
 
     /// <summary>
+    /// Gets configured MusicBrainz API URL.
+    /// </summary>
+    /// <returns>MusicBrainz API URL.</returns>
+    public string MusicBrainzApiUrl { get; }
+
+    /// <summary>
     /// Gets a value indicating whether listen backup feature is enabled.
     /// </summary>
     bool IsBackupEnabled { get; }
@@ -48,6 +54,11 @@ public interface IPluginConfigService
     /// Gets all ListenBrainz user configurations.
     /// </summary>
     Collection<UserConfig> UserConfigs { get; }
+
+    /// <summary>
+    /// Gets the path to the backup directory.
+    /// </summary>
+    string BackupPath { get; }
 
     /// <summary>
     /// Get a configuration for a specified Jellyfin user ID.

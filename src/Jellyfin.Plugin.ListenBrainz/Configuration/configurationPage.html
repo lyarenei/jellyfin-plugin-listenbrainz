@@ -71,6 +71,14 @@
                             </label>
                             <div class="fieldDescription">Has no effect if backup path is not configured.</div>
                         </div>
+                        <div class="checkboxContainer bootstrap-wrapper row no-gutters">
+                            <label class="inputLabel inputLabelUnfocused" for="IsStrictModeEnabled">
+                                <input is="emby-checkbox" type="checkbox" id="IsStrictModeEnabled"
+                                       name="IsStrictModeEnabled"/>
+                                <span>Enable strict mode for listen submission.</span>
+                            </label>
+                            <div class="fieldDescription">Only submit listens when certain metadata are available. See plugin documentation for more details.</div>
+                        </div>
                         <div class="bootstrap-wrapper row no-gutters horizontal-center">
                             <button is="emby-button" type="submit" id="SaveUserConfig"
                                     class="raised button-submit block emby-button col-md-2">
@@ -192,6 +200,7 @@
                 IsPlaylistsSyncEnabled: false,
                 IsAllPlaylistsSyncEnabled: false,
                 IsUserBackupEnabled: false,
+                IsStrictModeEnabled: false,
             },
         };
 
@@ -402,23 +411,30 @@
 
         function loadCss(fileName) {
             let path = 'ListenBrainzPlugin/internal/styles/' + fileName;
+            let exists = document.querySelector('style[data-lb-css="' + fileName + '"]');
+            if (exists) return;
+
             ApiClient.ajax({
                 type: "GET",
                 url: ApiClient.getUrl(path),
             }).then((cssValue) => {
                 let styleTag = document.createElement("style");
+                styleTag.setAttribute('data-lb-css', fileName);
                 styleTag.innerText = cssValue;
                 document.getElementsByTagName("head")[0].appendChild(styleTag);
             });
         }
 
         function buildUsersDropdown(jellyfinUsers) {
+            const dropdown = document.getElementById("JellyfinUser");
+            dropdown.innerHTML = "";
+
             let html = "";
             jellyfinUsers.forEach((user) => {
                 html += "<option value='" + user.Id + "'>" + user.Name + "</option>";
             })
 
-            document.getElementById("JellyfinUser").innerHTML = html;
+            dropdown.innerHTML = html;
         }
 
         function fillGeneralConfig(data) {
@@ -470,6 +486,9 @@
 
             document.querySelector("#IsUserBackupEnabled")
                 .checked = data.IsBackupEnabled;
+
+            document.querySelector("#IsStrictModeEnabled")
+                .checked = data.IsStrictModeEnabled;
         }
 
         function getUserConfig(config, userId) {
@@ -491,6 +510,7 @@
                 IsPlaylistsSyncEnabled: document.querySelector('#IsPlaylistsSyncEnabled').checked,
                 IsBackupEnabled: document.querySelector('#IsUserBackupEnabled').checked,
                 UserName: userName,
+                IsStrictModeEnabled: document.querySelector('#IsStrictModeEnabled').checked,
             }
         }
 
@@ -552,6 +572,9 @@
         }
 
         async function buildAllowedLibrariesList(libraryConfigs) {
+            const container = document.getElementById('LibrariesList');
+            container.innerHTML = "";
+
             const allLibraries = await ApiClient.GetAllLibraries();
 
             function isAllowed(libraryId) {
@@ -583,7 +606,7 @@
 
                 label.appendChild(input);
                 label.appendChild(span);
-                document.getElementById('LibrariesList').appendChild(label);
+                container.appendChild(label);
             })
         }
 

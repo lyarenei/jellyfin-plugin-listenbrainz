@@ -16,6 +16,14 @@ public interface IMusicBrainzClient
     public AudioItemMetadata GetAudioItemMetadata(BaseItem item);
 
     /// <summary>
+    /// Get additional metadata for specified audio item.
+    /// </summary>
+    /// <param name="item">Audio item.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Audio item metadata.</returns>
+    public Task<AudioItemMetadata> GetAudioItemMetadataAsync(BaseItem item, CancellationToken cancellationToken);
+
+	/// <summary/>
     /// Get related recording MBIDs for a given recording MBID.
     /// </summary>
     /// <param name="recordingMbid">MusicBrainz recording ID.</param>

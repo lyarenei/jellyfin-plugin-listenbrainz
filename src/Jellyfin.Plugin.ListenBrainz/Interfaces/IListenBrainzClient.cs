@@ -20,6 +20,16 @@ public interface IListenBrainzClient
     public void SendNowPlaying(UserConfig config, Audio item, AudioItemMetadata? audioMetadata);
 
     /// <summary>
+    /// Send 'now playing' listen of specified item.
+    /// </summary>
+    /// <param name="config">ListenBrainz user configuration.</param>
+    /// <param name="item">Audio item currently being listened to.</param>
+    /// <param name="audioMetadata">Additional metadata for this audio item.</param>
+    /// <exception cref="AggregateException">Sending failed.</exception>
+    /// <returns>Task representing the operation. Result value indicates success.</returns>
+    public Task<bool> SendNowPlayingAsync(UserConfig config, Audio item, AudioItemMetadata? audioMetadata);
+
+    /// <summary>
     /// Send a single listen of specified item.
     /// </summary>
     /// <param name="config">ListenBrainz user configuration.</param>
@@ -30,6 +40,18 @@ public interface IListenBrainzClient
     public void SendListen(UserConfig config, Audio item, AudioItemMetadata? metadata, long listenedAt);
 
     /// <summary>
+    /// Send a single listen of specified item.
+    /// </summary>
+    /// <param name="config">ListenBrainz user configuration.</param>
+    /// <param name="item">Audio item of the listen.</param>
+    /// <param name="metadata">Additional metadata for this audio item.</param>
+    /// <param name="listenedAt">Timestamp of the listen.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <exception cref="AggregateException">Sending failed.</exception>
+    /// <returns>Task representing asynchronous operation.</returns>
+    public Task SendListenAsync(UserConfig config, Audio item, AudioItemMetadata? metadata, long listenedAt, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Send a feedback for a specific recording, identified by either a MBID or MSID.
     /// </summary>
     /// <param name="config">ListenBrainz user configuration.</param>
@@ -38,6 +60,18 @@ public interface IListenBrainzClient
     /// <param name="recordingMsid">MessyBrainz ID identifying the recording.</param>
     /// <exception cref="AggregateException">Sending failed.</exception>
     public void SendFeedback(UserConfig config, bool isFavorite, string? recordingMbid = null, string? recordingMsid = null);
+
+    /// <summary>
+    /// Send a feedback for a specific recording, identified by either a MBID or MSID.
+    /// </summary>
+    /// <param name="config">ListenBrainz user configuration.</param>
+    /// <param name="isFavorite">The recording is marked as favorite.</param>
+    /// <param name="recordingMbid">MusicBrainz ID identifying the recording.</param>
+    /// <param name="recordingMsid">MessyBrainz ID identifying the recording.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <exception cref="AggregateException">Sending failed.</exception>
+    /// <returns>Task representing asynchronous operation.</returns>
+    public Task SendFeedbackAsync(UserConfig config, bool isFavorite, string? recordingMbid = null, string? recordingMsid = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Send multiple listens ('import') to ListenBrainz.
@@ -62,6 +96,15 @@ public interface IListenBrainzClient
     /// <param name="ts">Timestamp of the submitted listen.</param>
     /// <returns>Recording MSID associated with a specified listen timestamp.</returns>
     public string GetRecordingMsidByListenTs(UserConfig config, long ts);
+
+    /// <summary>
+    /// Get a recording MSID (MessyBrainz ID) associated with a listen submitted to ListenBrainz.
+    /// </summary>
+    /// <param name="config">ListenBrainz user configuration.</param>
+    /// <param name="ts">Timestamp of the submitted listen.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Recording MSID associated with a specified listen timestamp.</returns>
+    public Task<string> GetRecordingMsidByListenTsAsync(UserConfig config, long ts, CancellationToken cancellationToken);
 
     /// <summary>
     /// Get a collection of recording MBIDs which are loved by the user.

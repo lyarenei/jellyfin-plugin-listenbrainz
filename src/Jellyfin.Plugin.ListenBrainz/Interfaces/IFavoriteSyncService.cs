@@ -16,12 +16,14 @@ public interface IFavoriteSyncService
     bool IsDisabled { get; }
 
     /// <summary>
-    /// Syncs a favorite Jellyfin track to a loved ListenBrainz recording.
+    /// Sync a favorite Jellyfin track to a loved ListenBrainz recording.
     /// </summary>
     /// <param name="itemId">ID of the audio item.</param>
     /// <param name="jellyfinUserId">ID of the Jellyfin user.</param>
     /// <param name="listenTs">Listen timestamp. If specified, MSID sync will be attempted if recording MBID is not available.</param>
-    public void SyncToListenBrainz(Guid itemId, Guid jellyfinUserId, long? listenTs = null);
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Sync has been successful.</returns>
+    public Task<bool> SyncToListenBrainzAsync(Guid itemId, Guid jellyfinUserId, long? listenTs = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Enables the service.

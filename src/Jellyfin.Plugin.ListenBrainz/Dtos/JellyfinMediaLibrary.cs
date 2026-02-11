@@ -24,7 +24,9 @@ public class JellyfinMediaLibrary
     {
         Name = item.Name;
         Id = item.Id;
-        LibraryType = item.CollectionType.Value.ToString();
+
+        // Collection type is null when library content type is mixed"
+        LibraryType = item.CollectionType?.ToString() ?? "Mixed";
     }
 
     /// <summary>

@@ -16,4 +16,5 @@ artifacts:
   - "Jellyfin.Plugin.ListenBrainz.Http.dll"
   - "Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.dll"
 changelog: >
-  New feature: Sync playlists from ListenBrainz
+  - New: Strict mode option for ListenBrainz submissions
+  - New: Sync playlists from ListenBrainz
