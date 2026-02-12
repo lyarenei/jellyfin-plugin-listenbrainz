@@ -185,14 +185,14 @@ public class ResubmitListensTask : IScheduledTask
                 continue;
             }
 
-            if (userConfig.IsStrictModeEnabled && !IsStrictModeValid(item, storedListen))
-            {
-                continue;
-            }
-
             if (_pluginConfig.IsMusicBrainzEnabled && !storedListen.HasRecordingMbid)
             {
                 storedListen.Metadata = await GetAudioItemMetadataAsync(item, cancellationToken);
+            }
+
+            if (userConfig.IsStrictModeEnabled && !IsStrictModeValid(item, storedListen))
+            {
+                continue;
             }
 
             var listen = _libraryManager.ToListen(storedListen);
