@@ -135,6 +135,17 @@ Modifies the behavior of favorite sync feature. If enabled, the favorite status 
 ListenBrainz. Standard favorite sync (after playback of track finishes) is not affected. This feature only works if a
 track has required metadata (track MBID) and the MusicBrainz integration is enabled.
 
+##### Enable syncing playlists
+
+Enable or disable playlist sync for the user. When enabled, the user's playlists from ListenBrainz will be
+automatically synced to Jellyfin. For more details, see [how it works](how-it-works.md#syncing-playlists).
+
+##### Sync all playlists
+
+By default, only auto-generated playlists "from the past" (weekly jams, top discoveries, etc.) are synced. If enabled,
+all playlists created for the user on ListenBrainz will be synced, including collaborative ones. This is a global
+setting, applying to all users with playlist sync enabled.
+
 ##### Backup of listens
 
 Save listen locally before it is sent to ListenBrainz. To configure backups, first select the path where the backups

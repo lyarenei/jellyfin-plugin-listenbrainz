@@ -9,4 +9,9 @@ public static class Endpoints
     /// Recording endpoint.
     /// </summary>
     public const string Recording = "recording";
+
+    /// <summary>
+    /// Recording data endpoint.
+    /// </summary>
+    public const string RecordingData = "recording/{0}";
 }

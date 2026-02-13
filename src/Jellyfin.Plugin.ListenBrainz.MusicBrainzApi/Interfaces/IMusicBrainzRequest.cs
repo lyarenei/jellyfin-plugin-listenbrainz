@@ -18,5 +18,16 @@ public interface IMusicBrainzRequest
     /// <summary>
     /// Gets search query data.
     /// </summary>
-    public virtual Dictionary<string, string> SearchQuery => new();
+    public Dictionary<string, string> SearchQuery => new();
+
+    /// <summary>
+    /// Gets Lucene search query data.
+    /// </summary>
+    public Dictionary<string, string> LuceneSearchQuery => new();
+
+    /// <summary>
+    /// Gets Lucene search query as a string.
+    /// </summary>
+    public string LuceneSearchQueryString =>
+        string.Join(" AND ", LuceneSearchQuery.Select(kv => $"{kv.Key}:{kv.Value}"));
 }

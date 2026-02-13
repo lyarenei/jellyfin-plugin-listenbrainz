@@ -36,4 +36,10 @@ public class MusicBrainzApiClient : BaseClient, IMusicBrainzApiClient
     {
         return await Get<RecordingRequest, RecordingResponse>(request, cancellationToken);
     }
+
+    /// <inheritdoc />
+    public async Task<RecordingRelationsResponse> GetRecordingRelationsAsync(RecordingRelationsRequest request, CancellationToken cancellationToken)
+    {
+        return await Get<RecordingRelationsRequest, RecordingRelationsResponse>(request, cancellationToken);
+    }
 }

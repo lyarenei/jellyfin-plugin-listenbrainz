@@ -22,4 +22,12 @@ public interface IMusicBrainzClient
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Audio item metadata.</returns>
     public Task<AudioItemMetadata> GetAudioItemMetadataAsync(BaseItem item, CancellationToken cancellationToken);
+
+	/// <summary/>
+    /// Get related recording MBIDs for a given recording MBID.
+    /// </summary>
+    /// <param name="recordingMbid">MusicBrainz recording ID.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>List of related recording MBIDs.</returns>
+    public Task<IEnumerable<string>> GetRelatedRecordingMbidsAsync(string recordingMbid, CancellationToken cancellationToken);
 }

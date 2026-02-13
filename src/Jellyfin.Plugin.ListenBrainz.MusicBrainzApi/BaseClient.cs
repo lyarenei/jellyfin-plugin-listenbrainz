@@ -105,12 +105,23 @@ public class BaseClient : HttpClient, IDisposable
         where TRequest : IMusicBrainzRequest
         where TResponse : IMusicBrainzResponse
     {
-        var query = ToMusicbrainzQuery(request.SearchQuery);
+        var query = HttpUtility.ParseQueryString(string.Empty);
+        foreach (var param in request.SearchQuery)
+        {
+            query[param.Key] = param.Value;
+        }
+
+        var luceneSearchQuery = request.LuceneSearchQueryString;
+        if (!string.IsNullOrEmpty(luceneSearchQuery))
+        {
+            query["query"] = luceneSearchQuery;
+        }
+
         var requestUri = BuildRequestUri(request.BaseUrl, request.Endpoint);
         var requestMessage = new HttpRequestMessage
         {
             Method = HttpMethod.Get,
-            RequestUri = new Uri($"{requestUri}?query={query}&limit=1")
+            RequestUri = new Uri($"{requestUri}?{query}"),
         };
 
         var productValue = new ProductInfoHeaderValue(_clientName, _clientVersion);
@@ -123,9 +134,12 @@ public class BaseClient : HttpClient, IDisposable
         using (requestMessage) return await DoRequest<TResponse>(requestMessage, cancellationToken);
     }
 
-    private static Uri BuildRequestUri(string baseUrl, string endpoint) => new($"{baseUrl}/ws/{Api.Version}/{endpoint}");
+    private static Uri BuildRequestUri(string baseUrl, string endpoint) =>
+        new($"{baseUrl}/ws/{Api.Version}/{endpoint}");
 
-    private async Task<TResponse> DoRequest<TResponse>(HttpRequestMessage requestMessage, CancellationToken cancellationToken)
+    private async Task<TResponse> DoRequest<TResponse>(
+        HttpRequestMessage requestMessage,
+        CancellationToken cancellationToken)
         where TResponse : IMusicBrainzResponse
     {
         using var scope = _logger.AddNewScope("ClientRequestId");
@@ -144,7 +158,8 @@ public class BaseClient : HttpClient, IDisposable
         }
 
         var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
-        var result = await JsonSerializer.DeserializeAsync<TResponse>(responseStream, SerializerOptions, cancellationToken);
+        var result = await JsonSerializer
+            .DeserializeAsync<TResponse>(responseStream, SerializerOptions, cancellationToken);
         if (result is null)
         {
             throw new NoDataException("Response deserialized to NULL");
@@ -174,7 +189,9 @@ public class BaseClient : HttpClient, IDisposable
         return query;
     }
 
-    private async Task<HttpResponseMessage> DoRequestWithRetry(HttpRequestMessage requestMessage, CancellationToken cancellationToken)
+    private async Task<HttpResponseMessage> DoRequestWithRetry(
+        HttpRequestMessage requestMessage,
+        CancellationToken cancellationToken)
     {
         for (int i = 0; i < RateLimitAttempts; i++)
         {

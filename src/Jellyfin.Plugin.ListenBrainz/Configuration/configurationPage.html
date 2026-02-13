@@ -57,6 +57,13 @@
                             </label>
                         </div>
                         <div class="checkboxContainer bootstrap-wrapper row no-gutters">
+                            <label class="inputLabel inputLabelUnfocused" for="IsPlaylistsSyncEnabled">
+                                <input is="emby-checkbox" type="checkbox" id="IsPlaylistsSyncEnabled"
+                                       name="IsPlaylistsSyncEnabled"/>
+                                <span>Enable syncing playlists</span>
+                            </label>
+                        </div>
+                        <div class="checkboxContainer bootstrap-wrapper row no-gutters">
                             <label class="inputLabel inputLabelUnfocused" for="IsUserBackupEnabled">
                                 <input is="emby-checkbox" type="checkbox" id="IsUserBackupEnabled"
                                        name="IsUserBackupEnabled"/>
@@ -136,7 +143,18 @@
                                 <span>Immediate favorite sync</span>
                             </label>
                             <div class="fieldDescription">Sync favorite status immediately.
-                                Requires MusicBrainz metadata and integration to be enabled.</div>
+                                Requires MusicBrainz metadata and integration to be enabled.
+                            </div>
+                        </div>
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="IsAllPlaylistsSyncEnabled">
+                                <input is="emby-checkbox" type="checkbox" id="IsAllPlaylistsSyncEnabled"
+                                       name="IsAllPlaylistsSyncEnabled"/>
+                                <span>Sync all playlists from ListenBrainz</span>
+                            </label>
+                            <div class="fieldDescription">Sync all playlists from ListenBrainz, including
+                                suggestion/recommendation playlists.
+                            </div>
                         </div>
                         <div class="sectionTitleContainer flex align-items-center">
                             <h4 class="sectionTitle">Backup of listens</h4>
@@ -179,6 +197,8 @@
                 ApiToken: "",
                 IsListenSubmitEnabled: false,
                 IsFavoritesSyncEnabled: false,
+                IsPlaylistsSyncEnabled: false,
+                IsAllPlaylistsSyncEnabled: false,
                 IsUserBackupEnabled: false,
                 IsStrictModeEnabled: false,
             },
@@ -433,6 +453,9 @@
             document.querySelector("#IsImmediateFavoriteSyncEnabled")
                 .checked = data.IsImmediateFavoriteSyncEnabled;
 
+            document.querySelector("#IsAllPlaylistsSyncEnabled")
+                .checked = data.IsAllPlaylistsSyncEnabled;
+
             document.querySelector("#BackupPath")
                 .value = data.BackupPath;
 
@@ -458,6 +481,9 @@
             document.querySelector("#IsFavoritesSyncEnabled")
                 .checked = data.IsFavoritesSyncEnabled;
 
+            document.querySelector("#IsPlaylistsSyncEnabled")
+                .checked = data.IsPlaylistsSyncEnabled;
+
             document.querySelector("#IsUserBackupEnabled")
                 .checked = data.IsBackupEnabled;
 
@@ -481,6 +507,7 @@
                 ApiToken: btoa(getApiToken()),
                 IsListenSubmitEnabled: document.querySelector('#IsListenSubmitEnabled').checked,
                 IsFavoritesSyncEnabled: document.querySelector('#IsFavoritesSyncEnabled').checked,
+                IsPlaylistsSyncEnabled: document.querySelector('#IsPlaylistsSyncEnabled').checked,
                 IsBackupEnabled: document.querySelector('#IsUserBackupEnabled').checked,
                 UserName: userName,
                 IsStrictModeEnabled: document.querySelector('#IsStrictModeEnabled').checked,
@@ -494,6 +521,7 @@
                 IsMusicBrainzEnabled: document.querySelector('#IsMusicBrainzEnabled').checked,
                 IsAlternativeModeEnabled: document.querySelector('#IsAlternativeModeEnabled').checked,
                 IsImmediateFavoriteSyncEnabled: document.querySelector('#IsImmediateFavoriteSyncEnabled').checked,
+                IsAllPlaylistsSyncEnabled: document.querySelector('#IsAllPlaylistsSyncEnabled').checked,
                 BackupPath: document.querySelector('#BackupPath').value,
                 LibraryConfigs: getLibraryConfigsInputs(),
             }

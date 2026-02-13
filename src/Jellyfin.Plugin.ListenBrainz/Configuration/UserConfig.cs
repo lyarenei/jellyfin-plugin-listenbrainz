@@ -60,6 +60,11 @@ public class UserConfig
     public bool IsFavoritesSyncEnabled { get; set; }
 
     /// <summary>
+    /// Gets or sets a value indicating whether ListenBrainz playlist sync is enabled.
+    /// </summary>
+    public bool IsPlaylistsSyncEnabled { get; set; }
+
+    /// <summary>
     /// Gets or sets a ListenBrainz username.
     /// </summary>
     public string UserName { get; set; }

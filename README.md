@@ -25,6 +25,7 @@
 - Submit optional MusicBrainz metadata (requires track MBID)
 - Mark favorite tracks in Jellyfin as loved listens in ListenBrainz
 - Sync loved listens in ListenBrainz as favorite tracks in Jellyfin (requires track MBID)
+- Sync playlists from ListenBrainz to Jellyfin (weekly jams, top discoveries, etc.)
 - Cache listens when ListenBrainz server cannot be reached
 - Back up listens
 
