@@ -69,35 +69,12 @@ public class LovedTracksSyncTaskTests
     };
 
     [Fact]
-    public async Task ExecuteAsync_DisabledMusicBrainzDoesNotExit()
-    {
-        var user = GetUser();
-        var userConfig = GetUserConfig(user.Id);
-
-        _pluginConfigServiceMock
-            .SetupGet(m => m.UserConfigs)
-            .Returns([userConfig]);
-
-        _pluginConfigServiceMock
-            .SetupGet(m => m.IsMusicBrainzEnabled)
-            .Returns(false);
-
-        await _task.ExecuteAsync(_progressMock.Object, CancellationToken.None);
-
-        _pluginConfigServiceMock.VerifyGet(pcm => pcm.UserConfigs, Times.AtLeastOnce);
-        _pluginConfigServiceMock.VerifyGet(pcm => pcm.IsMusicBrainzEnabled, Times.Once);
-        _favoriteSyncServiceMock.Verify(fsm => fsm.Disable(), Times.Once);
-        _favoriteSyncServiceMock.Verify(fsm => fsm.Enable(), Times.Once);
-        _listenBrainzClientMock.Verify(
-            lbc => lbc.GetLovedTracksAsync(
-                It.Is<UserConfig>(uc => uc == userConfig),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
-    }
-
-    [Fact]
     public async Task ExecuteAsync_ExitEarlyNoUsers()
     {
+        _pluginConfigServiceMock
+            .SetupGet(m => m.IsMusicBrainzEnabled)
+            .Returns(true);
+
         _pluginConfigServiceMock
             .SetupGet(m => m.UserConfigs)
             .Returns([]);

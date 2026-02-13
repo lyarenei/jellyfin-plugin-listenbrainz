@@ -1,5 +1,5 @@
+using Jellyfin.Data.Entities;
 using Jellyfin.Data.Enums;
-using Jellyfin.Database.Implementations.Entities;
 using Jellyfin.Plugin.ListenBrainz.Api.Models;
 using Jellyfin.Plugin.ListenBrainz.Api.Resources;
 using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
@@ -92,7 +92,7 @@ public class SyncPlaylistsTask : IScheduledTask
     [
         new()
         {
-            Type = TaskTriggerInfoType.WeeklyTrigger,
+            Type = TaskTriggerInfo.TriggerWeekly,
             DayOfWeek = DayOfWeek.Monday,
             TimeOfDayTicks = Utils.GetRandomMinute() * TimeSpan.TicksPerMinute,
         },

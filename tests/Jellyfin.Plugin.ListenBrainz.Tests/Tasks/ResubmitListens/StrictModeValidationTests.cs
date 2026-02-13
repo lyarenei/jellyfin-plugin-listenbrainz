@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Jellyfin.Database.Implementations.Entities;
+using Jellyfin.Data.Entities;
 using Jellyfin.Plugin.ListenBrainz.Api.Models;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
@@ -170,7 +170,11 @@ public class StrictModeValidationTests : TestBase
     public void IsStrictModeValid_ShouldReturnTrue_WhenValidationPasses()
     {
         var item = new Audio();
-        var listen = new StoredListen { Id = Guid.NewGuid(), ListenedAt = 12345 };
+        var listen = new StoredListen
+        {
+            Id = Guid.NewGuid(),
+            ListenedAt = 12345
+        };
 
         _validationServiceMock
             .Setup(vs => vs.ValidateStrictModeConditions(item));
@@ -187,7 +191,11 @@ public class StrictModeValidationTests : TestBase
     public void IsStrictModeValid_ShouldReturnFalse_WhenValidationFails()
     {
         var item = new Audio();
-        var listen = new StoredListen { Id = Guid.NewGuid(), ListenedAt = 12345 };
+        var listen = new StoredListen
+        {
+            Id = Guid.NewGuid(),
+            ListenedAt = 12345
+        };
 
         _validationServiceMock
             .Setup(vs => vs.ValidateStrictModeConditions(item))
