@@ -19,5 +19,4 @@ changelog: >
   Fix:
     - Fetch metadata before evaluating strict mode in resubmit listens task
   New:
-	- Sync playlists from ListenBrainz
-
+	  - Sync playlists from ListenBrainz
