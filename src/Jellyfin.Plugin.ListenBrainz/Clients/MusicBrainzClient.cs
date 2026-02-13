@@ -77,5 +77,13 @@ public class MusicBrainzClient : IMusicBrainzClient
         var request = new RecordingRequest(trackMbid) { BaseUrl = _pluginConfig.MusicBrainzApiUrl };
         var resp = await _apiClient.GetRecordingAsync(request, cancellationToken);
         return new AudioItemMetadata(resp.Recordings.First());
+	}
+
+    public async Task<IEnumerable<string>> GetRelatedRecordingMbidsAsync(string recordingMbid, CancellationToken cancellationToken)
+    {
+        var config = Plugin.GetConfiguration();
+        var request = new RecordingRelationsRequest(recordingMbid) { BaseUrl = config.MusicBrainzApiUrl };
+        var response = await _apiClient.GetRecordingRelationsAsync(request, cancellationToken);
+        return response.Relations.Select(rel => rel.Recording.Mbid);
     }
 }
