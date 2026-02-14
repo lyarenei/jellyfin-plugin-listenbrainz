@@ -1,7 +1,7 @@
 import { pluginUUID } from "./constants";
 
 export const ConfigApiClient = {
-    getPluginConfiguration: async (pluginUUID: string): Promise<PluginConfiguration> => {
+    getPluginConfiguration: async (): Promise<PluginConfiguration> => {
         return ApiClient.getPluginConfiguration(pluginUUID);
     },
     getUsers: async (): Promise<JellyfinUser[]> => {

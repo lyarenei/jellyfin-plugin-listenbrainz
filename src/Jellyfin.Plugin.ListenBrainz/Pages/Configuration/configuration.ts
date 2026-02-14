@@ -1,5 +1,5 @@
 import { ConfigApiClient } from "./apiClient";
-import { pluginUUID, userDefaults } from "./constants";
+import { userDefaults } from "./constants";
 import { registerEventHooks } from "./eventHooks";
 import { fillUserConfigForm } from "./formHelpers";
 import { getUserConfig } from "./utils";
@@ -11,7 +11,7 @@ import { getUserConfig } from "./utils";
  * @return void
  */
 export async function initPluginConfigPage(view: HTMLElement): Promise<void> {
-    const pluginConfig = await ConfigApiClient.getPluginConfiguration(pluginUUID);
+    const pluginConfig = await ConfigApiClient.getPluginConfiguration();
     const jellyfinUsers = await ConfigApiClient.getUsers();
 
     buildUsersDropdown(view, jellyfinUsers);
@@ -57,7 +57,7 @@ function buildUsersDropdown(view: HTMLElement, users: JellyfinUser[]) {
  * @return void
  */
 async function loadUserConfig(view: HTMLElement, selectedUserId: string) {
-    const pluginConfig = await ConfigApiClient.getPluginConfiguration(pluginUUID);
+    const pluginConfig = await ConfigApiClient.getPluginConfiguration();
     const userConfig = getUserConfig(pluginConfig, selectedUserId);
     fillUserConfigForm(view, userConfig);
 }

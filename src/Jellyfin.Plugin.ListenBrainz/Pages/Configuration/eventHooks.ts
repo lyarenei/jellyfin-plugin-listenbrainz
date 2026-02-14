@@ -1,5 +1,4 @@
 import { ConfigApiClient } from "./apiClient";
-import { pluginUUID } from "./constants";
 import { getUserConfig } from "./utils";
 import { getUserConfigFormData } from "./formHelpers";
 
@@ -46,7 +45,7 @@ function registerSubmitButtonHook(view: HTMLElement) {
         const selectedUserId = jellyfinUserDropdown.value;
 
         try {
-            const currentPluginConfig = await ConfigApiClient.getPluginConfiguration(pluginUUID);
+            const currentPluginConfig = await ConfigApiClient.getPluginConfiguration();
 
             switch (event.submitter?.id) {
                 case "SaveUserConfig":
