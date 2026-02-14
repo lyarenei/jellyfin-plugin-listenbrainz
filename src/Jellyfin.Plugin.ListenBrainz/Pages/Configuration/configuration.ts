@@ -1,5 +1,6 @@
 import { ConfigApiClient } from "./apiClient";
 import { pluginUUID, userDefaults } from "./constants";
+import { registerEventHooks } from "./eventHooks";
 
 /**
  * Initializes the plugin configuration page by loading the necessary data and populating the form fields.
@@ -13,6 +14,7 @@ export async function initPluginConfigPage(view: HTMLElement): Promise<void> {
 
     buildUsersDropdown(view, jellyfinUsers);
     fillUserConfigForm(view, pluginConfig.UserConfigs[0] || userDefaults);
+    registerEventHooks(view);
 }
 
 /**
