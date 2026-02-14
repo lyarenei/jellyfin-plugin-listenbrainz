@@ -209,11 +209,6 @@
                 onPageShow();
             });
 
-        document.querySelector('#JellyfinUser')
-            .addEventListener('change', () => {
-                onSelectUser()
-            });
-
         document.querySelector('#CheckListenBrainzApiToken')
             .addEventListener('mouseup', () => {
                 onCheckApiToken();
@@ -253,28 +248,11 @@
 
             ApiClient.getUsers()
                 .then((users) => {
-                    buildUsersDropdown(users);
                     loadConfig(users[0].Id)
                 })
                 .catch((reason) => {
                     console.log("ListenBrainz plugin: Failed to load Jellyfin users: " + reason);
                     Dashboard.alert("Failed to load Jellyfin users");
-                });
-
-            Dashboard.hideLoadingMsg();
-        }
-
-        function onSelectUser() {
-            Dashboard.showLoadingMsg();
-            let userId = getSelectedUserId();
-            ApiClient.getPluginConfiguration(ListenBrainzConfig.PluginUniqueId)
-                .then((config) => {
-                    let userConfig = getUserConfig(config, userId);
-                    fillUserConfig(userConfig);
-                })
-                .catch((reason) => {
-                    console.log("ListenBrainz plugin: Failed to load user config: " + reason);
-                    Dashboard.alert("Failed to load user config");
                 });
 
             Dashboard.hideLoadingMsg();
@@ -425,18 +403,6 @@
             });
         }
 
-        function buildUsersDropdown(jellyfinUsers) {
-            const dropdown = document.getElementById("JellyfinUser");
-            dropdown.innerHTML = "";
-
-            let html = "";
-            jellyfinUsers.forEach((user) => {
-                html += "<option value='" + user.Id + "'>" + user.Name + "</option>";
-            })
-
-            dropdown.innerHTML = html;
-        }
-
         function fillGeneralConfig(data) {
             document.querySelector("#ListenBrainzApiUrl")
                 .value = data.ListenBrainzApiUrl;
@@ -469,35 +435,6 @@
 
         function getSelectedUserId() {
             return document.querySelector("#JellyfinUser").value;
-        }
-
-        function fillUserConfig(data) {
-            document.querySelector("#ListenBrainzApiToken")
-                .value = atob(data.ApiToken);
-
-            document.querySelector("#IsListenSubmitEnabled")
-                .checked = data.IsListenSubmitEnabled;
-
-            document.querySelector("#IsFavoritesSyncEnabled")
-                .checked = data.IsFavoritesSyncEnabled;
-
-            document.querySelector("#IsPlaylistsSyncEnabled")
-                .checked = data.IsPlaylistsSyncEnabled;
-
-            document.querySelector("#IsUserBackupEnabled")
-                .checked = data.IsBackupEnabled;
-
-            document.querySelector("#IsStrictModeEnabled")
-                .checked = data.IsStrictModeEnabled;
-        }
-
-        function getUserConfig(config, userId) {
-            if (config.UserConfigs === null) {
-                return ListenBrainzConfig.UserDefaults;
-            }
-
-            let index = config.UserConfigs.map((uc) => uc.JellyfinUserId).indexOf(userId);
-            return index < 0 ? ListenBrainzConfig.UserDefaults : config.UserConfigs[index];
         }
 
         async function getUserConfigInputs() {
@@ -552,8 +489,6 @@
             ApiClient.getPluginConfiguration(ListenBrainzConfig.PluginUniqueId)
                 .then((config) => {
                     fillGeneralConfig(config);
-                    let userConfig = getUserConfig(config, userId);
-                    fillUserConfig(userConfig);
                 })
                 .catch((reason) => {
                     console.log("ListenBrainz plugin: Failed to load plugin config: " + reason);
