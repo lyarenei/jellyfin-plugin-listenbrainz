@@ -1,6 +1,5 @@
 /**
- * ID of the plugin. Must never change, otherwise it will be treated by the server as a new plugin.
- * Must be the same as the ID in Plugin.cs file and in the repository manifest file.
+ * ID of the plugin. Must be the same as the ID in Plugin.cs file.
  */
 const pluginUUID = "59B20823-AAFE-454C-A393-17427F518631";
 
