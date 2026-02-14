@@ -27,7 +27,27 @@ const userDefaults = {
  * @param _params - A record of parameters passed to the configuration page.
  * @return void
  */
-export default function (view: HTMLElement, _params: Record<string, string>): void {
-    // TODO: set up hooks, fill settings, etc...
-    console.log("Called init for config page");
+export default function (view: HTMLElement, _params: Record<string, string>) {
+    // This function cannot be async, so instead hook into the viewshow event to call async functions.
+    view.addEventListener('viewshow', async () => {
+        Dashboard.showLoadingMsg();
+        try {
+            await initPluginConfigPage(view);
+        } catch (e) {
+            console.log("ListenBrainz plugin: Failed to initialize configuration page: " + e);
+            Dashboard.alert("Failed to initialize configuration page");
+        } finally {
+            Dashboard.hideLoadingMsg();
+        }
+    });
+}
+
+/**
+ * Initializes the plugin configuration page by loading the necessary data and populating the form fields.
+ *
+ * @param view - The HTML element where the configuration page is rendered.
+ * @return void
+ */
+async function initPluginConfigPage(view: HTMLElement): Promise<void> {
+    console.log("ListenBrainz plugin: Configuration page loaded");
 }
