@@ -151,9 +151,12 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
             new PluginPageInfo
             {
                 Name = Name,
-                EmbeddedResourcePath = $"{GetType().Namespace}.Configuration.configurationPage.html",
-                EnableInMainMenu = false,
-                MenuIcon = "music_note",
+                EmbeddedResourcePath = string.Format(CultureInfo.InvariantCulture, "{0}.Configuration.configurationPage.html", GetType().Namespace),
+            },
+            new PluginPageInfo
+            {
+                Name = $"{Name}.js",
+                EmbeddedResourcePath = string.Format(CultureInfo.InvariantCulture, "{0}.Configuration.configurationPage.js", GetType().Namespace),
             },
         ];
     }

@@ -30,6 +30,7 @@
 
     <ItemGroup>
         <EmbeddedResource Include="Configuration\configurationPage.html" />
+        <EmbeddedResource Include="Configuration\configurationPage.js" />
         <EmbeddedResource Include="Configuration\styles.css" />
         <EmbeddedResource Include="Configuration\bootstrap-grid.min.css" />
     </ItemGroup>
