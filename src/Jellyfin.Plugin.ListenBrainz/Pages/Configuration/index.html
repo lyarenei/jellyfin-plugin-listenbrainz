@@ -253,29 +253,6 @@
             Dashboard.hideLoadingMsg();
         }
 
-        function onCheckApiToken() {
-            let apiToken = getApiToken();
-            if (!apiToken) {
-                Dashboard.alert("No API token to verify");
-                return;
-            }
-
-            ApiClient.ValidateListenBrainzToken(apiToken)
-                .then((response) => {
-                    if (response.IsValid) {
-                        Dashboard.alert("Token is valid");
-                        return;
-                    }
-
-                    Dashboard.alert("Token is not valid");
-                    console.log("Token validation failed: " + response.Reason);
-                })
-                .catch((reason) => {
-                    Dashboard.alert("Token validation failed");
-                    console.log("Token validation failed: " + reason);
-                });
-        }
-
         function onSaveUserConfig() {
             Dashboard.showLoadingMsg();
             ApiClient.getPluginConfiguration(ListenBrainzConfig.PluginUniqueId)
