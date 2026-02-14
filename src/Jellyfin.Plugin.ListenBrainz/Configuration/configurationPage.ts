@@ -49,5 +49,35 @@ export default function (view: HTMLElement, _params: Record<string, string>) {
  * @return void
  */
 async function initPluginConfigPage(view: HTMLElement): Promise<void> {
-    console.log("ListenBrainz plugin: Configuration page loaded");
+    const pluginConfig = await ApiClient.getPluginConfiguration(pluginUUID);
+    const jellyfinUsers = await ApiClient.getUsers();
+
+    buildUsersDropdown(view, jellyfinUsers);
+}
+
+/**
+ * Builds the users dropdown in the configuration page and sets up the event listener for user selection.
+ * @param view - The HTML element where the configuration page is rendered.
+ * @param users - An array of Jellyfin users to populate the dropdown with.
+ * @return void
+ */
+function buildUsersDropdown(view: HTMLElement, users: JellyfinUser[]) {
+    const dropdown = view.querySelector("#JellyfinUser") as HTMLSelectElement;
+
+    users.forEach((user) => {
+        const option = document.createElement("option");
+        option.value = user.Id;
+        option.textContent = user.Name;
+        dropdown.appendChild(option);
+    });
+
+    // Load the config when a user is selected
+    dropdown.addEventListener("change", (event) => {
+        const selectedUserId = (event.target as HTMLSelectElement).value;
+        loadUserConfig(view, selectedUserId);
+    });
+}
+
+function loadUserConfig(view: HTMLElement, selectedUserId: string) {
+    // TODO: implementation
 }
