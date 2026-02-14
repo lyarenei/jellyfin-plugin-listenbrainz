@@ -5,6 +5,7 @@
     "strict": true,
     "sourceMap": false,
     "declaration": false,
+    "noEmit": true,
     "moduleResolution": "node",
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true

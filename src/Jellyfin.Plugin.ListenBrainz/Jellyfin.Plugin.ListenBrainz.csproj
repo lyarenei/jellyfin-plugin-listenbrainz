@@ -39,8 +39,8 @@
         <InternalsVisibleTo Include="Jellyfin.Plugin.ListenBrainz.Tests" />
     </ItemGroup>
 
-    <Target Name="CompileTypeScript" BeforeTargets="BeforeBuild">
-      <Exec Command="npx tsc" />
+    <Target Name="CompileTypeScript" BeforeTargets="BeforeBuild" Condition="Exists('$(MSBuildThisFileDirectory)../../node_modules')">
+        <Exec Command="npm run build" WorkingDirectory="$(MSBuildThisFileDirectory)../../" />
     </Target>
 
 </Project>

@@ -1,6 +1,12 @@
 {
   "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "bundle": "node esbuild.config.mjs",
+    "build": "npm run typecheck && npm run bundle"
+  },
   "devDependencies": {
+    "esbuild": "~0.25.0",
     "typescript": "~5.7.0"
   }
 }
