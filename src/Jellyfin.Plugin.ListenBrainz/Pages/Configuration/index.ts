@@ -1,4 +1,4 @@
-import {initPluginConfigPage} from "./configuration";
+import { initPluginConfigPage } from "./configuration";
 
 /**
  * This function server as an entrypoint and is called when the configuration page is loaded.
@@ -9,7 +9,7 @@ import {initPluginConfigPage} from "./configuration";
  */
 export default function (view: HTMLElement, _params: Record<string, string>) {
     // This function cannot be async, so instead hook into the viewshow event to call async functions.
-    view.addEventListener('viewshow', async () => {
+    view.addEventListener("viewshow", async () => {
         Dashboard.showLoadingMsg();
         try {
             await initPluginConfigPage(view);

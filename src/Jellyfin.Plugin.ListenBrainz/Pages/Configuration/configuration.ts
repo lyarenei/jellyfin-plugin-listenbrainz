@@ -1,4 +1,5 @@
-import {pluginUUID, userDefaults} from "./constants";
+import { ConfigApiClient } from "./apiClient";
+import { pluginUUID, userDefaults } from "./constants";
 
 /**
  * Initializes the plugin configuration page by loading the necessary data and populating the form fields.
@@ -7,8 +8,8 @@ import {pluginUUID, userDefaults} from "./constants";
  * @return void
  */
 export async function initPluginConfigPage(view: HTMLElement): Promise<void> {
-    const pluginConfig = await ApiClient.getPluginConfiguration(pluginUUID);
-    const jellyfinUsers = await ApiClient.getUsers();
+    const pluginConfig = await ConfigApiClient.getPluginConfiguration(pluginUUID);
+    const jellyfinUsers = await ConfigApiClient.getUsers();
 
     buildUsersDropdown(view, jellyfinUsers);
     fillUserConfigForm(view, pluginConfig.UserConfigs[0] || userDefaults);
@@ -52,13 +53,12 @@ function buildUsersDropdown(view: HTMLElement, users: JellyfinUser[]) {
  * @return void
  */
 async function loadUserConfig(view: HTMLElement, selectedUserId: string) {
-    const pluginConfig = await ApiClient.getPluginConfiguration(pluginUUID);
+    const pluginConfig = await ConfigApiClient.getPluginConfiguration(pluginUUID);
 
     // Find the config or use defaults if it doesn't exist yet (e.g. when selecting a user for the first time)
-    const userConfig = pluginConfig.UserConfigs.find((config) =>
-        config.JellyfinUserId === selectedUserId) || {
+    const userConfig = pluginConfig.UserConfigs.find((config) => config.JellyfinUserId === selectedUserId) || {
         ...userDefaults,
-        JellyfinUserId: selectedUserId
+        JellyfinUserId: selectedUserId,
     };
 
     fillUserConfigForm(view, userConfig);
