@@ -18,6 +18,8 @@ interface PluginConfiguration {
     UserConfigs: UserConfig[];
 }
 
+// Plugin user configuration.
+// The keys must match the fields of UserConfig class.
 interface PluginUserConfig {
     ApiToken: string;
     IsBackupEnabled: boolean;
