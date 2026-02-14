@@ -32,7 +32,7 @@
         <EmbeddedResource Include="Configuration\styles.css" />
         <EmbeddedResource Include="Configuration\bootstrap-grid.min.css" />
         <EmbeddedResource Include="Pages\Configuration\index.html" />
-        <EmbeddedResource Include="Pages\Configuration\index.js" />
+        <EmbeddedResource Include="Pages\Configuration\index.js" Condition="Exists('Pages\Configuration\index.js')" />
     </ItemGroup>
 
     <ItemGroup>
