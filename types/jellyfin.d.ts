@@ -1,5 +1,15 @@
+interface AjaxOptions {
+    contentType: string;
+    data: string;
+    dataType: string;
+    type: string;
+    url: string;
+}
+
 interface JellyfinApiClient {
+    ajax(options: AjaxOptions): Promise<any>;
     getPluginConfiguration(pluginId: string): Promise<PluginConfiguration>;
+    getUrl(path: string): Promise<string>;
     getUsers(): Promise<JellyfinUser[]>;
 }
 
@@ -28,6 +38,12 @@ interface PluginUserConfig {
     IsPlaylistsSyncEnabled: boolean;
     IsStrictModeEnabled: boolean;
     JellyfinUserId: string;
+    UserName: string;
+}
+
+interface TokenValidationResult {
+    IsValid: boolean;
+    Reason: string;
     UserName: string;
 }
 
