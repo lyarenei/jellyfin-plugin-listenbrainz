@@ -1,7 +1,7 @@
 ---
 name: "ListenBrainz"
 guid: "59B20823-AAFE-454C-A393-17427F518631"
-version: "6.2.0.3"
+version: "6.2.0.4"
 targetAbi: "10.11.0.0"
 framework: "net9.0"
 overview: "Track your music habits with ListenBrainz."
@@ -16,6 +16,5 @@ artifacts:
   - "Jellyfin.Plugin.ListenBrainz.Http.dll"
   - "Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.dll"
 changelog: >
-New features:
-  - Strict mode option for ListenBrainz submissions
-  - Sync playlists from ListenBrainz
+  Maintenance:
+    - Typescript integration for config page
