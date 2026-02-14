@@ -1,9 +1,14 @@
+import { pluginUUID } from "./constants";
+
 export const ConfigApiClient = {
     getPluginConfiguration: async (pluginUUID: string): Promise<PluginConfiguration> => {
         return ApiClient.getPluginConfiguration(pluginUUID);
     },
     getUsers: async (): Promise<JellyfinUser[]> => {
         return ApiClient.getUsers();
+    },
+    savePluginConfiguration: async (newPluginConfig: PluginConfiguration): Promise<object> => {
+        return ApiClient.updatePluginConfiguration(pluginUUID, newPluginConfig);
     },
     validateListenBrainzToken: async (apiToken: string): Promise<TokenValidationResult> => {
         try {

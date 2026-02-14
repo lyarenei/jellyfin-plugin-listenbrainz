@@ -11,11 +11,13 @@ interface JellyfinApiClient {
     getPluginConfiguration(pluginId: string): Promise<PluginConfiguration>;
     getUrl(path: string): Promise<string>;
     getUsers(): Promise<JellyfinUser[]>;
+    updatePluginConfiguration(pluginId: string, config: PluginConfiguration): Promise<any>;
 }
 
 interface JellyfinDashboard {
     alert(message: string): void;
     hideLoadingMsg(): void;
+    processPluginConfigurationUpdateResult(result: any): void;
     showLoadingMsg(): void;
 }
 
@@ -25,7 +27,7 @@ interface JellyfinUser {
 }
 
 interface PluginConfiguration {
-    UserConfigs: UserConfig[];
+    UserConfigs: PluginUserConfig[];
 }
 
 // Plugin user configuration.

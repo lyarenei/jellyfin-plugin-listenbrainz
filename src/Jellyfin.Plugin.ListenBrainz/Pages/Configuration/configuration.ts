@@ -1,6 +1,8 @@
 import { ConfigApiClient } from "./apiClient";
 import { pluginUUID, userDefaults } from "./constants";
 import { registerEventHooks } from "./eventHooks";
+import { fillUserConfigForm } from "./formHelpers";
+import { getUserConfig } from "./utils";
 
 /**
  * Initializes the plugin configuration page by loading the necessary data and populating the form fields.
@@ -56,38 +58,6 @@ function buildUsersDropdown(view: HTMLElement, users: JellyfinUser[]) {
  */
 async function loadUserConfig(view: HTMLElement, selectedUserId: string) {
     const pluginConfig = await ConfigApiClient.getPluginConfiguration(pluginUUID);
-
-    // Find the config or use defaults if it doesn't exist yet (e.g. when selecting a user for the first time)
-    const userConfig = pluginConfig.UserConfigs.find((config) => config.JellyfinUserId === selectedUserId) || {
-        ...userDefaults,
-        JellyfinUserId: selectedUserId,
-    };
-
+    const userConfig = getUserConfig(pluginConfig, selectedUserId);
     fillUserConfigForm(view, userConfig);
-}
-
-/**
- * Fills the configuration form fields with the values from the provided user configuration.
- * @param view - The HTML element where the configuration page is rendered.
- * @param userConfig - The user configuration object containing the values to fill in the form fields.
- * @return void
- */
-function fillUserConfigForm(view: HTMLElement, userConfig: PluginUserConfig): void {
-    const apiTokenInput = view.querySelector("#ListenBrainzApiToken") as HTMLInputElement;
-    apiTokenInput.value = atob(userConfig.ApiToken);
-
-    const userBackupCheckbox = view.querySelector("#IsUserBackupEnabled") as HTMLInputElement;
-    userBackupCheckbox.checked = userConfig.IsBackupEnabled;
-
-    const favoritesSyncCheckbox = view.querySelector("#IsFavoritesSyncEnabled") as HTMLInputElement;
-    favoritesSyncCheckbox.checked = userConfig.IsFavoritesSyncEnabled;
-
-    const listenSubmitCheckbox = view.querySelector("#IsListenSubmitEnabled") as HTMLInputElement;
-    listenSubmitCheckbox.checked = userConfig.IsListenSubmitEnabled;
-
-    const playlistsSyncCheckbox = view.querySelector("#IsPlaylistsSyncEnabled") as HTMLInputElement;
-    playlistsSyncCheckbox.checked = userConfig.IsPlaylistsSyncEnabled;
-
-    const strictModeCheckbox = view.querySelector("#IsStrictModeEnabled") as HTMLInputElement;
-    strictModeCheckbox.checked = userConfig.IsStrictModeEnabled;
 }
