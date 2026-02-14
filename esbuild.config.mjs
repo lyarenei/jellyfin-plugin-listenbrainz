@@ -2,8 +2,8 @@ import * as esbuild from "esbuild";
 
 const entryPoints = [
     {
-        in: "src/Jellyfin.Plugin.ListenBrainz/Configuration/configurationPage.ts",
-        out: "src/Jellyfin.Plugin.ListenBrainz/Configuration/index",
+        in: "src/Jellyfin.Plugin.ListenBrainz/Pages/Configuration/index.ts",
+        out: "src/Jellyfin.Plugin.ListenBrainz/Pages/Configuration/index",
     },
 ];
 

@@ -151,12 +151,12 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
             new PluginPageInfo
             {
                 Name = Name,
-                EmbeddedResourcePath = string.Format(CultureInfo.InvariantCulture, "{0}.Configuration.Page.configurationPage.html", GetType().Namespace),
+                EmbeddedResourcePath = string.Format(CultureInfo.InvariantCulture, "{0}.Pages.Configuration.index.html", GetType().Namespace),
             },
             new PluginPageInfo
             {
                 Name = $"{Name}.js",
-                EmbeddedResourcePath = string.Format(CultureInfo.InvariantCulture, "{0}.Configuration.Page.configurationPage.js", GetType().Namespace),
+                EmbeddedResourcePath = string.Format(CultureInfo.InvariantCulture, "{0}.Pages.Configuration.index.js", GetType().Namespace),
             },
         ];
     }

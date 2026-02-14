@@ -29,10 +29,10 @@
     </ItemGroup>
 
     <ItemGroup>
-        <EmbeddedResource Include="Configuration\configurationPage.html" />
-        <EmbeddedResource Include="Configuration\configurationPage.js" />
         <EmbeddedResource Include="Configuration\styles.css" />
         <EmbeddedResource Include="Configuration\bootstrap-grid.min.css" />
+        <EmbeddedResource Include="Pages\Configuration\index.html" />
+        <EmbeddedResource Include="Pages\Configuration\index.js" />
     </ItemGroup>
 
     <ItemGroup>
