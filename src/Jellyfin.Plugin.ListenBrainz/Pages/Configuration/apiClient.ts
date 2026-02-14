@@ -1,5 +1,10 @@
 export const ConfigApiClient = {
-    ...ApiClient,
+    getPluginConfiguration: async (pluginUUID: string): Promise<PluginConfiguration> => {
+        return ApiClient.getPluginConfiguration(pluginUUID);
+    },
+    getUsers: async (): Promise<JellyfinUser[]> => {
+        return ApiClient.getUsers();
+    },
     validateListenBrainzToken: async (apiToken: string): Promise<TokenValidationResult> => {
         try {
             const url = await ApiClient.getUrl("/ListenBrainzPlugin/ValidateToken");
