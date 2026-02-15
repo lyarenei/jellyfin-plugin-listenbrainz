@@ -1,7 +1,7 @@
 import { ConfigApiClient } from "./apiClient";
 import { userDefaults } from "./constants";
 import { fillUserConfigForm } from "./formHelpers";
-import registerEventHooks from "./EventHooks";
+import registerEventHooks from "./eventHooks";
 
 /**
  * Sets up the plugin config page. Should be only called once (when the page is first loaded).
