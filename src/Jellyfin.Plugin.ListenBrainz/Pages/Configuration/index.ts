@@ -1,4 +1,4 @@
-import { initPluginConfigPage } from "./configuration";
+import { setUpPluginConfigPage, loadPluginConfigData } from "./configuration";
 
 /**
  * This function serves as an entrypoint and is called when the configuration page is loaded.
@@ -8,11 +8,18 @@ import { initPluginConfigPage } from "./configuration";
  * @return void
  */
 export default function (view: HTMLElement, _params: Record<string, string>) {
+    let isSetUp = false;
+
     // This function cannot be async, so instead hook into the viewshow event to call async functions.
     view.addEventListener("viewshow", async () => {
         Dashboard.showLoadingMsg();
         try {
-            await initPluginConfigPage(view);
+            if (!isSetUp) {
+                await setUpPluginConfigPage(view);
+                isSetUp = true;
+            }
+
+            await loadPluginConfigData(view);
         } catch (e) {
             console.log("ListenBrainz plugin: Failed to initialize configuration page: " + e);
             Dashboard.alert("Failed to initialize configuration page");

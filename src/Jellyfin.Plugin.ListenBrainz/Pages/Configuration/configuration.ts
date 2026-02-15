@@ -5,18 +5,19 @@ import { fillUserConfigForm } from "./formHelpers";
 import { getUserConfig } from "./utils";
 
 /**
- * Initializes the plugin configuration page by loading the necessary data and populating the form fields.
- *
+ * Sets up the plugin config page. Should be only called once (when the page is first loaded).
  * @param view - The HTML element where the configuration page is rendered.
  * @return void
  */
-export async function initPluginConfigPage(view: HTMLElement): Promise<void> {
-    const pluginConfig = await ConfigApiClient.getPluginConfiguration();
+export async function setUpPluginConfigPage(view: HTMLElement): Promise<void> {
     const jellyfinUsers = await ConfigApiClient.getUsers();
-
     buildUsersDropdown(view, jellyfinUsers);
-    fillUserConfigForm(view, pluginConfig.UserConfigs[0] || userDefaults);
     registerEventHooks(view);
+}
+
+export async function loadPluginConfigData(view: HTMLElement): Promise<void> {
+    const pluginConfig = await ConfigApiClient.getPluginConfiguration();
+    fillUserConfigForm(view, pluginConfig.UserConfigs[0] || userDefaults);
 }
 
 /**
