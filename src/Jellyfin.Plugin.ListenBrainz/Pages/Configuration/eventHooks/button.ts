@@ -15,3 +15,19 @@ export function registerResetMusicBrainzApiUrlButtonHook(view: HTMLElement) {
         apiUrlInput.value = defaultMusicBrainzApiUrl;
     });
 }
+
+export function registerBackupPathBrowserButtonHook(view: HTMLElement) {
+    const browseButton = view.querySelector("#SetBackupPath") as HTMLButtonElement;
+    browseButton.addEventListener("click", async () => {
+        const backupPathInput = view.querySelector("#BackupPath") as HTMLInputElement;
+        const directoryBrowser = new Dashboard.DirectoryBrowser();
+        directoryBrowser.show({
+            callback: (selectedPath) => {
+                directoryBrowser.close();
+                backupPathInput.value = selectedPath;
+            },
+            header: "Select backup directory",
+            includeFiles: false,
+        });
+    });
+}
