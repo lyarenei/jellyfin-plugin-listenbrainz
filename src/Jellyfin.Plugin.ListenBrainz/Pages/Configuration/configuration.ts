@@ -19,12 +19,6 @@ export async function loadPluginConfigData(view: HTMLElement): Promise<void> {
     fillUserConfigForm(view, pluginConfig.UserConfigs[0] || userDefaults);
 }
 
-/**
- * Builds the users dropdown in the configuration page and sets up the event listener for user selection.
- * @param view - The HTML element where the configuration page is rendered.
- * @param users - An array of Jellyfin users to populate the dropdown with.
- * @return void
- */
 function buildUsersDropdown(view: HTMLElement, users: JellyfinUser[]) {
     const dropdown = view.querySelector("#JellyfinUser") as HTMLSelectElement;
 
