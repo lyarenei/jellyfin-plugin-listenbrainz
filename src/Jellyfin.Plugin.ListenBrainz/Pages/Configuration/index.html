@@ -348,27 +348,6 @@
         }
 
         function fillGeneralConfig(data) {
-            document.querySelector("#ListenBrainzApiUrl")
-                .value = data.ListenBrainzApiUrl;
-
-            document.querySelector("#MusicBrainzApiUrl")
-                .value = data.MusicBrainzApiUrl;
-
-            document.querySelector("#IsMusicBrainzEnabled")
-                .checked = data.IsMusicBrainzEnabled;
-
-            document.querySelector("#IsAlternativeModeEnabled")
-                .checked = data.IsAlternativeModeEnabled;
-
-            document.querySelector("#IsImmediateFavoriteSyncEnabled")
-                .checked = data.IsImmediateFavoriteSyncEnabled;
-
-            document.querySelector("#IsAllPlaylistsSyncEnabled")
-                .checked = data.IsAllPlaylistsSyncEnabled;
-
-            document.querySelector("#BackupPath")
-                .value = data.BackupPath;
-
             try {
                 buildAllowedLibrariesList(data.LibraryConfigs);
             } catch (err) {
