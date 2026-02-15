@@ -1,3 +1,8 @@
+interface MediaLibrary {
+    Id: string;
+    Name: string;
+}
+
 interface PluginConfiguration {
     BackupPath: string;
     IsAllPlaylistsSyncEnabled: boolean;
