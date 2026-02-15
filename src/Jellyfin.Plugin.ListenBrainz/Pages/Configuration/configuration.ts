@@ -1,8 +1,7 @@
 import { ConfigApiClient } from "./apiClient";
 import { userDefaults } from "./constants";
-import { registerEventHooks } from "./eventHooks";
 import { fillUserConfigForm } from "./formHelpers";
-import { getUserConfig } from "./utils";
+import registerEventHooks from "./EventHooks";
 
 /**
  * Sets up the plugin config page. Should be only called once (when the page is first loaded).
@@ -35,30 +34,4 @@ function buildUsersDropdown(view: HTMLElement, users: JellyfinUser[]) {
         option.textContent = user.Name;
         dropdown.appendChild(option);
     });
-
-    // Load the config when a user is selected
-    dropdown.addEventListener("change", async (event) => {
-        Dashboard.showLoadingMsg();
-        try {
-            const selectedUserId = (event.target as HTMLSelectElement).value;
-            await loadUserConfig(view, selectedUserId);
-        } catch (e) {
-            console.log("ListenBrainz plugin: Failed to load user configuration: " + e);
-            Dashboard.alert("Failed to load user configuration");
-        } finally {
-            Dashboard.hideLoadingMsg();
-        }
-    });
-}
-
-/**
- * Loads the configuration for the selected user and fills the form fields with the corresponding values.
- * @param view - The HTML element where the configuration page is rendered.
- * @param selectedUserId - The ID of the selected Jellyfin user for whom the configuration should be loaded.
- * @return void
- */
-async function loadUserConfig(view: HTMLElement, selectedUserId: string) {
-    const pluginConfig = await ConfigApiClient.getPluginConfiguration();
-    const userConfig = getUserConfig(pluginConfig, selectedUserId);
-    fillUserConfigForm(view, userConfig);
 }
