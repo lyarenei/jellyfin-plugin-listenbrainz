@@ -52,15 +52,6 @@ async function saveUserConfig(view: HTMLElement, currentPluginConfig: PluginConf
         ],
     };
 
-    await savePluginConfiguration(updatedPluginConfig);
-}
-
-async function savePluginConfiguration(newPluginConfig: PluginConfiguration): Promise<void> {
-    try {
-        const resp = await ConfigApiClient.savePluginConfiguration(newPluginConfig);
-        Dashboard.processPluginConfigurationUpdateResult(resp);
-    } catch (e) {
-        console.log("ListenBrainz plugin: Failed to save plugin configuration: " + e);
-        Dashboard.alert("Failed to save plugin configuration");
-    }
+    const resp = await ConfigApiClient.savePluginConfiguration(updatedPluginConfig);
+    Dashboard.processPluginConfigurationUpdateResult(resp);
 }
