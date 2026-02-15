@@ -1,7 +1,7 @@
 import { initPluginConfigPage } from "./configuration";
 
 /**
- * This function server as an entrypoint and is called when the configuration page is loaded.
+ * This function serves as an entrypoint and is called when the configuration page is loaded.
  *
  * @param view - The HTML element where the configuration page should be rendered.
  * @param _params - A record of parameters passed to the configuration page.
