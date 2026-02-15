@@ -15,6 +15,9 @@ export function registerSubmitButtonHook(view: HTMLElement) {
             const currentPluginConfig = await ConfigApiClient.getPluginConfiguration();
 
             switch (event.submitter?.id) {
+                case "SaveGeneralConfig":
+                    // Still handled by JS implementation
+                    break;
                 case "SaveUserConfig":
                     await saveUserConfig(view, currentPluginConfig, selectedUserId);
                     break;
