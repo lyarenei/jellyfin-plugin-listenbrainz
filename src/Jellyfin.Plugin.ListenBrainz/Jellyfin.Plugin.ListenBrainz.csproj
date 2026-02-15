@@ -29,13 +29,18 @@
     </ItemGroup>
 
     <ItemGroup>
-        <EmbeddedResource Include="Configuration\configurationPage.html" />
         <EmbeddedResource Include="Configuration\styles.css" />
         <EmbeddedResource Include="Configuration\bootstrap-grid.min.css" />
+        <EmbeddedResource Include="Pages\Configuration\index.html" />
+        <EmbeddedResource Include="Pages\Configuration\index.js" Condition="Exists('Pages\Configuration\index.js')" />
     </ItemGroup>
 
     <ItemGroup>
         <InternalsVisibleTo Include="Jellyfin.Plugin.ListenBrainz.Tests" />
     </ItemGroup>
+
+    <Target Name="CompileTypeScript" BeforeTargets="BeforeBuild" Condition="Exists('$(MSBuildThisFileDirectory)../../node_modules')">
+        <Exec Command="npm run build" WorkingDirectory="$(MSBuildThisFileDirectory)../../" />
+    </Target>
 
 </Project>

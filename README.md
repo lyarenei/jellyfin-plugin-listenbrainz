@@ -120,7 +120,7 @@ The modified template should look like this:
 + "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u3}] [{ThreadId}] {SourceContext} {EventId} {ClientRequestId} {HttpRequestId}: {Message}{NewLine}{Exception}"
 ```
 
-After modifying the template, restart Jellyfin server and you should see extra whitespace (before the `:`) in the log
+After modifying the template, restart Jellyfin server, and you should see extra whitespace (before the `:`) in the log
 like this: <code>... &#91;INF] &#91;1] Main&nbsp;&nbsp;&nbsp;: Jellyfin version: "10.8.13"</code>
 This is expected, as the three new fields you added earlier are only defined in this plugin, while the template affects
 all log messages. Unfortunately, Jellyfin does not seem to be using a logging extension which allows dynamic log
@@ -133,15 +133,25 @@ have an impact on the application performance.
 # Development
 
 This should be somewhat similar to standard .NET project development.
-So, clone the repo, open it in your favorite editor, restore dependencies and you should be good to go.
+So, clone the repo, open it in your favorite editor, restore dependencies, and you should be good to go.
 Debugging setup is documented in the [jellyfin plugin template][PLUGIN_DEBUGGING].
+
+The plugin pages are written in TypeScript, bundled with esbuild and embedded in the plugin DLL.
+Code quality is enforced with ESLint and Prettier (`npm run lint`, `npm run format:check`).
 
 ## Manual build and installation
 
-.NET 8.0 is required to build the plugin.
+.NET 9.0 and Node.js are required to build the plugin.
 To install the .NET SDK, check out the [.NET download page](https://dotnet.microsoft.com/download).
+To install Node.js, check out the [Node.js download page](https://nodejs.org).
 
-Once the SDK is installed, you should be able to compile the plugin in either debug or release configuration:
+Once the SDKs are installed, install the TypeScript dependencies first:
+
+```shell
+npm ci
+```
+
+Then you should be able to compile the plugin in either debug or release configuration:
 
 ```shell
 dotnet publish -c Debug
@@ -150,6 +160,8 @@ dotnet publish -c Debug
 ```shell
 dotnet publish -c Release
 ```
+
+The npm build is automatically run before the .NET build, it is not necessary to run it manually.
 
 Once the build is completed, the compiled DLLs should be available at:
 `src/Jellyfin.Plugin.Listenbrainz/bin/<Debug|Release>/net8.0/`
