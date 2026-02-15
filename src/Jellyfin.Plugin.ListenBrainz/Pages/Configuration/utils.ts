@@ -8,7 +8,7 @@ import { userDefaults } from "./constants";
  */
 export function getUserConfig(config: PluginConfiguration, userId: string): PluginUserConfig {
     return (
-        config.UserConfigs.find((config) => config.JellyfinUserId === userId) || {
+        config.UserConfigs.find((userConfig) => userConfig.JellyfinUserId === userId) || {
             ...userDefaults,
             JellyfinUserId: userId,
         }
