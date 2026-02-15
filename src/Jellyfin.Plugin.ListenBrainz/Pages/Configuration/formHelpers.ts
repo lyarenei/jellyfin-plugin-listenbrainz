@@ -10,6 +10,18 @@ function getUserConfigFormElements(view: HTMLElement) {
     };
 }
 
+function getGeneralConfigFormElements(view: HTMLElement) {
+    return {
+        allPlaylistsEnabled: view.querySelector("#IsAllPlaylistsSyncEnabled") as HTMLInputElement,
+        altModeEnabled: view.querySelector("#IsAlternativeModeEnabled") as HTMLInputElement,
+        backupPath: view.querySelector("#BackupPath") as HTMLInputElement,
+        immediateFavorites: view.querySelector("#IsImmediateFavoriteSyncEnabled") as HTMLInputElement,
+        listenBrainzUrl: view.querySelector("#ListenBrainzApiUrl") as HTMLInputElement,
+        musicBrainzEnabled: view.querySelector("#IsMusicBrainzEnabled") as HTMLInputElement,
+        musicBrainzUrl: view.querySelector("#MusicBrainzApiUrl") as HTMLInputElement,
+    };
+}
+
 export function fillUserConfigForm(view: HTMLElement, userConfig: PluginUserConfig): void {
     const elements = getUserConfigFormElements(view);
     elements.apiToken.value = atob(userConfig.ApiToken);
@@ -32,4 +44,15 @@ export function getUserConfigFormData(view: HTMLElement): PluginUserConfig {
         JellyfinUserId: elements.userDropdown.value,
         UserName: "",
     };
+}
+
+export function fillGeneralConfigForm(view: HTMLElement, pluginConfig: PluginConfiguration): void {
+    const elements = getGeneralConfigFormElements(view);
+    elements.allPlaylistsEnabled.checked = pluginConfig.IsAllPlaylistsSyncEnabled;
+    elements.altModeEnabled.checked = pluginConfig.IsAlternativeModeEnabled;
+    elements.backupPath.value = pluginConfig.BackupPath;
+    elements.immediateFavorites.checked = pluginConfig.IsImmediateFavoriteSyncEnabled;
+    elements.listenBrainzUrl.value = pluginConfig.ListenBrainzApiUrl;
+    elements.musicBrainzEnabled.checked = pluginConfig.IsMusicBrainzEnabled;
+    elements.musicBrainzUrl.value = pluginConfig.MusicBrainzApiUrl;
 }

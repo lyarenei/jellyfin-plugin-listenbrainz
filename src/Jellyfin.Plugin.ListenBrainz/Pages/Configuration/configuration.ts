@@ -1,6 +1,6 @@
 import { ConfigApiClient } from "./apiClient";
 import { userDefaults } from "./constants";
-import { fillUserConfigForm } from "./formHelpers";
+import { fillGeneralConfigForm, fillUserConfigForm } from "./formHelpers";
 import registerEventHooks from "./eventHooks";
 
 /**
@@ -17,6 +17,7 @@ export async function setUpPluginConfigPage(view: HTMLElement): Promise<void> {
 export async function loadPluginConfigData(view: HTMLElement): Promise<void> {
     const pluginConfig = await ConfigApiClient.getPluginConfiguration();
     fillUserConfigForm(view, pluginConfig.UserConfigs[0] || userDefaults);
+    fillGeneralConfigForm(view, pluginConfig);
 }
 
 function buildUsersDropdown(view: HTMLElement, users: JellyfinUser[]) {
