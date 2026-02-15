@@ -4,7 +4,7 @@
     <title>ListenBrainz Plugin Config</title>
 </head>
 <body>
-<div id="ListenBrainzConfigPage" data-role="page" class="page type-interior pluginConfigurationPage"
+<div id="ListenBrainzConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-controller="__plugin/ListenBrainz.js"
      data-require="emby-input,emby-button,emby-select,emby-checkbox">
     <div data-role="content">
         <div class="content-primary">
@@ -209,16 +209,6 @@
                 onPageShow();
             });
 
-        document.querySelector('#JellyfinUser')
-            .addEventListener('change', () => {
-                onSelectUser()
-            });
-
-        document.querySelector('#CheckListenBrainzApiToken')
-            .addEventListener('mouseup', () => {
-                onCheckApiToken();
-            });
-
         document.querySelector('#ResetListenBrainzApiUrl')
             .addEventListener('mouseup', () => {
                 onResetListenBrainzApiUrl();
@@ -253,79 +243,11 @@
 
             ApiClient.getUsers()
                 .then((users) => {
-                    buildUsersDropdown(users);
                     loadConfig(users[0].Id)
                 })
                 .catch((reason) => {
                     console.log("ListenBrainz plugin: Failed to load Jellyfin users: " + reason);
                     Dashboard.alert("Failed to load Jellyfin users");
-                });
-
-            Dashboard.hideLoadingMsg();
-        }
-
-        function onSelectUser() {
-            Dashboard.showLoadingMsg();
-            let userId = getSelectedUserId();
-            ApiClient.getPluginConfiguration(ListenBrainzConfig.PluginUniqueId)
-                .then((config) => {
-                    let userConfig = getUserConfig(config, userId);
-                    fillUserConfig(userConfig);
-                })
-                .catch((reason) => {
-                    console.log("ListenBrainz plugin: Failed to load user config: " + reason);
-                    Dashboard.alert("Failed to load user config");
-                });
-
-            Dashboard.hideLoadingMsg();
-        }
-
-        function onCheckApiToken() {
-            let apiToken = getApiToken();
-            if (!apiToken) {
-                Dashboard.alert("No API token to verify");
-                return;
-            }
-
-            ApiClient.ValidateListenBrainzToken(apiToken)
-                .then((response) => {
-                    if (response.IsValid) {
-                        Dashboard.alert("Token is valid");
-                        return;
-                    }
-
-                    Dashboard.alert("Token is not valid");
-                    console.log("Token validation failed: " + response.Reason);
-                })
-                .catch((reason) => {
-                    Dashboard.alert("Token validation failed");
-                    console.log("Token validation failed: " + reason);
-                });
-        }
-
-        function onSaveUserConfig() {
-            Dashboard.showLoadingMsg();
-            ApiClient.getPluginConfiguration(ListenBrainzConfig.PluginUniqueId)
-                .then((config) => {
-                    getUserConfigInputs()
-                        .then((newUserConfig) => {
-                            let index = config.UserConfigs.map((uc) => uc.JellyfinUserId).indexOf(newUserConfig.JellyfinUserId);
-                            if (index < 0) {
-                                config.UserConfigs.push(newUserConfig);
-                            } else {
-                                config.UserConfigs[index] = newUserConfig;
-                            }
-
-                            saveConfig(config);
-                        })
-                        .catch((err) => {
-                            console.log("ListenBrainz plugin: Failed to get plugin config: " + err);
-                            Dashboard.alert("Saving user config failed");
-                        })
-                })
-                .catch((reason) => {
-                    console.log("ListenBrainz plugin: Failed to get plugin config: " + reason);
-                    Dashboard.alert("Saving user config failed");
                 });
 
             Dashboard.hideLoadingMsg();
@@ -387,7 +309,7 @@
                     onSaveGeneralConfig();
                     break;
                 case 'SaveUserConfig':
-                    onSaveUserConfig();
+                    // implemented in ts
                     break;
                 default:
                     console.log("ListenBrainz plugin: invalid submitter ID");
@@ -425,18 +347,6 @@
             });
         }
 
-        function buildUsersDropdown(jellyfinUsers) {
-            const dropdown = document.getElementById("JellyfinUser");
-            dropdown.innerHTML = "";
-
-            let html = "";
-            jellyfinUsers.forEach((user) => {
-                html += "<option value='" + user.Id + "'>" + user.Name + "</option>";
-            })
-
-            dropdown.innerHTML = html;
-        }
-
         function fillGeneralConfig(data) {
             document.querySelector("#ListenBrainzApiUrl")
                 .value = data.ListenBrainzApiUrl;
@@ -464,53 +374,6 @@
             } catch (err) {
                 console.log("ListenBrainz plugin: Getting libraries from server failed: " + err);
                 Dashboard.alert("Failed to load Jellyfin libraries");
-            }
-        }
-
-        function getSelectedUserId() {
-            return document.querySelector("#JellyfinUser").value;
-        }
-
-        function fillUserConfig(data) {
-            document.querySelector("#ListenBrainzApiToken")
-                .value = atob(data.ApiToken);
-
-            document.querySelector("#IsListenSubmitEnabled")
-                .checked = data.IsListenSubmitEnabled;
-
-            document.querySelector("#IsFavoritesSyncEnabled")
-                .checked = data.IsFavoritesSyncEnabled;
-
-            document.querySelector("#IsPlaylistsSyncEnabled")
-                .checked = data.IsPlaylistsSyncEnabled;
-
-            document.querySelector("#IsUserBackupEnabled")
-                .checked = data.IsBackupEnabled;
-
-            document.querySelector("#IsStrictModeEnabled")
-                .checked = data.IsStrictModeEnabled;
-        }
-
-        function getUserConfig(config, userId) {
-            if (config.UserConfigs === null) {
-                return ListenBrainzConfig.UserDefaults;
-            }
-
-            let index = config.UserConfigs.map((uc) => uc.JellyfinUserId).indexOf(userId);
-            return index < 0 ? ListenBrainzConfig.UserDefaults : config.UserConfigs[index];
-        }
-
-        async function getUserConfigInputs() {
-            const userName = await tryGetListenBrainzUserName(getApiToken());
-            return {
-                JellyfinUserId: getSelectedUserId(),
-                ApiToken: btoa(getApiToken()),
-                IsListenSubmitEnabled: document.querySelector('#IsListenSubmitEnabled').checked,
-                IsFavoritesSyncEnabled: document.querySelector('#IsFavoritesSyncEnabled').checked,
-                IsPlaylistsSyncEnabled: document.querySelector('#IsPlaylistsSyncEnabled').checked,
-                IsBackupEnabled: document.querySelector('#IsUserBackupEnabled').checked,
-                UserName: userName,
-                IsStrictModeEnabled: document.querySelector('#IsStrictModeEnabled').checked,
             }
         }
 
@@ -552,23 +415,11 @@
             ApiClient.getPluginConfiguration(ListenBrainzConfig.PluginUniqueId)
                 .then((config) => {
                     fillGeneralConfig(config);
-                    let userConfig = getUserConfig(config, userId);
-                    fillUserConfig(userConfig);
                 })
                 .catch((reason) => {
                     console.log("ListenBrainz plugin: Failed to load plugin config: " + reason);
                     Dashboard.alert("Failed to load plugin config");
                 });
-        }
-
-        function getApiToken() {
-            let inputValue = document.querySelector('#ListenBrainzApiToken').value;
-            return inputValue.trim();
-        }
-
-        async function tryGetListenBrainzUserName(apiToken) {
-            const resp = await ApiClient.ValidateListenBrainzToken(apiToken);
-            return resp.UserName;
         }
 
         async function buildAllowedLibrariesList(libraryConfigs) {
