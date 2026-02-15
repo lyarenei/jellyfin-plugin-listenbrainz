@@ -1,4 +1,11 @@
 interface PluginConfiguration {
+    BackupPath: string;
+    IsAllPlaylistsSyncEnabled: boolean;
+    IsAlternativeModeEnabled: boolean;
+    IsImmediateFavoriteSyncEnabled: boolean;
+    IsMusicBrainzEnabled: boolean;
+    ListenBrainzApiUrl: string;
+    MusicBrainzApiUrl: string;
     UserConfigs: PluginUserConfig[];
 }
 
