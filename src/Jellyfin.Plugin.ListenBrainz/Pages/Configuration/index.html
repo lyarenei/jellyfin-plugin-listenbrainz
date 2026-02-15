@@ -209,16 +209,6 @@
                 onPageShow();
             });
 
-        document.querySelector('#ResetListenBrainzApiUrl')
-            .addEventListener('mouseup', () => {
-                onResetListenBrainzApiUrl();
-            });
-
-        document.querySelector('#ResetMusicBrainzApiUrl')
-            .addEventListener('mouseup', () => {
-                onResetMusicBrainzApiUrl();
-            });
-
         document.querySelector('#ResetAllowedLibraries')
             .addEventListener('mouseup', () => {
                 onAllowedLibrariesReset();
@@ -238,28 +228,6 @@
         function onPageShow() {
             loadCss('bootstrap-grid.min.css');
             loadCss('styles.css');
-        }
-
-        function onResetListenBrainzApiUrl() {
-            ApiClient.getPluginConfiguration(ListenBrainzConfig.PluginUniqueId)
-                .then((config) => {
-                    document.querySelector('#ListenBrainzApiUrl').value = config.DefaultListenBrainzApiUrl;
-                })
-                .catch((reason) => {
-                    console.log("ListenBrainz plugin: Failed to reset ListenBrainz URL: " + reason);
-                    Dashboard.alert("Reset failed");
-                });
-        }
-
-        function onResetMusicBrainzApiUrl() {
-            ApiClient.getPluginConfiguration(ListenBrainzConfig.PluginUniqueId)
-                .then((config) => {
-                    document.querySelector('#MusicBrainzApiUrl').value = config.DefaultMusicBrainzApiUrl;
-                })
-                .catch((reason) => {
-                    console.log("ListenBrainz plugin: Failed to reset MusicBrainz URL: " + reason);
-                    Dashboard.alert("Reset failed");
-                });
         }
 
         function onSetBackupPath() {

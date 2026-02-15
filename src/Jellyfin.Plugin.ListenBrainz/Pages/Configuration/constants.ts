@@ -12,3 +12,6 @@ export const userDefaults: PluginUserConfig = {
     JellyfinUserId: "",
     UserName: "",
 };
+
+export const defaultListenBrainzApiUrl = "https://api.listenbrainz.org";
+export const defaultMusicBrainzApiUrl = "https://musicbrainz.org";
