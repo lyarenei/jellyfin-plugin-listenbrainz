@@ -1,9 +1,24 @@
 interface AjaxOptions {
     contentType: string;
-    data: string;
+    data?: string;
     dataType: string;
     type: string;
     url: string;
+}
+
+interface DirectoryBrowser {
+    close(): void;
+    show(options: DirectoryBrowserOptions): void;
+}
+
+interface DirectoryBrowserConstructor {
+    new (): DirectoryBrowser;
+}
+
+interface DirectoryBrowserOptions {
+    callback: (selectedPath: string) => void;
+    header: string;
+    includeFiles: boolean;
 }
 
 interface JellyfinApiClient {
@@ -16,6 +31,7 @@ interface JellyfinApiClient {
 
 interface JellyfinDashboard {
     alert(message: string): void;
+    DirectoryBrowser: DirectoryBrowserConstructor;
     hideLoadingMsg(): void;
     processPluginConfigurationUpdateResult(result: any): void;
     showLoadingMsg(): void;
