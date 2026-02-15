@@ -220,26 +220,9 @@
                 onSubmitConfigForm(event.submitter.id);
             });
 
-        document.querySelector('#SetBackupPath')
-            .addEventListener('mouseup', () => {
-                onSetBackupPath();
-            });
-
         function onPageShow() {
             loadCss('bootstrap-grid.min.css');
             loadCss('styles.css');
-        }
-
-        function onSetBackupPath() {
-            const browser = new Dashboard.DirectoryBrowser();
-            browser.show({
-                includeFiles: false,
-                callback: (selectedDir) => {
-                    browser.close();
-                    document.querySelector('#BackupPath').value = selectedDir;
-                },
-                header: "Select path for backups"
-            })
         }
 
         function onSaveGeneralConfig() {
