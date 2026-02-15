@@ -1,8 +1,10 @@
 using System.Reflection;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
+using MediaBrowser.Common.Api;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Jellyfin.Plugin.ListenBrainz.Controllers;
@@ -11,6 +13,7 @@ namespace Jellyfin.Plugin.ListenBrainz.Controllers;
 /// Controller for serving internal plugin resources.
 /// </summary>
 [ApiController]
+[Authorize(Policy = Policies.RequiresElevation)]
 [Route("ListenBrainzPlugin/internal")]
 public class InternalController : ControllerBase
 {
