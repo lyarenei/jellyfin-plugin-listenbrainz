@@ -1,3 +1,4 @@
+using Jellyfin.Data.Enums;
 using MediaBrowser.Controller.Entities;
 
 namespace Jellyfin.Plugin.ListenBrainz.Dtos;
@@ -13,7 +14,6 @@ public class JellyfinMediaLibrary
     public JellyfinMediaLibrary()
     {
         Name = string.Empty;
-        LibraryType = string.Empty;
     }
 
     /// <summary>
@@ -24,9 +24,7 @@ public class JellyfinMediaLibrary
     {
         Name = item.Name;
         Id = item.Id;
-
-        // Collection type is null when library content type is mixed"
-        LibraryType = item.CollectionType?.ToString() ?? "Mixed";
+        IsMusicLibrary = item.CollectionType == CollectionType.music;
     }
 
     /// <summary>
@@ -40,7 +38,7 @@ public class JellyfinMediaLibrary
     public Guid Id { get; set; }
 
     /// <summary>
-    /// Gets or sets library type.
+    /// Gets or sets a value indicating whether this library is a music library.
     /// </summary>
-    public string LibraryType { get; set; }
+    public bool IsMusicLibrary { get; set; }
 }

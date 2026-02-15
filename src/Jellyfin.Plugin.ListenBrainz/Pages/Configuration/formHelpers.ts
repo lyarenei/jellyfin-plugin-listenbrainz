@@ -1,3 +1,5 @@
+import { getUniqueLibraryName } from "./utils";
+
 function getUserConfigFormElements(view: HTMLElement) {
     return {
         apiToken: view.querySelector("#ListenBrainzApiToken") as HTMLInputElement,
@@ -46,7 +48,11 @@ export function getUserConfigFormData(view: HTMLElement): PluginUserConfig {
     };
 }
 
-export function fillGeneralConfigForm(view: HTMLElement, pluginConfig: PluginConfiguration): void {
+export function fillGeneralConfigForm(
+    view: HTMLElement,
+    pluginConfig: PluginConfiguration,
+    jellyfinLibraries: MediaLibrary[],
+): void {
     const elements = getGeneralConfigFormElements(view);
     elements.allPlaylistsEnabled.checked = pluginConfig.IsAllPlaylistsSyncEnabled;
     elements.altModeEnabled.checked = pluginConfig.IsAlternativeModeEnabled;
@@ -55,4 +61,24 @@ export function fillGeneralConfigForm(view: HTMLElement, pluginConfig: PluginCon
     elements.listenBrainzUrl.value = pluginConfig.ListenBrainzApiUrl;
     elements.musicBrainzEnabled.checked = pluginConfig.IsMusicBrainzEnabled;
     elements.musicBrainzUrl.value = pluginConfig.MusicBrainzApiUrl;
+
+    if (pluginConfig.LibraryConfigs.length > 0) {
+        pluginConfig.LibraryConfigs.map((lc) => {
+            const checkboxId = getUniqueLibraryName(lc.Id);
+            const checkbox = view.querySelector(`#${checkboxId}`) as HTMLInputElement;
+            if (checkbox) {
+                checkbox.checked = lc.IsAllowed;
+            }
+        });
+
+        return;
+    }
+
+    jellyfinLibraries.forEach((library) => {
+        const checkboxId = getUniqueLibraryName(library.Id);
+        const checkbox = view.querySelector(`#${checkboxId}`) as HTMLInputElement;
+        if (checkbox) {
+            checkbox.checked = library.IsMusicLibrary;
+        }
+    });
 }

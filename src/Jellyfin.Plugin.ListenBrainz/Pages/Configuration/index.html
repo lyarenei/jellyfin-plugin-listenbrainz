@@ -238,19 +238,6 @@
         function onPageShow() {
             loadCss('bootstrap-grid.min.css');
             loadCss('styles.css');
-
-            Dashboard.showLoadingMsg();
-
-            ApiClient.getUsers()
-                .then((users) => {
-                    loadConfig(users[0].Id)
-                })
-                .catch((reason) => {
-                    console.log("ListenBrainz plugin: Failed to load Jellyfin users: " + reason);
-                    Dashboard.alert("Failed to load Jellyfin users");
-                });
-
-            Dashboard.hideLoadingMsg();
         }
 
         function onResetListenBrainzApiUrl() {
@@ -347,15 +334,6 @@
             });
         }
 
-        function fillGeneralConfig(data) {
-            try {
-                // buildAllowedLibrariesList(data.LibraryConfigs);
-            } catch (err) {
-                console.log("ListenBrainz plugin: Getting libraries from server failed: " + err);
-                Dashboard.alert("Failed to load Jellyfin libraries");
-            }
-        }
-
         function getGeneralConfigInputs() {
             return {
                 ListenBrainzApiUrl: document.querySelector('#ListenBrainzApiUrl').value,
@@ -388,61 +366,6 @@
                     console.log("ListenBrainz plugin: Failed to save config: " + reason);
                     Dashboard.alert("Failed to save plugin config");
                 });
-        }
-
-        function loadConfig(userId) {
-            ApiClient.getPluginConfiguration(ListenBrainzConfig.PluginUniqueId)
-                .then((config) => {
-                    fillGeneralConfig(config);
-                })
-                .catch((reason) => {
-                    console.log("ListenBrainz plugin: Failed to load plugin config: " + reason);
-                    Dashboard.alert("Failed to load plugin config");
-                });
-        }
-
-        async function buildAllowedLibrariesList(libraryConfigs) {
-            const container = document.getElementById('LibrariesList');
-            container.innerHTML = "";
-
-            const allLibraries = await ApiClient.GetAllLibraries();
-
-            function isAllowed(libraryId) {
-                const config = libraryConfigs.find(lc => lc.Id === libraryId);
-                if (config) return config.IsAllowed;
-
-                const library = allLibraries.find(lib => lib.Id === libraryId);
-                if (library) return library.LibraryType === 'music';
-            }
-
-            allLibraries.forEach((library) => {
-                let label = document.createElement('label');
-                label.classList.add('inputLabel', 'inputLabelUnfocused');
-                label.htmlFor = getUniqueName(library);
-                label.onclick = _ => {
-                    let checkbox = document.getElementById(library.Id);
-                    checkbox.checked = !checkbox.checked;
-                };
-
-                let input = document.createElement('input');
-                input.setAttribute('is', 'emby-checkbox');
-                input.type = 'checkbox';
-                input.id = library.Id;
-                input.name = getUniqueName(library);
-                input.checked = isAllowed(library.Id) ?? false;
-
-                let span = document.createElement('span');
-                span.innerText = library.Name;
-
-                label.appendChild(input);
-                label.appendChild(span);
-                container.appendChild(label);
-            })
-        }
-
-        function getUniqueName(library) {
-            // String template refuses to work
-            return 'library_' + library.Id + '_IsAllowed';
         }
 
         ApiClient.ValidateListenBrainzToken = function (apiToken) {
