@@ -1,6 +1,22 @@
 import { pluginUUID } from "./constants";
 
 export const ConfigApiClient = {
+    getLibraries: async (): Promise<MediaLibrary[]> => {
+        try {
+            const url = await ApiClient.getUrl("ListenBrainzPlugin/internal/libraries");
+            const response = await ApiClient.ajax({
+                contentType: "application/json",
+                dataType: "json",
+                type: "GET",
+                url: url,
+            });
+
+            return response as MediaLibrary[];
+        } catch (e) {
+            console.log("ListenBrainz plugin: Failed to get libraries: " + e);
+            throw new Error("Failed to get libraries");
+        }
+    },
     getPluginConfiguration: (): Promise<PluginConfiguration> => {
         return ApiClient.getPluginConfiguration(pluginUUID);
     },

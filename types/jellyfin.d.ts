@@ -1,6 +1,6 @@
 interface AjaxOptions {
     contentType: string;
-    data: string;
+    data?: string;
     dataType: string;
     type: string;
     url: string;

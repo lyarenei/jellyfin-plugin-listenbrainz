@@ -349,7 +349,7 @@
 
         function fillGeneralConfig(data) {
             try {
-                buildAllowedLibrariesList(data.LibraryConfigs);
+                // buildAllowedLibrariesList(data.LibraryConfigs);
             } catch (err) {
                 console.log("ListenBrainz plugin: Getting libraries from server failed: " + err);
                 Dashboard.alert("Failed to load Jellyfin libraries");
