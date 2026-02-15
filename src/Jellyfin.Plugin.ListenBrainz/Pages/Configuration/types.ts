@@ -1,6 +1,13 @@
+interface LibraryConfig {
+    Id: string;
+    Name: string;
+    IsAllowed: boolean;
+}
+
 interface MediaLibrary {
     Id: string;
     Name: string;
+    IsMusicLibrary: boolean;
 }
 
 interface PluginConfiguration {
@@ -9,6 +16,7 @@ interface PluginConfiguration {
     IsAlternativeModeEnabled: boolean;
     IsImmediateFavoriteSyncEnabled: boolean;
     IsMusicBrainzEnabled: boolean;
+    LibraryConfigs: LibraryConfig[];
     ListenBrainzApiUrl: string;
     MusicBrainzApiUrl: string;
     UserConfigs: PluginUserConfig[];

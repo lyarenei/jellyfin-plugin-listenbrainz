@@ -2,6 +2,7 @@ import { ConfigApiClient } from "./apiClient";
 import { userDefaults } from "./constants";
 import { fillGeneralConfigForm, fillUserConfigForm } from "./formHelpers";
 import registerEventHooks from "./eventHooks";
+import { getUniqueLibraryName } from "./utils";
 
 /**
  * Sets up the plugin config page. Should be only called once (when the page is first loaded).
@@ -21,7 +22,9 @@ export async function setUpPluginConfigPage(view: HTMLElement): Promise<void> {
 export async function loadPluginConfigData(view: HTMLElement): Promise<void> {
     const pluginConfig = await ConfigApiClient.getPluginConfiguration();
     fillUserConfigForm(view, pluginConfig.UserConfigs[0] || userDefaults);
-    fillGeneralConfigForm(view, pluginConfig);
+
+    const jellyfinLibraries = await ConfigApiClient.getLibraries();
+    fillGeneralConfigForm(view, pluginConfig, jellyfinLibraries);
 }
 
 function buildUsersDropdown(view: HTMLElement, users: JellyfinUser[]) {
@@ -41,7 +44,7 @@ function buildLibrariesList(view: HTMLElement, libraries: MediaLibrary[]) {
     libraries.forEach((library) => {
         const label = document.createElement("label");
         label.classList.add("inputLabel", "inputLabelUnfocused");
-        label.htmlFor = getUniqueName(library);
+        label.htmlFor = getUniqueLibraryName(library.Id);
         label.onclick = (_) => {
             const checkbox = document.getElementById(library.Id) as HTMLInputElement;
             checkbox.checked = !checkbox.checked;
@@ -50,8 +53,8 @@ function buildLibrariesList(view: HTMLElement, libraries: MediaLibrary[]) {
         const checkbox = document.createElement("input");
         checkbox.setAttribute("is", "emby-checkbox");
         checkbox.type = "checkbox";
-        checkbox.id = getUniqueName(library);
-        checkbox.name = getUniqueName(library);
+        checkbox.id = getUniqueLibraryName(library.Id);
+        checkbox.name = getUniqueLibraryName(library.Id);
 
         const span = document.createElement("span");
         span.textContent = library.Name;
@@ -60,8 +63,4 @@ function buildLibrariesList(view: HTMLElement, libraries: MediaLibrary[]) {
         label.appendChild(span);
         container.appendChild(label);
     });
-}
-
-function getUniqueName(library: MediaLibrary): string {
-    return `library_${library.Id}_IsAllowed`;
 }
