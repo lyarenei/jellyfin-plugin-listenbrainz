@@ -1,3 +1,4 @@
+using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using MediaBrowser.Controller.Entities.Audio;
 
@@ -35,6 +36,7 @@ public interface IValidationService
     /// Check if an audio item meets strict mode conditions.
     /// </summary>
     /// <param name="item">Audio item to validate.</param>
+    /// <param name="metadata">Metadata of the audio item to validate.</param>
     /// <throws cref="ValidationException">Thrown if strict mode conditions are not met.</throws>
-    public void ValidateStrictModeConditions(Audio item);
+    public void ValidateStrictModeConditions(Audio item, AudioItemMetadata? metadata);
 }

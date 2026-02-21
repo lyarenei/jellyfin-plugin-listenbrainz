@@ -138,7 +138,7 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
         {
             if (userConfig.IsStrictModeEnabled)
             {
-                ValidateStrictModeConditions(data.Item);
+                ValidateStrictModeConditions(data.Item, metadata);
             }
 
             isOk = await SendListen(userConfig, data.Item, metadata, now, cancellationToken);
@@ -258,10 +258,10 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
         return isOk;
     }
 
-    private void ValidateStrictModeConditions(Audio item)
+    private void ValidateStrictModeConditions(Audio item, AudioItemMetadata? metadata)
     {
         _logger.LogDebug("Strict mode enabled, validating strict mode conditions...");
-        _validationService.ValidateStrictModeConditions(item);
+        _validationService.ValidateStrictModeConditions(item, metadata);
         _logger.LogInformation("Strict mode validation passed");
     }
 }

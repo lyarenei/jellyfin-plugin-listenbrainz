@@ -1,4 +1,5 @@
 using Jellyfin.Plugin.ListenBrainz.Api.Resources;
+using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
@@ -92,12 +93,12 @@ public class DefaultValidationService : IValidationService
     }
 
     /// <inheritdoc />
-    public void ValidateStrictModeConditions(Audio item)
+    public void ValidateStrictModeConditions(Audio item, AudioItemMetadata? metadata)
     {
         _logger.LogDebug("Checking strict mode conditions for item");
 
-        var recordingMbid = item.GetRecordingMbid();
-        if (string.IsNullOrEmpty(recordingMbid))
+        var itemRecordingMbid = item.GetRecordingMbid();
+        if (string.IsNullOrEmpty(itemRecordingMbid) && string.IsNullOrEmpty(metadata?.RecordingMbid))
         {
             _logger.LogDebug("Strict mode validation failed: Missing recording MBID");
             throw new ValidationException("Missing recording MBID");

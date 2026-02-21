@@ -97,7 +97,7 @@ public class PlaybackStopHandler : GenericHandler<PlaybackStopEventArgs>
         {
             if (userConfig.IsStrictModeEnabled)
             {
-                ValidateStrictModeConditions(data.Item);
+                ValidateStrictModeConditions(data.Item, metadata);
             }
 
             isOk = await SendListen(userConfig, data.Item, metadata, now, CancellationToken.None);
@@ -191,10 +191,10 @@ public class PlaybackStopHandler : GenericHandler<PlaybackStopEventArgs>
         _logger.LogInformation("Listen has been added to the cache");
     }
 
-    private void ValidateStrictModeConditions(Audio item)
+    private void ValidateStrictModeConditions(Audio item, AudioItemMetadata? metadata)
     {
         _logger.LogDebug("Strict mode enabled, validating strict mode conditions...");
-        _validationService.ValidateStrictModeConditions(item);
+        _validationService.ValidateStrictModeConditions(item, metadata);
         _logger.LogInformation("Strict mode validation passed");
     }
 }
