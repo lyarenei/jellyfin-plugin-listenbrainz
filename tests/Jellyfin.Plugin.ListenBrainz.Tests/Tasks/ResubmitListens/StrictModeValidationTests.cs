@@ -47,7 +47,7 @@ public class StrictModeValidationTests : TestBase
         await _task.ProcessChunkOfListens(listens, userConfig, token);
 
         _validationServiceMock.Verify(
-            vs => vs.ValidateStrictModeConditions(It.IsAny<Audio>()),
+            vs => vs.ValidateStrictModeConditions(It.IsAny<Audio>(), null),
             Times.Never);
 
         _listenBrainzServiceMock.Verify(
@@ -71,7 +71,7 @@ public class StrictModeValidationTests : TestBase
             .Returns(new Audio());
 
         _validationServiceMock
-            .Setup(vs => vs.ValidateStrictModeConditions(It.IsAny<Audio>()));
+            .Setup(vs => vs.ValidateStrictModeConditions(It.IsAny<Audio>(), null));
 
         _listenBrainzServiceMock
             .Setup(lb => lb.SendListensAsync(userConfig, It.IsAny<IEnumerable<Listen>>(), token))
@@ -80,7 +80,7 @@ public class StrictModeValidationTests : TestBase
         await _task.ProcessChunkOfListens(listens, userConfig, token);
 
         _validationServiceMock.Verify(
-            vs => vs.ValidateStrictModeConditions(It.IsAny<Audio>()),
+            vs => vs.ValidateStrictModeConditions(It.IsAny<Audio>(), null),
             Times.Exactly(2));
 
         _listenBrainzServiceMock.Verify(
@@ -111,7 +111,7 @@ public class StrictModeValidationTests : TestBase
             .Returns(invalidItem);
 
         _validationServiceMock
-            .Setup(vs => vs.ValidateStrictModeConditions(It.Is<Audio>(a => ReferenceEquals(a, invalidItem))))
+            .Setup(vs => vs.ValidateStrictModeConditions(It.Is<Audio>(a => ReferenceEquals(a, invalidItem)), null))
             .Throws(new ValidationException("Missing MBID"));
 
         _listenBrainzServiceMock
@@ -147,7 +147,7 @@ public class StrictModeValidationTests : TestBase
             .Returns(new Audio());
 
         _validationServiceMock
-            .Setup(vs => vs.ValidateStrictModeConditions(It.IsAny<Audio>()))
+            .Setup(vs => vs.ValidateStrictModeConditions(It.IsAny<Audio>(), null))
             .Throws(new ValidationException("Missing MBID"));
 
         await _task.ProcessChunkOfListens(listens, userConfig, token);
@@ -177,13 +177,13 @@ public class StrictModeValidationTests : TestBase
         };
 
         _validationServiceMock
-            .Setup(vs => vs.ValidateStrictModeConditions(item));
+            .Setup(vs => vs.ValidateStrictModeConditions(item, null));
 
         var result = _task.IsStrictModeValid(item, listen);
 
         Assert.True(result);
         _validationServiceMock.Verify(
-            vs => vs.ValidateStrictModeConditions(item),
+            vs => vs.ValidateStrictModeConditions(item, null),
             Times.Once);
     }
 
@@ -198,14 +198,14 @@ public class StrictModeValidationTests : TestBase
         };
 
         _validationServiceMock
-            .Setup(vs => vs.ValidateStrictModeConditions(item))
+            .Setup(vs => vs.ValidateStrictModeConditions(item, null))
             .Throws(new ValidationException("Missing MBID"));
 
         var result = _task.IsStrictModeValid(item, listen);
 
         Assert.False(result);
         _validationServiceMock.Verify(
-            vs => vs.ValidateStrictModeConditions(item),
+            vs => vs.ValidateStrictModeConditions(item, null),
             Times.Once);
     }
 }

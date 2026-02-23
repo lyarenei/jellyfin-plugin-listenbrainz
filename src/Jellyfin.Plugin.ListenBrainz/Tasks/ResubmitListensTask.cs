@@ -154,7 +154,7 @@ public class ResubmitListensTask : IScheduledTask
     {
         try
         {
-            _validationService.ValidateStrictModeConditions(item);
+            _validationService.ValidateStrictModeConditions(item, listen.Metadata);
             return true;
         }
         catch (ValidationException e)
