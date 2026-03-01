@@ -1,6 +1,7 @@
 import { ConfigApiClient } from "../apiClient";
 import { getUserConfig } from "../utils";
-import { getUserConfigFormData } from "../formHelpers";
+import { getGeneralConfigFormData, getUserConfigFormData } from "../formHelpers";
+import { PluginConfiguration } from "../types";
 
 export function registerSubmitButtonHook(view: HTMLElement) {
     const configForm = view.querySelector("#ListenBrainzPluginConfigForm") as HTMLFormElement;
@@ -16,7 +17,7 @@ export function registerSubmitButtonHook(view: HTMLElement) {
 
             switch (event.submitter?.id) {
                 case "SaveGeneralConfig":
-                    // Still handled by JS implementation
+                    await saveGeneralConfig(view, currentPluginConfig);
                     break;
                 case "SaveUserConfig":
                     await saveUserConfig(view, currentPluginConfig, selectedUserId);
@@ -26,12 +27,23 @@ export function registerSubmitButtonHook(view: HTMLElement) {
                     Dashboard.alert("Unknown action");
             }
         } catch (e) {
-            console.log("ListenBrainz plugin: Failed to save configuration: " + e);
+            console.log("ListenBrainz plugin: Failed to save configuration: " + JSON.stringify(e));
             Dashboard.alert("Failed to save configuration");
         } finally {
             Dashboard.hideLoadingMsg();
         }
     });
+}
+
+async function saveGeneralConfig(view: HTMLElement, currentPluginConfig: PluginConfiguration) {
+    const newGeneralConfig = getGeneralConfigFormData(view);
+    const updatedPluginConfig: PluginConfiguration = {
+        ...newGeneralConfig,
+        UserConfigs: currentPluginConfig.UserConfigs,
+    };
+
+    const resp = await ConfigApiClient.savePluginConfiguration(updatedPluginConfig);
+    Dashboard.processPluginConfigurationUpdateResult(resp);
 }
 
 async function saveUserConfig(view: HTMLElement, currentPluginConfig: PluginConfiguration, selectedUserId: string) {

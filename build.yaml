@@ -1,7 +1,7 @@
 ---
 name: "ListenBrainz"
 guid: "59B20823-AAFE-454C-A393-17427F518631"
-version: "6.2.0.6"
+version: "6.2.1.2"
 targetAbi: "10.11.0.0"
 framework: "net9.0"
 overview: "Track your music habits with ListenBrainz."
@@ -18,3 +18,5 @@ artifacts:
 changelog: >
   Maintenance:
     - Typescript integration for config page
+  Fix:
+    - Strict mode not working with fetched metadata -- @Maxr1998

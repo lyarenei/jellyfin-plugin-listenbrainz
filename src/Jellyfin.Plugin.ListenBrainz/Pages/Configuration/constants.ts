@@ -1,3 +1,5 @@
+import { PluginUserConfig } from "./types";
+
 // ID of the plugin. Must be the same as the ID in Plugin.cs file.
 export const pluginUUID = "59B20823-AAFE-454C-A393-17427F518631";
 
@@ -12,3 +14,6 @@ export const userDefaults: PluginUserConfig = {
     JellyfinUserId: "",
     UserName: "",
 };
+
+export const defaultListenBrainzApiUrl = "https://api.listenbrainz.org";
+export const defaultMusicBrainzApiUrl = "https://musicbrainz.org";

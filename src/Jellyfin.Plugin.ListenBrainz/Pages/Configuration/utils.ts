@@ -1,4 +1,5 @@
 import { userDefaults } from "./constants";
+import { PluginConfiguration, PluginUserConfig } from "./types";
 
 /**
  * Retrieves the configuration for a specific user from the plugin configuration.
@@ -13,4 +14,8 @@ export function getUserConfig(config: PluginConfiguration, userId: string): Plug
             JellyfinUserId: userId,
         }
     );
+}
+
+export function getUniqueLibraryName(libraryId: string): string {
+    return `library_${libraryId}_IsAllowed`;
 }
