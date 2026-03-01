@@ -189,21 +189,6 @@
         </div>
     </div>
     <script type="text/javascript">
-        // Cannot use let because of redeclaration.
-        var ListenBrainzConfig = {
-            PluginUniqueId: "59B20823-AAFE-454C-A393-17427F518631",
-            UserDefaults: {
-                JellyfinUserId: "",
-                ApiToken: "",
-                IsListenSubmitEnabled: false,
-                IsFavoritesSyncEnabled: false,
-                IsPlaylistsSyncEnabled: false,
-                IsAllPlaylistsSyncEnabled: false,
-                IsUserBackupEnabled: false,
-                IsStrictModeEnabled: false,
-            },
-        };
-
         document.querySelector('#ListenBrainzConfigPage')
             .addEventListener('pageshow', () => {
                 onPageShow();
@@ -212,36 +197,6 @@
         function onPageShow() {
             loadCss('bootstrap-grid.min.css');
             loadCss('styles.css');
-        }
-
-        function onSaveGeneralConfig() {
-            Dashboard.showLoadingMsg();
-            ApiClient.getPluginConfiguration(ListenBrainzConfig.PluginUniqueId)
-                .then((config) => {
-                    let newConfig = getGeneralConfigInputs();
-                    newConfig.UserConfigs = config.UserConfigs;
-                    saveConfig(newConfig);
-                })
-                .catch((reason) => {
-                    console.log("ListenBrainz plugin: Failed to get plugin config: " + reason);
-                    Dashboard.alert("Saving config failed");
-                });
-
-            Dashboard.hideLoadingMsg();
-        }
-
-        function onSubmitConfigForm(buttonId) {
-            switch (buttonId) {
-                case 'SaveGeneralConfig':
-                    onSaveGeneralConfig();
-                    break;
-                case 'SaveUserConfig':
-                    // implemented in ts
-                    break;
-                default:
-                    console.log("ListenBrainz plugin: invalid submitter ID");
-                    Dashboard.alert("Something went wrong");
-            }
         }
 
         function loadCss(fileName) {
@@ -257,69 +212,6 @@
                 styleTag.setAttribute('data-lb-css', fileName);
                 styleTag.innerText = cssValue;
                 document.getElementsByTagName("head")[0].appendChild(styleTag);
-            });
-        }
-
-        function getGeneralConfigInputs() {
-            return {
-                ListenBrainzApiUrl: document.querySelector('#ListenBrainzApiUrl').value,
-                MusicBrainzApiUrl: document.querySelector('#MusicBrainzApiUrl').value,
-                IsMusicBrainzEnabled: document.querySelector('#IsMusicBrainzEnabled').checked,
-                IsAlternativeModeEnabled: document.querySelector('#IsAlternativeModeEnabled').checked,
-                IsImmediateFavoriteSyncEnabled: document.querySelector('#IsImmediateFavoriteSyncEnabled').checked,
-                IsAllPlaylistsSyncEnabled: document.querySelector('#IsAllPlaylistsSyncEnabled').checked,
-                BackupPath: document.querySelector('#BackupPath').value,
-                LibraryConfigs: getLibraryConfigsInputs(),
-            }
-        }
-
-        function getLibraryConfigsInputs() {
-            const checkboxes = document.querySelectorAll('[name^=library_]');
-            return [...checkboxes].map(box => {
-                return {
-                    Id: box.id,
-                    IsAllowed: box.checked,
-                };
-            });
-        }
-
-        function saveConfig(newConfig) {
-            ApiClient.updatePluginConfiguration(ListenBrainzConfig.PluginUniqueId, newConfig)
-                .then((result) => {
-                    Dashboard.processPluginConfigurationUpdateResult(result);
-                })
-                .catch((reason) => {
-                    console.log("ListenBrainz plugin: Failed to save config: " + reason);
-                    Dashboard.alert("Failed to save plugin config");
-                });
-        }
-
-        ApiClient.ValidateListenBrainzToken = function (apiToken) {
-            let url = this.getUrl('ListenBrainzPlugin/ValidateToken');
-            return this.ajax({
-                type: "POST",
-                url: url,
-                data: JSON.stringify(apiToken),
-                contentType: "application/json",
-                dataType: "json",
-            });
-        }
-
-        ApiClient.GetAllLibraries = function () {
-            let url = this.getUrl('ListenBrainzPlugin/internal/libraries');
-            return this.ajax({
-                type: "GET",
-                url: url,
-                dataType: "json",
-            });
-        }
-
-        ApiClient.GetMusicLibraries = function () {
-            let url = this.getUrl('ListenBrainzPlugin/internal/musicLibraries');
-            return this.ajax({
-                type: "GET",
-                url: url,
-                dataType: "json",
             });
         }
     </script>
