@@ -48,6 +48,29 @@ export function getUserConfigFormData(view: HTMLElement): PluginUserConfig {
     };
 }
 
+export function getGeneralConfigFormData(view: HTMLElement): Omit<PluginConfiguration, "UserConfigs"> {
+    const elements = getGeneralConfigFormElements(view);
+    return {
+        BackupPath: elements.backupPath.value,
+        IsAllPlaylistsSyncEnabled: elements.allPlaylistsEnabled.checked,
+        IsAlternativeModeEnabled: elements.altModeEnabled.checked,
+        IsImmediateFavoriteSyncEnabled: elements.immediateFavorites.checked,
+        IsMusicBrainzEnabled: elements.musicBrainzEnabled.checked,
+        LibraryConfigs: getLibraryConfigsFormData(view),
+        ListenBrainzApiUrl: elements.listenBrainzUrl.value,
+        MusicBrainzApiUrl: elements.musicBrainzUrl.value,
+    };
+}
+
+function getLibraryConfigsFormData(view: HTMLElement): LibraryConfig[] {
+    const checkboxes = view.querySelectorAll<HTMLInputElement>("[name^=library_]");
+    return [...checkboxes].map((box) => ({
+        Id: box.id,
+        Name: "",
+        IsAllowed: box.checked,
+    }));
+}
+
 export function fillGeneralConfigForm(
     view: HTMLElement,
     pluginConfig: PluginConfiguration,

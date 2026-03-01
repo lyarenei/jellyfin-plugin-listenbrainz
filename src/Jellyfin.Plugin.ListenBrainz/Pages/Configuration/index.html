@@ -209,12 +209,6 @@
                 onPageShow();
             });
 
-        document.querySelector('#ListenBrainzPluginConfigForm')
-            .addEventListener('submit', (event) => {
-                event.preventDefault();
-                onSubmitConfigForm(event.submitter.id);
-            });
-
         function onPageShow() {
             loadCss('bootstrap-grid.min.css');
             loadCss('styles.css');
