@@ -1,6 +1,5 @@
 export interface LibraryConfig {
     Id: string;
-    Name: string;
     IsAllowed: boolean;
 }
 
