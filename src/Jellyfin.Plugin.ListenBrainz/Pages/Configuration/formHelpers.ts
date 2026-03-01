@@ -66,7 +66,7 @@ export function getGeneralConfigFormData(view: HTMLElement): Omit<PluginConfigur
 function getLibraryConfigsFormData(view: HTMLElement): LibraryConfig[] {
     const checkboxes = view.querySelectorAll<HTMLInputElement>("[name^=library_]");
     return [...checkboxes].map((box) => ({
-        Id: box.id,
+        Id: box.id.replace(/^library_/, "").replace(/_IsAllowed$/, ""),
         Name: "",
         IsAllowed: box.checked,
     }));
