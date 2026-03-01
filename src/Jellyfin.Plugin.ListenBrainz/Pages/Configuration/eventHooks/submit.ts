@@ -27,7 +27,7 @@ export function registerSubmitButtonHook(view: HTMLElement) {
                     Dashboard.alert("Unknown action");
             }
         } catch (e) {
-            console.log("ListenBrainz plugin: Failed to save configuration: " + e);
+            console.log("ListenBrainz plugin: Failed to save configuration: " + JSON.stringify(e));
             Dashboard.alert("Failed to save configuration");
         } finally {
             Dashboard.hideLoadingMsg();
