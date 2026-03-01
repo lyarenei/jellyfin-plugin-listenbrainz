@@ -46,10 +46,6 @@ function buildLibrariesList(view: HTMLElement, libraries: MediaLibrary[]) {
         const label = document.createElement("label");
         label.classList.add("inputLabel", "inputLabelUnfocused");
         label.htmlFor = getUniqueLibraryName(library.Id);
-        label.onclick = (_) => {
-            const checkbox = document.getElementById(library.Id) as HTMLInputElement;
-            checkbox.checked = !checkbox.checked;
-        };
 
         const checkbox = document.createElement("input");
         checkbox.setAttribute("is", "emby-checkbox");
