@@ -3,6 +3,7 @@ import { userDefaults } from "./constants";
 import { fillGeneralConfigForm, fillUserConfigForm } from "./formHelpers";
 import registerEventHooks from "./eventHooks";
 import { getUniqueLibraryName } from "./utils";
+import { MediaLibrary } from "./types";
 
 /**
  * Sets up the plugin config page. Should be only called once (when the page is first loaded).

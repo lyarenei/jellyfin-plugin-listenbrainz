@@ -1,6 +1,7 @@
 import { ConfigApiClient } from "../apiClient";
 import { getUserConfig } from "../utils";
 import { getGeneralConfigFormData, getUserConfigFormData } from "../formHelpers";
+import { PluginConfiguration } from "../types";
 
 export function registerSubmitButtonHook(view: HTMLElement) {
     const configForm = view.querySelector("#ListenBrainzPluginConfigForm") as HTMLFormElement;

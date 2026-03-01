@@ -1,4 +1,5 @@
 import { userDefaults } from "./constants";
+import { PluginConfiguration, PluginUserConfig } from "./types";
 
 /**
  * Retrieves the configuration for a specific user from the plugin configuration.

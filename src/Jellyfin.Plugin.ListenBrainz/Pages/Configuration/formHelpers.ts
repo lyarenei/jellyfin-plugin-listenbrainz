@@ -1,4 +1,5 @@
 import { getUniqueLibraryName } from "./utils";
+import { LibraryConfig, MediaLibrary, PluginConfiguration, PluginUserConfig } from "./types";
 
 function getUserConfigFormElements(view: HTMLElement) {
     return {

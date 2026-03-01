@@ -1,16 +1,16 @@
-interface LibraryConfig {
+export interface LibraryConfig {
     Id: string;
     Name: string;
     IsAllowed: boolean;
 }
 
-interface MediaLibrary {
+export interface MediaLibrary {
     Id: string;
     Name: string;
     IsMusicLibrary: boolean;
 }
 
-interface PluginConfiguration {
+export interface PluginConfiguration {
     BackupPath: string;
     IsAllPlaylistsSyncEnabled: boolean;
     IsAlternativeModeEnabled: boolean;
@@ -24,7 +24,7 @@ interface PluginConfiguration {
 
 // Plugin user configuration.
 // The keys must match the fields of UserConfig class.
-interface PluginUserConfig {
+export interface PluginUserConfig {
     ApiToken: string;
     IsBackupEnabled: boolean;
     IsFavoritesSyncEnabled: boolean;
@@ -35,7 +35,7 @@ interface PluginUserConfig {
     UserName: string;
 }
 
-interface TokenValidationResult {
+export interface TokenValidationResult {
     IsValid: boolean;
     Reason: string;
     UserName: string;

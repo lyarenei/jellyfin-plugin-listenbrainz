@@ -1,4 +1,5 @@
 import { pluginUUID } from "./constants";
+import { MediaLibrary, PluginConfiguration, TokenValidationResult } from "./types";
 
 export const ConfigApiClient = {
     getLibraries: async (): Promise<MediaLibrary[]> => {
