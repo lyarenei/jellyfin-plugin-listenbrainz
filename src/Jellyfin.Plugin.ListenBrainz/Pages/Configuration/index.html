@@ -209,11 +209,6 @@
                 onPageShow();
             });
 
-        document.querySelector('#ResetAllowedLibraries')
-            .addEventListener('mouseup', () => {
-                onAllowedLibrariesReset();
-            });
-
         document.querySelector('#ListenBrainzPluginConfigForm')
             .addEventListener('submit', (event) => {
                 event.preventDefault();
@@ -253,20 +248,6 @@
                     console.log("ListenBrainz plugin: invalid submitter ID");
                     Dashboard.alert("Something went wrong");
             }
-        }
-
-        async function onAllowedLibrariesReset() {
-            const allLibraries = await ApiClient.GetAllLibraries();
-
-            function isAllowed(libraryId) {
-                const library = allLibraries.find(lib => lib.Id === libraryId);
-                if (library) return library.LibraryType === 'music';
-            }
-
-            allLibraries.forEach((library) => {
-                let checkbox = document.getElementById(library.Id);
-                checkbox.checked = isAllowed(library.Id) ?? false;
-            });
         }
 
         function loadCss(fileName) {

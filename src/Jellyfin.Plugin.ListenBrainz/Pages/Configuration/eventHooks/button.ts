@@ -1,5 +1,15 @@
 import { defaultListenBrainzApiUrl, defaultMusicBrainzApiUrl } from "../constants";
 
+export function registerResetAllowedLibrariesButtonHook(view: HTMLElement) {
+    const resetButton = view.querySelector("#ResetAllowedLibraries") as HTMLButtonElement;
+    resetButton.addEventListener("click", () => {
+        const checkboxes = view.querySelectorAll<HTMLInputElement>("[name^=library_]");
+        for (const checkbox of checkboxes) {
+            checkbox.checked = checkbox.dataset.musicLibrary === "true";
+        }
+    });
+}
+
 export function registerResetListenBrainzApiUrlButtonHook(view: HTMLElement) {
     const resetButton = view.querySelector("#ResetListenBrainzApiUrl") as HTMLButtonElement;
     resetButton.addEventListener("click", async () => {

@@ -55,6 +55,7 @@ function buildLibrariesList(view: HTMLElement, libraries: MediaLibrary[]) {
         checkbox.type = "checkbox";
         checkbox.id = getUniqueLibraryName(library.Id);
         checkbox.name = getUniqueLibraryName(library.Id);
+        checkbox.dataset.musicLibrary = String(library.IsMusicLibrary);
 
         const span = document.createElement("span");
         span.textContent = library.Name;
