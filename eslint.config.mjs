@@ -10,6 +10,7 @@ export default tseslint.config(
         files: ["src/**/*.ts"],
         extends: [eslint.configs.recommended, ...tseslint.configs.recommended, prettier],
         rules: {
+            "no-unused-vars": "off",
             "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
             "no-restricted-globals": [
                 "error",
