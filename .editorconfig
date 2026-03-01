@@ -24,6 +24,17 @@ indent_size = 2
 indent_size = 2
 
 ###############################
+# TypeScript                  #
+###############################
+[*.{ts,mts,tsx}]
+quote_type = double
+ij_typescript_use_double_quoted_strings = true
+ij_typescript_use_semicolon_after_statement = true
+ij_typescript_trailing_comma = all
+ij_typescript_spaces_within_imports = true
+ij_typescript_spaces_within_object_literal_braces = true
+
+###############################
 # .NET Coding Conventions     #
 ###############################
 [*.{cs,vb}]
@@ -84,7 +95,7 @@ dotnet_naming_symbols.constants.required_modifiers = const
 
 dotnet_naming_style.constant_style.capitalization = pascal_case
 
-# Static fields are camelCase and start with s_
+# Static fields are camelCase and start with _
 dotnet_naming_rule.static_fields_should_be_camel_case.severity = suggestion
 dotnet_naming_rule.static_fields_should_be_camel_case.symbols = static_fields
 dotnet_naming_rule.static_fields_should_be_camel_case.style = static_field_style
