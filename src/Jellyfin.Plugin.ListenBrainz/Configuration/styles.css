@@ -6,3 +6,39 @@
     justify-content: center;
     text-align: center;
 }
+
+.tab-bar {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 1em;
+}
+
+.tab-button {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: inherit;
+    cursor: pointer;
+    font-size: inherit;
+    padding: 0.75em 1.25em;
+    opacity: 0.7;
+    transition: opacity 0.2s, border-color 0.2s;
+}
+
+.tab-button:hover {
+    opacity: 1;
+}
+
+.tab-button.active {
+    opacity: 1;
+    border-bottom-color: #00a4dc;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
