@@ -1,5 +1,5 @@
 import { getUniqueLibraryName } from "./utils";
-import { LibraryConfig, MediaLibrary, PluginConfiguration, PluginUserConfig } from "./types";
+import { MediaLibrary, PluginConfiguration, PluginUserConfig } from "./types";
 
 // ── User Config ──
 
@@ -60,7 +60,10 @@ export function fillGeneralConfigForm(view: HTMLElement, pluginConfig: PluginCon
 
 export function getGeneralConfigFormData(
     view: HTMLElement,
-): Pick<PluginConfiguration, "ListenBrainzApiUrl" | "IsAlternativeModeEnabled" | "IsImmediateFavoriteSyncEnabled" | "IsAllPlaylistsSyncEnabled"> {
+): Pick<
+    PluginConfiguration,
+    "ListenBrainzApiUrl" | "IsAlternativeModeEnabled" | "IsImmediateFavoriteSyncEnabled" | "IsAllPlaylistsSyncEnabled"
+> {
     const elements = getGeneralConfigFormElements(view);
     return {
         IsAllPlaylistsSyncEnabled: elements.allPlaylistsEnabled.checked,
