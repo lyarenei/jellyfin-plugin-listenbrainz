@@ -1,6 +1,12 @@
 import { registerUserDropdownChangeHook } from "./userDropdown";
 import { registerApiTokenCheckButtonHook } from "./apiToken";
-import { registerSubmitButtonHook } from "./submit";
+import {
+    registerBackupConfigSubmitHook,
+    registerGeneralConfigSubmitHook,
+    registerLibrariesConfigSubmitHook,
+    registerMusicBrainzConfigSubmitHook,
+    registerUserConfigSubmitHook,
+} from "./submit";
 import {
     registerBackupPathBrowserButtonHook,
     registerResetAllowedLibrariesButtonHook,
@@ -17,5 +23,9 @@ export default function registerEventHooks(view: HTMLElement) {
     registerBackupPathBrowserButtonHook(view);
     registerResetAllowedLibrariesButtonHook(view);
 
-    registerSubmitButtonHook(view);
+    registerUserConfigSubmitHook(view);
+    registerGeneralConfigSubmitHook(view);
+    registerMusicBrainzConfigSubmitHook(view);
+    registerBackupConfigSubmitHook(view);
+    registerLibrariesConfigSubmitHook(view);
 }
