@@ -235,34 +235,6 @@
             </div>
         </div>
     </div>
-    <script type="text/javascript">
-        document.querySelector('#ListenBrainzConfigPage')
-            .addEventListener('pageshow', () => {
-                // TODO: remove with redesign of the page
-                onPageShow();
-            });
-
-        function onPageShow() {
-            loadCss('bootstrap-grid.min.css');
-            loadCss('styles.css');
-        }
-
-        function loadCss(fileName) {
-            let path = 'ListenBrainzPlugin/internal/styles/' + fileName;
-            let exists = document.querySelector('style[data-lb-css="' + fileName + '"]');
-            if (exists) return;
-
-            ApiClient.ajax({
-                type: "GET",
-                url: ApiClient.getUrl(path),
-            }).then((cssValue) => {
-                let styleTag = document.createElement("style");
-                styleTag.setAttribute('data-lb-css', fileName);
-                styleTag.innerText = cssValue;
-                document.getElementsByTagName("head")[0].appendChild(styleTag);
-            });
-        }
-    </script>
 </div>
 </body>
 </html>

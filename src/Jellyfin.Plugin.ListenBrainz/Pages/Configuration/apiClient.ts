@@ -2,10 +2,16 @@ import { pluginUUID } from "./constants";
 import { MediaLibrary, PluginConfiguration, TokenValidationResult } from "./types";
 
 export const ConfigApiClient = {
+    ajax: (options: AjaxOptions): Promise<unknown> => {
+        return ApiClient.ajax(options);
+    },
+    getUrl: (path: string): Promise<string> => {
+        return ApiClient.getUrl(path);
+    },
     getLibraries: async (): Promise<MediaLibrary[]> => {
         try {
-            const url = await ApiClient.getUrl("ListenBrainzPlugin/internal/libraries");
-            const response = await ApiClient.ajax({
+            const url = await ConfigApiClient.getUrl("ListenBrainzPlugin/internal/libraries");
+            const response = await ConfigApiClient.ajax({
                 contentType: "application/json",
                 dataType: "json",
                 type: "GET",
@@ -29,8 +35,8 @@ export const ConfigApiClient = {
     },
     validateListenBrainzToken: async (apiToken: string): Promise<TokenValidationResult> => {
         try {
-            const url = await ApiClient.getUrl("/ListenBrainzPlugin/ValidateToken");
-            const response = await ApiClient.ajax({
+            const url = await ConfigApiClient.getUrl("/ListenBrainzPlugin/ValidateToken");
+            const response = await ConfigApiClient.ajax({
                 contentType: "application/json",
                 data: JSON.stringify(apiToken),
                 dataType: "json",
