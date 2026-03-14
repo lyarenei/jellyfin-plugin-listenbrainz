@@ -1,10 +1,37 @@
-.vertical-center {
-    align-self: center;
+.form-container {
+    width: 100%;
 }
 
-.horizontal-center {
-    justify-content: center;
-    text-align: center;
+.input-row {
+    display: flex;
+    align-items: center;
+    gap: 1em;
+}
+
+.input-field {
+    flex: 1;
+    min-width: 0;
+}
+
+.checkboxContainer {
+    display: block;
+}
+
+.input-row label {
+    display: none;
+}
+
+.input-row > .emby-button {
+    flex: 0 0 auto;
+    width: auto;
+    padding-top: 0.68em;
+    padding-bottom: 0.68em;
+}
+
+.headerHelpButton {
+    margin-left: 1em;
+    font-size: 0.8em;
+    padding: 0.4em 0.8em;
 }
 
 .tab-bar {
