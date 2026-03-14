@@ -163,11 +163,6 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
                 Name = $"{Name}.styles.css",
                 EmbeddedResourcePath = string.Format(CultureInfo.InvariantCulture, "{0}.Pages.Configuration.styles.css", GetType().Namespace),
             },
-            new PluginPageInfo
-            {
-                Name = $"{Name}.bootstrap-grid.css",
-                EmbeddedResourcePath = string.Format(CultureInfo.InvariantCulture, "{0}.Pages.bootstrap-grid.min.css", GetType().Namespace),
-            },
         ];
     }
 
