@@ -21,7 +21,7 @@ async function loadCss(pageName: string): Promise<void> {
 }
 
 async function loadStyles(): Promise<void> {
-    await Promise.all([loadCss("ListenBrainz.bootstrap-grid.css"), loadCss("ListenBrainz.styles.css")]);
+    await loadCss("ListenBrainz.styles.css");
 }
 
 export default function (view: HTMLElement, _params: Record<string, string>) {
