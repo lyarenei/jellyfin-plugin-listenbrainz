@@ -32,7 +32,9 @@ export default function (view: HTMLElement, _params: Record<string, string>) {
         Dashboard.showLoadingMsg();
         try {
             if (!isSetUp) {
-                await loadStyles();
+                loadStyles().catch((e) => {
+                    console.warn("ListenBrainz plugin: Failed to load configuration page styles:", e);
+                });
                 await setUpPluginConfigPage(view);
                 isSetUp = true;
             }
