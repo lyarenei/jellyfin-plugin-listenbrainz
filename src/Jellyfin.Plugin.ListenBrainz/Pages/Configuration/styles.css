@@ -1,0 +1,71 @@
+.form-container {
+    width: 100%;
+}
+
+.input-row {
+    display: flex;
+    align-items: center;
+    gap: 1em;
+}
+
+.input-field {
+    flex: 1;
+    min-width: 0;
+}
+
+.checkboxContainer {
+    display: block;
+}
+
+.input-row label {
+    display: none;
+}
+
+.input-row > .emby-button {
+    flex: 0 0 auto;
+    width: auto;
+    padding-top: 0.68em;
+    padding-bottom: 0.68em;
+}
+
+.headerHelpButton {
+    margin-left: 1em;
+    font-size: 0.8em;
+    padding: 0.4em 0.8em;
+}
+
+.tab-bar {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 1em;
+}
+
+.tab-button {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: inherit;
+    cursor: pointer;
+    font-size: inherit;
+    padding: 0.75em 1.25em;
+    opacity: 0.7;
+    transition: opacity 0.2s, border-color 0.2s;
+}
+
+.tab-button:hover {
+    opacity: 1;
+}
+
+.tab-button.active {
+    opacity: 1;
+    border-bottom-color: #00a4dc;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}

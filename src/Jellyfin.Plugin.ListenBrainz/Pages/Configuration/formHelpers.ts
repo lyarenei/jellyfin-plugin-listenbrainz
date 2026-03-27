@@ -1,5 +1,7 @@
 import { getUniqueLibraryName } from "./utils";
-import { LibraryConfig, MediaLibrary, PluginConfiguration, PluginUserConfig } from "./types";
+import { MediaLibrary, PluginConfiguration, PluginUserConfig } from "./types";
+
+// ── User Config ──
 
 function getUserConfigFormElements(view: HTMLElement) {
     return {
@@ -10,18 +12,6 @@ function getUserConfigFormElements(view: HTMLElement) {
         playlistsSync: view.querySelector("#IsPlaylistsSyncEnabled") as HTMLInputElement,
         strictMode: view.querySelector("#IsStrictModeEnabled") as HTMLInputElement,
         userDropdown: view.querySelector("#JellyfinUser") as HTMLSelectElement,
-    };
-}
-
-function getGeneralConfigFormElements(view: HTMLElement) {
-    return {
-        allPlaylistsEnabled: view.querySelector("#IsAllPlaylistsSyncEnabled") as HTMLInputElement,
-        altModeEnabled: view.querySelector("#IsAlternativeModeEnabled") as HTMLInputElement,
-        backupPath: view.querySelector("#BackupPath") as HTMLInputElement,
-        immediateFavorites: view.querySelector("#IsImmediateFavoriteSyncEnabled") as HTMLInputElement,
-        listenBrainzUrl: view.querySelector("#ListenBrainzApiUrl") as HTMLInputElement,
-        musicBrainzEnabled: view.querySelector("#IsMusicBrainzEnabled") as HTMLInputElement,
-        musicBrainzUrl: view.querySelector("#MusicBrainzApiUrl") as HTMLInputElement,
     };
 }
 
@@ -49,42 +39,92 @@ export function getUserConfigFormData(view: HTMLElement): PluginUserConfig {
     };
 }
 
-export function getGeneralConfigFormData(view: HTMLElement): Omit<PluginConfiguration, "UserConfigs"> {
+// ── General Config ──
+
+function getGeneralConfigFormElements(view: HTMLElement) {
+    return {
+        allPlaylistsEnabled: view.querySelector("#IsAllPlaylistsSyncEnabled") as HTMLInputElement,
+        altModeEnabled: view.querySelector("#IsAlternativeModeEnabled") as HTMLInputElement,
+        immediateFavorites: view.querySelector("#IsImmediateFavoriteSyncEnabled") as HTMLInputElement,
+        listenBrainzUrl: view.querySelector("#ListenBrainzApiUrl") as HTMLInputElement,
+    };
+}
+
+export function fillGeneralConfigForm(view: HTMLElement, pluginConfig: PluginConfiguration): void {
+    const elements = getGeneralConfigFormElements(view);
+    elements.allPlaylistsEnabled.checked = pluginConfig.IsAllPlaylistsSyncEnabled;
+    elements.altModeEnabled.checked = pluginConfig.IsAlternativeModeEnabled;
+    elements.immediateFavorites.checked = pluginConfig.IsImmediateFavoriteSyncEnabled;
+    elements.listenBrainzUrl.value = pluginConfig.ListenBrainzApiUrl;
+}
+
+export function getGeneralConfigFormData(
+    view: HTMLElement,
+): Pick<
+    PluginConfiguration,
+    "ListenBrainzApiUrl" | "IsAlternativeModeEnabled" | "IsImmediateFavoriteSyncEnabled" | "IsAllPlaylistsSyncEnabled"
+> {
     const elements = getGeneralConfigFormElements(view);
     return {
-        BackupPath: elements.backupPath.value,
         IsAllPlaylistsSyncEnabled: elements.allPlaylistsEnabled.checked,
         IsAlternativeModeEnabled: elements.altModeEnabled.checked,
         IsImmediateFavoriteSyncEnabled: elements.immediateFavorites.checked,
-        IsMusicBrainzEnabled: elements.musicBrainzEnabled.checked,
-        LibraryConfigs: getLibraryConfigsFormData(view),
         ListenBrainzApiUrl: elements.listenBrainzUrl.value,
+    };
+}
+
+// ── MusicBrainz Config ──
+
+function getMusicBrainzConfigFormElements(view: HTMLElement) {
+    return {
+        musicBrainzEnabled: view.querySelector("#IsMusicBrainzEnabled") as HTMLInputElement,
+        musicBrainzUrl: view.querySelector("#MusicBrainzApiUrl") as HTMLInputElement,
+    };
+}
+
+export function fillMusicBrainzConfigForm(view: HTMLElement, pluginConfig: PluginConfiguration): void {
+    const elements = getMusicBrainzConfigFormElements(view);
+    elements.musicBrainzEnabled.checked = pluginConfig.IsMusicBrainzEnabled;
+    elements.musicBrainzUrl.value = pluginConfig.MusicBrainzApiUrl;
+}
+
+export function getMusicBrainzConfigFormData(
+    view: HTMLElement,
+): Pick<PluginConfiguration, "IsMusicBrainzEnabled" | "MusicBrainzApiUrl"> {
+    const elements = getMusicBrainzConfigFormElements(view);
+    return {
+        IsMusicBrainzEnabled: elements.musicBrainzEnabled.checked,
         MusicBrainzApiUrl: elements.musicBrainzUrl.value,
     };
 }
 
-function getLibraryConfigsFormData(view: HTMLElement): LibraryConfig[] {
-    const checkboxes = view.querySelectorAll<HTMLInputElement>("[name^=library_]");
-    return [...checkboxes].map((box) => ({
-        Id: box.id.replace(/^library_/, "").replace(/_IsAllowed$/, ""),
-        IsAllowed: box.checked,
-    }));
+// ── Backup Config ──
+
+function getBackupConfigFormElements(view: HTMLElement) {
+    return {
+        backupPath: view.querySelector("#BackupPath") as HTMLInputElement,
+    };
 }
 
-export function fillGeneralConfigForm(
+export function fillBackupConfigForm(view: HTMLElement, pluginConfig: PluginConfiguration): void {
+    const elements = getBackupConfigFormElements(view);
+    elements.backupPath.value = pluginConfig.BackupPath;
+}
+
+export function getBackupConfigFormData(view: HTMLElement): Pick<PluginConfiguration, "BackupPath"> {
+    const elements = getBackupConfigFormElements(view);
+    return {
+        BackupPath: elements.backupPath.value,
+    };
+}
+
+// ── Libraries Config ──
+
+export function fillLibrariesConfigForm(
     view: HTMLElement,
     pluginConfig: PluginConfiguration,
     jellyfinLibraries: MediaLibrary[],
 ): void {
-    const elements = getGeneralConfigFormElements(view);
-    elements.allPlaylistsEnabled.checked = pluginConfig.IsAllPlaylistsSyncEnabled;
-    elements.altModeEnabled.checked = pluginConfig.IsAlternativeModeEnabled;
-    elements.backupPath.value = pluginConfig.BackupPath;
-    elements.immediateFavorites.checked = pluginConfig.IsImmediateFavoriteSyncEnabled;
-    elements.listenBrainzUrl.value = pluginConfig.ListenBrainzApiUrl;
-    elements.musicBrainzEnabled.checked = pluginConfig.IsMusicBrainzEnabled;
-    elements.musicBrainzUrl.value = pluginConfig.MusicBrainzApiUrl;
-
     if (pluginConfig.LibraryConfigs.length > 0) {
         pluginConfig.LibraryConfigs.map((lc) => {
             const checkboxId = getUniqueLibraryName(lc.Id);
@@ -104,4 +144,14 @@ export function fillGeneralConfigForm(
             checkbox.checked = library.IsMusicLibrary;
         }
     });
+}
+
+export function getLibrariesConfigFormData(view: HTMLElement): Pick<PluginConfiguration, "LibraryConfigs"> {
+    const checkboxes = view.querySelectorAll<HTMLInputElement>("[name^=library_]");
+    return {
+        LibraryConfigs: [...checkboxes].map((box) => ({
+            Id: box.id.replace(/^library_/, "").replace(/_IsAllowed$/, ""),
+            IsAllowed: box.checked,
+        })),
+    };
 }

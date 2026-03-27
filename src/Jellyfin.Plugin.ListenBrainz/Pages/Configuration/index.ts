@@ -1,4 +1,28 @@
 import { setUpPluginConfigPage, loadPluginConfigData } from "./configuration";
+import { ConfigApiClient } from "./apiClient";
+
+async function loadCss(pageName: string): Promise<void> {
+    if (document.querySelector(`style[data-lb-css="${pageName}"]`)) {
+        return;
+    }
+
+    const url = await ConfigApiClient.getUrl(`web/configurationpage?name=${pageName}`);
+    const cssContent = await ConfigApiClient.ajax({
+        contentType: "text/css",
+        dataType: "text",
+        type: "GET",
+        url: url,
+    });
+
+    const styleTag = document.createElement("style");
+    styleTag.setAttribute("data-lb-css", pageName);
+    styleTag.textContent = cssContent as string;
+    document.head.appendChild(styleTag);
+}
+
+async function loadStyles(): Promise<void> {
+    await loadCss("ListenBrainz.styles.css");
+}
 
 export default function (view: HTMLElement, _params: Record<string, string>) {
     let isSetUp = false;
@@ -8,6 +32,9 @@ export default function (view: HTMLElement, _params: Record<string, string>) {
         Dashboard.showLoadingMsg();
         try {
             if (!isSetUp) {
+                loadStyles().catch((e) => {
+                    console.warn("ListenBrainz plugin: Failed to load configuration page styles:", e);
+                });
                 await setUpPluginConfigPage(view);
                 isSetUp = true;
             }

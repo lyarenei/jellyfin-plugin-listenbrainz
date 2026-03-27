@@ -1,26 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>ListenBrainz Plugin Config</title>
+    <title>ListenBrainz Plugin Configuration</title>
 </head>
 <body>
 <div id="ListenBrainzConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-controller="__plugin/ListenBrainz.js"
      data-require="emby-input,emby-button,emby-select,emby-checkbox">
     <div data-role="content">
         <div class="content-primary">
-            <form id="ListenBrainzPluginConfigForm">
-                <div class="sectionTitleContainer flex align-items-center">
-                    <h2 class="sectionTitle">ListenBrainz Plugin Config</h2>
-                    <a class="raised button-alt headerHelpButton emby-button" is="emby-linkbutton"
-                       rel="noopener noreferrer" target="_blank"
-                       href="https://github.com/lyarenei/jellyfin-plugin-listenbrainz#configuration">Documentation</a>
-                </div>
-                <fieldset class="verticalSection verticalSection-extrabottompadding">
-                    <legend>
-                        <h3>User Config</h3>
-                    </legend>
-                    <div class="bootstrap-wrapper container">
-                        <div class="selectContainer bootstrap-wrapper row no-gutters">
+            <div class="sectionTitleContainer flex align-items-center">
+                <h2 class="sectionTitle">ListenBrainz Plugin Configuration</h2>
+                <a class="raised button-alt headerHelpButton emby-button" is="emby-linkbutton"
+                   rel="noopener noreferrer" target="_blank"
+                   href="https://github.com/lyarenei/jellyfin-plugin-listenbrainz#configuration">Documentation</a>
+            </div>
+
+            <div class="tab-bar">
+                <button type="button" class="tab-button active" data-tab="user">User Config</button>
+                <button type="button" class="tab-button" data-tab="general">General</button>
+                <button type="button" class="tab-button" data-tab="musicbrainz">MusicBrainz</button>
+                <button type="button" class="tab-button" data-tab="backup">Backup</button>
+                <button type="button" class="tab-button" data-tab="libraries">Libraries</button>
+            </div>
+
+            <!-- User Config Tab -->
+            <div class="tab-content active" id="tab-user">
+                <form id="UserConfigForm">
+                    <div class="form-container">
+                        <div class="selectContainer">
                             <label class="selectLabel" for="JellyfinUser">Select Jellyfin user</label>
                             <select is="emby-select" id="JellyfinUser" name="JellyfinUser"></select>
                         </div>
@@ -28,11 +35,11 @@
                             <label class="inputLabel inputLabelUnfocused" for="ListenBrainzApiToken">
                                 ListenBrainz API token
                             </label>
-                            <div class="bootstrap-wrapper row no-gutters">
+                            <div class="input-row">
                                 <input id="ListenBrainzApiToken" name="ListenBrainzApiToken" type="password"
-                                       is="emby-input" class="bootstrap-wrapper col-md-9 vertical-center"/>
+                                       is="emby-input" class="input-field"/>
                                 <div id="CheckListenBrainzApiToken"
-                                     class="raised button block emby-button bootstrap-wrapper col-md-2 offset-md-1 vertical-center">
+                                     class="raised button block emby-button">
                                     Check
                                 </div>
                             </div>
@@ -42,28 +49,28 @@
                                     user profile</a>.
                             </div>
                         </div>
-                        <div class="checkboxContainer bootstrap-wrapper row no-gutters">
+                        <div class="checkboxContainer">
                             <label class="inputLabel inputLabelUnfocused" for="IsListenSubmitEnabled">
                                 <input is="emby-checkbox" type="checkbox" id="IsListenSubmitEnabled"
                                        name="IsListenSubmitEnabled"/>
                                 <span>Enable submitting listens</span>
                             </label>
                         </div>
-                        <div class="checkboxContainer bootstrap-wrapper row no-gutters">
+                        <div class="checkboxContainer">
                             <label class="inputLabel inputLabelUnfocused" for="IsFavoritesSyncEnabled">
                                 <input is="emby-checkbox" type="checkbox" id="IsFavoritesSyncEnabled"
                                        name="IsFavoritesSyncEnabled"/>
                                 <span>Enable syncing favorites</span>
                             </label>
                         </div>
-                        <div class="checkboxContainer bootstrap-wrapper row no-gutters">
+                        <div class="checkboxContainer">
                             <label class="inputLabel inputLabelUnfocused" for="IsPlaylistsSyncEnabled">
                                 <input is="emby-checkbox" type="checkbox" id="IsPlaylistsSyncEnabled"
                                        name="IsPlaylistsSyncEnabled"/>
                                 <span>Enable syncing playlists</span>
                             </label>
                         </div>
-                        <div class="checkboxContainer bootstrap-wrapper row no-gutters">
+                        <div class="checkboxContainer">
                             <label class="inputLabel inputLabelUnfocused" for="IsUserBackupEnabled">
                                 <input is="emby-checkbox" type="checkbox" id="IsUserBackupEnabled"
                                        name="IsUserBackupEnabled"/>
@@ -71,62 +78,41 @@
                             </label>
                             <div class="fieldDescription">Has no effect if backup path is not configured.</div>
                         </div>
-                        <div class="checkboxContainer bootstrap-wrapper row no-gutters">
+                        <div class="checkboxContainer">
                             <label class="inputLabel inputLabelUnfocused" for="IsStrictModeEnabled">
                                 <input is="emby-checkbox" type="checkbox" id="IsStrictModeEnabled"
                                        name="IsStrictModeEnabled"/>
-                                <span>Enable strict mode for listen submission.</span>
+                                <span>Enable strict mode for listen submission</span>
                             </label>
                             <div class="fieldDescription">Only submit listens when certain metadata are available. See plugin documentation for more details.</div>
                         </div>
-                        <div class="bootstrap-wrapper row no-gutters horizontal-center">
-                            <button is="emby-button" type="submit" id="SaveUserConfig"
-                                    class="raised button-submit block emby-button col-md-2">
+                        <div>
+                            <button is="emby-button" type="submit"
+                                    class="raised button-submit block emby-button save-button">
                                 Save
                             </button>
                         </div>
                     </div>
-                </fieldset>
-                <fieldset class="verticalSection">
-                    <legend>
-                        <h3>General Config</h3>
-                    </legend>
-                    <div class="bootstrap-wrapper container">
+                </form>
+            </div>
+
+            <!-- General Config Tab -->
+            <div class="tab-content" id="tab-general">
+                <form id="GeneralConfigForm">
+                    <div class="form-container">
                         <div class="inputContainer">
                             <label class="inputLabel inputLabelUnfocused" for="ListenBrainzApiUrl">
                                 ListenBrainz API URL
                             </label>
-                            <div class="bootstrap-wrapper row no-gutters">
+                            <div class="input-row">
                                 <input id="ListenBrainzApiUrl" name="ListenBrainzApiUrl" type="text"
-                                       is="emby-input" class="bootstrap-wrapper col-md-9 vertical-center"/>
+                                       is="emby-input" class="input-field"/>
                                 <div id="ResetListenBrainzApiUrl"
-                                     class="raised button block emby-button bootstrap-wrapper col-md-2 offset-md-1 vertical-center">
+                                     class="raised button block emby-button">
                                     Reset
                                 </div>
                             </div>
                             <div class="fieldDescription">Set a custom ListenBrainz API URL.</div>
-                        </div>
-                        <div class="inputContainer">
-                            <label class="inputLabel inputLabelUnfocused" for="MusicBrainzApiUrl">
-                                MusicBrainz API URL
-                            </label>
-                            <div class="bootstrap-wrapper row no-gutters">
-                                <input id="MusicBrainzApiUrl" name="MusicBrainzApiUrl" type="text"
-                                       is="emby-input"
-                                       class="bootstrap-wrapper col-md-9 vertical-center"/>
-                                <div id="ResetMusicBrainzApiUrl"
-                                     class="raised button block emby-button bootstrap-wrapper col-md-2 offset-md-1 vertical-center">
-                                    Reset
-                                </div>
-                            </div>
-                            <div class="fieldDescription">Set a custom MusicBrainz API URL. Requires restart to take effect.</div>
-                        </div>
-                        <div class="checkboxContainer">
-                            <label class="inputLabel inputLabelUnfocused" for="IsMusicBrainzEnabled">
-                                <input is="emby-checkbox" type="checkbox" id="IsMusicBrainzEnabled"
-                                       name="IsMusicBrainzEnabled"/>
-                                <span>Fetch additional metadata from MusicBrainz</span>
-                            </label>
                         </div>
                         <div class="inputContainer">
                             <label class="inputLabel inputLabelUnfocused" for="IsAlternativeModeEnabled">
@@ -156,20 +142,81 @@
                                 suggestion/recommendation playlists.
                             </div>
                         </div>
-                        <div class="sectionTitleContainer flex align-items-center">
-                            <h4 class="sectionTitle">Backup of listens</h4>
+                        <div>
+                            <button is="emby-button" type="submit"
+                                    class="raised button-submit block emby-button save-button">
+                                Save
+                            </button>
                         </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- MusicBrainz Config Tab -->
+            <div class="tab-content" id="tab-musicbrainz">
+                <form id="MusicBrainzConfigForm">
+                    <div class="form-container">
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="MusicBrainzApiUrl">
+                                MusicBrainz API URL
+                            </label>
+                            <div class="input-row">
+                                <input id="MusicBrainzApiUrl" name="MusicBrainzApiUrl" type="text"
+                                       is="emby-input"
+                                       class="input-field"/>
+                                <div id="ResetMusicBrainzApiUrl"
+                                     class="raised button block emby-button">
+                                    Reset
+                                </div>
+                            </div>
+                            <div class="fieldDescription">Set a custom MusicBrainz API URL. Requires restart to take effect.</div>
+                        </div>
+                        <div class="checkboxContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="IsMusicBrainzEnabled">
+                                <input is="emby-checkbox" type="checkbox" id="IsMusicBrainzEnabled"
+                                       name="IsMusicBrainzEnabled"/>
+                                <span>Fetch additional metadata from MusicBrainz</span>
+                            </label>
+                        </div>
+                        <div>
+                            <button is="emby-button" type="submit"
+                                    class="raised button-submit block emby-button save-button">
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Backup Config Tab -->
+            <div class="tab-content" id="tab-backup">
+                <form id="BackupConfigForm">
+                    <div class="form-container">
                         <div class="inputContainer">
                             <label class="inputLabel inputLabelUnfocused" for="BackupPath">Backup path</label>
-                            <div class="bootstrap-wrapper row no-gutters">
+                            <div class="input-row">
                                 <input id="BackupPath" name="BackupPath" type="text" is="emby-input"
-                                       class="bootstrap-wrapper col-md-9 vertical-center"/>
+                                       class="input-field"/>
                                 <div id="SetBackupPath"
-                                     class="raised button block emby-button bootstrap-wrapper col-md-2 offset-md-1 vertical-center">
+                                     class="raised button block emby-button">
                                     Browse
                                 </div>
                             </div>
                         </div>
+                        <div>
+                            <button is="emby-button" type="submit"
+                                    class="raised button-submit block emby-button save-button">
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Libraries Config Tab -->
+            <div class="tab-content" id="tab-libraries">
+                <form id="LibrariesConfigForm">
+                    <div class="form-container">
                         <div class="sectionTitleContainer flex align-items-center">
                             <h4 class="sectionTitle">Allowed libraries for listen submission</h4>
                             <div class="raised button-alt headerHelpButton emby-button" id="ResetAllowedLibraries">
@@ -177,45 +224,17 @@
                             </div>
                         </div>
                         <div class="inputContainer" id="LibrariesList"></div>
-                        <div class="bootstrap-wrapper row no-gutters horizontal-center">
-                            <button is="emby-button" type="submit" id="SaveGeneralConfig"
-                                    class="raised button-submit block emby-button col-md-2">
+                        <div>
+                            <button is="emby-button" type="submit"
+                                    class="raised button-submit block emby-button save-button">
                                 Save
                             </button>
                         </div>
                     </div>
-                </fieldset>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
-    <script type="text/javascript">
-        document.querySelector('#ListenBrainzConfigPage')
-            .addEventListener('pageshow', () => {
-                // TODO: remove with redesign of the page
-                onPageShow();
-            });
-
-        function onPageShow() {
-            loadCss('bootstrap-grid.min.css');
-            loadCss('styles.css');
-        }
-
-        function loadCss(fileName) {
-            let path = 'ListenBrainzPlugin/internal/styles/' + fileName;
-            let exists = document.querySelector('style[data-lb-css="' + fileName + '"]');
-            if (exists) return;
-
-            ApiClient.ajax({
-                type: "GET",
-                url: ApiClient.getUrl(path),
-            }).then((cssValue) => {
-                let styleTag = document.createElement("style");
-                styleTag.setAttribute('data-lb-css', fileName);
-                styleTag.innerText = cssValue;
-                document.getElementsByTagName("head")[0].appendChild(styleTag);
-            });
-        }
-    </script>
 </div>
 </body>
 </html>
