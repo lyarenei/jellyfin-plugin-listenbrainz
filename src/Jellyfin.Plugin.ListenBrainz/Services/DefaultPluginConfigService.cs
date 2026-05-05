@@ -74,4 +74,50 @@ public class DefaultPluginConfigService : IPluginConfigService
 
         return userConfig;
     }
+
+    /// <inheritdoc />
+    public Guid? GetPlaylistId(Guid jellyfinUserId, string playlistId)
+    {
+        var userConfig = GetUserConfig(jellyfinUserId);
+        var mapping = userConfig?
+            .PlaylistMappings
+            .FirstOrDefault(m => string.Equals(m.ListenBrainzPlaylistId, playlistId, StringComparison.Ordinal));
+
+        return mapping?.JellyfinPlaylistId;
+    }
+
+    /// <inheritdoc />
+    public bool SetPlaylistMapping(Guid jellyfinUserId, string listenBrainzPlaylistId, Guid jellyfinPlaylistId)
+    {
+        var userConfig = GetUserConfig(jellyfinUserId);
+        if (userConfig is null)
+        {
+            return false;
+        }
+
+        var mapping = userConfig
+            .PlaylistMappings
+            .FirstOrDefault(m =>
+                string.Equals(m.ListenBrainzPlaylistId, listenBrainzPlaylistId, StringComparison.Ordinal));
+
+        if (mapping is null)
+        {
+            userConfig.PlaylistMappings.Add(new PlaylistMapping
+            {
+                ListenBrainzPlaylistId = listenBrainzPlaylistId,
+                JellyfinPlaylistId = jellyfinPlaylistId,
+            });
+        }
+        else if (mapping.JellyfinPlaylistId == jellyfinPlaylistId)
+        {
+            return true;
+        }
+        else
+        {
+            mapping.JellyfinPlaylistId = jellyfinPlaylistId;
+        }
+
+        Plugin.UpdateConfig(Config);
+        return true;
+    }
 }

@@ -26,6 +26,8 @@ namespace Jellyfin.Plugin.ListenBrainz.Tasks;
 /// </summary>
 public class SyncPlaylistsTask : IScheduledTask
 {
+    private const string PlaylistTag = "ListenBrainz";
+
     private static readonly string[] _defaultAllowedPatches =
     [
         "weekly-jams",
@@ -193,7 +195,7 @@ public class SyncPlaylistsTask : IScheduledTask
                             userConfig,
                             pl.PlaylistId,
                             cancellationToken);
-                        await SyncPlaylist(user, playlist, allAudioItems, cancellationToken);
+                        await SyncPlaylist(user, userConfig, playlist, allAudioItems, cancellationToken);
                     }
                     catch (Exception e)
                     {
@@ -222,6 +224,7 @@ public class SyncPlaylistsTask : IScheduledTask
 
     private async Task SyncPlaylist(
         User user,
+        UserConfig userConfig,
         Playlist playlist,
         IReadOnlyList<BaseItem> allAudioItems,
         CancellationToken cancellationToken)
@@ -261,30 +264,49 @@ public class SyncPlaylistsTask : IScheduledTask
             playlist.Tracks.Count(),
             playlist.Title);
 
-        var playlistName = $"[LB] {playlist.Title}";
-        var playlistQuery = new InternalItemsQuery
-        {
-            IncludeItemTypes = [BaseItemKind.Playlist],
-            Name = playlistName,
-            User = user,
-        };
-        var existingPlaylist = _libraryManager.GetItemList(playlistQuery).FirstOrDefault();
+        var existingPlaylist = GetJellyfinPlaylist(userConfig, playlist.PlaylistId);
+        var playlistName = playlist.Title;
+        BaseItem? syncedPlaylist;
+
         if (existingPlaylist is not null)
         {
-            _logger.LogDebug("Deleting already existing playlist {Title}", playlist.Title);
-            _libraryManager.DeleteItem(
-                existingPlaylist,
-                new DeleteOptions { DeleteFileLocation = false });
+            _logger.LogDebug("Updating playlist {Name} with {Count} items", playlistName, jellyfinPlaylistTracks.Count);
+            await _playlistManager.UpdatePlaylist(new PlaylistUpdateRequest
+            {
+                Id = existingPlaylist.Id,
+                UserId = user.Id,
+                Name = playlistName,
+                Ids = jellyfinPlaylistTracks.Select(i => i.Id).ToArray(),
+            });
+
+            syncedPlaylist = _libraryManager.GetItemById(existingPlaylist.Id) ?? existingPlaylist;
+        }
+        else
+        {
+            _logger.LogDebug("Creating playlist {Name} with {Count} items", playlistName, jellyfinPlaylistTracks.Count);
+            var createdPlaylist = await _playlistManager.CreatePlaylist(new PlaylistCreationRequest
+            {
+                Name = playlistName,
+                UserId = user.Id,
+                ItemIdList = jellyfinPlaylistTracks.Select(i => i.Id).ToArray(),
+                MediaType = MediaType.Audio,
+            });
+
+            if (!Guid.TryParse(createdPlaylist.Id, out var createdPlaylistId))
+            {
+                throw new PluginException($"Failed to parse created playlist id '{createdPlaylist.Id}'");
+            }
+
+            syncedPlaylist = _libraryManager.GetItemById(createdPlaylistId);
+            if (syncedPlaylist is null)
+            {
+                throw new PluginException($"Failed to load created Jellyfin playlist '{createdPlaylistId}'");
+            }
+
+            _configService.SetPlaylistMapping(userConfig.JellyfinUserId, playlist.PlaylistId, createdPlaylistId);
         }
 
-        _logger.LogDebug("Creating playlist {Name} with {Count} items", playlistName, jellyfinPlaylistTracks.Count);
-        await _playlistManager.CreatePlaylist(new PlaylistCreationRequest
-        {
-            Name = playlistName,
-            UserId = user.Id,
-            ItemIdList = jellyfinPlaylistTracks.Select(i => i.Id).ToArray(),
-            MediaType = MediaType.Audio
-        });
+        await SetListenBrainzTag(syncedPlaylist, cancellationToken).ConfigureAwait(false);
 
         _logger.LogInformation(
             "Successfully synced playlist {Name} with {Count} tracks",
@@ -318,6 +340,32 @@ public class SyncPlaylistsTask : IScheduledTask
     {
         return _defaultAllowedPatches.Any(patch =>
             sourcePatch.Contains(patch, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    private BaseItem? GetJellyfinPlaylist(UserConfig userConfig, string listenBrainzPlaylistId)
+    {
+        var playlistId = _configService.GetPlaylistId(userConfig.JellyfinUserId, listenBrainzPlaylistId);
+        return playlistId is null ? null : _libraryManager.GetItemById(playlistId.Value);
+    }
+
+    private async Task SetListenBrainzTag(BaseItem playlist, CancellationToken cancellationToken)
+    {
+        if (playlist.Tags.Any(tag => string.Equals(tag, PlaylistTag, StringComparison.OrdinalIgnoreCase)))
+        {
+            return;
+        }
+
+        playlist.Tags =
+        [
+            .. playlist.Tags,
+            PlaylistTag,
+        ];
+
+        var parent = playlist.ParentId == Guid.Empty
+            ? playlist
+            : _libraryManager.GetItemById(playlist.ParentId) ?? playlist;
+
+        await _libraryManager.UpdateItemAsync(playlist, parent, ItemUpdateType.MetadataEdit, cancellationToken);
     }
 
     private async Task<BaseItem?> FindJellyfinItem(

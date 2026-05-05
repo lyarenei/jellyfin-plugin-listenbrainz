@@ -66,4 +66,21 @@ public interface IPluginConfigService
     /// <param name="jellyfinUserId">ID of the Jellyfin user.</param>
     /// <returns>User configuration. Null if it does not exist.</returns>
     public UserConfig? GetUserConfig(Guid jellyfinUserId);
+
+    /// <summary>
+    /// Gets a matching Jellyfin playlist ID for a ListenBrainz playlist ID.
+    /// </summary>
+    /// <param name="jellyfinUserId">ID of the Jellyfin user.</param>
+    /// <param name="playlistId">ListenBrainz playlist ID.</param>
+    /// <returns>Mapped Jellyfin playlist ID. Null if it does not exist.</returns>
+    Guid? GetPlaylistId(Guid jellyfinUserId, string playlistId);
+
+    /// <summary>
+    /// Adds or updates a playlist mapping for a Jellyfin user.
+    /// </summary>
+    /// <param name="jellyfinUserId">ID of the Jellyfin user.</param>
+    /// <param name="listenBrainzPlaylistId">ListenBrainz playlist ID.</param>
+    /// <param name="jellyfinPlaylistId">Jellyfin playlist ID.</param>
+    /// <returns>Operation success.</returns>
+    bool SetPlaylistMapping(Guid jellyfinUserId, string listenBrainzPlaylistId, Guid jellyfinPlaylistId);
 }
