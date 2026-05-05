@@ -1,3 +1,5 @@
+using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Xml.Serialization;
@@ -19,6 +21,7 @@ public class UserConfig
         UserName = string.Empty;
         IsBackupEnabled = false;
         IsStrictModeEnabled = false;
+        PlaylistMappings = new Collection<PlaylistMapping>();
     }
 
     /// <summary>
@@ -68,6 +71,12 @@ public class UserConfig
     /// Gets or sets a ListenBrainz username.
     /// </summary>
     public string UserName { get; set; }
+
+    /// <summary>
+    /// Gets or sets mappings between ListenBrainz playlists and synced Jellyfin playlists.
+    /// </summary>
+    [SuppressMessage("Warning", "CA2227", Justification = "Needed for deserialization")]
+    public Collection<PlaylistMapping> PlaylistMappings { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether listens should be backed up.
