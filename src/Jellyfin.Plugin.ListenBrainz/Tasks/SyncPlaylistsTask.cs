@@ -26,6 +26,7 @@ namespace Jellyfin.Plugin.ListenBrainz.Tasks;
 /// </summary>
 public class SyncPlaylistsTask : IScheduledTask
 {
+    private const string PlaylistPrefix = "[LB]";
     private const string PlaylistTag = "ListenBrainz";
 
     private static readonly string[] _defaultAllowedPatches =
@@ -264,7 +265,7 @@ public class SyncPlaylistsTask : IScheduledTask
             playlist.Tracks.Count(),
             playlist.Title);
 
-        var existingPlaylist = GetJellyfinPlaylist(userConfig, playlist.PlaylistId);
+        var existingPlaylist = GetJellyfinPlaylist(user, userConfig, playlist);
         var playlistName = playlist.Title;
         BaseItem? syncedPlaylist;
 
@@ -342,10 +343,33 @@ public class SyncPlaylistsTask : IScheduledTask
             sourcePatch.Contains(patch, StringComparison.InvariantCultureIgnoreCase));
     }
 
-    private BaseItem? GetJellyfinPlaylist(UserConfig userConfig, string listenBrainzPlaylistId)
+    private BaseItem? GetJellyfinPlaylist(User user, UserConfig userConfig, Playlist playlist)
     {
-        var playlistId = _configService.GetPlaylistId(userConfig.JellyfinUserId, listenBrainzPlaylistId);
-        return playlistId is null ? null : _libraryManager.GetItemById(playlistId.Value);
+        var playlistId = _configService.GetPlaylistId(userConfig.JellyfinUserId, playlist.PlaylistId);
+        if (playlistId is not null)
+        {
+            return _libraryManager.GetItemById(playlistId.Value);
+        }
+
+        // Playlist may already exist before mappings were introduced
+        return MigratePlaylist(user, userConfig, playlist);
+    }
+
+    private BaseItem? MigratePlaylist(User user, UserConfig userConfig, Playlist playlist)
+    {
+        var legacyPlaylistQuery = new InternalItemsQuery
+        {
+            IncludeItemTypes = [BaseItemKind.Playlist],
+            Name = $"{PlaylistPrefix} ${playlist.Title}",
+            User = user,
+        };
+        var legacyPlaylist = _libraryManager.GetItemList(legacyPlaylistQuery).FirstOrDefault();
+        if (legacyPlaylist is not null)
+        {
+            _configService.SetPlaylistMapping(userConfig.JellyfinUserId, playlist.PlaylistId, legacyPlaylist.Id);
+        }
+
+        return legacyPlaylist;
     }
 
     private async Task SetListenBrainzTag(BaseItem playlist, CancellationToken cancellationToken)
