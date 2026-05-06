@@ -360,7 +360,7 @@ public class SyncPlaylistsTask : IScheduledTask
         var legacyPlaylistQuery = new InternalItemsQuery
         {
             IncludeItemTypes = [BaseItemKind.Playlist],
-            Name = $"{PlaylistPrefix} ${playlist.Title}",
+            Name = $"{PlaylistPrefix} {playlist.Title}",
             User = user,
         };
 
