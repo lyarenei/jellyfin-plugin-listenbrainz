@@ -346,13 +346,13 @@ public class SyncPlaylistsTask : IScheduledTask
     private BaseItem? GetJellyfinPlaylist(User user, UserConfig userConfig, Playlist playlist)
     {
         var playlistId = _configService.GetPlaylistId(userConfig.JellyfinUserId, playlist.PlaylistId);
-        if (playlistId is not null)
+        if (playlistId is null)
         {
-            return _libraryManager.GetItemById(playlistId.Value);
+            // Playlist may already exist before mappings were introduced
+            return MigratePlaylist(user, userConfig, playlist);
         }
 
-        // Playlist may already exist before mappings were introduced
-        return MigratePlaylist(user, userConfig, playlist);
+        return _libraryManager.GetItemById(playlistId.Value);
     }
 
     private BaseItem? MigratePlaylist(User user, UserConfig userConfig, Playlist playlist)
