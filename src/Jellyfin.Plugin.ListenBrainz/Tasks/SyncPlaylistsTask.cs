@@ -363,12 +363,20 @@ public class SyncPlaylistsTask : IScheduledTask
             Name = $"{PlaylistPrefix} ${playlist.Title}",
             User = user,
         };
+
         var legacyPlaylist = _libraryManager.GetItemList(legacyPlaylistQuery).FirstOrDefault();
-        if (legacyPlaylist is not null)
+        if (legacyPlaylist is null)
         {
-            _configService.SetPlaylistMapping(userConfig.JellyfinUserId, playlist.PlaylistId, legacyPlaylist.Id);
+            return null;
         }
 
+        var ok = _configService.SetPlaylistMapping(userConfig.JellyfinUserId, playlist.PlaylistId, legacyPlaylist.Id);
+        if (!ok)
+        {
+            return null;
+        }
+
+        legacyPlaylist.Name = playlist.Title;
         return legacyPlaylist;
     }
 
