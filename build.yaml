@@ -18,3 +18,5 @@ artifacts:
 changelog: >
   Maintenance:
     - Config page redesign
+    - Fix potential playlist duplication
+    - Use playlist tags instead of prefix in playlist names
