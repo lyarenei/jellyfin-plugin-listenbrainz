@@ -280,7 +280,7 @@ public class SyncPlaylistsTask : IScheduledTask
                 Ids = jellyfinPlaylistTracks.Select(i => i.Id).ToArray(),
             });
 
-            syncedPlaylist = _libraryManager.GetItemById(existingPlaylist.Id) ?? existingPlaylist;
+            syncedPlaylist = _playlistManager.GetPlaylistForUser(existingPlaylist.Id, user.Id) ?? existingPlaylist;
         }
         else
         {
@@ -298,7 +298,7 @@ public class SyncPlaylistsTask : IScheduledTask
                 throw new PluginException($"Failed to parse created playlist id '{createdPlaylist.Id}'");
             }
 
-            syncedPlaylist = _libraryManager.GetItemById(createdPlaylistId);
+            syncedPlaylist = _playlistManager.GetPlaylistForUser(createdPlaylistId, user.Id);
             if (syncedPlaylist is null)
             {
                 throw new PluginException($"Failed to load created Jellyfin playlist '{createdPlaylistId}'");
@@ -352,7 +352,7 @@ public class SyncPlaylistsTask : IScheduledTask
             return MigratePlaylist(user, userConfig, playlist);
         }
 
-        return _libraryManager.GetItemById(playlistId.Value);
+        return _playlistManager.GetPlaylistForUser(playlistId.Value, user.Id);
     }
 
     private BaseItem? MigratePlaylist(User user, UserConfig userConfig, Playlist playlist)
