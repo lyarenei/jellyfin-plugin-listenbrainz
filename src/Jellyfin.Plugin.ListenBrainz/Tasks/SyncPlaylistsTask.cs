@@ -364,20 +364,20 @@ public class SyncPlaylistsTask : IScheduledTask
             User = user,
         };
 
-        var legacyPlaylist = _libraryManager.GetItemList(legacyPlaylistQuery).FirstOrDefault();
-        if (legacyPlaylist is null)
+        var existingPlaylist = _libraryManager.GetItemList(legacyPlaylistQuery).FirstOrDefault();
+        if (existingPlaylist is null)
         {
             return null;
         }
 
-        var ok = _configService.SetPlaylistMapping(userConfig.JellyfinUserId, playlist.PlaylistId, legacyPlaylist.Id);
+        var ok = _configService.SetPlaylistMapping(userConfig.JellyfinUserId, playlist.PlaylistId, existingPlaylist.Id);
         if (!ok)
         {
             return null;
         }
 
-        legacyPlaylist.Name = playlist.Title;
-        return legacyPlaylist;
+        existingPlaylist.Name = playlist.Title;
+        return existingPlaylist;
     }
 
     private async Task SetListenBrainzTag(BaseItem playlist, CancellationToken cancellationToken)
