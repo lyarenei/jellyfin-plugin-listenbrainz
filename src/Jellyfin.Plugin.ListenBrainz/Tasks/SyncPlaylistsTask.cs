@@ -128,6 +128,7 @@ public class SyncPlaylistsTask : IScheduledTask
                     continue;
                 }
 
+                await MigratePlaylists(userConfig, cancellationToken);
                 await HandlePlaylistSync(progress, userConfig, cancellationToken);
             }
         }
@@ -135,6 +136,110 @@ public class SyncPlaylistsTask : IScheduledTask
         {
             _logger.LogInformation("Playlist sync task has been cancelled");
             progress.Report(100);
+        }
+    }
+
+    private async Task MigratePlaylists(UserConfig userConfig, CancellationToken cancellationToken)
+    {
+        var user = _userManager.GetUserById(userConfig.JellyfinUserId);
+        if (user is null)
+        {
+            _logger.LogError("User with ID {UserId} does not exist", userConfig.JellyfinUserId);
+            return;
+        }
+
+        var listenBrainzPlaylists = (
+            await _listenBrainzClient.GetCreatedForPlaylistsAsync(
+                userConfig,
+                Limits.MaxItemsPerGet,
+                cancellationToken)
+        ).ToList();
+
+        var playlistsToMigrate = _libraryManager
+            .GetItemList(new InternalItemsQuery
+            {
+                IncludeItemTypes = [BaseItemKind.Playlist],
+                User = user,
+            })
+            .Where(p => p.Name.StartsWith(PlaylistPrefix, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        if (playlistsToMigrate.Count == 0)
+        {
+            _logger.LogDebug("No playlists to migrate found for user {Username}", userConfig.UserName);
+            return;
+        }
+
+        _logger.LogDebug(
+            "Found {LegacyPlaylistCount} not migrated playlists for user {Username}",
+            playlistsToMigrate.Count,
+            userConfig.UserName);
+
+        var playlistsByTitle = listenBrainzPlaylists
+            .GroupBy(playlist => playlist.Title, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
+
+        foreach (var playlistToMigrate in playlistsToMigrate)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var titleWithoutPrefix = playlistToMigrate.Name.Substring(PlaylistPrefix.Length).Trim();
+
+            _logger.LogDebug("Attempting to migrate playlist {PlaylistName}", playlistToMigrate.Name);
+
+            if (!playlistsByTitle.TryGetValue(titleWithoutPrefix, out var matchingPlaylists))
+            {
+                // Common for weekly jams playlists from the past
+                _logger.LogInformation(
+                    "Skipping migration of playlist {PlaylistName}: no ListenBrainz playlist found with title {Title}",
+                    playlistToMigrate.Name,
+                    titleWithoutPrefix);
+                continue;
+            }
+
+            if (matchingPlaylists.Count > 1)
+            {
+                // Very old playlists were created by troi-bot and appear to be regenerated in 2026
+                // so not treating this as an error.
+                _logger.LogInformation(
+                    "Playlist {PlaylistName}: title {Title} is ambiguous across {Count} ListenBrainz playlists, picking the most recently created one",
+                    playlistToMigrate.Name,
+                    titleWithoutPrefix,
+                    matchingPlaylists.Count);
+            }
+
+            var matchingPlaylist = matchingPlaylists.OrderByDescending(p => p.CreatedAt).First();
+            var existingMapping = _configService.GetPlaylistId(userConfig.JellyfinUserId, matchingPlaylist.PlaylistId);
+            if (existingMapping.HasValue && existingMapping.Value != playlistToMigrate.Id)
+            {
+                _logger.LogInformation(
+                    "Skipping migration of playlist {PlaylistName}: ListenBrainz playlist {ListenBrainzPlaylistId} is already mapped to Jellyfin playlist {MappedPlaylistId}",
+                    playlistToMigrate.Name,
+                    matchingPlaylist.PlaylistId,
+                    existingMapping.Value);
+                continue;
+            }
+
+            var mappingSaved = _configService.SetPlaylistMapping(
+                userConfig.JellyfinUserId,
+                matchingPlaylist.PlaylistId,
+                playlistToMigrate.Id);
+
+            if (!mappingSaved)
+            {
+                _logger.LogDebug(
+                    "Skipping migration of playlist {PlaylistName}: failed to save mapping for ListenBrainz playlist {ListenBrainzPlaylistId}",
+                    playlistToMigrate.Name,
+                    matchingPlaylist.PlaylistId);
+                continue;
+            }
+
+            await UpdatePlaylistMetadata(playlistToMigrate, titleWithoutPrefix, cancellationToken);
+
+            _logger.LogInformation(
+                "Migrated playlist {PlaylistId} (mapped to ListenBrainz playlist {ListenBrainzPlaylistId})",
+                playlistToMigrate.Id,
+                matchingPlaylist.PlaylistId);
         }
     }
 
@@ -307,7 +412,7 @@ public class SyncPlaylistsTask : IScheduledTask
             _configService.SetPlaylistMapping(userConfig.JellyfinUserId, playlist.PlaylistId, createdPlaylistId);
         }
 
-        await SetListenBrainzTag(syncedPlaylist, cancellationToken).ConfigureAwait(false);
+        await UpdatePlaylistMetadata(syncedPlaylist, null, cancellationToken).ConfigureAwait(false);
 
         _logger.LogInformation(
             "Successfully synced playlist {Name} with {Count} tracks",
@@ -346,52 +451,38 @@ public class SyncPlaylistsTask : IScheduledTask
     private BaseItem? GetJellyfinPlaylist(User user, UserConfig userConfig, Playlist playlist)
     {
         var playlistId = _configService.GetPlaylistId(userConfig.JellyfinUserId, playlist.PlaylistId);
-        if (playlistId is null)
-        {
-            // Playlist may already exist before mappings were introduced
-            return MigratePlaylist(user, userConfig, playlist);
-        }
-
-        return _playlistManager.GetPlaylistForUser(playlistId.Value, user.Id);
+        return playlistId is null ? null : _playlistManager.GetPlaylistForUser(playlistId.Value, user.Id);
     }
 
-    private BaseItem? MigratePlaylist(User user, UserConfig userConfig, Playlist playlist)
+    private async Task UpdatePlaylistMetadata(
+        BaseItem playlist,
+        string? playlistName,
+        CancellationToken cancellationToken)
     {
-        var legacyPlaylistQuery = new InternalItemsQuery
-        {
-            IncludeItemTypes = [BaseItemKind.Playlist],
-            Name = $"{PlaylistPrefix} {playlist.Title}",
-            User = user,
-        };
+        var didChange = false;
 
-        var existingPlaylist = _libraryManager.GetItemList(legacyPlaylistQuery).FirstOrDefault();
-        if (existingPlaylist is null)
+        if (!string.IsNullOrWhiteSpace(playlistName) &&
+            !string.Equals(playlist.Name, playlistName, StringComparison.Ordinal))
         {
-            return null;
+            playlist.Name = playlistName;
+            didChange = true;
         }
 
-        var ok = _configService.SetPlaylistMapping(userConfig.JellyfinUserId, playlist.PlaylistId, existingPlaylist.Id);
-        if (!ok)
+        if (!playlist.Tags.Any(tag => string.Equals(tag, PlaylistTag, StringComparison.OrdinalIgnoreCase)))
         {
-            return null;
+            playlist.Tags =
+            [
+                .. playlist.Tags,
+                PlaylistTag,
+            ];
+
+            didChange = true;
         }
 
-        existingPlaylist.Name = playlist.Title;
-        return existingPlaylist;
-    }
-
-    private async Task SetListenBrainzTag(BaseItem playlist, CancellationToken cancellationToken)
-    {
-        if (playlist.Tags.Any(tag => string.Equals(tag, PlaylistTag, StringComparison.OrdinalIgnoreCase)))
+        if (!didChange)
         {
             return;
         }
-
-        playlist.Tags =
-        [
-            .. playlist.Tags,
-            PlaylistTag,
-        ];
 
         var parent = playlist.ParentId == Guid.Empty
             ? playlist
