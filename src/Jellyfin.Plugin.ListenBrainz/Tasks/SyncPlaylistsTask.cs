@@ -274,6 +274,7 @@ public class SyncPlaylistsTask : IScheduledTask
                 return;
             }
 
+            playlists = DeduplicatePlaylistsByTitle(playlists);
             var playlistRatio = _userCountRatio / playlists.Count;
 
             var allowedLibraries = GetAllowedLibraries()
@@ -446,6 +447,29 @@ public class SyncPlaylistsTask : IScheduledTask
     {
         return _defaultAllowedPatches.Any(patch =>
             sourcePatch.Contains(patch, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    private List<Playlist> DeduplicatePlaylistsByTitle(IReadOnlyCollection<Playlist> playlists)
+    {
+        return playlists
+            .GroupBy(playlist => playlist.Title, StringComparer.OrdinalIgnoreCase)
+            .Select(group =>
+            {
+                var matchingPlaylists = group.OrderByDescending(playlist => playlist.CreatedAt).ToList();
+                var newestPlaylist = matchingPlaylists[0];
+
+                if (matchingPlaylists.Count > 1)
+                {
+                    _logger.LogInformation(
+                        "Found {Count} ListenBrainz playlists with title {PlaylistTitle}; syncing only newest playlist ({SelectedPlaylistId})",
+                        matchingPlaylists.Count,
+                        group.Key,
+                        newestPlaylist.PlaylistId);
+                }
+
+                return newestPlaylist;
+            })
+            .ToList();
     }
 
     private BaseItem? GetJellyfinPlaylist(User user, UserConfig userConfig, Playlist playlist)
