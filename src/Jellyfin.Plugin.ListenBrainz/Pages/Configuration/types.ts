@@ -21,6 +21,11 @@ export interface PluginConfiguration {
     UserConfigs: PluginUserConfig[];
 }
 
+export interface PlaylistMapping {
+    JellyfinPlaylistId: string;
+    ListenBrainzPlaylistId: string;
+}
+
 // Plugin user configuration.
 // The keys must match the fields of UserConfig class.
 export interface PluginUserConfig {
@@ -31,6 +36,7 @@ export interface PluginUserConfig {
     IsPlaylistsSyncEnabled: boolean;
     IsStrictModeEnabled: boolean;
     JellyfinUserId: string;
+    PlaylistMappings: PlaylistMapping[];
     UserName: string;
 }
 

@@ -12,6 +12,7 @@ export const userDefaults: PluginUserConfig = {
     IsStrictModeEnabled: false,
     IsBackupEnabled: false,
     JellyfinUserId: "",
+    PlaylistMappings: [],
     UserName: "",
 };
 

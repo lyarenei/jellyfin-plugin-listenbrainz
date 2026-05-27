@@ -35,6 +35,7 @@ export function getUserConfigFormData(view: HTMLElement): PluginUserConfig {
         IsPlaylistsSyncEnabled: elements.playlistsSync.checked,
         IsStrictModeEnabled: elements.strictMode.checked,
         JellyfinUserId: elements.userDropdown.value,
+        PlaylistMappings: [],
         UserName: "",
     };
 }

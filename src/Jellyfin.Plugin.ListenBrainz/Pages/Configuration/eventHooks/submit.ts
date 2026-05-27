@@ -142,11 +142,17 @@ async function saveUserConfig(view: HTMLElement, currentPluginConfig: PluginConf
         // We don't care if validation failed
     }
 
+    const updatedUserConfig = {
+        ...currentUserConfig,
+        ...newUserConfig,
+        PlaylistMappings: currentUserConfig.PlaylistMappings ?? [],
+    };
+
     const updatedPluginConfig: PluginConfiguration = {
         ...currentPluginConfig,
         UserConfigs: [
             ...currentPluginConfig.UserConfigs.filter((config) => config.JellyfinUserId !== selectedUserId),
-            { ...newUserConfig },
+            updatedUserConfig,
         ],
     };
 
