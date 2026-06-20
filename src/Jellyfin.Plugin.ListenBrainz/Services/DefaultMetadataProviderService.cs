@@ -1,4 +1,5 @@
 using Jellyfin.Plugin.ListenBrainz.Dtos;
+using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.Interfaces;
@@ -60,6 +61,22 @@ public class DefaultMetadataProviderService : IMetadataProviderService
             _logger.LogDebug("Could not get MusicBrainz metadata: {Message}", e.Message);
             _logger.LogTrace(e, "Exception occurred while getting MusicBrainz metadata");
             return null;
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task<IEnumerable<string>> GetRelatedRecordingMbidsAsync(string recordingMbid, CancellationToken cancellationToken)
+    {
+        var request = new RecordingRelationsRequest(recordingMbid) { BaseUrl = _pluginConfig.MusicBrainzApiUrl };
+        try
+        {
+            var response = await _apiClient.GetRecordingRelationsAsync(request, cancellationToken);
+            return response.Relations.Select(rel => rel.Recording.Mbid);
+        }
+        catch (Exception e)
+        {
+            _logger.LogDebug("Could not get related recordings: {Message}", e.Message);
+            throw new ServiceException("Getting related recordings failed", e);
         }
     }
 }

@@ -15,4 +15,12 @@ public interface IMetadataProviderService
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Audio item metadata. Null on failure.</returns>
     public Task<AudioItemMetadata?> GetAudioItemMetadataAsync(Audio item, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Get recording MBIDs related to the specified recording.
+    /// </summary>
+    /// <param name="recordingMbid">MusicBrainz ID identifying the recording.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Collection of related recording MBIDs.</returns>
+    public Task<IEnumerable<string>> GetRelatedRecordingMbidsAsync(string recordingMbid, CancellationToken cancellationToken);
 }
