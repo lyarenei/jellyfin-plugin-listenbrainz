@@ -280,6 +280,71 @@ public class DefaultListenBrainzService : IListenBrainzService
         return recordingMbids;
     }
 
+    /// <inheritdoc />
+    public async Task<IEnumerable<Playlist>> GetCreatedForPlaylistsAsync(UserConfig config, int count, CancellationToken cancellationToken)
+    {
+        var playlists = new List<Playlist>();
+        int offset = 0;
+        GetCreatedForPlaylistsResponse response;
+        do
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var request = new GetCreatedForPlaylistsRequest(config.UserName, count, offset)
+            {
+                BaseUrl = _pluginConfig.ListenBrainzApiUrl,
+            };
+
+            try
+            {
+                response = await _apiClient.GetCreatedForPlaylists(request, cancellationToken);
+            }
+            catch (Exception e)
+            {
+                _logger.LogDebug("Exception when getting 'created for' playlists: {Message}", e.Message);
+                throw new ServiceException("Getting 'created for' playlists failed", e);
+            }
+
+            if (response.IsNotOk)
+            {
+                throw new ServiceException("Getting 'created for' playlists failed");
+            }
+
+            playlists.AddRange(response.Playlists);
+            offset += response.Count;
+        }
+        while (offset < response.PlaylistCount);
+
+        return playlists;
+    }
+
+    /// <inheritdoc />
+    public async Task<Playlist> GetPlaylistAsync(UserConfig config, string playlistId, CancellationToken cancellationToken)
+    {
+        var request = new GetPlaylistRequest(playlistId, false)
+        {
+            ApiToken = config.PlaintextApiToken,
+            BaseUrl = _pluginConfig.ListenBrainzApiUrl,
+        };
+
+        GetPlaylistResponse response;
+        try
+        {
+            response = await _apiClient.GetPlaylist(request, cancellationToken);
+        }
+        catch (Exception e)
+        {
+            _logger.LogDebug("Exception when getting playlist: {Message}", e.Message);
+            throw new ServiceException("Getting playlist failed", e);
+        }
+
+        if (response.IsNotOk)
+        {
+            throw new ServiceException("Getting playlist failed");
+        }
+
+        return response.Playlist;
+    }
+
     /// <summary>
     /// Fetch ListenBrainz username using the API token.
     /// </summary>

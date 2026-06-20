@@ -104,4 +104,22 @@ public interface IListenBrainzService
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>List of recording MBIDs identifying loved tracks by the user.</returns>
     public Task<IEnumerable<string>> GetLovedTracksAsync(UserConfig config, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Get all 'created for' playlists for the user.
+    /// </summary>
+    /// <param name="config">ListenBrainz user configuration.</param>
+    /// <param name="count">Number of playlists to fetch per request.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Collection of 'created for' playlists.</returns>
+    public Task<IEnumerable<Playlist>> GetCreatedForPlaylistsAsync(UserConfig config, int count, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Get a single playlist by its identifier.
+    /// </summary>
+    /// <param name="config">ListenBrainz user configuration.</param>
+    /// <param name="playlistId">Identifier of the playlist to fetch.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The requested playlist.</returns>
+    public Task<Playlist> GetPlaylistAsync(UserConfig config, string playlistId, CancellationToken cancellationToken);
 }
