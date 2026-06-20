@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Net.Http;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.Tasks;
@@ -11,23 +9,14 @@ using Moq;
 
 namespace Jellyfin.Plugin.ListenBrainz.Tests.Tasks.ResubmitListens;
 
-using ListenCacheData = Dictionary<
-    Guid,
-    List<
-        StoredListen
-    >
->;
-
 public class TestBase
 {
-    protected readonly Mock<IHttpClientFactory> _clientFactoryMock;
     protected readonly Mock<ILibraryManager> _libraryManagerMock;
     protected readonly Mock<IListensCachingService> _listensCachingServiceMock;
     protected readonly Mock<IListenBrainzService> _listenBrainzServiceMock;
     protected readonly Mock<IMetadataProviderService> _metadataProviderServiceMock;
     protected readonly Mock<IPluginConfigService> _pluginConfigServiceMock;
     protected readonly Mock<IValidationService> _validationServiceMock;
-    protected readonly Mock<IServiceFactory> _serviceFactoryMock;
     protected readonly ResubmitListensTask _task;
 
     public TestBase()
@@ -37,7 +26,6 @@ public class TestBase
             .Setup(lf => lf.CreateLogger(It.IsAny<string>()))
             .Returns(new NullLogger<ResubmitListensTask>());
 
-        _clientFactoryMock = new Mock<IHttpClientFactory>();
         _libraryManagerMock = new Mock<ILibraryManager>();
         _listensCachingServiceMock = new Mock<IListensCachingService>();
         _listenBrainzServiceMock = new Mock<IListenBrainzService>();
@@ -45,21 +33,14 @@ public class TestBase
         _pluginConfigServiceMock = new Mock<IPluginConfigService>();
         _validationServiceMock = new Mock<IValidationService>();
 
-        _serviceFactoryMock = new Mock<IServiceFactory>();
-        _serviceFactoryMock.Setup(m => m.GetListenBrainzService()).Returns(_listenBrainzServiceMock.Object);
-        _serviceFactoryMock.Setup(m => m.GetMetadataProviderService()).Returns(_metadataProviderServiceMock.Object);
-        _serviceFactoryMock.Setup(m => m.GetPluginConfigService()).Returns(_pluginConfigServiceMock.Object);
-        _serviceFactoryMock.Setup(m => m.GetListensCachingService(It.IsAny<IPersistentJsonService<ListenCacheData>>())).Returns(_listensCachingServiceMock.Object);
-        _serviceFactoryMock.Setup(m => m.GetValidationService(
-            It.IsAny<ILibraryManager>(),
-            It.IsAny<IPluginConfigService>()))
-            .Returns(_validationServiceMock.Object);
-
         _task = new ResubmitListensTask(
             loggerFactoryMock.Object,
-            _clientFactoryMock.Object,
             _libraryManagerMock.Object,
-            _serviceFactoryMock.Object);
+            _listenBrainzServiceMock.Object,
+            _metadataProviderServiceMock.Object,
+            _pluginConfigServiceMock.Object,
+            _listensCachingServiceMock.Object,
+            _validationServiceMock.Object);
     }
 
     internal static StoredListen[] GetStoredListens() =>

@@ -1,5 +1,4 @@
 using System;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Database.Implementations.Entities;
@@ -16,12 +15,11 @@ namespace Jellyfin.Plugin.ListenBrainz.Tests.Tasks;
 
 public class LovedTracksSyncTaskTests
 {
-    private readonly Mock<IHttpClientFactory> _clientFactoryMock;
     private readonly Mock<ILibraryManager> _libraryManagerMock;
     private readonly Mock<IUserManager> _userManagerMock;
     private readonly Mock<IUserDataManager> _userDataManagerMock;
-    private readonly Mock<IListenBrainzClient> _listenBrainzClientMock;
-    private readonly Mock<IMusicBrainzClient> _musicBrainzClientMock;
+    private readonly Mock<IListenBrainzService> _listenBrainzServiceMock;
+    private readonly Mock<IMetadataProviderService> _metadataProviderServiceMock;
     private readonly Mock<IPluginConfigService> _pluginConfigServiceMock;
     private readonly Mock<IFavoriteSyncService> _favoriteSyncServiceMock;
     private readonly LovedTracksSyncTask _task;
@@ -34,23 +32,21 @@ public class LovedTracksSyncTaskTests
             .Setup(lf => lf.CreateLogger(It.IsAny<string>()))
             .Returns(new NullLogger<ResubmitListensTask>());
 
-        _clientFactoryMock = new Mock<IHttpClientFactory>();
         _libraryManagerMock = new Mock<ILibraryManager>();
         _userManagerMock = new Mock<IUserManager>();
         _userDataManagerMock = new Mock<IUserDataManager>();
-        _listenBrainzClientMock = new Mock<IListenBrainzClient>();
-        _musicBrainzClientMock = new Mock<IMusicBrainzClient>();
+        _listenBrainzServiceMock = new Mock<IListenBrainzService>();
+        _metadataProviderServiceMock = new Mock<IMetadataProviderService>();
         _pluginConfigServiceMock = new Mock<IPluginConfigService>();
         _favoriteSyncServiceMock = new Mock<IFavoriteSyncService>();
 
         _task = new LovedTracksSyncTask(
             loggerFactoryMock.Object,
-            _clientFactoryMock.Object,
             _libraryManagerMock.Object,
             _userManagerMock.Object,
             _userDataManagerMock.Object,
-            _listenBrainzClientMock.Object,
-            _musicBrainzClientMock.Object,
+            _listenBrainzServiceMock.Object,
+            _metadataProviderServiceMock.Object,
             _pluginConfigServiceMock.Object,
             _favoriteSyncServiceMock.Object);
 
@@ -88,7 +84,7 @@ public class LovedTracksSyncTaskTests
         _pluginConfigServiceMock.VerifyGet(pcm => pcm.IsMusicBrainzEnabled, Times.Once);
         _favoriteSyncServiceMock.Verify(fsm => fsm.Disable(), Times.Once);
         _favoriteSyncServiceMock.Verify(fsm => fsm.Enable(), Times.Once);
-        _listenBrainzClientMock.Verify(
+        _listenBrainzServiceMock.Verify(
             lbc => lbc.GetLovedTracksAsync(
                 It.Is<UserConfig>(uc => uc == userConfig),
                 It.IsAny<CancellationToken>()),
@@ -106,7 +102,7 @@ public class LovedTracksSyncTaskTests
 
         _pluginConfigServiceMock.VerifyGet(pcm => pcm.UserConfigs, Times.Once);
         _progressMock.Verify(pm => pm.Report(100), Times.Once);
-        _listenBrainzClientMock.Verify(
+        _listenBrainzServiceMock.Verify(
             lbc => lbc.GetLovedTracksAsync(
                 It.IsAny<UserConfig>(),
                 It.IsAny<CancellationToken>()),
