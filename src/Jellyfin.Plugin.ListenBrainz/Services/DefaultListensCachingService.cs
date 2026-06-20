@@ -19,8 +19,6 @@ using ListenCacheData = System.Collections.Generic.Dictionary<
 /// </summary>
 public sealed class DefaultListensCachingService : IListensCachingService, IDisposable
 {
-    private static DefaultListensCachingService? _instance;
-
     private readonly SemaphoreSlim _lock;
     private readonly IPersistentJsonService<ListenCacheData> _persistentCache;
     private readonly ListenCacheData _listensCache;
@@ -44,7 +42,6 @@ public sealed class DefaultListensCachingService : IListensCachingService, IDisp
         _isDisposed = false;
         _persistentCache = persistentCache;
         _logger = logger;
-        _instance = this;
 
         if (!restore)
         {
@@ -66,20 +63,6 @@ public sealed class DefaultListensCachingService : IListensCachingService, IDisp
     /// Finalizes an instance of the <see cref="DefaultListensCachingService"/> class.
     /// </summary>
     ~DefaultListensCachingService() => Dispose(false);
-
-    /// <summary>
-    /// Gets instance of the cache manager.
-    /// </summary>
-    /// <returns>Singleton instance of <see cref="DefaultFavoriteSyncService"/>.</returns>
-    public static DefaultListensCachingService GetInstance()
-    {
-        if (_instance is null)
-        {
-            throw new ServiceException("Service is not initialized");
-        }
-
-        return _instance;
-    }
 
     /// <inheritdoc />
     public void Dispose()
