@@ -107,12 +107,18 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
             DefaultPlaybackTrackingService.Instance);
 
         RegisterEventHandlers();
+        Instance = this;
     }
 
     /// <summary>
     /// Finalizes an instance of the <see cref="Plugin"/> class.
     /// </summary>
     ~Plugin() => Dispose(false);
+
+    /// <summary>
+    /// Gets the current plugin instance.
+    /// </summary>
+    public static Plugin? Instance { get; private set; }
 
     /// <inheritdoc />
     public override string Name => "ListenBrainz";

@@ -9,7 +9,18 @@ namespace Jellyfin.Plugin.ListenBrainz.Services;
 /// </summary>
 public class DefaultPluginConfigService : IPluginConfigService
 {
-    private static PluginConfiguration Config => Plugin.GetConfiguration();
+    private readonly Func<PluginConfiguration> _configAccessor;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DefaultPluginConfigService"/> class.
+    /// </summary>
+    /// <param name="configAccessor">Accessor returning the live plugin configuration.</param>
+    public DefaultPluginConfigService(Func<PluginConfiguration> configAccessor)
+    {
+        _configAccessor = configAccessor;
+    }
+
+    private PluginConfiguration Config => _configAccessor();
 
     /// <inheritdoc />
     public bool IsAlternativeModeEnabled

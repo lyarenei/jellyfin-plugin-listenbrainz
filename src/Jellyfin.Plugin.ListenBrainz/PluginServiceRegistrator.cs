@@ -4,6 +4,8 @@ using Jellyfin.Plugin.ListenBrainz.Api;
 using Jellyfin.Plugin.ListenBrainz.Api.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.Api.Models;
 using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
+using Jellyfin.Plugin.ListenBrainz.Configuration;
+using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Handlers;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.MusicBrainzApi;
@@ -31,7 +33,7 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
     /// <inheritdoc />
     public void RegisterServices(IServiceCollection serviceCollection, IServerApplicationHost applicationHost)
     {
-        serviceCollection.AddSingleton<IPluginConfigService>(_ => new DefaultPluginConfigService());
+        serviceCollection.AddSingleton<IPluginConfigService>(_ => new DefaultPluginConfigService(GetConfiguration));
         serviceCollection.AddSingleton<IListenBrainzApiClient>(sp =>
         {
             var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
@@ -146,5 +148,11 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
             sp.GetRequiredService<IPlaybackTrackingService>()));
 
         serviceCollection.AddHostedService<PluginEventHandlerService>();
+    }
+
+    private static PluginConfiguration GetConfiguration()
+    {
+        var instance = Plugin.Instance ?? throw new PluginException("Plugin instance is not available");
+        return instance.Configuration;
     }
 }
