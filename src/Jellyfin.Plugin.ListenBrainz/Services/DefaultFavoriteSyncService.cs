@@ -47,7 +47,6 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
         _userManager = userManager;
         _userDataManager = userDataManager;
         IsEnabled = true;
-        Instance = this;
     }
 
     /// <inheritdoc />
@@ -55,11 +54,6 @@ public class DefaultFavoriteSyncService : IFavoriteSyncService
 
     /// <inheritdoc />
     public bool IsDisabled => !IsEnabled;
-
-    /// <summary>
-    /// Gets a singleton instance of the favorite sync service.
-    /// </summary>
-    public static IFavoriteSyncService? Instance { get; private set; }
 
     /// <inheritdoc />
     public async Task<bool> SyncToListenBrainzAsync(
