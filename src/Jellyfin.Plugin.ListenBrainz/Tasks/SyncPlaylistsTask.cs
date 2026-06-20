@@ -7,7 +7,6 @@ using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
-using Jellyfin.Plugin.ListenBrainz.Services;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
@@ -15,7 +14,6 @@ using MediaBrowser.Controller.Playlists;
 using MediaBrowser.Model.Playlists;
 using MediaBrowser.Model.Tasks;
 using Microsoft.Extensions.Logging;
-using ClientUtils = Jellyfin.Plugin.ListenBrainz.Clients.Utils;
 using Playlist = Jellyfin.Plugin.ListenBrainz.Api.Models.Playlist;
 using Utils = Jellyfin.Plugin.ListenBrainz.Common.Utils;
 
@@ -36,8 +34,8 @@ public class SyncPlaylistsTask : IScheduledTask
     ];
 
     private readonly ILogger _logger;
-    private readonly IListenBrainzClient _listenBrainzClient;
-    private readonly IMusicBrainzClient _musicBrainzClient;
+    private readonly IListenBrainzService _listenBrainz;
+    private readonly IMetadataProviderService _metadataProvider;
     private readonly ILibraryManager _libraryManager;
     private readonly IUserManager _userManager;
     private readonly IPlaylistManager _playlistManager;
@@ -49,30 +47,28 @@ public class SyncPlaylistsTask : IScheduledTask
     /// Initializes a new instance of the <see cref="SyncPlaylistsTask"/> class.
     /// </summary>
     /// <param name="loggerFactory">Logger factory.</param>
-    /// <param name="clientFactory">HTTP client factory.</param>
     /// <param name="libraryManager">Library manager.</param>
     /// <param name="userManager">User manager.</param>
     /// <param name="playlistManager">Playlist manager.</param>
-    /// <param name="listenBrainzClient">ListenBrainz client.</param>
-    /// <param name="musicBrainzClient">MusicBrainz client.</param>
+    /// <param name="listenBrainz">ListenBrainz service.</param>
+    /// <param name="metadataProvider">Metadata provider service.</param>
     /// <param name="configService">Plugin configuration service.</param>
     public SyncPlaylistsTask(
         ILoggerFactory loggerFactory,
-        IHttpClientFactory clientFactory,
         ILibraryManager libraryManager,
         IUserManager userManager,
         IPlaylistManager playlistManager,
-        IListenBrainzClient? listenBrainzClient = null,
-        IMusicBrainzClient? musicBrainzClient = null,
-        IPluginConfigService? configService = null)
+        IListenBrainzService listenBrainz,
+        IMetadataProviderService metadataProvider,
+        IPluginConfigService configService)
     {
         _logger = loggerFactory.CreateLogger($"{Plugin.LoggerCategory}.SyncPlaylistsTask");
-        _listenBrainzClient = listenBrainzClient ?? ClientUtils.GetListenBrainzClient(_logger, clientFactory);
-        _musicBrainzClient = musicBrainzClient ?? ClientUtils.GetMusicBrainzClient(_logger, clientFactory);
+        _listenBrainz = listenBrainz;
+        _metadataProvider = metadataProvider;
         _libraryManager = libraryManager;
         _userManager = userManager;
         _playlistManager = playlistManager;
-        _configService = configService ?? new DefaultPluginConfigService();
+        _configService = configService;
     }
 
     /// <inheritdoc />
@@ -152,7 +148,7 @@ public class SyncPlaylistsTask : IScheduledTask
         try
         {
             var playlists = (
-                await _listenBrainzClient.GetCreatedForPlaylistsAsync(
+                await _listenBrainz.GetCreatedForPlaylistsAsync(
                     userConfig,
                     Limits.MaxItemsPerGet,
                     cancellationToken)
@@ -189,7 +185,7 @@ public class SyncPlaylistsTask : IScheduledTask
                 {
                     try
                     {
-                        var playlist = await _listenBrainzClient.GetPlaylistAsync(
+                        var playlist = await _listenBrainz.GetPlaylistAsync(
                             userConfig,
                             pl.PlaylistId,
                             cancellationToken);
@@ -356,7 +352,7 @@ public class SyncPlaylistsTask : IScheduledTask
         {
             _logger.LogDebug("Looking up related recordings for recording MBID {Mbid}", track.RecordingMbid);
 
-            var relatedRecordingMbids = await _musicBrainzClient.GetRelatedRecordingMbidsAsync(
+            var relatedRecordingMbids = await _metadataProvider.GetRelatedRecordingMbidsAsync(
                 track.RecordingMbid,
                 cancellationToken);
 
