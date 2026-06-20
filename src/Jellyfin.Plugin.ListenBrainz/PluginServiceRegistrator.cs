@@ -145,7 +145,6 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
             sp.GetRequiredService<IListensCachingService>(),
             sp.GetRequiredService<IPlaybackTrackingService>()));
 
-        // Subscribes the handlers to Jellyfin events for the lifetime of the host.
-        // serviceCollection.AddHostedService<PluginEventHandlerHostedService>();
+        serviceCollection.AddHostedService<PluginEventHandlerService>();
     }
 }
