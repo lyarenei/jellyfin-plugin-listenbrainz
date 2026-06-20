@@ -4,13 +4,12 @@ using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
-using Jellyfin.Plugin.ListenBrainz.Services;
 using MediaBrowser.Controller.Entities;
+using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Tasks;
 using Microsoft.Extensions.Logging;
-using ClientUtils = Jellyfin.Plugin.ListenBrainz.Clients.Utils;
 
 namespace Jellyfin.Plugin.ListenBrainz.Tasks;
 
@@ -20,13 +19,13 @@ namespace Jellyfin.Plugin.ListenBrainz.Tasks;
 public class LovedTracksSyncTask : IScheduledTask
 {
     private readonly ILogger _logger;
-    private readonly IListenBrainzClient _listenBrainzClient;
-    private readonly IMusicBrainzClient _musicBrainzClient;
+    private readonly IListenBrainzService _listenBrainz;
+    private readonly IMetadataProviderService _metadataProvider;
     private readonly ILibraryManager _libraryManager;
     private readonly IUserManager _userManager;
     private readonly IUserDataManager _userDataManager;
     private readonly IPluginConfigService _configService;
-    private IFavoriteSyncService? _favoriteSyncService;
+    private readonly IFavoriteSyncService _favoriteSyncService;
     private double _progress;
     private double _userCountRatio;
 
@@ -34,43 +33,41 @@ public class LovedTracksSyncTask : IScheduledTask
     /// Initializes a new instance of the <see cref="LovedTracksSyncTask"/> class.
     /// </summary>
     /// <param name="loggerFactory">Logger factory.</param>
-    /// <param name="clientFactory">HTTP client factory.</param>
     /// <param name="libraryManager">Library manager.</param>
     /// <param name="userManager">User manager.</param>
     /// <param name="dataManager">User data manager.</param>
-    /// <param name="listenBrainzClient">ListenBrainz client.</param>
-    /// <param name="musicBrainzClient">MusicBrainz client.</param>
+    /// <param name="listenBrainz">ListenBrainz service.</param>
+    /// <param name="metadataProvider">Metadata provider service.</param>
     /// <param name="configService">Plugin configuration service.</param>
     /// <param name="favoriteSyncService">Favorite sync service.</param>
     public LovedTracksSyncTask(
         ILoggerFactory loggerFactory,
-        IHttpClientFactory clientFactory,
         ILibraryManager libraryManager,
         IUserManager userManager,
         IUserDataManager dataManager,
-        IListenBrainzClient? listenBrainzClient = null,
-        IMusicBrainzClient? musicBrainzClient = null,
-        IPluginConfigService? configService = null,
-        IFavoriteSyncService? favoriteSyncService = null)
+        IListenBrainzService listenBrainz,
+        IMetadataProviderService metadataProvider,
+        IPluginConfigService configService,
+        IFavoriteSyncService favoriteSyncService)
     {
         _logger = loggerFactory.CreateLogger($"{Plugin.LoggerCategory}.LovedSyncTask");
-        _listenBrainzClient = listenBrainzClient ?? ClientUtils.GetListenBrainzClient(_logger, clientFactory);
-        _musicBrainzClient = musicBrainzClient ?? ClientUtils.GetMusicBrainzClient(_logger, clientFactory);
+        _listenBrainz = listenBrainz;
+        _metadataProvider = metadataProvider;
         _libraryManager = libraryManager;
         _userManager = userManager;
         _userDataManager = dataManager;
-        _configService = configService ?? new DefaultPluginConfigService();
-        _favoriteSyncService = favoriteSyncService ?? DefaultFavoriteSyncService.Instance;
+        _configService = configService;
+        _favoriteSyncService = favoriteSyncService;
     }
 
     /// <inheritdoc />
-    public string Name => "Synchronize loved tracks";
+    public string Name => "Sync loved tracks";
 
     /// <inheritdoc />
     public string Key => "SyncLovedTracks";
 
     /// <inheritdoc />
-    public string Description => "Synchronize loved tracks from ListenBrainz to Jellyfin";
+    public string Description => "Get loved tracks from ListenBrainz and mark them as favorite in Jellyfin";
 
     /// <inheritdoc />
     public string Category => "ListenBrainz";
@@ -87,16 +84,6 @@ public class LovedTracksSyncTask : IScheduledTask
             _logger.LogInformation("No users have been configured, nothing to sync");
             progress.Report(100);
             return;
-        }
-
-        if (_favoriteSyncService is null)
-        {
-            _favoriteSyncService = DefaultFavoriteSyncService.Instance;
-            if (_favoriteSyncService is null)
-            {
-                _logger.LogError("Favorite sync service is not available, cannot sync favorites");
-                return;
-            }
         }
 
         if (!_configService.IsMusicBrainzEnabled)
@@ -143,7 +130,7 @@ public class LovedTracksSyncTask : IScheduledTask
         UserConfig userConfig,
         CancellationToken cancellationToken)
     {
-        var lovedTracksIds = (await _listenBrainzClient.GetLovedTracksAsync(userConfig, cancellationToken)).ToList();
+        var lovedTracksIds = (await _listenBrainz.GetLovedTracksAsync(userConfig, cancellationToken)).ToList();
         var user = _userManager.GetUserById(userConfig.JellyfinUserId);
         if (user is null)
         {
@@ -168,11 +155,11 @@ public class LovedTracksSyncTask : IScheduledTask
             try
             {
                 recordingMbid = item.GetRecordingMbid();
-                if (string.IsNullOrEmpty(recordingMbid) && _configService.IsMusicBrainzEnabled)
+                if (string.IsNullOrEmpty(recordingMbid) && _configService.IsMusicBrainzEnabled && item is Audio audioItem)
                 {
                     _logger.LogDebug("Fetching recording MBID for item {ItemId} from MusicBrainz", item.Id);
-                    var metadata = await _musicBrainzClient.GetAudioItemMetadataAsync(item, cancellationToken);
-                    recordingMbid = metadata.RecordingMbid;
+                    var metadata = await _metadataProvider.GetAudioItemMetadataAsync(audioItem, cancellationToken);
+                    recordingMbid = metadata?.RecordingMbid;
                 }
                 else
                 {
@@ -184,7 +171,7 @@ public class LovedTracksSyncTask : IScheduledTask
                 _logger.LogWarning("Processing item {ItemId} failed: {Error}", item.Id, e.Message);
             }
 
-            if (lovedTracksIds.Contains(recordingMbid ?? string.Empty))
+            if (recordingMbid is not null && lovedTracksIds.Contains(recordingMbid))
             {
                 MarkAsFavorite(user, item, cancellationToken);
             }
