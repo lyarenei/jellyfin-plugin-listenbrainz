@@ -155,15 +155,18 @@ public class LovedTracksSyncTask : IScheduledTask
             try
             {
                 recordingMbid = item.GetRecordingMbid();
-                if (string.IsNullOrEmpty(recordingMbid) && _configService.IsMusicBrainzEnabled && item is Audio audioItem)
+                if (string.IsNullOrEmpty(recordingMbid))
                 {
-                    _logger.LogDebug("Fetching recording MBID for item {ItemId} from MusicBrainz", item.Id);
-                    var metadata = await _metadataProvider.GetAudioItemMetadataAsync(audioItem, cancellationToken);
-                    recordingMbid = metadata?.RecordingMbid;
-                }
-                else
-                {
-                    _logger.LogDebug("Recording MBID for item {ItemId} is not available, skipping", item.Id);
+                    if (_configService.IsMusicBrainzEnabled && item is Audio audioItem)
+                    {
+                        _logger.LogDebug("Fetching recording MBID for item {ItemId} from MusicBrainz", item.Id);
+                        var metadata = await _metadataProvider.GetAudioItemMetadataAsync(audioItem, cancellationToken);
+                        recordingMbid = metadata?.RecordingMbid;
+                    }
+                    else
+                    {
+                        _logger.LogDebug("Recording MBID for item {ItemId} is not available, skipping", item.Id);
+                    }
                 }
             }
             catch (Exception e)
