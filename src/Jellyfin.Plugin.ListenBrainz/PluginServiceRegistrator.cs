@@ -110,8 +110,7 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
                 WriteIndented = true,
             };
 
-            var dummyFilePath = Path.Combine(config.BackupPath, "not-a-backup.json");
-            var storage = new DefaultPersistentJsonService<List<Listen>>(dummyFilePath, serializerOptions);
+            var storage = new DefaultPersistentJsonService<List<Listen>>(serializerOptions: serializerOptions);
             return new DefaultListenBackupService(logger, config.BackupPath, storage);
         });
 

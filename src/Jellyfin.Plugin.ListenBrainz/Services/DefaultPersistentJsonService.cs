@@ -15,7 +15,7 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
         WriteIndented = true,
     };
 
-    private readonly string _defaultFilePath;
+    private readonly string? _defaultFilePath;
     private readonly JsonSerializerOptions _serializerOptions;
     private readonly SemaphoreSlim _lock;
 
@@ -24,9 +24,9 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
     /// <summary>
     /// Initializes a new instance of the <see cref="DefaultPersistentJsonService{T}"/> class.
     /// </summary>
-    /// <param name="defaultFilePath">Default path to the file.</param>
+    /// <param name="defaultFilePath">Default path for persistent storage.</param>
     /// <param name="serializerOptions">JSON serializer options.</param>
-    public DefaultPersistentJsonService(string defaultFilePath, JsonSerializerOptions? serializerOptions = null)
+    public DefaultPersistentJsonService(string? defaultFilePath = null, JsonSerializerOptions? serializerOptions = null)
     {
         _defaultFilePath = defaultFilePath;
         _serializerOptions = serializerOptions ?? _defaultSerializerOptions;
@@ -164,7 +164,13 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
 
     private string ResolveFilePath(string? filePath)
     {
-        return string.IsNullOrWhiteSpace(filePath) ? _defaultFilePath : filePath;
+        var path = string.IsNullOrWhiteSpace(filePath) ? _defaultFilePath : filePath;
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            throw new ServiceException("No file path was provided and no default file path is configured");
+        }
+
+        return path;
     }
 
     private static void EnsureFileDirectory(string filePath)
