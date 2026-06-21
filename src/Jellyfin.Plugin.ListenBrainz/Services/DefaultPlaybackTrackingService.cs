@@ -10,7 +10,6 @@ namespace Jellyfin.Plugin.ListenBrainz.Services;
 /// </summary>
 public sealed class DefaultPlaybackTrackingService : IPlaybackTrackingService, IDisposable
 {
-    private static DefaultPlaybackTrackingService? _instance;
     private readonly SemaphoreSlim _lock;
     private readonly Dictionary<string, List<TrackedItem>> _items;
     private bool _isDisposed;
@@ -29,14 +28,6 @@ public sealed class DefaultPlaybackTrackingService : IPlaybackTrackingService, I
     /// Finalizes an instance of the <see cref="DefaultPlaybackTrackingService"/> class.
     /// </summary>
     ~DefaultPlaybackTrackingService() => Dispose(false);
-
-    /// <summary>
-    /// Gets the default singleton instance.
-    /// </summary>
-    public static DefaultPlaybackTrackingService Instance
-    {
-        get => _instance ??= new DefaultPlaybackTrackingService();
-    }
 
     /// <inheritdoc />
     public async Task<bool> AddItemAsync(string userId, Audio item, CancellationToken cancellationToken = default)

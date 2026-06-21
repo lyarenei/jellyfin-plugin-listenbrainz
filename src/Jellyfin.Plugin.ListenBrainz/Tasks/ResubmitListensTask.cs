@@ -6,7 +6,6 @@ using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
-using Jellyfin.Plugin.ListenBrainz.Services;
 using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Tasks;
@@ -31,24 +30,28 @@ public class ResubmitListensTask : IScheduledTask
     /// Initializes a new instance of the <see cref="ResubmitListensTask"/> class.
     /// </summary>
     /// <param name="loggerFactory">Logger factory.</param>
-    /// <param name="clientFactory">HTTP client factory.</param>
     /// <param name="libraryManager">Library manager.</param>
-    /// <param name="serviceFactory">Service factory.</param>
+    /// <param name="listenBrainz">ListenBrainz service.</param>
+    /// <param name="metadataProvider">Metadata provider service.</param>
+    /// <param name="pluginConfig">Plugin configuration service.</param>
+    /// <param name="listensCache">Listens caching service.</param>
+    /// <param name="validationService">Validation service.</param>
     public ResubmitListensTask(
         ILoggerFactory loggerFactory,
-        IHttpClientFactory clientFactory,
         ILibraryManager libraryManager,
-        IServiceFactory? serviceFactory = null)
+        IListenBrainzService listenBrainz,
+        IMetadataProviderService metadataProvider,
+        IPluginConfigService pluginConfig,
+        IListensCachingService listensCache,
+        IValidationService validationService)
     {
         _logger = loggerFactory.CreateLogger($"{Plugin.LoggerCategory}.ResubmitListensTask");
         _libraryManager = libraryManager;
-
-        var factory = serviceFactory ?? new DefaultServiceFactory(loggerFactory, clientFactory);
-        _listenBrainz = factory.GetListenBrainzService();
-        _metadataProvider = factory.GetMetadataProviderService();
-        _pluginConfig = factory.GetPluginConfigService();
-        _listensCache = factory.GetListensCachingService();
-        _validationService = factory.GetValidationService(_libraryManager, _pluginConfig);
+        _listenBrainz = listenBrainz;
+        _metadataProvider = metadataProvider;
+        _pluginConfig = pluginConfig;
+        _listensCache = listensCache;
+        _validationService = validationService;
     }
 
     /// <inheritdoc />

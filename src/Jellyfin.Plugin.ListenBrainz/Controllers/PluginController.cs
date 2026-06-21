@@ -2,7 +2,6 @@ using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using ClientUtils = Jellyfin.Plugin.ListenBrainz.Clients.Utils;
 
 namespace Jellyfin.Plugin.ListenBrainz.Controllers;
 
@@ -14,17 +13,17 @@ namespace Jellyfin.Plugin.ListenBrainz.Controllers;
 public class PluginController : ControllerBase
 {
     private readonly ILogger _logger;
-    private readonly IListenBrainzClient _client;
+    private readonly IListenBrainzService _listenBrainz;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PluginController"/> class.
     /// </summary>
     /// <param name="loggerFactory">Logger factory.</param>
-    /// <param name="clientFactory">HTTP client factory.</param>
-    public PluginController(ILoggerFactory loggerFactory, IHttpClientFactory clientFactory)
+    /// <param name="listenBrainz">ListenBrainz service.</param>
+    public PluginController(ILoggerFactory loggerFactory, IListenBrainzService listenBrainz)
     {
         _logger = loggerFactory.CreateLogger($"{Plugin.LoggerCategory}.Controller");
-        _client = ClientUtils.GetListenBrainzClient(_logger, clientFactory);
+        _listenBrainz = listenBrainz;
     }
 
     /// <summary>
@@ -39,7 +38,7 @@ public class PluginController : ControllerBase
     {
         try
         {
-            return await _client.ValidateToken(apiToken);
+            return await _listenBrainz.ValidateTokenAsync(apiToken, CancellationToken.None);
         }
         catch (Exception e)
         {
