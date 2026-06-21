@@ -10,7 +10,6 @@ using Jellyfin.Plugin.ListenBrainz.MusicBrainzApi;
 using Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.Services;
 using MediaBrowser.Controller;
-using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Plugins;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -36,26 +35,18 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
 
         serviceCollection.AddSingleton<IListenBrainzApiClient>(sp =>
         {
-            var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
+            var clientLogger = GetLogger(sp, "HttpClient");
+            var apiLogger = GetLogger(sp, "Api");
+
             var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
-
-            var httpClient = new UnderlyingClient(
-                httpClientFactory,
-                loggerFactory.CreateLogger(Plugin.LoggerCategory + ".HttpClient"),
-                null);
-
-            var wrapper = new HttpClientWrapper(httpClient);
-            var baseClient = new BaseApiClient(
-                wrapper,
-                loggerFactory.CreateLogger(Plugin.LoggerCategory + ".Api"),
-                null);
-
-            return new ListenBrainzApiClient(baseClient, loggerFactory.CreateLogger(Plugin.LoggerCategory + ".Api"));
+            var httpClient = new UnderlyingClient(httpClientFactory, clientLogger, null);
+            var baseClient = new BaseApiClient(new HttpClientWrapper(httpClient), apiLogger, null);
+            return new ListenBrainzApiClient(baseClient, apiLogger);
         });
 
         serviceCollection.AddSingleton<IMusicBrainzApiClient>(sp =>
         {
-            var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
+            var logger = GetLogger(sp, "MusicBrainzApi");
             var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
             var clientName = string.Join(string.Empty, Plugin.FullName.Split(' ').Select(s => s.Capitalize()));
             return new MusicBrainzApiClient(
@@ -63,45 +54,27 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
                 Plugin.Version,
                 Plugin.SourceUrl,
                 httpClientFactory,
-                loggerFactory.CreateLogger(Plugin.LoggerCategory + ".MusicBrainzApi"));
+                logger);
         });
 
-        serviceCollection.AddSingleton<IListenBrainzService>(sp => new DefaultListenBrainzService(
-            sp.GetRequiredService<ILoggerFactory>().CreateLogger(Plugin.LoggerCategory),
-            sp.GetRequiredService<IListenBrainzApiClient>(),
-            sp.GetRequiredService<IPluginConfigService>()));
+        AddPluginService<IListenBrainzService, DefaultListenBrainzService>(serviceCollection);
+        AddPluginService<IMetadataProviderService, DefaultMetadataProviderService>(
+            serviceCollection,
+            "MetadataProvider");
 
-        serviceCollection.AddSingleton<IMetadataProviderService>(sp => new DefaultMetadataProviderService(
-            sp.GetRequiredService<ILoggerFactory>().CreateLogger(Plugin.LoggerCategory + ".MetadataProvider"),
-            sp.GetRequiredService<IMusicBrainzApiClient>(),
-            sp.GetRequiredService<IPluginConfigService>()));
+        AddPluginService<IValidationService, DefaultValidationService>(serviceCollection, "Validation");
+        AddPluginService<IFavoriteSyncService, DefaultFavoriteSyncService>(serviceCollection, "FavoriteSync");
+        serviceCollection.AddSingleton<IPlaybackTrackingService, DefaultPlaybackTrackingService>();
 
-        serviceCollection.AddSingleton<IValidationService>(sp => new DefaultValidationService(
-            sp.GetRequiredService<ILoggerFactory>().CreateLogger(Plugin.LoggerCategory + ".Validation"),
-            sp.GetRequiredService<IPluginConfigService>(),
-            sp.GetRequiredService<ILibraryManager>()));
-
-        serviceCollection.AddSingleton<IFavoriteSyncService>(sp => new DefaultFavoriteSyncService(
-            sp.GetRequiredService<ILoggerFactory>().CreateLogger(Plugin.LoggerCategory + ".FavoriteSync"),
-            sp.GetRequiredService<IListenBrainzService>(),
-            sp.GetRequiredService<IMetadataProviderService>(),
-            sp.GetRequiredService<IPluginConfigService>(),
-            sp.GetRequiredService<ILibraryManager>(),
-            sp.GetRequiredService<IUserManager>(),
-            sp.GetRequiredService<IUserDataManager>()));
-
-        serviceCollection.AddSingleton<IPlaybackTrackingService>(_ => new DefaultPlaybackTrackingService());
         serviceCollection.AddSingleton<IListensCachingService>(sp =>
         {
-            var logger = sp.GetRequiredService<ILoggerFactory>().CreateLogger(Plugin.LoggerCategory + ".ListensCache");
             var cachePath = Path.Join(Plugin.GetDataPath(), "cache.json");
             var storage = new DefaultPersistentJsonService<ListenCacheData>(cachePath);
-            return new DefaultListensCachingService(logger, storage);
+            return new DefaultListensCachingService(GetLogger(sp, "ListensCache"), storage);
         });
 
         serviceCollection.AddSingleton<IListenBackupService>(sp =>
         {
-            var logger = sp.GetRequiredService<ILoggerFactory>().CreateLogger(Plugin.LoggerCategory + ".ListensBackup");
             var config = sp.GetRequiredService<IPluginConfigService>();
             var serializerOptions = new JsonSerializerOptions
             {
@@ -111,41 +84,32 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
             };
 
             var storage = new DefaultPersistentJsonService<List<Listen>>(serializerOptions: serializerOptions);
-            return new DefaultListenBackupService(logger, config.BackupPath, storage);
+            return new DefaultListenBackupService(GetLogger(sp, "ListensBackup"), config.BackupPath, storage);
         });
 
-        serviceCollection.AddSingleton(sp => new PlaybackStartHandler(
-            sp.GetRequiredService<ILoggerFactory>().CreateLogger(Plugin.LoggerCategory + ".PlaybackStartHandler"),
-            sp.GetRequiredService<IValidationService>(),
-            sp.GetRequiredService<IPluginConfigService>(),
-            sp.GetRequiredService<IMetadataProviderService>(),
-            sp.GetRequiredService<IListenBrainzService>(),
-            sp.GetRequiredService<IPlaybackTrackingService>(),
-            sp.GetRequiredService<IUserManager>()));
-
-        serviceCollection.AddSingleton(sp => new PlaybackStopHandler(
-            sp.GetRequiredService<ILoggerFactory>().CreateLogger(Plugin.LoggerCategory + ".PlaybackStopHandler"),
-            sp.GetRequiredService<IUserManager>(),
-            sp.GetRequiredService<IPluginConfigService>(),
-            sp.GetRequiredService<IFavoriteSyncService>(),
-            sp.GetRequiredService<IValidationService>(),
-            sp.GetRequiredService<IMetadataProviderService>(),
-            sp.GetRequiredService<IListenBackupService>(),
-            sp.GetRequiredService<IListenBrainzService>(),
-            sp.GetRequiredService<IListensCachingService>()));
-
-        serviceCollection.AddSingleton(sp => new UserDataSaveHandler(
-            sp.GetRequiredService<ILoggerFactory>().CreateLogger(Plugin.LoggerCategory + ".UserDataSaveHandler"),
-            sp.GetRequiredService<IUserManager>(),
-            sp.GetRequiredService<IPluginConfigService>(),
-            sp.GetRequiredService<IFavoriteSyncService>(),
-            sp.GetRequiredService<IValidationService>(),
-            sp.GetRequiredService<IMetadataProviderService>(),
-            sp.GetRequiredService<IListenBackupService>(),
-            sp.GetRequiredService<IListenBrainzService>(),
-            sp.GetRequiredService<IListensCachingService>(),
-            sp.GetRequiredService<IPlaybackTrackingService>()));
+        AddPluginService<PlaybackStartHandler>(serviceCollection, "PlaybackStartHandler");
+        AddPluginService<PlaybackStopHandler>(serviceCollection, "PlaybackStopHandler");
+        AddPluginService<UserDataSaveHandler>(serviceCollection, "UserDataSaveHandler");
 
         serviceCollection.AddHostedService<PluginEventHandlerService>();
+    }
+
+    private static void AddPluginService<TInterface, TService>(IServiceCollection services, string logCategory = "")
+        where TService : class, TInterface
+        where TInterface : class
+        => services.AddSingleton<TInterface>(sp =>
+            ActivatorUtilities.CreateInstance<TService>(sp, GetLogger(sp, logCategory)));
+
+    private static void AddPluginService<T>(IServiceCollection services, string logCategory)
+        where T : class
+        => services.AddSingleton(sp => ActivatorUtilities.CreateInstance<T>(sp, GetLogger(sp, logCategory)));
+
+    private static ILogger GetLogger(IServiceProvider sp, string categorySuffix = "")
+    {
+        var loggerCategory = string.IsNullOrWhiteSpace(categorySuffix)
+            ? Plugin.LoggerCategory
+            : $"{Plugin.LoggerCategory}.{categorySuffix}";
+
+        return sp.GetRequiredService<ILoggerFactory>().CreateLogger(loggerCategory);
     }
 }
