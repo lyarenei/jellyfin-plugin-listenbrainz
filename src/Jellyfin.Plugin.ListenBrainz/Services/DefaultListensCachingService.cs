@@ -55,7 +55,11 @@ public sealed class DefaultListensCachingService : IListensCachingService, IDisp
         }
         catch (ServiceException ex)
         {
-            _logger.LogWarning(ex, "Failed to restore listens cache from persistent storage - cached listens may be lost");
+            _logger.LogWarning(
+                ex,
+                "Could not restore listens cache from persistent storage. " +
+                "This is expected on first server startup after install or update; " +
+                "otherwise cached listens may be lost");
         }
     }
 
