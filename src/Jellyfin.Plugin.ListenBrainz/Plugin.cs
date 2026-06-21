@@ -58,6 +58,13 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// </summary>
     public static string LoggerCategory => "Jellyfin.Plugin.ListenBrainz";
 
+    /// <summary>
+    /// Gets the current plugin instance.
+    /// </summary>
+    /// <returns>The current plugin instance.</returns>
+    /// <exception cref="PluginException">Plugin instance is not available.</exception>
+    public static Plugin RequireInstance() => Instance ?? throw new PluginException("Plugin instance is not available");
+
     /// <inheritdoc />
     public IEnumerable<PluginPageInfo> GetPages()
     {
@@ -97,7 +104,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// <exception cref="PluginException">Plugin instance is not available.</exception>
     public static string GetDataPath()
     {
-        var instance = Instance ?? throw new PluginException("Plugin instance is not available");
+        var instance = RequireInstance();
 
         // DataFolderPath is invalid (https://github.com/jellyfin/jellyfin/issues/10091)
         // var path = instance.DataFolderPath;
@@ -112,7 +119,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// <exception cref="PluginException">Plugin instance or path is not available.</exception>
     public static string GetConfigDirPath()
     {
-        var instance = Instance ?? throw new PluginException("Plugin instance is not available");
+        var instance = RequireInstance();
         var dirName = Path.GetDirectoryName(instance.ConfigurationFilePath);
         if (dirName is null)
         {
