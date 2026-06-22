@@ -76,5 +76,46 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
     /// <inheritdoc />
     public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
+        using var logScope = BeginLogScope();
+        var enabledUserConfigs = _configService
+            .UserConfigs
+            .Where(uc => uc.IsWeeklyPlaylistsSyncEnabled)
+            .ToList();
+
+        if (enabledUserConfigs.Count == 0)
+        {
+            _logger.LogInformation("No users have weekly playlist syncing enabled, nothing to sync");
+            progress.Report(100);
+            return;
+        }
+
+        _logger.LogInformation("Starting weekly playlist sync from ListenBrainz...");
+        ResetProgress(enabledUserConfigs.Count);
+
+        try
+        {
+            foreach (var userConfig in enabledUserConfigs)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                _logger.LogInformation("Syncing weekly playlists for user {Username}", userConfig.UserName);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogInformation("Weekly playlist sync task has been cancelled");
+            progress.Report(100);
+        }
+    }
+
+    private void ResetProgress(int userCount)
+    {
+        _userCountRatio = 100.0 / userCount;
+        _progress = 0;
+    }
+
+    private IDisposable? BeginLogScope()
+    {
+        return _logger.BeginScope(new Dictionary<string, object> { { "EventId", "SyncWeeklyPlaylistsTask" } });
     }
 }
