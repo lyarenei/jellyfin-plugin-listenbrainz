@@ -24,6 +24,8 @@ namespace Jellyfin.Plugin.ListenBrainz.Tasks;
 /// </summary>
 public class SyncPlaylistsTask : IScheduledTask
 {
+    private const string PlaylistTag = "ListenBrainz";
+
     private static readonly string[] _defaultAllowedPatches =
     [
         "weekly-jams",
