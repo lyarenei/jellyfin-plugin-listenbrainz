@@ -11,7 +11,11 @@ export const userDefaults: PluginUserConfig = {
     IsPlaylistsSyncEnabled: false,
     IsStrictModeEnabled: false,
     IsBackupEnabled: false,
+    IsWeeklyExplorationSyncEnabled: true,
+    IsWeeklyJamsSyncEnabled: true,
+    IsWeeklyPlaylistsSyncEnabled: false,
     JellyfinUserId: "",
+    KeepWeeklyPlaylistsAfterRotation: false,
     UserName: "",
 };
 

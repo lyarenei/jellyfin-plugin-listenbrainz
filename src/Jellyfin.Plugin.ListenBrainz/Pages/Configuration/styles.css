@@ -17,6 +17,10 @@
     display: block;
 }
 
+.weekly-playlist-option {
+    margin-left: 1.5em;
+}
+
 .input-row label {
     display: none;
 }
