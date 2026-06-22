@@ -19,6 +19,10 @@ public class UserConfig
         UserName = string.Empty;
         IsBackupEnabled = false;
         IsStrictModeEnabled = false;
+        IsWeeklyPlaylistsSyncEnabled = false;
+        IsWeeklyJamsSyncEnabled = true;
+        IsWeeklyExplorationSyncEnabled = true;
+        KeepWeeklyPlaylistsAfterRotation = false;
     }
 
     /// <summary>
@@ -63,6 +67,26 @@ public class UserConfig
     /// Gets or sets a value indicating whether ListenBrainz playlist sync is enabled.
     /// </summary>
     public bool IsPlaylistsSyncEnabled { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether ListenBrainz weekly playlist sync is enabled.
+    /// </summary>
+    public bool IsWeeklyPlaylistsSyncEnabled { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether Weekly Jams playlists should be synced.
+    /// </summary>
+    public bool IsWeeklyJamsSyncEnabled { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether Weekly Exploration playlists should be synced.
+    /// </summary>
+    public bool IsWeeklyExplorationSyncEnabled { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether weekly playlists should be kept after rotation.
+    /// </summary>
+    public bool KeepWeeklyPlaylistsAfterRotation { get; set; }
 
     /// <summary>
     /// Gets or sets a ListenBrainz username.
