@@ -276,13 +276,15 @@ public class SyncPlaylistsTask : IScheduledTask
         }
 
         _logger.LogDebug("Creating playlist {Name} with {Count} items", playlistName, jellyfinPlaylistTracks.Count);
-        await _playlistManager.CreatePlaylist(new PlaylistCreationRequest
+        var createdPlaylist = await _playlistManager.CreatePlaylist(new PlaylistCreationRequest
         {
             Name = playlistName,
             UserId = user.Id,
             ItemIdList = jellyfinPlaylistTracks.Select(i => i.Id).ToArray(),
-            MediaType = MediaType.Audio
+            MediaType = MediaType.Audio,
         });
+
+        await TagPlaylist(user, createdPlaylist, cancellationToken);
 
         _logger.LogInformation(
             "Successfully synced playlist {Name} with {Count} tracks",
@@ -316,6 +318,39 @@ public class SyncPlaylistsTask : IScheduledTask
     {
         return _defaultAllowedPatches.Any(patch =>
             sourcePatch.Contains(patch, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    private async Task TagPlaylist(
+        User user,
+        PlaylistCreationResult playlist,
+        CancellationToken cancellationToken)
+    {
+        if (!Guid.TryParse(playlist.Id, out var playlistId))
+        {
+            _logger.LogWarning("Could not tag playlist {PlaylistId}: invalid playlist ID", playlist.Id);
+            return;
+        }
+
+        var createdPlaylist = _playlistManager.GetPlaylistForUser(playlistId, user.Id);
+        if (createdPlaylist is null)
+        {
+            _logger.LogWarning("Could not tag playlist {PlaylistId}: playlist was not found", playlist.Id);
+            return;
+        }
+
+        createdPlaylist.Tags = AddListenBrainzTag(createdPlaylist.Tags);
+        await createdPlaylist.UpdateToRepositoryAsync(ItemUpdateType.MetadataEdit, cancellationToken);
+    }
+
+    private static string[] AddListenBrainzTag(IEnumerable<string>? tags)
+    {
+        var existingTags = tags?.ToArray() ?? [];
+        if (existingTags.Any(tag => tag.Equals(PlaylistTag, StringComparison.OrdinalIgnoreCase)))
+        {
+            return existingTags;
+        }
+
+        return [..existingTags, PlaylistTag];
     }
 
     private async Task<BaseItem?> FindJellyfinItem(
