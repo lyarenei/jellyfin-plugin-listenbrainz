@@ -74,7 +74,7 @@ public class SyncPlaylistsTask : IScheduledTask
     }
 
     /// <inheritdoc />
-    public string Name => "Sync playlists from ListenBrainz";
+    public string Name => "Sync playlists from ListenBrainz (deprecated)";
 
     /// <inheritdoc />
     public string Key => "SyncPlaylists";
