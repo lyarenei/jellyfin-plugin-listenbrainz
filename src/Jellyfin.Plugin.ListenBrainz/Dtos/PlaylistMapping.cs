@@ -11,6 +11,7 @@ public class PlaylistMapping
     public PlaylistMapping()
     {
         ListenBrainzPlaylistId = string.Empty;
+        Title = string.Empty;
     }
 
     /// <summary>
@@ -27,4 +28,24 @@ public class PlaylistMapping
     /// Gets or sets the Jellyfin playlist ID.
     /// </summary>
     public Guid JellyfinPlaylistId { get; set; }
+
+    /// <summary>
+    /// Gets or sets an optional task-specific category discriminator.
+    /// </summary>
+    public string? Category { get; set; }
+
+    /// <summary>
+    /// Gets or sets the ListenBrainz playlist title at last sync.
+    /// </summary>
+    public string Title { get; set; }
+
+    /// <summary>
+    /// Gets or sets the ListenBrainz playlist creation date.
+    /// </summary>
+    public DateTime CreatedAt { get; set; }
+
+    /// <summary>
+    /// Gets or sets the last sync date.
+    /// </summary>
+    public DateTime LastSyncedAt { get; set; }
 }
