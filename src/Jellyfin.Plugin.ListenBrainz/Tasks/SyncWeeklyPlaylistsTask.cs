@@ -1,14 +1,17 @@
+using Jellyfin.Plugin.ListenBrainz.Api.Resources;
+using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Playlists;
 using MediaBrowser.Model.Tasks;
 using Microsoft.Extensions.Logging;
+using Playlist = Jellyfin.Plugin.ListenBrainz.Api.Models.Playlist;
 using Utils = Jellyfin.Plugin.ListenBrainz.Common.Utils;
 
 namespace Jellyfin.Plugin.ListenBrainz.Tasks;
 
 /// <summary>
-/// Jellyfin task for syncing weekly playlists from ListenBrainz.
+/// Jellyfin task for syncing weekly rotation playlists from ListenBrainz.
 /// </summary>
 public class SyncWeeklyPlaylistsTask : IScheduledTask
 {
@@ -99,6 +102,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
                 cancellationToken.ThrowIfCancellationRequested();
 
                 _logger.LogInformation("Syncing weekly playlists for user {Username}", userConfig.UserName);
+                await HandleUserPlaylistSync(progress, userConfig, cancellationToken);
             }
         }
         catch (OperationCanceledException)
@@ -108,10 +112,40 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
         }
     }
 
+    private async Task HandleUserPlaylistSync(
+        IProgress<double> progress,
+        UserConfig userConfig,
+        CancellationToken cancellationToken)
+    {
+        var user = _userManager.GetUserById(userConfig.JellyfinUserId);
+        if (user is null)
+        {
+            _logger.LogWarning("User with ID {UserId} does not exist", userConfig.JellyfinUserId);
+            ReportUserDone(progress);
+            return;
+        }
+
+        var playlists = (await _listenBrainz.GetCreatedForPlaylistsAsync(
+            userConfig,
+            Limits.MaxItemsPerGet,
+            cancellationToken)).ToList();
+        _logger.LogInformation(
+            "Found {Count} playlists created for user {Username}",
+            playlists.Count,
+            userConfig.UserName);
+
+        // todo: process playlists
+    }
     private void ResetProgress(int userCount)
     {
         _userCountRatio = 100.0 / userCount;
         _progress = 0;
+    }
+
+    private void ReportUserDone(IProgress<double> progress)
+    {
+        _progress += _userCountRatio;
+        progress.Report(_progress);
     }
 
     private IDisposable? BeginLogScope()
