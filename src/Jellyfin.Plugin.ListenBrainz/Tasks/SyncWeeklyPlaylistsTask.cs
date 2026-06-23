@@ -1,4 +1,5 @@
 using Jellyfin.Plugin.ListenBrainz.Api.Resources;
+using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using MediaBrowser.Controller.Library;
@@ -15,6 +16,8 @@ namespace Jellyfin.Plugin.ListenBrainz.Tasks;
 /// </summary>
 public class SyncWeeklyPlaylistsTask : IScheduledTask
 {
+    private const int RotationPlaylistCount = 2;
+
     private readonly ILogger _logger;
     private readonly IListenBrainzService _listenBrainz;
     private readonly IMetadataProviderService _metadataProvider;
@@ -129,13 +132,69 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
             userConfig,
             Limits.MaxItemsPerGet,
             cancellationToken)).ToList();
+
         _logger.LogInformation(
             "Found {Count} playlists created for user {Username}",
             playlists.Count,
             userConfig.UserName);
 
+        var weeklyPlaylists = PickWeeklyRotationPlaylists(playlists, userConfig).ToList();
+        _logger.LogInformation(
+            "Selected {Count} weekly rotation playlists for user {Username}",
+            weeklyPlaylists.Count,
+            userConfig.UserName);
+
         // todo: process playlists
     }
+
+    /// <summary>
+    /// Pick the created-for playlists (current and previous) rotation for each type the user has enabled.
+    /// </summary>
+    /// <remarks>
+    /// ListenBrainz does not provide "current weekly jams" alias, so newest <see cref="Playlist.CreatedAt"/>
+    /// is treated as the current week and the next one as the last week one.
+    /// </remarks>
+    /// <param name="playlists">Playlists created for the user.</param>
+    /// <param name="userConfig">User configuration.</param>
+    /// <returns>The weekly playlists matching the user settings.</returns>
+    internal static IEnumerable<WeeklyPlaylistCandidate> PickWeeklyRotationPlaylists(
+        IEnumerable<Playlist> playlists,
+        UserConfig userConfig)
+    {
+        return playlists
+            .Select(GetWeeklyPlaylistCandidate)
+            .WhereNotNull()
+            .Where(candidate => !string.IsNullOrWhiteSpace(candidate.Playlist.PlaylistId))
+            .Where(candidate => IsPlaylistTypeEnabled(userConfig, candidate.Type))
+            .GroupBy(candidate => candidate.Type)
+            .SelectMany(group => group
+                .OrderByDescending(candidate => candidate.Playlist.CreatedAt)
+                .ThenByDescending(candidate => candidate.Playlist.Identifier, StringComparer.OrdinalIgnoreCase)
+                .Take(RotationPlaylistCount))
+            .OrderBy(candidate => candidate.Type)
+            .ThenByDescending(candidate => candidate.Playlist.CreatedAt);
+    }
+
+    internal static WeeklyPlaylistCandidate? GetWeeklyPlaylistCandidate(Playlist playlist)
+    {
+        return playlist.JspfPlaylist.SourcePatch switch
+        {
+            "weekly-jams" => new WeeklyPlaylistCandidate(playlist, WeeklyPlaylistType.Jams),
+            "weekly-exploration" => new WeeklyPlaylistCandidate(playlist, WeeklyPlaylistType.Exploration),
+            _ => null,
+        };
+    }
+
+    private static bool IsPlaylistTypeEnabled(UserConfig userConfig, WeeklyPlaylistType playlistType)
+    {
+        return playlistType switch
+        {
+            WeeklyPlaylistType.Jams => userConfig.IsWeeklyJamsSyncEnabled,
+            WeeklyPlaylistType.Exploration => userConfig.IsWeeklyExplorationSyncEnabled,
+            _ => false,
+        };
+    }
+
     private void ResetProgress(int userCount)
     {
         _userCountRatio = 100.0 / userCount;
