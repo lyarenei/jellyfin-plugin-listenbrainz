@@ -4,6 +4,7 @@ using Jellyfin.Plugin.ListenBrainz.Api;
 using Jellyfin.Plugin.ListenBrainz.Api.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.Api.Models;
 using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
+using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Handlers;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.MusicBrainzApi;
@@ -65,6 +66,13 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
         AddPluginService<IValidationService, DefaultValidationService>(serviceCollection, "Validation");
         AddPluginService<IFavoriteSyncService, DefaultFavoriteSyncService>(serviceCollection, "FavoriteSync");
         serviceCollection.AddSingleton<IPlaybackTrackingService, DefaultPlaybackTrackingService>();
+
+        serviceCollection.AddSingleton<IPlaylistSyncStateService>(sp =>
+        {
+            var statePath = Path.Join(Plugin.GetDataPath(), "playlist-sync-state.json");
+            var storage = new DefaultPersistentJsonService<PlaylistSyncState>(statePath);
+            return new DefaultPlaylistSyncStateService(GetLogger(sp, "PlaylistSyncState"), storage);
+        });
 
         serviceCollection.AddSingleton<IListensCachingService>(sp =>
         {
