@@ -1,6 +1,8 @@
+using Jellyfin.Database.Implementations.Entities;
 using Jellyfin.Plugin.ListenBrainz.Api.Resources;
 using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
+using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Playlists;
@@ -25,6 +27,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
     private readonly IUserManager _userManager;
     private readonly IPlaylistManager _playlistManager;
     private readonly IPluginConfigService _configService;
+    private readonly IPlaylistSyncStateService _stateService;
     private double _progress;
     private double _userCountRatio;
 
@@ -38,6 +41,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
     /// <param name="listenBrainz">ListenBrainz service.</param>
     /// <param name="metadataProvider">Metadata provider service.</param>
     /// <param name="configService">Plugin configuration service.</param>
+    /// <param name="stateService">Playlist sync state service.</param>
     public SyncWeeklyPlaylistsTask(
         ILoggerFactory loggerFactory,
         ILibraryManager libraryManager,
@@ -45,7 +49,8 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
         IPlaylistManager playlistManager,
         IListenBrainzService listenBrainz,
         IMetadataProviderService metadataProvider,
-        IPluginConfigService configService)
+        IPluginConfigService configService,
+        IPlaylistSyncStateService stateService)
     {
         _logger = loggerFactory.CreateLogger($"{Plugin.LoggerCategory}.SyncWeeklyPlaylistsTask");
         _listenBrainz = listenBrainz;
@@ -54,6 +59,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
         _userManager = userManager;
         _playlistManager = playlistManager;
         _configService = configService;
+        _stateService = stateService;
     }
 
     /// <inheritdoc />
@@ -98,6 +104,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
         _logger.LogInformation("Starting weekly playlist sync from ListenBrainz...");
         ResetProgress(enabledUserConfigs.Count);
 
+        var state = await _stateService.ReadAsync(cancellationToken);
         try
         {
             foreach (var userConfig in enabledUserConfigs)
@@ -105,7 +112,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
                 cancellationToken.ThrowIfCancellationRequested();
 
                 _logger.LogInformation("Syncing weekly playlists for user {Username}", userConfig.UserName);
-                await HandleUserPlaylistSync(progress, userConfig, cancellationToken);
+                await HandleUserPlaylistSync(progress, userConfig, state, cancellationToken);
             }
         }
         catch (OperationCanceledException)
@@ -113,11 +120,16 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
             _logger.LogInformation("Weekly playlist sync task has been cancelled");
             progress.Report(100);
         }
+        finally
+        {
+            await _stateService.SaveAsync(state, CancellationToken.None);
+        }
     }
 
     private async Task HandleUserPlaylistSync(
         IProgress<double> progress,
         UserConfig userConfig,
+        PlaylistSyncState state,
         CancellationToken cancellationToken)
     {
         var user = _userManager.GetUserById(userConfig.JellyfinUserId);
@@ -144,7 +156,79 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
             weeklyPlaylists.Count,
             userConfig.UserName);
 
+        PruneOutOfRotationPlaylists(user, userConfig, state, weeklyPlaylists, cancellationToken);
+
+        if (weeklyPlaylists.Count == 0)
+        {
+            ReportUserDone(progress);
+            return;
+        }
+
         // todo: process playlists
+
+    private void PruneOutOfRotationPlaylists(
+        User user,
+        UserConfig userConfig,
+        PlaylistSyncState state,
+        IReadOnlyList<WeeklyPlaylistCandidate> rotationPlaylists,
+        CancellationToken cancellationToken)
+    {
+        if (userConfig.KeepWeeklyPlaylistsAfterRotation)
+        {
+            return;
+        }
+
+        var rotationIds = rotationPlaylists
+            .Select(p => p.Playlist.PlaylistId)
+            .WhereNotNull()
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        var rotationTypes = rotationPlaylists.Select(p => p.Type).ToHashSet();
+
+        var mappingsToRemove = state
+            .Mappings
+            .Where(m => m.JellyfinUserId == user.Id && ShouldPruneMapping(userConfig, m, rotationIds, rotationTypes))
+            .ToList();
+
+        foreach (var mapping in mappingsToRemove)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var playlist = _playlistManager.GetPlaylistForUser(mapping.JellyfinPlaylistId, user.Id);
+            if (playlist is not null)
+            {
+                _logger.LogInformation(
+                    "Deleting weekly playlist {PlaylistName} because it is no longer in rotation",
+                    playlist.Name);
+                _libraryManager.DeleteItem(playlist, new DeleteOptions { DeleteFileLocation = false });
+            }
+
+            state.Mappings.Remove(mapping);
+        }
+    }
+
+    internal static bool ShouldPruneMapping(
+        UserConfig userConfig,
+        PlaylistMapping mapping,
+        HashSet<string> rotationIds,
+        HashSet<WeeklyPlaylistType> rotationTypes)
+    {
+        if (!TryGetWeeklyType(mapping.Category, out var type))
+        {
+            return false;
+        }
+
+        if (!IsPlaylistTypeEnabled(userConfig, type))
+        {
+            return true;
+        }
+
+        return rotationTypes.Contains(type) && !rotationIds.Contains(mapping.ListenBrainzPlaylistId);
+    }
+
+    private static bool TryGetWeeklyType(string? category, out WeeklyPlaylistType type)
+    {
+        return Enum.TryParse(category, ignoreCase: true, out type) && Enum.IsDefined(type);
     }
 
     /// <summary>
