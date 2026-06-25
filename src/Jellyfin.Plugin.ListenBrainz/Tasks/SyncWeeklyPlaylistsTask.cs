@@ -3,6 +3,7 @@ using Jellyfin.Plugin.ListenBrainz.Api.Resources;
 using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
+using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
@@ -145,62 +146,72 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
             return;
         }
 
-        var playlists = (await _listenBrainz.GetCreatedForPlaylistsAsync(
-            userConfig,
-            Limits.MaxItemsPerGet,
-            cancellationToken)).ToList();
-
-        _logger.LogInformation(
-            "Found {Count} playlists created for user {Username}",
-            playlists.Count,
-            userConfig.UserName);
-
-        var weeklyPlaylists = PickWeeklyRotationPlaylists(playlists, userConfig).ToList();
-        _logger.LogInformation(
-            "Selected {Count} weekly rotation playlists for user {Username}",
-            weeklyPlaylists.Count,
-            userConfig.UserName);
-
-        PruneOutOfRotationPlaylists(user, userConfig, state, weeklyPlaylists, cancellationToken);
-
-        if (weeklyPlaylists.Count == 0)
+        try
         {
+            var playlists = (await _listenBrainz.GetCreatedForPlaylistsAsync(
+                userConfig,
+                Limits.MaxItemsPerGet,
+                cancellationToken)).ToList();
+
+            _logger.LogInformation(
+                "Found {Count} playlists created for user {Username}",
+                playlists.Count,
+                userConfig.UserName);
+
+            var weeklyPlaylists = PickWeeklyRotationPlaylists(playlists, userConfig).ToList();
+            _logger.LogInformation(
+                "Selected {Count} weekly rotation playlists for user {Username}",
+                weeklyPlaylists.Count,
+                userConfig.UserName);
+
+            PruneOutOfRotationPlaylists(user, userConfig, state, weeklyPlaylists, cancellationToken);
+
+            if (weeklyPlaylists.Count == 0)
+            {
+                ReportUserDone(progress);
+                return;
+            }
+
+            var playlistRatio = _userCountRatio / weeklyPlaylists.Count;
+            var candidates = _trackMatcher.GetCandidateAudioItems(user);
+            foreach (var weeklyPlaylist in weeklyPlaylists)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                try
+                {
+                    _logger.LogDebug(
+                        "Processing weekly playlist {PlaylistId} of type {PlaylistType}",
+                        weeklyPlaylist.Playlist.PlaylistId,
+                        weeklyPlaylist.Type);
+
+                    var playlist = await _listenBrainz.GetPlaylistAsync(
+                        userConfig,
+                        weeklyPlaylist.Playlist.PlaylistId,
+                        cancellationToken);
+
+                    await SyncPlaylist(user, playlist, weeklyPlaylist.Type, candidates, state, cancellationToken);
+                }
+                catch (Exception e) when (e is not OperationCanceledException)
+                {
+                    _logger.LogWarning(
+                        "Failed to sync weekly playlist {PlaylistId}: {Error}",
+                        weeklyPlaylist.Playlist.PlaylistId,
+                        e.Message);
+                }
+
+                _progress += playlistRatio;
+                progress.Report(_progress);
+            }
+        }
+        catch (PluginException e)
+        {
+            _logger.LogError(
+                "Failed to fetch weekly playlists for user {Username}: {Error}",
+                userConfig.UserName,
+                e.Message);
             ReportUserDone(progress);
-            return;
         }
-
-        var playlistRatio = _userCountRatio / weeklyPlaylists.Count;
-        var candidates = _trackMatcher.GetCandidateAudioItems(user);
-        foreach (var weeklyPlaylist in weeklyPlaylists)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            try
-            {
-                _logger.LogDebug(
-                    "Processing weekly playlist {PlaylistId} of type {PlaylistType}",
-                    weeklyPlaylist.Playlist.PlaylistId,
-                    weeklyPlaylist.Type);
-
-                var playlist = await _listenBrainz.GetPlaylistAsync(
-                    userConfig,
-                    weeklyPlaylist.Playlist.PlaylistId,
-                    cancellationToken);
-
-                await SyncPlaylist(user, playlist, weeklyPlaylist.Type, candidates, state, cancellationToken);
-            }
-            catch (Exception e) when (e is not OperationCanceledException)
-            {
-                _logger.LogWarning(
-                    "Failed to sync weekly playlist {PlaylistId}: {Error}",
-                    weeklyPlaylist.Playlist.PlaylistId,
-                    e.Message);
-            }
-
-            _progress += playlistRatio;
-            progress.Report(_progress);
-        }
-
     }
 
     private async Task SyncPlaylist(
