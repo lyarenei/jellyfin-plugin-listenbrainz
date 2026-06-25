@@ -28,6 +28,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
     private readonly IPlaylistManager _playlistManager;
     private readonly IPluginConfigService _configService;
     private readonly IPlaylistSyncStateService _stateService;
+    private readonly IPlaylistTrackMatcher _trackMatcher;
     private double _progress;
     private double _userCountRatio;
 
@@ -42,6 +43,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
     /// <param name="metadataProvider">Metadata provider service.</param>
     /// <param name="configService">Plugin configuration service.</param>
     /// <param name="stateService">Playlist sync state service.</param>
+    /// <param name="trackMatcher">Playlist track matcher.</param>
     public SyncWeeklyPlaylistsTask(
         ILoggerFactory loggerFactory,
         ILibraryManager libraryManager,
@@ -50,7 +52,8 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
         IListenBrainzService listenBrainz,
         IMetadataProviderService metadataProvider,
         IPluginConfigService configService,
-        IPlaylistSyncStateService stateService)
+        IPlaylistSyncStateService stateService,
+        IPlaylistTrackMatcher trackMatcher)
     {
         _logger = loggerFactory.CreateLogger($"{Plugin.LoggerCategory}.SyncWeeklyPlaylistsTask");
         _listenBrainz = listenBrainz;
@@ -60,6 +63,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
         _playlistManager = playlistManager;
         _configService = configService;
         _stateService = stateService;
+        _trackMatcher = trackMatcher;
     }
 
     /// <inheritdoc />
@@ -164,7 +168,44 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
             return;
         }
 
-        // todo: process playlists
+        var playlistRatio = _userCountRatio / weeklyPlaylists.Count;
+        var candidates = _trackMatcher.GetCandidateAudioItems(user);
+        foreach (var weeklyPlaylist in weeklyPlaylists)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            try
+            {
+                _logger.LogDebug(
+                    "Processing weekly playlist {PlaylistId} of type {PlaylistType}",
+                    weeklyPlaylist.Playlist.PlaylistId,
+                    weeklyPlaylist.Type);
+
+                var playlist = await _listenBrainz.GetPlaylistAsync(
+                    userConfig,
+                    weeklyPlaylist.Playlist.PlaylistId,
+                    cancellationToken);
+
+                await SyncPlaylist();
+            }
+            catch (Exception e) when (e is not OperationCanceledException)
+            {
+                _logger.LogWarning(
+                    "Failed to sync weekly playlist {PlaylistId}: {Error}",
+                    weeklyPlaylist.Playlist.PlaylistId,
+                    e.Message);
+            }
+
+            _progress += playlistRatio;
+            progress.Report(_progress);
+        }
+
+    }
+
+    private async Task SyncPlaylist()
+    {
+    }
+
 
     private void PruneOutOfRotationPlaylists(
         User user,

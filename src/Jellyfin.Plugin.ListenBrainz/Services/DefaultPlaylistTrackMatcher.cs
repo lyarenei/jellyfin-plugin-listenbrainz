@@ -1,6 +1,7 @@
 using Jellyfin.Data.Enums;
 using Jellyfin.Database.Implementations.Entities;
 using Jellyfin.Plugin.ListenBrainz.Api.Models;
+using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using MediaBrowser.Controller.Entities;
@@ -37,6 +38,19 @@ public class DefaultPlaylistTrackMatcher : IPlaylistTrackMatcher
         _libraryManager = libraryManager;
         _metadataProvider = metadataProvider;
         _configService = configService;
+    }
+
+    /// <inheritdoc />
+    public IReadOnlyList<BaseItem> GetCandidateAudioItems(User user)
+    {
+        // todo there may be a better placer for this method
+        var allowedLibraries = GetAllowedLibraries()
+            .Select(al => _libraryManager.GetItemById(al))
+            .WhereNotNull()
+            .ToList();
+
+        var query = new InternalItemsQuery(user) { MediaTypes = [MediaType.Audio] };
+        return _libraryManager.GetItemList(query, allowedLibraries).ToList();
     }
 
     /// <inheritdoc />

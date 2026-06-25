@@ -10,6 +10,13 @@ namespace Jellyfin.Plugin.ListenBrainz.Interfaces;
 public interface IPlaylistTrackMatcher
 {
     /// <summary>
+    /// Gets the candidate audio items from the allowed libraries for the given user.
+    /// </summary>
+    /// <param name="user">The user to resolve candidates for.</param>
+    /// <returns>The candidate audio items.</returns>
+    IReadOnlyList<BaseItem> GetCandidateAudioItems(User user);
+
+    /// <summary>
     /// Finds the best matching Jellyfin item for a ListenBrainz playlist track.
     /// </summary>
     /// <param name="candidates">Candidate audio items, as returned by <see cref="GetCandidateAudioItems"/>.</param>
