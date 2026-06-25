@@ -4,6 +4,7 @@ using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
+using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Playlists;
 using MediaBrowser.Model.Tasks;
@@ -186,7 +187,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
                     weeklyPlaylist.Playlist.PlaylistId,
                     cancellationToken);
 
-                await SyncPlaylist();
+                await SyncPlaylist(user, playlist, weeklyPlaylist.Type, candidates, state, cancellationToken);
             }
             catch (Exception e) when (e is not OperationCanceledException)
             {
@@ -202,8 +203,45 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
 
     }
 
-    private async Task SyncPlaylist()
+    private async Task SyncPlaylist(
+        User user,
+        Playlist playlist,
+        WeeklyPlaylistType playlistType,
+        IReadOnlyList<BaseItem> candidates,
+        PlaylistSyncState state,
+        CancellationToken cancellationToken)
     {
+        _logger.LogDebug("Syncing weekly playlist: {Title}", playlist.Title);
+
+        var tracks = playlist.Tracks.ToList();
+        if (tracks.Count == 0)
+        {
+            _logger.LogDebug("Playlist {Title} has no tracks, skipping", playlist.Title);
+            return;
+        }
+
+        var matchedTracks = new List<BaseItem>();
+        foreach (var track in tracks)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var item = await _trackMatcher.FindMatchAsync(candidates, user, track, cancellationToken);
+            if (item is null)
+            {
+                _logger.LogDebug("No Jellyfin item found for track: {Title}", track.Title);
+                continue;
+            }
+
+            matchedTracks.Add(item);
+        }
+
+        _logger.LogInformation(
+            "Found {Count} (out of {TotalCount}) matching tracks for weekly playlist {Title}",
+            matchedTracks.Count,
+            tracks.Count,
+            playlist.Title);
+
+        // todo: handle sync state
     }
 
 
