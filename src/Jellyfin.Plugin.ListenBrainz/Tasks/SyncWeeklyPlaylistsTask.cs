@@ -482,10 +482,16 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
 
     internal static WeeklyPlaylistCandidate? GetWeeklyPlaylistCandidate(Playlist playlist)
     {
-        return playlist.JspfPlaylist.SourcePatch switch
+        var type = ClassifyBySourcePatch(playlist.JspfPlaylist.SourcePatch);
+        return type is null ? null : new WeeklyPlaylistCandidate(playlist, type.Value);
+    }
+
+    internal static WeeklyPlaylistType? ClassifyBySourcePatch(string? sourcePatch)
+    {
+        return sourcePatch switch
         {
-            "weekly-jams" => new WeeklyPlaylistCandidate(playlist, WeeklyPlaylistType.Jams),
-            "weekly-exploration" => new WeeklyPlaylistCandidate(playlist, WeeklyPlaylistType.Exploration),
+            "weekly-jams" => WeeklyPlaylistType.Jams,
+            "weekly-exploration" => WeeklyPlaylistType.Exploration,
             _ => null,
         };
     }
