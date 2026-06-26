@@ -27,8 +27,6 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
     private readonly IPlaylistSyncStateService _stateService;
     private readonly IPlaylistTrackMatcher _trackMatcher;
     private readonly IPlaylistManager _playlistManager;
-    private double _progress;
-    private double _userCountRatio;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SyncWeeklyPlaylistsTask"/> class.
@@ -98,7 +96,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
         }
 
         _logger.LogInformation("Starting weekly playlist sync from ListenBrainz...");
-        ResetProgress(enabledUserConfigs.Count);
+        var reporter = new SyncProgress(progress, enabledUserConfigs.Count);
 
         var state = await _stateService.ReadAsync(cancellationToken);
         try
@@ -108,13 +106,13 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
                 cancellationToken.ThrowIfCancellationRequested();
 
                 _logger.LogInformation("Syncing weekly playlists for user {Username}", userConfig.UserName);
-                await HandleUserPlaylistSync(progress, userConfig, state, cancellationToken);
+                await HandleUserPlaylistSync(reporter, userConfig, state, cancellationToken);
             }
         }
         catch (OperationCanceledException)
         {
             _logger.LogInformation("Weekly playlist sync task has been cancelled");
-            progress.Report(100);
+            reporter.Finish();
         }
         finally
         {
@@ -123,7 +121,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
     }
 
     private async Task HandleUserPlaylistSync(
-        IProgress<double> progress,
+        SyncProgress reporter,
         UserConfig userConfig,
         PlaylistSyncState state,
         CancellationToken cancellationToken)
@@ -132,7 +130,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
         if (user is null)
         {
             _logger.LogWarning("User with ID {UserId} does not exist", userConfig.JellyfinUserId);
-            ReportUserDone(progress);
+            reporter.CompleteUser();
             return;
         }
 
@@ -158,11 +156,10 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
 
             if (weeklyPlaylists.Count == 0)
             {
-                ReportUserDone(progress);
+                reporter.CompleteUser();
                 return;
             }
 
-            var playlistRatio = _userCountRatio / weeklyPlaylists.Count;
             var candidates = _trackMatcher.GetCandidateAudioItems(user);
             foreach (var weeklyPlaylist in weeklyPlaylists)
             {
@@ -190,8 +187,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
                         e.Message);
                 }
 
-                _progress += playlistRatio;
-                progress.Report(_progress);
+                reporter.AdvancePlaylist(weeklyPlaylists.Count);
             }
         }
         catch (PluginException e)
@@ -200,7 +196,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
                 "Failed to fetch weekly playlists for user {Username}: {Error}",
                 userConfig.UserName,
                 e.Message);
-            ReportUserDone(progress);
+            reporter.CompleteUser();
         }
     }
 
@@ -338,20 +334,48 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
         }
     }
 
-    private void ResetProgress(int userCount)
-    {
-        _userCountRatio = 100.0 / userCount;
-        _progress = 0;
-    }
-
-    private void ReportUserDone(IProgress<double> progress)
-    {
-        _progress += _userCountRatio;
-        progress.Report(_progress);
-    }
-
     private IDisposable? BeginLogScope()
     {
         return _logger.BeginScope(new Dictionary<string, object> { { "EventId", "SyncWeeklyPlaylistsTask" } });
+    }
+
+    /// <summary>
+    /// Tracks task progress as an evenly split share per user, advanced per processed playlist.
+    /// </summary>
+    private sealed class SyncProgress
+    {
+        private readonly IProgress<double> _progress;
+        private readonly double _userShare;
+        private double _reported;
+
+        public SyncProgress(IProgress<double> progress, int userCount)
+        {
+            _progress = progress;
+            _userShare = 100.0 / userCount;
+        }
+
+        /// <summary>
+        /// Advances by one playlist's portion of the current user's share.
+        /// </summary>
+        /// <param name="totalPlaylists">Number of playlists being processed for the current user.</param>
+        public void AdvancePlaylist(int totalPlaylists)
+        {
+            _reported += _userShare / totalPlaylists;
+            _progress.Report(_reported);
+        }
+
+        /// <summary>
+        /// Marks the current user as fully processed.
+        /// </summary>
+        public void CompleteUser()
+        {
+            _reported += _userShare;
+            _progress.Report(_reported);
+        }
+
+        /// <summary>
+        /// Reports completion of the whole task.
+        /// </summary>
+        public void Finish() => _progress.Report(100);
     }
 }
