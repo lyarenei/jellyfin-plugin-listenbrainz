@@ -159,7 +159,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
                 playlists.Count,
                 userConfig.UserName);
 
-            var weeklyPlaylists = PickWeeklyRotationPlaylists(playlists, userConfig).ToList();
+            var weeklyPlaylists = WeeklyRotationPolicy.PickWeeklyRotationPlaylists(playlists, userConfig).ToList();
             _logger.LogInformation(
                 "Selected {Count} weekly rotation playlists for user {Username}",
                 weeklyPlaylists.Count,
@@ -274,7 +274,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
             jellyfinPlaylistId,
             playlist.Title,
             playlist.CreatedAt,
-            playlistType.ToString());
+            WeeklyRotationPolicy.CategoryFor(playlistType));
 
         _logger.LogInformation(
             "Successfully synced weekly playlist {Name} with {Count} tracks",
@@ -408,7 +408,8 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
 
         var mappingsToRemove = state
             .Mappings
-            .Where(m => m.JellyfinUserId == user.Id && ShouldPruneMapping(userConfig, m, rotationIds, rotationTypes))
+            .Where(m => m.JellyfinUserId == user.Id &&
+                        WeeklyRotationPolicy.ShouldPruneMapping(userConfig, m, rotationIds, rotationTypes))
             .ToList();
 
         foreach (var mapping in mappingsToRemove)
@@ -426,84 +427,6 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
 
             state.Mappings.Remove(mapping);
         }
-    }
-
-    internal static bool ShouldPruneMapping(
-        UserConfig userConfig,
-        PlaylistMapping mapping,
-        HashSet<string> rotationIds,
-        HashSet<WeeklyPlaylistType> rotationTypes)
-    {
-        if (!TryGetWeeklyType(mapping.Category, out var type))
-        {
-            return false;
-        }
-
-        if (!IsPlaylistTypeEnabled(userConfig, type))
-        {
-            return true;
-        }
-
-        return rotationTypes.Contains(type) && !rotationIds.Contains(mapping.ListenBrainzPlaylistId);
-    }
-
-    private static bool TryGetWeeklyType(string? category, out WeeklyPlaylistType type)
-    {
-        return Enum.TryParse(category, ignoreCase: true, out type) && Enum.IsDefined(type);
-    }
-
-    /// <summary>
-    /// Pick the created-for playlists (current and previous) rotation for each type the user has enabled.
-    /// </summary>
-    /// <remarks>
-    /// ListenBrainz does not provide "current weekly jams" alias, so newest <see cref="Playlist.CreatedAt"/>
-    /// is treated as the current week and the next one as the last week one.
-    /// </remarks>
-    /// <param name="playlists">Playlists created for the user.</param>
-    /// <param name="userConfig">User configuration.</param>
-    /// <returns>The weekly playlists matching the user settings.</returns>
-    internal static IEnumerable<WeeklyPlaylistCandidate> PickWeeklyRotationPlaylists(
-        IEnumerable<Playlist> playlists,
-        UserConfig userConfig)
-    {
-        return playlists
-            .Select(GetWeeklyPlaylistCandidate)
-            .WhereNotNull()
-            .Where(candidate => !string.IsNullOrWhiteSpace(candidate.Playlist.PlaylistId))
-            .Where(candidate => IsPlaylistTypeEnabled(userConfig, candidate.Type))
-            .GroupBy(candidate => candidate.Type)
-            .SelectMany(group => group
-                .OrderByDescending(candidate => candidate.Playlist.CreatedAt)
-                .ThenByDescending(candidate => candidate.Playlist.Identifier, StringComparer.OrdinalIgnoreCase)
-                .Take(RotationPlaylistCount))
-            .OrderBy(candidate => candidate.Type)
-            .ThenByDescending(candidate => candidate.Playlist.CreatedAt);
-    }
-
-    internal static WeeklyPlaylistCandidate? GetWeeklyPlaylistCandidate(Playlist playlist)
-    {
-        var type = ClassifyBySourcePatch(playlist.JspfPlaylist.SourcePatch);
-        return type is null ? null : new WeeklyPlaylistCandidate(playlist, type.Value);
-    }
-
-    internal static WeeklyPlaylistType? ClassifyBySourcePatch(string? sourcePatch)
-    {
-        return sourcePatch switch
-        {
-            "weekly-jams" => WeeklyPlaylistType.Jams,
-            "weekly-exploration" => WeeklyPlaylistType.Exploration,
-            _ => null,
-        };
-    }
-
-    private static bool IsPlaylistTypeEnabled(UserConfig userConfig, WeeklyPlaylistType playlistType)
-    {
-        return playlistType switch
-        {
-            WeeklyPlaylistType.Jams => userConfig.IsWeeklyJamsSyncEnabled,
-            WeeklyPlaylistType.Exploration => userConfig.IsWeeklyExplorationSyncEnabled,
-            _ => false,
-        };
     }
 
     private static bool HasListenBrainzTag(BaseItem playlist)
