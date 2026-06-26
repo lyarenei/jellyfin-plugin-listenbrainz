@@ -14,6 +14,7 @@ using MediaBrowser.Controller.Playlists;
 using MediaBrowser.Model.Playlists;
 using MediaBrowser.Model.Tasks;
 using Microsoft.Extensions.Logging;
+using IPlaylistManager = MediaBrowser.Controller.Playlists.IPlaylistManager;
 using Playlist = Jellyfin.Plugin.ListenBrainz.Api.Models.Playlist;
 using Utils = Jellyfin.Plugin.ListenBrainz.Common.Utils;
 
