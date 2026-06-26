@@ -1,4 +1,4 @@
-namespace Jellyfin.Plugin.ListenBrainz.Tasks;
+namespace Jellyfin.Plugin.ListenBrainz.Tasks.SyncWeeklyPlaylists;
 
 /// <summary>
 /// ListenBrainz weekly playlist family.

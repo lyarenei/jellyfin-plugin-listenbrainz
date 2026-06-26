@@ -5,6 +5,7 @@ using Jellyfin.Plugin.ListenBrainz.Api.Models;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Tasks;
+using Jellyfin.Plugin.ListenBrainz.Tasks.SyncWeeklyPlaylists;
 using Xunit;
 
 namespace Jellyfin.Plugin.ListenBrainz.Tests.Tasks.WeeklyPlaylists;
