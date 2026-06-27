@@ -1,7 +1,7 @@
 import { pluginUUID } from "./constants";
 import { MediaLibrary, PluginConfiguration, TokenValidationResult } from "./types";
 
-let pendingConfig: PluginConfiguration | null = null;
+let cacheInvalid = false;
 
 export const ConfigApiClient = {
     ajax: (options: AjaxOptions): Promise<unknown> => {
@@ -26,11 +26,17 @@ export const ConfigApiClient = {
             throw new Error("Failed to get libraries");
         }
     },
-    getPluginConfiguration: (): Promise<PluginConfiguration> => {
-        if (pendingConfig !== null) {
-            const config = pendingConfig;
-            pendingConfig = null;
-            return Promise.resolve(config);
+    getPluginConfiguration: async (): Promise<PluginConfiguration> => {
+        if (cacheInvalid) {
+            cacheInvalid = false;
+            const url = await ConfigApiClient.getUrl(`Plugins/${pluginUUID}/Configuration`);
+            const response = await ConfigApiClient.ajax({
+                contentType: "application/json",
+                dataType: "json",
+                type: "GET",
+                url: `${url}?_=${Date.now()}`,
+            });
+            return response as PluginConfiguration;
         }
 
         return ApiClient.getPluginConfiguration(pluginUUID);
@@ -40,7 +46,7 @@ export const ConfigApiClient = {
     },
     savePluginConfiguration: async (newPluginConfig: PluginConfiguration): Promise<object> => {
         const result = await ApiClient.updatePluginConfiguration(pluginUUID, newPluginConfig);
-        pendingConfig = newPluginConfig;
+        cacheInvalid = true;
         return result;
     },
     validateListenBrainzToken: async (apiToken: string): Promise<TokenValidationResult> => {
