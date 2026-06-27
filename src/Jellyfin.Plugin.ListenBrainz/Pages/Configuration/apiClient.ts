@@ -1,6 +1,8 @@
 import { pluginUUID } from "./constants";
 import { MediaLibrary, PluginConfiguration, TokenValidationResult } from "./types";
 
+let pendingConfig: PluginConfiguration | null = null;
+
 export const ConfigApiClient = {
     ajax: (options: AjaxOptions): Promise<unknown> => {
         return ApiClient.ajax(options);
@@ -25,13 +27,21 @@ export const ConfigApiClient = {
         }
     },
     getPluginConfiguration: (): Promise<PluginConfiguration> => {
+        if (pendingConfig !== null) {
+            const config = pendingConfig;
+            pendingConfig = null;
+            return Promise.resolve(config);
+        }
+
         return ApiClient.getPluginConfiguration(pluginUUID);
     },
     getUsers: (): Promise<JellyfinUser[]> => {
         return ApiClient.getUsers();
     },
-    savePluginConfiguration: (newPluginConfig: PluginConfiguration): Promise<object> => {
-        return ApiClient.updatePluginConfiguration(pluginUUID, newPluginConfig);
+    savePluginConfiguration: async (newPluginConfig: PluginConfiguration): Promise<object> => {
+        const result = await ApiClient.updatePluginConfiguration(pluginUUID, newPluginConfig);
+        pendingConfig = newPluginConfig;
+        return result;
     },
     validateListenBrainzToken: async (apiToken: string): Promise<TokenValidationResult> => {
         try {
