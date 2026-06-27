@@ -1,8 +1,6 @@
 import { pluginUUID } from "./constants";
 import { MediaLibrary, PluginConfiguration, TokenValidationResult } from "./types";
 
-let cacheInvalid = false;
-
 export const ConfigApiClient = {
     ajax: (options: AjaxOptions): Promise<unknown> => {
         return ApiClient.ajax(options);
@@ -27,27 +25,20 @@ export const ConfigApiClient = {
         }
     },
     getPluginConfiguration: async (): Promise<PluginConfiguration> => {
-        if (cacheInvalid) {
-            cacheInvalid = false;
-            const url = await ConfigApiClient.getUrl(`Plugins/${pluginUUID}/Configuration`);
-            const response = await ConfigApiClient.ajax({
-                contentType: "application/json",
-                dataType: "json",
-                type: "GET",
-                url: `${url}?_=${Date.now()}`,
-            });
-            return response as PluginConfiguration;
-        }
-
-        return ApiClient.getPluginConfiguration(pluginUUID);
+        const url = await ConfigApiClient.getUrl(`Plugins/${pluginUUID}/Configuration`);
+        const response = await ConfigApiClient.ajax({
+            contentType: "application/json",
+            dataType: "json",
+            type: "GET",
+            url: `${url}?_=${Date.now()}`,
+        });
+        return response as PluginConfiguration;
     },
     getUsers: (): Promise<JellyfinUser[]> => {
         return ApiClient.getUsers();
     },
-    savePluginConfiguration: async (newPluginConfig: PluginConfiguration): Promise<object> => {
-        const result = await ApiClient.updatePluginConfiguration(pluginUUID, newPluginConfig);
-        cacheInvalid = true;
-        return result;
+    savePluginConfiguration: (newPluginConfig: PluginConfiguration): Promise<object> => {
+        return ApiClient.updatePluginConfiguration(pluginUUID, newPluginConfig);
     },
     validateListenBrainzToken: async (apiToken: string): Promise<TokenValidationResult> => {
         try {
