@@ -24,8 +24,15 @@ export const ConfigApiClient = {
             throw new Error("Failed to get libraries");
         }
     },
-    getPluginConfiguration: (): Promise<PluginConfiguration> => {
-        return ApiClient.getPluginConfiguration(pluginUUID);
+    getPluginConfiguration: async (): Promise<PluginConfiguration> => {
+        const url = await ConfigApiClient.getUrl(`Plugins/${pluginUUID}/Configuration`);
+        const response = await ConfigApiClient.ajax({
+            contentType: "application/json",
+            dataType: "json",
+            type: "GET",
+            url: `${url}?_=${Date.now()}`,
+        });
+        return response as PluginConfiguration;
     },
     getUsers: (): Promise<JellyfinUser[]> => {
         return ApiClient.getUsers();
