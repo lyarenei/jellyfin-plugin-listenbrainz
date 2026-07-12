@@ -61,6 +61,12 @@ public class ListenBrainzApiClient : IListenBrainzApiClient
     }
 
     /// <inheritdoc />
+    public async Task<GetUserPlaylistsResponse> GetUserPlaylists(GetUserPlaylistsRequest request, CancellationToken cancellationToken)
+    {
+        return await _apiClient.SendGetRequest<GetUserPlaylistsRequest, GetUserPlaylistsResponse>(request, cancellationToken);
+    }
+
+    /// <inheritdoc />
     public async Task<GetPlaylistResponse> GetPlaylist(GetPlaylistRequest request, CancellationToken cancellationToken)
     {
         return await _apiClient.SendGetRequest<GetPlaylistRequest, GetPlaylistResponse>(request, cancellationToken);

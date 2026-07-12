@@ -57,6 +57,14 @@ public interface IListenBrainzApiClient
     public Task<GetCreatedForPlaylistsResponse> GetCreatedForPlaylists(GetCreatedForPlaylistsRequest request, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Get playlists owned by a specified user.
+    /// </summary>
+    /// <param name="request">User-owned playlists request.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Request response.</returns>
+    public Task<GetUserPlaylistsResponse> GetUserPlaylists(GetUserPlaylistsRequest request, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Get detailed information for a specific playlist.
     /// </summary>
     /// <param name="request">Playlist details request.</param>
