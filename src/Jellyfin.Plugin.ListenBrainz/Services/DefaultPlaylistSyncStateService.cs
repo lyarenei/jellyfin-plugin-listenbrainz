@@ -33,9 +33,9 @@ public class DefaultPlaylistSyncStateService : IPlaylistSyncStateService
         {
             return await _storage.ReadAsync(cancellationToken: cancellationToken);
         }
-        catch (ServiceException e)
+        catch (ServiceException e) when (e.InnerException is FileNotFoundException or DirectoryNotFoundException)
         {
-            _logger.LogWarning("Failed to read playlist sync state, starting fresh: {Error}", e.Message);
+            _logger.LogInformation("No playlist sync state found, starting fresh: {Error}", e.Message);
             return new PlaylistSyncState();
         }
     }
