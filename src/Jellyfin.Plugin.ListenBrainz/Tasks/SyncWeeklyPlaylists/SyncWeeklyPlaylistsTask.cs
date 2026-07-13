@@ -152,8 +152,6 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
                 weeklyPlaylists.Count,
                 userConfig.UserName);
 
-            PruneOutOfRotationPlaylists(user, userConfig, state, weeklyPlaylists, cancellationToken);
-
             if (weeklyPlaylists.Count == 0)
             {
                 reporter.CompleteUser();
@@ -161,6 +159,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
             }
 
             var candidates = _trackMatcher.GetCandidateAudioItems(user);
+            var failedTypes = new HashSet<WeeklyPlaylistType>();
             foreach (var weeklyPlaylist in weeklyPlaylists)
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -181,6 +180,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
                 }
                 catch (Exception e) when (e is not OperationCanceledException)
                 {
+                    failedTypes.Add(weeklyPlaylist.Type);
                     _logger.LogWarning(
                         "Failed to sync weekly playlist {PlaylistId}: {Error}",
                         weeklyPlaylist.Playlist.PlaylistId,
@@ -189,6 +189,8 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
 
                 reporter.AdvancePlaylist(weeklyPlaylists.Count);
             }
+
+            PruneOutOfRotationPlaylists(user, userConfig, state, weeklyPlaylists, failedTypes, cancellationToken);
         }
         catch (PluginException e)
         {
@@ -297,6 +299,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
         UserConfig userConfig,
         PlaylistSyncState state,
         IReadOnlyList<WeeklyPlaylistCandidate> rotationPlaylists,
+        IReadOnlySet<WeeklyPlaylistType> failedTypes,
         CancellationToken cancellationToken)
     {
         var rotationIds = rotationPlaylists
@@ -304,7 +307,10 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
             .WhereNotNull()
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        var rotationTypes = rotationPlaylists.Select(p => p.Type).ToHashSet();
+        var rotationTypes = rotationPlaylists
+            .Select(p => p.Type)
+            .Where(t => !failedTypes.Contains(t))
+            .ToHashSet();
 
         var mappingsToRemove = state
             .Mappings
