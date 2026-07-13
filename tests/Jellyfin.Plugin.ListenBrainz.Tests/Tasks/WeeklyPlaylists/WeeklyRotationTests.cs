@@ -92,7 +92,6 @@ public class WeeklyRotationTests
     [Fact]
     public void Prune_OutOfRotationSameFamily_IsPruned()
     {
-        var config = EnabledForBoth();
         var mapping = new PlaylistMapping
         {
             ListenBrainzPlaylistId = "old-jams",
@@ -100,7 +99,6 @@ public class WeeklyRotationTests
         };
 
         var result = WeeklyRotationPolicy.ShouldPruneMapping(
-            config,
             mapping,
             rotationIds: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "current-jams", "previous-jams" },
             rotationTypes: new HashSet<WeeklyPlaylistType> { WeeklyPlaylistType.Jams });
@@ -111,7 +109,6 @@ public class WeeklyRotationTests
     [Fact]
     public void Prune_StillInRotation_IsKept()
     {
-        var config = EnabledForBoth();
         var mapping = new PlaylistMapping
         {
             ListenBrainzPlaylistId = "current-jams",
@@ -119,7 +116,6 @@ public class WeeklyRotationTests
         };
 
         var result = WeeklyRotationPolicy.ShouldPruneMapping(
-            config,
             mapping,
             rotationIds: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "current-jams", "previous-jams" },
             rotationTypes: new HashSet<WeeklyPlaylistType> { WeeklyPlaylistType.Jams });
@@ -128,22 +124,20 @@ public class WeeklyRotationTests
     }
 
     [Fact]
-    public void Prune_DisabledFamily_IsPruned()
+    public void Prune_DisabledFamily_IsKept()
     {
-        var config = new UserConfig { IsWeeklyJamsSyncEnabled = false, IsWeeklyExplorationSyncEnabled = true };
         var mapping = new PlaylistMapping
         {
-            ListenBrainzPlaylistId = "current-jams",
-            Category = "Jams",
+            ListenBrainzPlaylistId = "old-exploration",
+            Category = "Exploration",
         };
 
         var result = WeeklyRotationPolicy.ShouldPruneMapping(
-            config,
             mapping,
             rotationIds: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "current-jams" },
             rotationTypes: new HashSet<WeeklyPlaylistType> { WeeklyPlaylistType.Jams });
 
-        Assert.True(result);
+        Assert.False(result);
     }
 
     [Theory]
@@ -153,7 +147,6 @@ public class WeeklyRotationTests
     public void Prune_ForeignOrNullCategory_IsNeverPruned(string? category)
     {
         // The store is shared across sync tasks; the weekly task must leave mappings it does not own.
-        var config = EnabledForBoth();
         var mapping = new PlaylistMapping
         {
             ListenBrainzPlaylistId = "not-a-weekly-playlist",
@@ -161,7 +154,6 @@ public class WeeklyRotationTests
         };
 
         var result = WeeklyRotationPolicy.ShouldPruneMapping(
-            config,
             mapping,
             rotationIds: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "current-jams" },
             rotationTypes: new HashSet<WeeklyPlaylistType> { WeeklyPlaylistType.Jams });

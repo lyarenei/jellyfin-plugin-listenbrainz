@@ -299,11 +299,6 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
         IReadOnlyList<WeeklyPlaylistCandidate> rotationPlaylists,
         CancellationToken cancellationToken)
     {
-        if (userConfig.KeepWeeklyPlaylistsAfterRotation)
-        {
-            return;
-        }
-
         var rotationIds = rotationPlaylists
             .Select(p => p.Playlist.PlaylistId)
             .WhereNotNull()
@@ -314,12 +309,21 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
         var mappingsToRemove = state
             .Mappings
             .Where(m => m.JellyfinUserId == user.Id &&
-                        WeeklyRotationPolicy.ShouldPruneMapping(userConfig, m, rotationIds, rotationTypes))
+                        WeeklyRotationPolicy.ShouldPruneMapping(m, rotationIds, rotationTypes))
             .ToList();
 
         foreach (var mapping in mappingsToRemove)
         {
             cancellationToken.ThrowIfCancellationRequested();
+
+            if (userConfig.KeepWeeklyPlaylistsAfterRotation)
+            {
+                _logger.LogDebug(
+                    "Keeping out-of-rotation weekly playlist {PlaylistId}, removing its mapping",
+                    mapping.ListenBrainzPlaylistId);
+                state.Mappings.Remove(mapping);
+                continue;
+            }
 
             var playlist = _playlistManager.Find(mapping.JellyfinPlaylistId, user.Id);
             if (playlist is not null)

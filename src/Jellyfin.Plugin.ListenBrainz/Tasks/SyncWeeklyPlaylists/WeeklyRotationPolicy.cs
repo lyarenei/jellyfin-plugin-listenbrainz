@@ -69,13 +69,11 @@ internal static class WeeklyRotationPolicy
     /// <summary>
     /// Determines whether a persisted mapping should be pruned given the current rotation.
     /// </summary>
-    /// <param name="userConfig">User configuration.</param>
     /// <param name="mapping">The persisted playlist mapping.</param>
     /// <param name="rotationIds">ListenBrainz playlist IDs currently in rotation.</param>
     /// <param name="rotationTypes">Weekly playlist families currently in rotation.</param>
     /// <returns>True if the mapping is owned by the weekly task and no longer in rotation.</returns>
     internal static bool ShouldPruneMapping(
-        UserConfig userConfig,
         PlaylistMapping mapping,
         HashSet<string> rotationIds,
         HashSet<WeeklyPlaylistType> rotationTypes)
@@ -83,11 +81,6 @@ internal static class WeeklyRotationPolicy
         if (!TryGetWeeklyType(mapping.Category, out var type))
         {
             return false;
-        }
-
-        if (!IsPlaylistTypeEnabled(userConfig, type))
-        {
-            return true;
         }
 
         return rotationTypes.Contains(type) && !rotationIds.Contains(mapping.ListenBrainzPlaylistId);
