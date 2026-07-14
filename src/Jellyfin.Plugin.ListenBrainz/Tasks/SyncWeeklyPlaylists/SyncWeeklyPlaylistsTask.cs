@@ -176,7 +176,17 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
                         weeklyPlaylist.Playlist.PlaylistId,
                         cancellationToken);
 
-                    await SyncPlaylist(user, playlist, weeklyPlaylist.Type, candidates, state, cancellationToken);
+                    var synced = await SyncPlaylist(
+                        user,
+                        playlist,
+                        weeklyPlaylist.Type,
+                        candidates,
+                        state,
+                        cancellationToken);
+                    if (!synced)
+                    {
+                        failedTypes.Add(weeklyPlaylist.Type);
+                    }
                 }
                 catch (Exception e) when (e is not OperationCanceledException)
                 {
@@ -202,7 +212,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
         }
     }
 
-    private async Task SyncPlaylist(
+    private async Task<bool> SyncPlaylist(
         User user,
         Playlist playlist,
         WeeklyPlaylistType playlistType,
@@ -216,7 +226,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
         if (tracks.Count == 0)
         {
             _logger.LogDebug("Playlist {Title} has no tracks, skipping", playlist.Title);
-            return;
+            return true;
         }
 
         var matchedTracks = new List<BaseItem>();
@@ -239,6 +249,14 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
             matchedTracks.Count,
             tracks.Count,
             playlist.Title);
+
+        if (matchedTracks.Count == 0)
+        {
+            _logger.LogWarning(
+                "No matching tracks for weekly playlist {Title}, skipping sync",
+                playlist.Title);
+            return false;
+        }
 
         var existingPlaylist = ResolveMappedPlaylist(user, state, playlist.PlaylistId) ??
                                _playlistManager.FindByName(user, playlist.Title);
@@ -270,6 +288,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
             "Successfully synced weekly playlist {Name} with {Count} tracks",
             playlist.Title,
             matchedTracks.Count);
+        return true;
     }
 
     private JellyfinPlaylist? ResolveMappedPlaylist(User user, PlaylistSyncState state, string listenBrainzPlaylistId)
