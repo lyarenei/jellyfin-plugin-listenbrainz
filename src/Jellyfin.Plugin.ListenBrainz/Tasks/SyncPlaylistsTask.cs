@@ -124,6 +124,15 @@ public class SyncPlaylistsTask : IScheduledTask
                     continue;
                 }
 
+                if (userConfig.IsWeeklyPlaylistsSyncEnabled)
+                {
+                    _logger.LogInformation(
+                        "User has weekly playlist syncing enabled, skipping deprecated playlist sync");
+                    _progress += _userCountRatio;
+                    progress.Report(_progress);
+                    continue;
+                }
+
                 await HandlePlaylistSync(progress, userConfig, cancellationToken);
             }
         }
