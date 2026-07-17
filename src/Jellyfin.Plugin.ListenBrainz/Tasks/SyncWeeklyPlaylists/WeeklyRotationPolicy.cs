@@ -16,18 +16,30 @@ internal static class WeeklyRotationPolicy
     private const int RotationPlaylistCount = 2;
 
     /// <summary>
+    /// Descriptors for every known playlist type, keyed by <see cref="PlaylistType"/>.
+    /// </summary>
+    private static readonly IReadOnlyList<PlaylistTypeDescriptor> _descriptors =
+    [
+        new(
+            PlaylistType.Jams,
+            PlaylistRetention.Rotation,
+            "weekly-jams",
+            uc => uc.IsWeeklyJamsSyncEnabled),
+        new(
+            PlaylistType.Exploration,
+            PlaylistRetention.Rotation,
+            "weekly-exploration",
+            uc => uc.IsWeeklyExplorationSyncEnabled),
+    ];
+
+    /// <summary>
     /// Classifies a ListenBrainz playlist source patch into a weekly playlist family.
     /// </summary>
     /// <param name="sourcePatch">The playlist source patch.</param>
     /// <returns>The matching weekly playlist family, or null if the patch is not a weekly rotation.</returns>
     internal static PlaylistType? ClassifyBySourcePatch(string? sourcePatch)
     {
-        return sourcePatch switch
-        {
-            "weekly-jams" => PlaylistType.Jams,
-            "weekly-exploration" => PlaylistType.Exploration,
-            _ => null,
-        };
+        return DescriptorForPatch(sourcePatch)?.Type;
     }
 
     /// <summary>
@@ -94,16 +106,27 @@ internal static class WeeklyRotationPolicy
 
     private static bool IsPlaylistTypeEnabled(UserConfig userConfig, PlaylistType playlistType)
     {
-        return playlistType switch
-        {
-            PlaylistType.Jams => userConfig.IsWeeklyJamsSyncEnabled,
-            PlaylistType.Exploration => userConfig.IsWeeklyExplorationSyncEnabled,
-            _ => false,
-        };
+        return DescriptorForType(playlistType).IsEnabled(userConfig);
     }
 
     private static bool TryGetWeeklyType(string? category, out PlaylistType type)
     {
         return Enum.TryParse(category, ignoreCase: true, out type) && Enum.IsDefined(type);
+    }
+
+    private static PlaylistTypeDescriptor DescriptorForType(PlaylistType type)
+    {
+        return _descriptors.First(d => d.Type == type);
+    }
+
+    private static PlaylistTypeDescriptor? DescriptorForPatch(string? sourcePatch)
+    {
+        if (string.IsNullOrEmpty(sourcePatch))
+        {
+            return null;
+        }
+
+        return _descriptors.FirstOrDefault(d =>
+            d.SourcePatch.Equals(sourcePatch, StringComparison.Ordinal));
     }
 }
