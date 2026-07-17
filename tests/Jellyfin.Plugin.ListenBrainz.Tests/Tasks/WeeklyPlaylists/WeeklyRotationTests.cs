@@ -61,12 +61,12 @@ public class WeeklyRotationTests
             .PickWeeklyRotationPlaylists(playlists, EnabledForBoth())
             .ToList();
 
-        var jamsIds = selected.Where(c => c.Type == WeeklyPlaylistType.Jams)
+        var jamsIds = selected.Where(c => c.Type == PlaylistType.Jams)
             .Select(c => c.Playlist.PlaylistId)
             .ToList();
 
         Assert.Equal(new[] { "jams-3", "jams-2" }, jamsIds);
-        Assert.Single(selected, c => c.Type == WeeklyPlaylistType.Exploration);
+        Assert.Single(selected, c => c.Type == PlaylistType.Exploration);
     }
 
     [Fact]
@@ -86,7 +86,7 @@ public class WeeklyRotationTests
             .ToList();
 
         Assert.Single(selected);
-        Assert.Equal(WeeklyPlaylistType.Jams, selected[0].Type);
+        Assert.Equal(PlaylistType.Jams, selected[0].Type);
     }
 
     [Fact]
@@ -101,7 +101,7 @@ public class WeeklyRotationTests
         var result = WeeklyRotationPolicy.ShouldPruneMapping(
             mapping,
             rotationIds: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "current-jams", "previous-jams" },
-            rotationTypes: new HashSet<WeeklyPlaylistType> { WeeklyPlaylistType.Jams });
+            rotationTypes: new HashSet<PlaylistType> { PlaylistType.Jams });
 
         Assert.True(result);
     }
@@ -118,7 +118,7 @@ public class WeeklyRotationTests
         var result = WeeklyRotationPolicy.ShouldPruneMapping(
             mapping,
             rotationIds: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "current-jams", "previous-jams" },
-            rotationTypes: new HashSet<WeeklyPlaylistType> { WeeklyPlaylistType.Jams });
+            rotationTypes: new HashSet<PlaylistType> { PlaylistType.Jams });
 
         Assert.False(result);
     }
@@ -135,7 +135,7 @@ public class WeeklyRotationTests
         var result = WeeklyRotationPolicy.ShouldPruneMapping(
             mapping,
             rotationIds: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "current-jams" },
-            rotationTypes: new HashSet<WeeklyPlaylistType> { WeeklyPlaylistType.Jams });
+            rotationTypes: new HashSet<PlaylistType> { PlaylistType.Jams });
 
         Assert.False(result);
     }
@@ -156,7 +156,7 @@ public class WeeklyRotationTests
         var result = WeeklyRotationPolicy.ShouldPruneMapping(
             mapping,
             rotationIds: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "current-jams" },
-            rotationTypes: new HashSet<WeeklyPlaylistType> { WeeklyPlaylistType.Jams });
+            rotationTypes: new HashSet<PlaylistType> { PlaylistType.Jams });
 
         Assert.False(result);
     }

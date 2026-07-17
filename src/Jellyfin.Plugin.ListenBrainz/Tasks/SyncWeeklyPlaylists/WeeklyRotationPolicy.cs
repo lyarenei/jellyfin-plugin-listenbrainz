@@ -20,12 +20,12 @@ internal static class WeeklyRotationPolicy
     /// </summary>
     /// <param name="sourcePatch">The playlist source patch.</param>
     /// <returns>The matching weekly playlist family, or null if the patch is not a weekly rotation.</returns>
-    internal static WeeklyPlaylistType? ClassifyBySourcePatch(string? sourcePatch)
+    internal static PlaylistType? ClassifyBySourcePatch(string? sourcePatch)
     {
         return sourcePatch switch
         {
-            "weekly-jams" => WeeklyPlaylistType.Jams,
-            "weekly-exploration" => WeeklyPlaylistType.Exploration,
+            "weekly-jams" => PlaylistType.Jams,
+            "weekly-exploration" => PlaylistType.Exploration,
             _ => null,
         };
     }
@@ -36,7 +36,7 @@ internal static class WeeklyRotationPolicy
     /// </summary>
     /// <param name="type">The weekly playlist family.</param>
     /// <returns>The category discriminator stored on a mapping.</returns>
-    internal static string CategoryFor(WeeklyPlaylistType type) => type.ToString();
+    internal static string CategoryFor(PlaylistType type) => type.ToString();
 
     /// <summary>
     /// Pick the created-for playlists (current and previous) rotation for each type the user has enabled.
@@ -76,7 +76,7 @@ internal static class WeeklyRotationPolicy
     internal static bool ShouldPruneMapping(
         PlaylistMapping mapping,
         HashSet<string> rotationIds,
-        HashSet<WeeklyPlaylistType> rotationTypes)
+        HashSet<PlaylistType> rotationTypes)
     {
         if (!TryGetWeeklyType(mapping.Category, out var type))
         {
@@ -92,17 +92,17 @@ internal static class WeeklyRotationPolicy
         return type is null ? null : new WeeklyPlaylistCandidate(playlist, type.Value);
     }
 
-    private static bool IsPlaylistTypeEnabled(UserConfig userConfig, WeeklyPlaylistType playlistType)
+    private static bool IsPlaylistTypeEnabled(UserConfig userConfig, PlaylistType playlistType)
     {
         return playlistType switch
         {
-            WeeklyPlaylistType.Jams => userConfig.IsWeeklyJamsSyncEnabled,
-            WeeklyPlaylistType.Exploration => userConfig.IsWeeklyExplorationSyncEnabled,
+            PlaylistType.Jams => userConfig.IsWeeklyJamsSyncEnabled,
+            PlaylistType.Exploration => userConfig.IsWeeklyExplorationSyncEnabled,
             _ => false,
         };
     }
 
-    private static bool TryGetWeeklyType(string? category, out WeeklyPlaylistType type)
+    private static bool TryGetWeeklyType(string? category, out PlaylistType type)
     {
         return Enum.TryParse(category, ignoreCase: true, out type) && Enum.IsDefined(type);
     }

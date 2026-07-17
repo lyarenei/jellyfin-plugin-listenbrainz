@@ -1,9 +1,9 @@
 namespace Jellyfin.Plugin.ListenBrainz.Tasks.SyncWeeklyPlaylists;
 
 /// <summary>
-/// ListenBrainz weekly playlist family.
+/// A type of ListenBrainz generated playlist, identified by its source patch.
 /// </summary>
-internal enum WeeklyPlaylistType
+internal enum PlaylistType
 {
     /// <summary>
     /// Weekly Jams rotation.

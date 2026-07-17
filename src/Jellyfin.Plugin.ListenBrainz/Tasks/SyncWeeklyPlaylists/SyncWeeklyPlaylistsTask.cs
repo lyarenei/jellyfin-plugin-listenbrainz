@@ -159,7 +159,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
             }
 
             var candidates = _trackMatcher.GetCandidateAudioItems(user);
-            var failedTypes = new HashSet<WeeklyPlaylistType>();
+            var failedTypes = new HashSet<PlaylistType>();
             foreach (var weeklyPlaylist in weeklyPlaylists)
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -215,7 +215,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
     private async Task<bool> SyncPlaylist(
         User user,
         Playlist playlist,
-        WeeklyPlaylistType playlistType,
+        PlaylistType playlistType,
         IReadOnlyList<BaseItem> candidates,
         PlaylistSyncState state,
         CancellationToken cancellationToken)
@@ -318,7 +318,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
         UserConfig userConfig,
         PlaylistSyncState state,
         IReadOnlyList<WeeklyPlaylistCandidate> rotationPlaylists,
-        IReadOnlySet<WeeklyPlaylistType> failedTypes,
+        IReadOnlySet<PlaylistType> failedTypes,
         CancellationToken cancellationToken)
     {
         var rotationIds = rotationPlaylists
