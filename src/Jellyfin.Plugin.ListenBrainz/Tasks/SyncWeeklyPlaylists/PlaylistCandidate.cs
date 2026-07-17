@@ -2,4 +2,4 @@ using Jellyfin.Plugin.ListenBrainz.Api.Models;
 
 namespace Jellyfin.Plugin.ListenBrainz.Tasks.SyncWeeklyPlaylists;
 
-internal sealed record WeeklyPlaylistCandidate(Playlist Playlist, PlaylistType Type);
+internal sealed record PlaylistCandidate(Playlist Playlist, PlaylistType Type);

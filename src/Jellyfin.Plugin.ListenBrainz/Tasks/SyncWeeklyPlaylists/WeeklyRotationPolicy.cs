@@ -48,12 +48,12 @@ internal static class WeeklyRotationPolicy
     /// <param name="playlists">Playlists created for the user.</param>
     /// <param name="userConfig">User configuration.</param>
     /// <returns>The weekly playlists matching the user settings.</returns>
-    internal static IEnumerable<WeeklyPlaylistCandidate> PickWeeklyRotationPlaylists(
+    internal static IEnumerable<PlaylistCandidate> PickWeeklyRotationPlaylists(
         IEnumerable<Playlist> playlists,
         UserConfig userConfig)
     {
         return playlists
-            .Select(GetWeeklyPlaylistCandidate)
+            .Select(GetPlaylistCandidate)
             .WhereNotNull()
             .Where(candidate => !string.IsNullOrWhiteSpace(candidate.Playlist.PlaylistId))
             .Where(candidate => IsPlaylistTypeEnabled(userConfig, candidate.Type))
@@ -86,10 +86,10 @@ internal static class WeeklyRotationPolicy
         return rotationTypes.Contains(type) && !rotationIds.Contains(mapping.ListenBrainzPlaylistId);
     }
 
-    private static WeeklyPlaylistCandidate? GetWeeklyPlaylistCandidate(Playlist playlist)
+    private static PlaylistCandidate? GetPlaylistCandidate(Playlist playlist)
     {
         var type = ClassifyBySourcePatch(playlist.JspfPlaylist.SourcePatch);
-        return type is null ? null : new WeeklyPlaylistCandidate(playlist, type.Value);
+        return type is null ? null : new PlaylistCandidate(playlist, type.Value);
     }
 
     private static bool IsPlaylistTypeEnabled(UserConfig userConfig, PlaylistType playlistType)

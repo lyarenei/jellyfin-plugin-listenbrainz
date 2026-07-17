@@ -317,7 +317,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
         User user,
         UserConfig userConfig,
         PlaylistSyncState state,
-        IReadOnlyList<WeeklyPlaylistCandidate> rotationPlaylists,
+        IReadOnlyList<PlaylistCandidate> rotationPlaylists,
         IReadOnlySet<PlaylistType> failedTypes,
         CancellationToken cancellationToken)
     {
