@@ -98,18 +98,14 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     }
 
     /// <summary>
-    /// Gets plugin data path.
+    /// Gets a stable plugin data directory path.
     /// </summary>
-    /// <returns>Path to the plugin data folder.</returns>
-    /// <exception cref="PluginException">Plugin instance is not available.</exception>
+    /// <returns>Path to the stable plugin data directory.</returns>
+    /// <exception cref="PluginException">Plugin instance or path is not available.</exception>
     public static string GetDataPath()
     {
         var instance = RequireInstance();
-
-        // DataFolderPath is invalid (https://github.com/jellyfin/jellyfin/issues/10091)
-        // var path = instance.DataFolderPath;
-        var pluginDirName = string.Format(CultureInfo.InvariantCulture, "{0}_{1}", instance.Name, Version);
-        return Path.Join(instance.ApplicationPaths.PluginsPath, pluginDirName);
+        return Path.Join(GetConfigDirPath(), instance.Name);
     }
 
     /// <summary>
