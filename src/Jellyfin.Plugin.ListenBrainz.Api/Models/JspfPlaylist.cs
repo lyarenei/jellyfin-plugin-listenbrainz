@@ -19,6 +19,15 @@ public class JspfPlaylist
     }
 
     /// <summary>
+    /// Initializes a new instance of the <see cref="JspfPlaylist"/> class with a known source patch.
+    /// </summary>
+    /// <param name="sourcePatch">The playlist's source patch.</param>
+    public JspfPlaylist(string sourcePatch) : this()
+    {
+        AdditionalMetadata.AlgorithmMetadata.SourcePatch = sourcePatch;
+    }
+
+    /// <summary>
     /// Gets or sets additional metadata.
     /// </summary>
     [JsonProperty("additional_metadata")]

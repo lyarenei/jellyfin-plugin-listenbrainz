@@ -67,8 +67,40 @@
                             <label class="inputLabel inputLabelUnfocused" for="IsPlaylistsSyncEnabled">
                                 <input is="emby-checkbox" type="checkbox" id="IsPlaylistsSyncEnabled"
                                        name="IsPlaylistsSyncEnabled"/>
-                                <span>Enable syncing playlists</span>
+                                <span>Enable playlist sync</span>
                             </label>
+                            <div class="fieldDescription">Deprecated. Has no effect when weekly playlist sync is enabled.</div>
+                        </div>
+                        <div class="checkboxContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="IsWeeklyPlaylistsSyncEnabled">
+                                <input is="emby-checkbox" type="checkbox" id="IsWeeklyPlaylistsSyncEnabled"
+                                       name="IsWeeklyPlaylistsSyncEnabled"/>
+                                <span>Enable weekly playlist sync</span>
+                            </label>
+                            <div class="fieldDescription">Sync ListenBrainz weekly rotation playlists for this user.</div>
+                        </div>
+                        <div class="checkboxContainer weekly-playlist-option">
+                            <label class="inputLabel inputLabelUnfocused" for="IsWeeklyJamsSyncEnabled">
+                                <input is="emby-checkbox" type="checkbox" id="IsWeeklyJamsSyncEnabled"
+                                       name="IsWeeklyJamsSyncEnabled"/>
+                                <span>Sync Weekly Jams</span>
+                            </label>
+                        </div>
+                        <div class="checkboxContainer weekly-playlist-option">
+                            <label class="inputLabel inputLabelUnfocused" for="IsWeeklyExplorationSyncEnabled">
+                                <input is="emby-checkbox" type="checkbox" id="IsWeeklyExplorationSyncEnabled"
+                                       name="IsWeeklyExplorationSyncEnabled"/>
+                                <span>Sync Weekly Exploration</span>
+                            </label>
+                            <div class="fieldDescription">May produce very tiny playlists due to Jellyfin limitations.</div>
+                        </div>
+                        <div class="checkboxContainer weekly-playlist-option">
+                            <label class="inputLabel inputLabelUnfocused" for="KeepWeeklyPlaylistsAfterRotation">
+                                <input is="emby-checkbox" type="checkbox" id="KeepWeeklyPlaylistsAfterRotation"
+                                       name="KeepWeeklyPlaylistsAfterRotation"/>
+                                <span>Keep weekly playlists after rotation</span>
+                            </label>
+                            <div class="fieldDescription">Keep playlist clone in Jellyfin when the playlist goes out of rotation.</div>
                         </div>
                         <div class="checkboxContainer">
                             <label class="inputLabel inputLabelUnfocused" for="IsUserBackupEnabled">

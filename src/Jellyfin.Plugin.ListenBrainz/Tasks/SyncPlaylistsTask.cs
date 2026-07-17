@@ -10,10 +10,10 @@ using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.Playlists;
 using MediaBrowser.Model.Playlists;
 using MediaBrowser.Model.Tasks;
 using Microsoft.Extensions.Logging;
+using IPlaylistManager = MediaBrowser.Controller.Playlists.IPlaylistManager;
 using Playlist = Jellyfin.Plugin.ListenBrainz.Api.Models.Playlist;
 using Utils = Jellyfin.Plugin.ListenBrainz.Common.Utils;
 
@@ -74,7 +74,7 @@ public class SyncPlaylistsTask : IScheduledTask
     }
 
     /// <inheritdoc />
-    public string Name => "Sync playlists from ListenBrainz";
+    public string Name => "Sync playlists from ListenBrainz (deprecated)";
 
     /// <inheritdoc />
     public string Key => "SyncPlaylists";
@@ -118,6 +118,15 @@ public class SyncPlaylistsTask : IScheduledTask
                 if (!userConfig.IsPlaylistsSyncEnabled)
                 {
                     _logger.LogInformation("User has not playlist syncing enabled, skipping");
+                    _progress += _userCountRatio;
+                    progress.Report(_progress);
+                    continue;
+                }
+
+                if (userConfig.IsWeeklyPlaylistsSyncEnabled)
+                {
+                    _logger.LogInformation(
+                        "User has weekly playlist syncing enabled, skipping deprecated playlist sync");
                     _progress += _userCountRatio;
                     progress.Report(_progress);
                     continue;

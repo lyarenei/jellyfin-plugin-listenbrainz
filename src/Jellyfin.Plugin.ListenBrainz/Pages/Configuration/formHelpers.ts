@@ -11,6 +11,10 @@ function getUserConfigFormElements(view: HTMLElement) {
         listenSubmit: view.querySelector("#IsListenSubmitEnabled") as HTMLInputElement,
         playlistsSync: view.querySelector("#IsPlaylistsSyncEnabled") as HTMLInputElement,
         strictMode: view.querySelector("#IsStrictModeEnabled") as HTMLInputElement,
+        weeklyExplorationSync: view.querySelector("#IsWeeklyExplorationSyncEnabled") as HTMLInputElement,
+        weeklyJamsSync: view.querySelector("#IsWeeklyJamsSyncEnabled") as HTMLInputElement,
+        weeklyPlaylistsSync: view.querySelector("#IsWeeklyPlaylistsSyncEnabled") as HTMLInputElement,
+        weeklyPlaylistsRetention: view.querySelector("#KeepWeeklyPlaylistsAfterRotation") as HTMLInputElement,
         userDropdown: view.querySelector("#JellyfinUser") as HTMLSelectElement,
     };
 }
@@ -23,6 +27,10 @@ export function fillUserConfigForm(view: HTMLElement, userConfig: PluginUserConf
     elements.listenSubmit.checked = userConfig.IsListenSubmitEnabled;
     elements.playlistsSync.checked = userConfig.IsPlaylistsSyncEnabled;
     elements.strictMode.checked = userConfig.IsStrictModeEnabled;
+    elements.weeklyExplorationSync.checked = userConfig.IsWeeklyExplorationSyncEnabled;
+    elements.weeklyJamsSync.checked = userConfig.IsWeeklyJamsSyncEnabled;
+    elements.weeklyPlaylistsSync.checked = userConfig.IsWeeklyPlaylistsSyncEnabled;
+    elements.weeklyPlaylistsRetention.checked = userConfig.KeepWeeklyPlaylistsAfterRotation;
 }
 
 export function getUserConfigFormData(view: HTMLElement): PluginUserConfig {
@@ -34,7 +42,11 @@ export function getUserConfigFormData(view: HTMLElement): PluginUserConfig {
         IsListenSubmitEnabled: elements.listenSubmit.checked,
         IsPlaylistsSyncEnabled: elements.playlistsSync.checked,
         IsStrictModeEnabled: elements.strictMode.checked,
+        IsWeeklyExplorationSyncEnabled: elements.weeklyExplorationSync.checked,
+        IsWeeklyJamsSyncEnabled: elements.weeklyJamsSync.checked,
+        IsWeeklyPlaylistsSyncEnabled: elements.weeklyPlaylistsSync.checked,
         JellyfinUserId: elements.userDropdown.value,
+        KeepWeeklyPlaylistsAfterRotation: elements.weeklyPlaylistsRetention.checked,
         UserName: "",
     };
 }

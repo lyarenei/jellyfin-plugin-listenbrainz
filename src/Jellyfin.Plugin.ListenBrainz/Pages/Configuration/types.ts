@@ -30,7 +30,11 @@ export interface PluginUserConfig {
     IsListenSubmitEnabled: boolean;
     IsPlaylistsSyncEnabled: boolean;
     IsStrictModeEnabled: boolean;
+    IsWeeklyExplorationSyncEnabled: boolean;
+    IsWeeklyJamsSyncEnabled: boolean;
+    IsWeeklyPlaylistsSyncEnabled: boolean;
     JellyfinUserId: string;
+    KeepWeeklyPlaylistsAfterRotation: boolean;
     UserName: string;
 }
 
