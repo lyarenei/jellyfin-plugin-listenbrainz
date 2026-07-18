@@ -6,12 +6,12 @@ using Playlist = Jellyfin.Plugin.ListenBrainz.Api.Models.Playlist;
 namespace Jellyfin.Plugin.ListenBrainz.Tasks.SyncWeeklyPlaylists;
 
 /// <summary>
-/// Selection and classification utils for ListenBrainz weekly rotation playlists.
+/// Selection, classification and retention rules for ListenBrainz generated playlists.
 /// </summary>
-internal static class WeeklyRotationPolicy
+internal static class PlaylistTypePolicy
 {
     /// <summary>
-    /// Number of playlists kept per family (current and previous week).
+    /// Number of playlists kept per rotation type (current and previous).
     /// </summary>
     private const int RotationPlaylistCount = 2;
 
@@ -33,34 +33,35 @@ internal static class WeeklyRotationPolicy
     ];
 
     /// <summary>
-    /// Classifies a ListenBrainz playlist source patch into a weekly playlist family.
+    /// Classifies a ListenBrainz playlist source patch into a playlist type.
     /// </summary>
     /// <param name="sourcePatch">The playlist source patch.</param>
-    /// <returns>The matching weekly playlist family, or null if the patch is not a weekly rotation.</returns>
+    /// <returns>The matching playlist type, or null if the patch is not a known type.</returns>
     internal static PlaylistType? ClassifyBySourcePatch(string? sourcePatch)
     {
         return DescriptorForPatch(sourcePatch)?.Type;
     }
 
     /// <summary>
-    /// Gets the persisted category discriminator for a weekly playlist family.
-    /// Inverse of <see cref="TryGetWeeklyType"/>.
+    /// Gets the persisted category discriminator for a playlist type.
+    /// Inverse of <see cref="TryGetPlaylistType"/>.
     /// </summary>
-    /// <param name="type">The weekly playlist family.</param>
+    /// <param name="type">The playlist type.</param>
     /// <returns>The category discriminator stored on a mapping.</returns>
     internal static string CategoryFor(PlaylistType type) => type.ToString();
 
     /// <summary>
-    /// Pick the created-for playlists (current and previous) rotation for each type the user has enabled.
+    /// Picks the playlists to sync for the types a user has enabled.
     /// </summary>
     /// <remarks>
-    /// ListenBrainz does not provide "current weekly jams" alias, so newest <see cref="Playlist.CreatedAt"/>
-    /// is treated as the current week and the next one as the last week one.
+    /// Rotation types keep the current and previous playlists (ListenBrainz does not provide a "current"
+    /// alias, so the newest <see cref="Playlist.CreatedAt"/> is treated as the current one).
+    /// Archive types keep every playlist.
     /// </remarks>
     /// <param name="playlists">Playlists created for the user.</param>
     /// <param name="userConfig">User configuration.</param>
-    /// <returns>The weekly playlists matching the user settings.</returns>
-    internal static IEnumerable<PlaylistCandidate> PickWeeklyRotationPlaylists(
+    /// <returns>The playlists matching the user settings.</returns>
+    internal static IEnumerable<PlaylistCandidate> SelectPlaylists(
         IEnumerable<Playlist> playlists,
         UserConfig userConfig)
     {
@@ -70,32 +71,46 @@ internal static class WeeklyRotationPolicy
             .Where(candidate => !string.IsNullOrWhiteSpace(candidate.Playlist.PlaylistId))
             .Where(candidate => IsPlaylistTypeEnabled(userConfig, candidate.Type))
             .GroupBy(candidate => candidate.Type)
-            .SelectMany(group => group
-                .OrderByDescending(candidate => candidate.Playlist.CreatedAt)
-                .ThenByDescending(candidate => candidate.Playlist.Identifier, StringComparer.OrdinalIgnoreCase)
-                .Take(RotationPlaylistCount))
+            .SelectMany(TakeForType)
             .OrderBy(candidate => candidate.Type)
             .ThenByDescending(candidate => candidate.Playlist.CreatedAt);
     }
 
     /// <summary>
-    /// Determines whether a persisted mapping should be pruned given the current rotation.
+    /// Determines whether a persisted mapping should be pruned given the current selection.
     /// </summary>
     /// <param name="mapping">The persisted playlist mapping.</param>
     /// <param name="rotationIds">ListenBrainz playlist IDs currently in rotation.</param>
-    /// <param name="rotationTypes">Weekly playlist families currently in rotation.</param>
-    /// <returns>True if the mapping is owned by the weekly task and no longer in rotation.</returns>
+    /// <param name="syncedTypes">Playlist types that were fully synced this run.</param>
+    /// <returns>True if the mapping is owned by a rotation type and no longer in rotation.</returns>
     internal static bool ShouldPruneMapping(
         PlaylistMapping mapping,
         HashSet<string> rotationIds,
-        HashSet<PlaylistType> rotationTypes)
+        HashSet<PlaylistType> syncedTypes)
     {
-        if (!TryGetWeeklyType(mapping.Category, out var type))
+        if (!TryGetPlaylistType(mapping.Category, out var type))
         {
             return false;
         }
 
-        return rotationTypes.Contains(type) && !rotationIds.Contains(mapping.ListenBrainzPlaylistId);
+        // Archive types are permanent and never pruned.
+        if (RetentionOf(type) != PlaylistRetention.Rotation)
+        {
+            return false;
+        }
+
+        return syncedTypes.Contains(type) && !rotationIds.Contains(mapping.ListenBrainzPlaylistId);
+    }
+
+    private static IEnumerable<PlaylistCandidate> TakeForType(IGrouping<PlaylistType, PlaylistCandidate> group)
+    {
+        var ordered = group
+            .OrderByDescending(candidate => candidate.Playlist.CreatedAt)
+            .ThenByDescending(candidate => candidate.Playlist.Identifier, StringComparer.OrdinalIgnoreCase);
+
+        return RetentionOf(group.Key) == PlaylistRetention.Rotation
+            ? ordered.Take(RotationPlaylistCount)
+            : ordered;
     }
 
     private static PlaylistCandidate? GetPlaylistCandidate(Playlist playlist)
@@ -109,7 +124,9 @@ internal static class WeeklyRotationPolicy
         return DescriptorForType(playlistType).IsEnabled(userConfig);
     }
 
-    private static bool TryGetWeeklyType(string? category, out PlaylistType type)
+    private static PlaylistRetention RetentionOf(PlaylistType type) => DescriptorForType(type).Retention;
+
+    private static bool TryGetPlaylistType(string? category, out PlaylistType type)
     {
         return Enum.TryParse(category, ignoreCase: true, out type) && Enum.IsDefined(type);
     }

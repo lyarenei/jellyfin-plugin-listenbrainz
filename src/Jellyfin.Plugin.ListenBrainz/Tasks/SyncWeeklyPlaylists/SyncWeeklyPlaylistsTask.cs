@@ -146,7 +146,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
                 playlists.Count,
                 userConfig.UserName);
 
-            var weeklyPlaylists = WeeklyRotationPolicy.PickWeeklyRotationPlaylists(playlists, userConfig).ToList();
+            var weeklyPlaylists = PlaylistTypePolicy.SelectPlaylists(playlists, userConfig).ToList();
             _logger.LogInformation(
                 "Selected {Count} weekly rotation playlists for user {Username}",
                 weeklyPlaylists.Count,
@@ -282,7 +282,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
             jellyfinPlaylistId,
             playlist.Title,
             playlist.CreatedAt,
-            WeeklyRotationPolicy.CategoryFor(playlistType));
+            PlaylistTypePolicy.CategoryFor(playlistType));
 
         _logger.LogInformation(
             "Successfully synced weekly playlist {Name} with {Count} tracks",
@@ -326,7 +326,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
             .WhereNotNull()
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        var rotationTypes = rotationPlaylists
+        var syncedTypes = rotationPlaylists
             .Select(p => p.Type)
             .Where(t => !failedTypes.Contains(t))
             .ToHashSet();
@@ -334,7 +334,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
         var mappingsToRemove = state
             .Mappings
             .Where(m => m.JellyfinUserId == user.Id &&
-                        WeeklyRotationPolicy.ShouldPruneMapping(m, rotationIds, rotationTypes))
+                        PlaylistTypePolicy.ShouldPruneMapping(m, rotationIds, syncedTypes))
             .ToList();
 
         foreach (var mapping in mappingsToRemove)
