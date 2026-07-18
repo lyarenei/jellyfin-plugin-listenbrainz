@@ -77,6 +77,18 @@ internal static class PlaylistTypePolicy
     }
 
     /// <summary>
+    /// Determines whether a persisted mapping is already up to date with the playlist from the listing,
+    /// i.e. the playlist has not been regenerated since it was last synced.
+    /// </summary>
+    /// <param name="mapping">The persisted playlist mapping.</param>
+    /// <param name="playlist">The playlist metadata from the created-for listing.</param>
+    /// <returns>True if the mapping already reflects the current playlist.</returns>
+    internal static bool IsUpToDate(PlaylistMapping mapping, Playlist playlist)
+    {
+        return mapping.CreatedAt == playlist.CreatedAt;
+    }
+
+    /// <summary>
     /// Determines whether a persisted mapping should be pruned given the current selection.
     /// </summary>
     /// <param name="mapping">The persisted playlist mapping.</param>

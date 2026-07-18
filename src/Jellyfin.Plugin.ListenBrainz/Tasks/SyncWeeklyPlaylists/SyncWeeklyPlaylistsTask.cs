@@ -166,6 +166,15 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
 
                 try
                 {
+                    if (IsAlreadySynced(user, state, weeklyPlaylist.Playlist))
+                    {
+                        _logger.LogDebug(
+                            "Playlist {PlaylistId} is already up to date, skipping",
+                            weeklyPlaylist.Playlist.PlaylistId);
+                        reporter.AdvancePlaylist(weeklyPlaylists.Count);
+                        continue;
+                    }
+
                     _logger.LogDebug(
                         "Processing weekly playlist {PlaylistId} of type {PlaylistType}",
                         weeklyPlaylist.Playlist.PlaylistId,
@@ -289,6 +298,18 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
             playlist.Title,
             matchedTracks.Count);
         return true;
+    }
+
+    private bool IsAlreadySynced(User user, PlaylistSyncState state, Playlist listingPlaylist)
+    {
+        var mapping = state.FindMapping(user.Id, listingPlaylist.PlaylistId);
+        if (mapping is null || !PlaylistTypePolicy.IsUpToDate(mapping, listingPlaylist))
+        {
+            return false;
+        }
+
+        // The mapping is current, but only skip if the Jellyfin playlist still exists.
+        return _playlistManager.Find(mapping.JellyfinPlaylistId, user.Id) is not null;
     }
 
     private JellyfinPlaylist? ResolveMappedPlaylist(User user, PlaylistSyncState state, string listenBrainzPlaylistId)

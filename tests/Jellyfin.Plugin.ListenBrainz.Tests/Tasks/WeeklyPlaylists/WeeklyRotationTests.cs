@@ -90,6 +90,25 @@ public class WeeklyRotationTests
     }
 
     [Fact]
+    public void IsUpToDate_SameCreatedAt_ReturnsTrue()
+    {
+        var createdAt = DateTime.UtcNow;
+        var mapping = new PlaylistMapping { ListenBrainzPlaylistId = "jams-1", CreatedAt = createdAt };
+        var playlist = MakePlaylist("weekly-jams", "jams-1", createdAt);
+
+        Assert.True(PlaylistTypePolicy.IsUpToDate(mapping, playlist));
+    }
+
+    [Fact]
+    public void IsUpToDate_DifferentCreatedAt_ReturnsFalse()
+    {
+        var mapping = new PlaylistMapping { ListenBrainzPlaylistId = "jams-1", CreatedAt = DateTime.UtcNow.AddDays(-7) };
+        var playlist = MakePlaylist("weekly-jams", "jams-1", DateTime.UtcNow);
+
+        Assert.False(PlaylistTypePolicy.IsUpToDate(mapping, playlist));
+    }
+
+    [Fact]
     public void Prune_OutOfRotationSameFamily_IsPruned()
     {
         var mapping = new PlaylistMapping
