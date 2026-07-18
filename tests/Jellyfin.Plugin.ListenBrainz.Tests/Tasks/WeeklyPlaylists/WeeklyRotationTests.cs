@@ -100,7 +100,7 @@ public class WeeklyRotationTests
 
         var result = PlaylistTypePolicy.ShouldPruneMapping(
             mapping,
-            rotationIds: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "current-jams", "previous-jams" },
+            selectedPlaylistIds: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "current-jams", "previous-jams" },
             syncedTypes: new HashSet<PlaylistType> { PlaylistType.Jams });
 
         Assert.True(result);
@@ -117,7 +117,7 @@ public class WeeklyRotationTests
 
         var result = PlaylistTypePolicy.ShouldPruneMapping(
             mapping,
-            rotationIds: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "current-jams", "previous-jams" },
+            selectedPlaylistIds: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "current-jams", "previous-jams" },
             syncedTypes: new HashSet<PlaylistType> { PlaylistType.Jams });
 
         Assert.False(result);
@@ -134,7 +134,7 @@ public class WeeklyRotationTests
 
         var result = PlaylistTypePolicy.ShouldPruneMapping(
             mapping,
-            rotationIds: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "current-jams" },
+            selectedPlaylistIds: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "current-jams" },
             syncedTypes: new HashSet<PlaylistType> { PlaylistType.Jams });
 
         Assert.False(result);
@@ -155,7 +155,7 @@ public class WeeklyRotationTests
 
         var result = PlaylistTypePolicy.ShouldPruneMapping(
             mapping,
-            rotationIds: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "current-jams" },
+            selectedPlaylistIds: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "current-jams" },
             syncedTypes: new HashSet<PlaylistType> { PlaylistType.Jams });
 
         Assert.False(result);

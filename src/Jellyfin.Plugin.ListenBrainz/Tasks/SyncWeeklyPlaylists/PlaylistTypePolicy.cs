@@ -80,12 +80,12 @@ internal static class PlaylistTypePolicy
     /// Determines whether a persisted mapping should be pruned given the current selection.
     /// </summary>
     /// <param name="mapping">The persisted playlist mapping.</param>
-    /// <param name="rotationIds">ListenBrainz playlist IDs currently in rotation.</param>
+    /// <param name="selectedPlaylistIds">ListenBrainz playlist IDs selected this run.</param>
     /// <param name="syncedTypes">Playlist types that were fully synced this run.</param>
     /// <returns>True if the mapping is owned by a rotation type and no longer in rotation.</returns>
     internal static bool ShouldPruneMapping(
         PlaylistMapping mapping,
-        HashSet<string> rotationIds,
+        HashSet<string> selectedPlaylistIds,
         HashSet<PlaylistType> syncedTypes)
     {
         if (!TryGetPlaylistType(mapping.Category, out var type))
@@ -99,7 +99,7 @@ internal static class PlaylistTypePolicy
             return false;
         }
 
-        return syncedTypes.Contains(type) && !rotationIds.Contains(mapping.ListenBrainzPlaylistId);
+        return syncedTypes.Contains(type) && !selectedPlaylistIds.Contains(mapping.ListenBrainzPlaylistId);
     }
 
     private static IEnumerable<PlaylistCandidate> TakeForType(IGrouping<PlaylistType, PlaylistCandidate> group)

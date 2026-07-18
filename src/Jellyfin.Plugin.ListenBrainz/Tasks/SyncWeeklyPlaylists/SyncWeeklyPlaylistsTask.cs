@@ -321,7 +321,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
         IReadOnlySet<PlaylistType> failedTypes,
         CancellationToken cancellationToken)
     {
-        var rotationIds = rotationPlaylists
+        var selectedPlaylistIds = rotationPlaylists
             .Select(p => p.Playlist.PlaylistId)
             .WhereNotNull()
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -334,7 +334,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
         var mappingsToRemove = state
             .Mappings
             .Where(m => m.JellyfinUserId == user.Id &&
-                        PlaylistTypePolicy.ShouldPruneMapping(m, rotationIds, syncedTypes))
+                        PlaylistTypePolicy.ShouldPruneMapping(m, selectedPlaylistIds, syncedTypes))
             .ToList();
 
         foreach (var mapping in mappingsToRemove)
