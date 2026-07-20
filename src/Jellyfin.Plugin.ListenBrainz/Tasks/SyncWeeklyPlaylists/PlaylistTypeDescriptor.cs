@@ -8,10 +8,10 @@ namespace Jellyfin.Plugin.ListenBrainz.Tasks.SyncWeeklyPlaylists;
 /// </summary>
 /// <param name="Type">The playlist type.</param>
 /// <param name="Retention">The retention strategy for the type.</param>
-/// <param name="SourcePatch">The ListenBrainz source patch identifying the type.</param>
+/// <param name="SourcePatchPrefix">The ListenBrainz source patch identifying the type.</param>
 /// <param name="IsEnabled">Whether the type is enabled for a given user.</param>
 internal sealed record PlaylistTypeDescriptor(
     PlaylistType Type,
     PlaylistRetention Retention,
-    string SourcePatch,
+    string SourcePatchPrefix,
     Func<UserConfig, bool> IsEnabled);

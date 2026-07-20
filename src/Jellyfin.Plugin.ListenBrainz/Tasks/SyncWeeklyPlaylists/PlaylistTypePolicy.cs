@@ -155,7 +155,13 @@ internal static class PlaylistTypePolicy
             return null;
         }
 
-        return _descriptors.FirstOrDefault(d =>
-            d.SourcePatch.Equals(sourcePatch, StringComparison.Ordinal));
+        return _descriptors.FirstOrDefault(d => MatchesPatch(d.SourcePatchPrefix, sourcePatch));
+    }
+
+    private static bool MatchesPatch(string prefix, string sourcePatch)
+    {
+        // Match exactly or as a prefix
+        return sourcePatch.Equals(prefix, StringComparison.Ordinal) ||
+               sourcePatch.StartsWith(prefix + "-", StringComparison.Ordinal);
     }
 }
