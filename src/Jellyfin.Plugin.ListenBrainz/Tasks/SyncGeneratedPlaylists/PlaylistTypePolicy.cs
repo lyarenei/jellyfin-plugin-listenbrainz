@@ -3,7 +3,7 @@ using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Playlist = Jellyfin.Plugin.ListenBrainz.Api.Models.Playlist;
 
-namespace Jellyfin.Plugin.ListenBrainz.Tasks.SyncWeeklyPlaylists;
+namespace Jellyfin.Plugin.ListenBrainz.Tasks.SyncGeneratedPlaylists;
 
 /// <summary>
 /// Selection, classification and retention rules for ListenBrainz generated playlists.

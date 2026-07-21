@@ -13,7 +13,7 @@ using JellyfinPlaylist = MediaBrowser.Controller.Playlists.Playlist;
 using Playlist = Jellyfin.Plugin.ListenBrainz.Api.Models.Playlist;
 using Utils = Jellyfin.Plugin.ListenBrainz.Common.Utils;
 
-namespace Jellyfin.Plugin.ListenBrainz.Tasks.SyncWeeklyPlaylists;
+namespace Jellyfin.Plugin.ListenBrainz.Tasks.SyncGeneratedPlaylists;
 
 /// <summary>
 /// Jellyfin task for syncing generated playlists from ListenBrainz.

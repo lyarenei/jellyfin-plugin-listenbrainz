@@ -1,4 +1,4 @@
-namespace Jellyfin.Plugin.ListenBrainz.Tasks.SyncWeeklyPlaylists;
+namespace Jellyfin.Plugin.ListenBrainz.Tasks.SyncGeneratedPlaylists;
 
 /// <summary>
 /// A type of ListenBrainz generated playlist, identified by its source patch.
