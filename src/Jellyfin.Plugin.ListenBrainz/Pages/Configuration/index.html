@@ -102,6 +102,22 @@
                             </label>
                             <div class="fieldDescription">Keep playlist clone in Jellyfin when the playlist goes out of rotation.</div>
                         </div>
+                        <div class="checkboxContainer weekly-playlist-option">
+                            <label class="inputLabel inputLabelUnfocused" for="IsTopDiscoveriesSyncEnabled">
+                                <input is="emby-checkbox" type="checkbox" id="IsTopDiscoveriesSyncEnabled"
+                                       name="IsTopDiscoveriesSyncEnabled"/>
+                                <span>Sync Top Discoveries</span>
+                            </label>
+                            <div class="fieldDescription">Archive yearly "Top Discoveries" playlists.</div>
+                        </div>
+                        <div class="checkboxContainer weekly-playlist-option">
+                            <label class="inputLabel inputLabelUnfocused" for="IsTopMissedRecordingsSyncEnabled">
+                                <input is="emby-checkbox" type="checkbox" id="IsTopMissedRecordingsSyncEnabled"
+                                       name="IsTopMissedRecordingsSyncEnabled"/>
+                                <span>Sync Top Missed Recordings</span>
+                            </label>
+                            <div class="fieldDescription">Archive yearly "Top Missed Recordings" playlists. May produce very tiny playlists due to Jellyfin limitations.</div>
+                        </div>
                         <div class="checkboxContainer">
                             <label class="inputLabel inputLabelUnfocused" for="IsUserBackupEnabled">
                                 <input is="emby-checkbox" type="checkbox" id="IsUserBackupEnabled"

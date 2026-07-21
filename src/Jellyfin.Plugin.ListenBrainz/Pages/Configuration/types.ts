@@ -30,6 +30,8 @@ export interface PluginUserConfig {
     IsListenSubmitEnabled: boolean;
     IsPlaylistsSyncEnabled: boolean;
     IsStrictModeEnabled: boolean;
+    IsTopDiscoveriesSyncEnabled: boolean;
+    IsTopMissedRecordingsSyncEnabled: boolean;
     IsWeeklyExplorationSyncEnabled: boolean;
     IsWeeklyJamsSyncEnabled: boolean;
     IsWeeklyPlaylistsSyncEnabled: boolean;

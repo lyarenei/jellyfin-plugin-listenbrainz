@@ -11,6 +11,8 @@ export const userDefaults: PluginUserConfig = {
     IsPlaylistsSyncEnabled: false,
     IsStrictModeEnabled: false,
     IsBackupEnabled: false,
+    IsTopDiscoveriesSyncEnabled: true,
+    IsTopMissedRecordingsSyncEnabled: true,
     IsWeeklyExplorationSyncEnabled: true,
     IsWeeklyJamsSyncEnabled: true,
     IsWeeklyPlaylistsSyncEnabled: false,
