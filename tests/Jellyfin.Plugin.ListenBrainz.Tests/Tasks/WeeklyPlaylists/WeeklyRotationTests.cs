@@ -30,7 +30,10 @@ public class WeeklyRotationTests
     [Theory]
     [InlineData("weekly-jams", "Jams")]
     [InlineData("weekly-exploration", "Exploration")]
-    public void Classify_KnownFamilies(string sourcePatch, string expectedType)
+    [InlineData("top-discoveries-of-2024", "TopDiscoveries")]
+    [InlineData("top-missed-recordings-of-2024", "TopMissedRecordings")]
+    [InlineData("top-discoveries-for-year", "TopDiscoveries")]
+    public void Classify_KnownTypes(string sourcePatch, string expectedType)
     {
         Assert.Equal(expectedType, PlaylistTypePolicy.ClassifyBySourcePatch(sourcePatch)?.ToString());
     }
@@ -39,8 +42,8 @@ public class WeeklyRotationTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("daily-jams")]
-    [InlineData("top-discoveries-of")]
-    public void Classify_NonWeekly_ReturnsNull(string? sourcePatch)
+    [InlineData("top-recordings-for-year")]
+    public void Classify_UnknownType_ReturnsNull(string? sourcePatch)
     {
         Assert.Null(PlaylistTypePolicy.ClassifyBySourcePatch(sourcePatch));
     }
@@ -87,6 +90,26 @@ public class WeeklyRotationTests
 
         Assert.Single(selected);
         Assert.Equal(PlaylistType.Jams, selected[0].Type);
+    }
+
+    [Fact]
+    public void Selection_ArchiveKeepsAllYears()
+    {
+        var now = DateTime.UtcNow;
+        var playlists = new[]
+        {
+            MakePlaylist("top-discoveries-of-2022", "disc-2022", now.AddYears(-2)),
+            MakePlaylist("top-discoveries-of-2023", "disc-2023", now.AddYears(-1)),
+            MakePlaylist("top-discoveries-of-2024", "disc-2024", now),
+        };
+
+        var selected = PlaylistTypePolicy
+            .SelectPlaylists(playlists, new UserConfig())
+            .ToList();
+
+        // Archive types are not capped like rotation types; every year is kept.
+        Assert.Equal(3, selected.Count);
+        Assert.All(selected, c => Assert.Equal(PlaylistType.TopDiscoveries, c.Type));
     }
 
     [Fact]
@@ -155,6 +178,25 @@ public class WeeklyRotationTests
             mapping,
             selectedPlaylistIds: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "current-jams" },
             syncedTypes: new HashSet<PlaylistType> { PlaylistType.Jams });
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void Prune_ArchiveMapping_IsNeverPruned()
+    {
+        var mapping = new PlaylistMapping
+        {
+            ListenBrainzPlaylistId = "disc-2022",
+            Category = "TopDiscoveries",
+        };
+
+        // The type was synced and this playlist is not among the selected ids, yet archive
+        // playlists are permanent and must never be pruned.
+        var result = PlaylistTypePolicy.ShouldPruneMapping(
+            mapping,
+            selectedPlaylistIds: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "disc-2024" },
+            syncedTypes: new HashSet<PlaylistType> { PlaylistType.TopDiscoveries });
 
         Assert.False(result);
     }
