@@ -24,7 +24,7 @@ public class UserConfig
         IsWeeklyExplorationSyncEnabled = true;
         IsTopDiscoveriesSyncEnabled = true;
         IsTopMissedRecordingsSyncEnabled = true;
-        KeepWeeklyPlaylistsAfterRotation = false;
+        KeepPlaylistsAfterRotation = false;
     }
 
     /// <summary>
@@ -96,9 +96,9 @@ public class UserConfig
     public bool IsTopMissedRecordingsSyncEnabled { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether weekly playlists should be kept after rotation.
+    /// Gets or sets a value indicating whether playlists should be kept after rotation.
     /// </summary>
-    public bool KeepWeeklyPlaylistsAfterRotation { get; set; }
+    public bool KeepPlaylistsAfterRotation { get; set; }
 
     /// <summary>
     /// Gets or sets a ListenBrainz username.

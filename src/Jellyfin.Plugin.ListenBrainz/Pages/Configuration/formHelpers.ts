@@ -16,7 +16,7 @@ function getUserConfigFormElements(view: HTMLElement) {
         weeklyExplorationSync: view.querySelector("#IsWeeklyExplorationSyncEnabled") as HTMLInputElement,
         weeklyJamsSync: view.querySelector("#IsWeeklyJamsSyncEnabled") as HTMLInputElement,
         generatedPlaylistsSync: view.querySelector("#IsGeneratedPlaylistsSyncEnabled") as HTMLInputElement,
-        weeklyPlaylistsRetention: view.querySelector("#KeepWeeklyPlaylistsAfterRotation") as HTMLInputElement,
+        playlistsRetention: view.querySelector("#KeepPlaylistsAfterRotation") as HTMLInputElement,
         userDropdown: view.querySelector("#JellyfinUser") as HTMLSelectElement,
     };
 }
@@ -34,7 +34,7 @@ export function fillUserConfigForm(view: HTMLElement, userConfig: PluginUserConf
     elements.weeklyExplorationSync.checked = userConfig.IsWeeklyExplorationSyncEnabled;
     elements.weeklyJamsSync.checked = userConfig.IsWeeklyJamsSyncEnabled;
     elements.generatedPlaylistsSync.checked = userConfig.IsGeneratedPlaylistsSyncEnabled;
-    elements.weeklyPlaylistsRetention.checked = userConfig.KeepWeeklyPlaylistsAfterRotation;
+    elements.playlistsRetention.checked = userConfig.KeepPlaylistsAfterRotation;
 }
 
 export function getUserConfigFormData(view: HTMLElement): PluginUserConfig {
@@ -52,7 +52,7 @@ export function getUserConfigFormData(view: HTMLElement): PluginUserConfig {
         IsWeeklyJamsSyncEnabled: elements.weeklyJamsSync.checked,
         IsGeneratedPlaylistsSyncEnabled: elements.generatedPlaylistsSync.checked,
         JellyfinUserId: elements.userDropdown.value,
-        KeepWeeklyPlaylistsAfterRotation: elements.weeklyPlaylistsRetention.checked,
+        KeepPlaylistsAfterRotation: elements.playlistsRetention.checked,
         UserName: "",
     };
 }

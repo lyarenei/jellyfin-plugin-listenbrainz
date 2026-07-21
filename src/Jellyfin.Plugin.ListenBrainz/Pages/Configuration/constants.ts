@@ -17,7 +17,7 @@ export const userDefaults: PluginUserConfig = {
     IsWeeklyJamsSyncEnabled: true,
     IsGeneratedPlaylistsSyncEnabled: false,
     JellyfinUserId: "",
-    KeepWeeklyPlaylistsAfterRotation: false,
+    KeepPlaylistsAfterRotation: false,
     UserName: "",
 };
 

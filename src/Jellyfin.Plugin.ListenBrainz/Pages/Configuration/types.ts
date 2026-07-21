@@ -36,7 +36,7 @@ export interface PluginUserConfig {
     IsWeeklyJamsSyncEnabled: boolean;
     IsGeneratedPlaylistsSyncEnabled: boolean;
     JellyfinUserId: string;
-    KeepWeeklyPlaylistsAfterRotation: boolean;
+    KeepPlaylistsAfterRotation: boolean;
     UserName: string;
 }
 

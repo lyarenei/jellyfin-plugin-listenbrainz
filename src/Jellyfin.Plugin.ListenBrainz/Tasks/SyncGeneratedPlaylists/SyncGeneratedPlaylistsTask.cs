@@ -362,7 +362,7 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (userConfig.KeepWeeklyPlaylistsAfterRotation)
+            if (userConfig.KeepPlaylistsAfterRotation)
             {
                 _logger.LogDebug(
                     "Keeping out-of-rotation generated playlist {PlaylistId}, removing its mapping",
