@@ -15,7 +15,7 @@ function getUserConfigFormElements(view: HTMLElement) {
         topMissedRecordingsSync: view.querySelector("#IsTopMissedRecordingsSyncEnabled") as HTMLInputElement,
         weeklyExplorationSync: view.querySelector("#IsWeeklyExplorationSyncEnabled") as HTMLInputElement,
         weeklyJamsSync: view.querySelector("#IsWeeklyJamsSyncEnabled") as HTMLInputElement,
-        weeklyPlaylistsSync: view.querySelector("#IsWeeklyPlaylistsSyncEnabled") as HTMLInputElement,
+        generatedPlaylistsSync: view.querySelector("#IsGeneratedPlaylistsSyncEnabled") as HTMLInputElement,
         weeklyPlaylistsRetention: view.querySelector("#KeepWeeklyPlaylistsAfterRotation") as HTMLInputElement,
         userDropdown: view.querySelector("#JellyfinUser") as HTMLSelectElement,
     };
@@ -33,7 +33,7 @@ export function fillUserConfigForm(view: HTMLElement, userConfig: PluginUserConf
     elements.topMissedRecordingsSync.checked = userConfig.IsTopMissedRecordingsSyncEnabled;
     elements.weeklyExplorationSync.checked = userConfig.IsWeeklyExplorationSyncEnabled;
     elements.weeklyJamsSync.checked = userConfig.IsWeeklyJamsSyncEnabled;
-    elements.weeklyPlaylistsSync.checked = userConfig.IsWeeklyPlaylistsSyncEnabled;
+    elements.generatedPlaylistsSync.checked = userConfig.IsGeneratedPlaylistsSyncEnabled;
     elements.weeklyPlaylistsRetention.checked = userConfig.KeepWeeklyPlaylistsAfterRotation;
 }
 
@@ -50,7 +50,7 @@ export function getUserConfigFormData(view: HTMLElement): PluginUserConfig {
         IsTopMissedRecordingsSyncEnabled: elements.topMissedRecordingsSync.checked,
         IsWeeklyExplorationSyncEnabled: elements.weeklyExplorationSync.checked,
         IsWeeklyJamsSyncEnabled: elements.weeklyJamsSync.checked,
-        IsWeeklyPlaylistsSyncEnabled: elements.weeklyPlaylistsSync.checked,
+        IsGeneratedPlaylistsSyncEnabled: elements.generatedPlaylistsSync.checked,
         JellyfinUserId: elements.userDropdown.value,
         KeepWeeklyPlaylistsAfterRotation: elements.weeklyPlaylistsRetention.checked,
         UserName: "",

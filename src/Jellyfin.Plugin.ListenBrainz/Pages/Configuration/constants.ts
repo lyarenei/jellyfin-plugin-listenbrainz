@@ -15,7 +15,7 @@ export const userDefaults: PluginUserConfig = {
     IsTopMissedRecordingsSyncEnabled: true,
     IsWeeklyExplorationSyncEnabled: true,
     IsWeeklyJamsSyncEnabled: true,
-    IsWeeklyPlaylistsSyncEnabled: false,
+    IsGeneratedPlaylistsSyncEnabled: false,
     JellyfinUserId: "",
     KeepWeeklyPlaylistsAfterRotation: false,
     UserName: "",

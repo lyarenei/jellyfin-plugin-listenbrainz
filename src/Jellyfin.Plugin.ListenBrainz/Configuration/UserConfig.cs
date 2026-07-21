@@ -19,7 +19,7 @@ public class UserConfig
         UserName = string.Empty;
         IsBackupEnabled = false;
         IsStrictModeEnabled = false;
-        IsWeeklyPlaylistsSyncEnabled = false;
+        IsGeneratedPlaylistsSyncEnabled = false;
         IsWeeklyJamsSyncEnabled = true;
         IsWeeklyExplorationSyncEnabled = true;
         IsTopDiscoveriesSyncEnabled = true;
@@ -71,9 +71,9 @@ public class UserConfig
     public bool IsPlaylistsSyncEnabled { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether ListenBrainz weekly playlist sync is enabled.
+    /// Gets or sets a value indicating whether ListenBrainz generated playlist sync is enabled.
     /// </summary>
-    public bool IsWeeklyPlaylistsSyncEnabled { get; set; }
+    public bool IsGeneratedPlaylistsSyncEnabled { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether Weekly Jams playlists should be synced.

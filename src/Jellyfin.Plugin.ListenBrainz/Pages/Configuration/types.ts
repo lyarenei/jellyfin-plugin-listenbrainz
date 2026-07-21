@@ -34,7 +34,7 @@ export interface PluginUserConfig {
     IsTopMissedRecordingsSyncEnabled: boolean;
     IsWeeklyExplorationSyncEnabled: boolean;
     IsWeeklyJamsSyncEnabled: boolean;
-    IsWeeklyPlaylistsSyncEnabled: boolean;
+    IsGeneratedPlaylistsSyncEnabled: boolean;
     JellyfinUserId: string;
     KeepWeeklyPlaylistsAfterRotation: boolean;
     UserName: string;

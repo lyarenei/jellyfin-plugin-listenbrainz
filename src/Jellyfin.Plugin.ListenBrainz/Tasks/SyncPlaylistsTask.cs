@@ -123,10 +123,10 @@ public class SyncPlaylistsTask : IScheduledTask
                     continue;
                 }
 
-                if (userConfig.IsWeeklyPlaylistsSyncEnabled)
+                if (userConfig.IsGeneratedPlaylistsSyncEnabled)
                 {
                     _logger.LogInformation(
-                        "User has weekly playlist syncing enabled, skipping deprecated playlist sync");
+                        "User has generated playlist syncing enabled, skipping deprecated playlist sync");
                     _progress += _userCountRatio;
                     progress.Report(_progress);
                     continue;

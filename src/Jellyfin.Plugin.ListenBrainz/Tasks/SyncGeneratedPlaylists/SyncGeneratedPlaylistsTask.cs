@@ -85,7 +85,7 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
         using var logScope = BeginLogScope();
         var enabledUserConfigs = _configService
             .UserConfigs
-            .Where(uc => uc.IsWeeklyPlaylistsSyncEnabled)
+            .Where(uc => uc.IsGeneratedPlaylistsSyncEnabled)
             .ToList();
 
         if (enabledUserConfigs.Count == 0)
