@@ -22,6 +22,8 @@ public class UserConfig
         IsWeeklyPlaylistsSyncEnabled = false;
         IsWeeklyJamsSyncEnabled = true;
         IsWeeklyExplorationSyncEnabled = true;
+        IsTopDiscoveriesSyncEnabled = true;
+        IsTopMissedRecordingsSyncEnabled = true;
         KeepWeeklyPlaylistsAfterRotation = false;
     }
 
@@ -82,6 +84,16 @@ public class UserConfig
     /// Gets or sets a value indicating whether Weekly Exploration playlists should be synced.
     /// </summary>
     public bool IsWeeklyExplorationSyncEnabled { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether Top Discoveries of the year playlists should be synced.
+    /// </summary>
+    public bool IsTopDiscoveriesSyncEnabled { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether Top Missed Recordings of the year playlists should be synced.
+    /// </summary>
+    public bool IsTopMissedRecordingsSyncEnabled { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether weekly playlists should be kept after rotation.
