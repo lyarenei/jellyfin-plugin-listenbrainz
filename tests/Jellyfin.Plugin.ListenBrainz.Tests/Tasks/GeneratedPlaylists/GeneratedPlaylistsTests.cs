@@ -8,9 +8,9 @@ using Jellyfin.Plugin.ListenBrainz.Tasks;
 using Jellyfin.Plugin.ListenBrainz.Tasks.SyncGeneratedPlaylists;
 using Xunit;
 
-namespace Jellyfin.Plugin.ListenBrainz.Tests.Tasks.WeeklyPlaylists;
+namespace Jellyfin.Plugin.ListenBrainz.Tests.Tasks.GeneratedPlaylists;
 
-public class WeeklyRotationTests
+public class GeneratedPlaylistsTests
 {
     private static Playlist MakePlaylist(string sourcePatch, string mbid, DateTime createdAt)
     {
@@ -207,10 +207,10 @@ public class WeeklyRotationTests
     [InlineData("SomeOtherTaskCategory")]
     public void Prune_ForeignOrNullCategory_IsNeverPruned(string? category)
     {
-        // The store is shared across sync tasks; the weekly task must leave mappings it does not own.
+        // The store is shared across sync tasks; the generated task must leave mappings it does not own.
         var mapping = new PlaylistMapping
         {
-            ListenBrainzPlaylistId = "not-a-weekly-playlist",
+            ListenBrainzPlaylistId = "not-a-generated-playlist",
             Category = category,
         };
 
