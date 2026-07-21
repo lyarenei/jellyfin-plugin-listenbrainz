@@ -14,4 +14,14 @@ internal enum PlaylistType
     /// Weekly Exploration rotation.
     /// </summary>
     Exploration,
+
+    /// <summary>
+    /// Top Discoveries of the year archive.
+    /// </summary>
+    TopDiscoveries,
+
+    /// <summary>
+    /// Top Missed Recordings of the year archive.
+    /// </summary>
+    TopMissedRecordings,
 }
