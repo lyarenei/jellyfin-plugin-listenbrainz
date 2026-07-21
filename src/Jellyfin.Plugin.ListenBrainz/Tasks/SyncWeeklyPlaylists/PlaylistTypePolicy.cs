@@ -30,6 +30,16 @@ internal static class PlaylistTypePolicy
             PlaylistRetention.Rotation,
             "weekly-exploration",
             uc => uc.IsWeeklyExplorationSyncEnabled),
+        new(
+            PlaylistType.TopDiscoveries,
+            PlaylistRetention.Archive,
+            "top-discoveries",
+            uc => uc.IsTopDiscoveriesSyncEnabled),
+        new(
+            PlaylistType.TopMissedRecordings,
+            PlaylistRetention.Archive,
+            "top-missed-recordings",
+            uc => uc.IsTopMissedRecordingsSyncEnabled),
     ];
 
     /// <summary>
