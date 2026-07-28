@@ -83,7 +83,7 @@ internal static class PlaylistTypePolicy
             .Where(candidate => IsPlaylistTypeEnabled(userConfig, candidate.Type))
             .GroupBy(candidate => candidate.Type)
             .SelectMany(TakeForType)
-            .OrderBy(candidate => candidate.Type)
+            .OrderBy(candidate => candidate.Type) // Ensure stable order
             .ThenByDescending(candidate => candidate.Playlist.CreatedAt);
     }
 
