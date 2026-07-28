@@ -33,12 +33,12 @@ internal static class PlaylistTypePolicy
         new(
             PlaylistType.TopDiscoveries,
             PlaylistRetention.Archive,
-            "top-discoveries",
+            "top-discoveries-of",
             uc => uc.IsTopDiscoveriesSyncEnabled),
         new(
             PlaylistType.TopMissedRecordings,
             PlaylistRetention.Archive,
-            "top-missed-recordings",
+            "top-missed-recordings-of",
             uc => uc.IsTopMissedRecordingsSyncEnabled),
     ];
 

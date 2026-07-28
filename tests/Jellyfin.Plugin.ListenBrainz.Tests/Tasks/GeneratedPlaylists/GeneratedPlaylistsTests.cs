@@ -32,7 +32,6 @@ public class GeneratedPlaylistsTests
     [InlineData("weekly-exploration", "Exploration")]
     [InlineData("top-discoveries-of-2024", "TopDiscoveries")]
     [InlineData("top-missed-recordings-of-2024", "TopMissedRecordings")]
-    [InlineData("top-discoveries-for-year", "TopDiscoveries")]
     public void Classify_KnownTypes(string sourcePatch, string expectedType)
     {
         Assert.Equal(expectedType, PlaylistTypePolicy.ClassifyBySourcePatch(sourcePatch)?.ToString());
@@ -43,6 +42,7 @@ public class GeneratedPlaylistsTests
     [InlineData("")]
     [InlineData("daily-jams")]
     [InlineData("top-recordings-for-year")]
+    [InlineData("top-discoveries-for-year")]
     public void Classify_UnknownType_ReturnsNull(string? sourcePatch)
     {
         Assert.Null(PlaylistTypePolicy.ClassifyBySourcePatch(sourcePatch));
