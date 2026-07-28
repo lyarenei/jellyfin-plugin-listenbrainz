@@ -21,7 +21,9 @@ namespace Jellyfin.Plugin.ListenBrainz.Tasks;
 
 /// <summary>
 /// Jellyfin task for syncing playlists from ListenBrainz.
+/// Deprecated: superseded by <see cref="SyncGeneratedPlaylists.SyncGeneratedPlaylistsTask"/>.
 /// </summary>
+// TODO: remove next release.
 public class SyncPlaylistsTask : IScheduledTask
 {
     private const string PlaylistTag = "ListenBrainz";
