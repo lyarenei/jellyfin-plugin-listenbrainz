@@ -18,29 +18,30 @@ internal static class PlaylistTypePolicy
     /// <summary>
     /// Descriptors for every known playlist type, keyed by <see cref="PlaylistType"/>.
     /// </summary>
-    private static readonly IReadOnlyList<PlaylistTypeDescriptor> _descriptors =
-    [
-        new(
-            PlaylistType.Jams,
-            PlaylistRetention.Rotation,
-            "weekly-jams",
-            uc => uc.IsWeeklyJamsSyncEnabled),
-        new(
-            PlaylistType.Exploration,
-            PlaylistRetention.Rotation,
-            "weekly-exploration",
-            uc => uc.IsWeeklyExplorationSyncEnabled),
-        new(
-            PlaylistType.TopDiscoveries,
-            PlaylistRetention.Archive,
-            "top-discoveries-of",
-            uc => uc.IsTopDiscoveriesSyncEnabled),
-        new(
-            PlaylistType.TopMissedRecordings,
-            PlaylistRetention.Archive,
-            "top-missed-recordings-of",
-            uc => uc.IsTopMissedRecordingsSyncEnabled),
-    ];
+    private static readonly IReadOnlyDictionary<PlaylistType, PlaylistTypeDescriptor> _descriptors =
+        new PlaylistTypeDescriptor[]
+        {
+            new(
+                PlaylistType.Jams,
+                PlaylistRetention.Rotation,
+                "weekly-jams",
+                uc => uc.IsWeeklyJamsSyncEnabled),
+            new(
+                PlaylistType.Exploration,
+                PlaylistRetention.Rotation,
+                "weekly-exploration",
+                uc => uc.IsWeeklyExplorationSyncEnabled),
+            new(
+                PlaylistType.TopDiscoveries,
+                PlaylistRetention.Archive,
+                "top-discoveries-of",
+                uc => uc.IsTopDiscoveriesSyncEnabled),
+            new(
+                PlaylistType.TopMissedRecordings,
+                PlaylistRetention.Archive,
+                "top-missed-recordings-of",
+                uc => uc.IsTopMissedRecordingsSyncEnabled),
+        }.ToDictionary(d => d.Type);
 
     /// <summary>
     /// Classifies a ListenBrainz playlist source patch into a playlist type.
@@ -155,7 +156,7 @@ internal static class PlaylistTypePolicy
 
     private static PlaylistTypeDescriptor DescriptorForType(PlaylistType type)
     {
-        return _descriptors.First(d => d.Type == type);
+        return _descriptors[type];
     }
 
     private static PlaylistTypeDescriptor? DescriptorForPatch(string? sourcePatch)
@@ -165,7 +166,7 @@ internal static class PlaylistTypePolicy
             return null;
         }
 
-        return _descriptors.FirstOrDefault(d => MatchesPatch(d.SourcePatchPrefix, sourcePatch));
+        return _descriptors.Values.FirstOrDefault(d => MatchesPatch(d.SourcePatchPrefix, sourcePatch));
     }
 
     private static bool MatchesPatch(string prefix, string sourcePatch)
