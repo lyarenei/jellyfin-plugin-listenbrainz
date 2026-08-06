@@ -129,8 +129,7 @@ public class DefaultPlaylistManager : IPlaylistManager
         }
 
         await AddItemsToPlaylistAsync(playlist.Id, tracks.Select(i => i.Id).ToArray(), user.Id);
-
-        await TagPlaylist(playlist.Id, user.Id, cancellationToken);
+        await TagPlaylist(playlist, user.Id, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -172,13 +171,35 @@ public class DefaultPlaylistManager : IPlaylistManager
             return;
         }
 
-        if (HasListenBrainzTag(playlist))
+        await TagPlaylist(playlist, userId, cancellationToken);
+    }
+
+    private async Task TagPlaylist(JellyfinPlaylist playlist, Guid userId, CancellationToken cancellationToken)
+    {
+        var needsSave = false;
+
+        // Only playlist owner can tag it
+        if (playlist.OwnerUserId != userId)
         {
-            return;
+            _logger.LogInformation(
+                "Setting owner of playlist {PlaylistId} to {UserId}",
+                playlist.Id,
+                userId);
+
+            playlist.OwnerUserId = userId;
+            needsSave = true;
         }
 
-        playlist.Tags = [..playlist.Tags, PlaylistTag];
-        await playlist.UpdateToRepositoryAsync(ItemUpdateType.MetadataEdit, cancellationToken);
+        if (!HasListenBrainzTag(playlist))
+        {
+            playlist.Tags = [.. playlist.Tags, PlaylistTag];
+            needsSave = true;
+        }
+
+        if (needsSave)
+        {
+            await playlist.UpdateToRepositoryAsync(ItemUpdateType.MetadataEdit, cancellationToken);
+        }
     }
 
     private static bool HasListenBrainzTag(BaseItem playlist)
