@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Reflection;
 using Jellyfin.Data.Enums;
 using Jellyfin.Database.Implementations.Entities;
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
@@ -17,6 +18,18 @@ namespace Jellyfin.Plugin.ListenBrainz.Services;
 public class DefaultPlaylistManager : IPlaylistManager
 {
     private const string PlaylistTag = "ListenBrainz";
+
+    // For Jellyfin 12.x
+    private static readonly MethodInfo? _addItemToPlaylistWithPosition = typeof(MediaBrowser.Controller.Playlists.IPlaylistManager)
+        .GetMethod(
+            "AddItemToPlaylistAsync",
+            [typeof(Guid), typeof(IReadOnlyCollection<Guid>), typeof(int?), typeof(Guid)]);
+
+    // For Jellyfin 10.11.x
+    private static readonly MethodInfo? _addItemToPlaylistLegacy = typeof(MediaBrowser.Controller.Playlists.IPlaylistManager)
+        .GetMethod(
+            "AddItemToPlaylistAsync",
+            [typeof(Guid), typeof(IReadOnlyCollection<Guid>), typeof(Guid)]);
 
     private readonly ILogger _logger;
     private readonly ILibraryManager _libraryManager;
@@ -106,10 +119,7 @@ public class DefaultPlaylistManager : IPlaylistManager
                 entryIds);
         }
 
-        await _playlistManager.AddItemToPlaylistAsync(
-            playlist.Id,
-            tracks.Select(i => i.Id).ToArray(),
-            user.Id);
+        await AddItemsToPlaylistAsync(playlist.Id, tracks.Select(i => i.Id).ToArray(), user.Id);
 
         await TagPlaylist(playlist.Id, user.Id, cancellationToken);
     }
@@ -118,6 +128,28 @@ public class DefaultPlaylistManager : IPlaylistManager
     public void Delete(JellyfinPlaylist playlist)
     {
         _libraryManager.DeleteItem(playlist, new DeleteOptions { DeleteFileLocation = false });
+    }
+
+    private Task AddItemsToPlaylistAsync(Guid playlistId, IReadOnlyCollection<Guid> itemIds, Guid userId)
+    {
+        // Not null => running on Jellyfin 12.x
+        if (_addItemToPlaylistWithPosition is not null)
+        {
+            return (Task)_addItemToPlaylistWithPosition.Invoke(
+                _playlistManager,
+                [playlistId, itemIds, null, userId])!;
+        }
+
+        // Not null => running on Jellyfin 10.11.x
+        if (_addItemToPlaylistLegacy is not null)
+        {
+            return (Task)_addItemToPlaylistLegacy.Invoke(
+                _playlistManager,
+                [playlistId, itemIds, userId])!;
+        }
+
+        _logger.LogDebug("Incompatible Jellyfin version: no matching IPlaylistManager.AddItemToPlaylistAsync overload is available");
+        throw new PluginException("Incompatible Jellyfin version");
     }
 
     private async Task TagPlaylist(Guid playlistId, Guid userId, CancellationToken cancellationToken)
