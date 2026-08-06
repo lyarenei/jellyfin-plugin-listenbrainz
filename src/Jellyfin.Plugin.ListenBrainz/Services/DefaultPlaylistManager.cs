@@ -53,7 +53,18 @@ public class DefaultPlaylistManager : IPlaylistManager
 
     /// <inheritdoc />
     public JellyfinPlaylist? Find(Guid playlistId, Guid userId)
-        => _playlistManager.GetPlaylistForUser(playlistId, userId);
+    {
+        // Prefer lookup with user ID scope
+        // Fall back to global search which bypasses ownership and caches
+        return _playlistManager.GetPlaylistForUser(playlistId, userId)
+               ?? _libraryManager
+                   .GetItemList(new InternalItemsQuery
+                   {
+                       IncludeItemTypes = [BaseItemKind.Playlist], ItemIds = [playlistId],
+                   })
+                   .OfType<JellyfinPlaylist>()
+                   .FirstOrDefault();
+    }
 
     /// <inheritdoc />
     public JellyfinPlaylist? FindByName(User user, string name)
@@ -154,7 +165,7 @@ public class DefaultPlaylistManager : IPlaylistManager
 
     private async Task TagPlaylist(Guid playlistId, Guid userId, CancellationToken cancellationToken)
     {
-        var playlist = _playlistManager.GetPlaylistForUser(playlistId, userId);
+        var playlist = Find(playlistId, userId);
         if (playlist is null)
         {
             _logger.LogWarning("Could not tag playlist {PlaylistId}: playlist was not found", playlistId);
