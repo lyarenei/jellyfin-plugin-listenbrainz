@@ -73,13 +73,7 @@ public class DefaultPlaylistManager : IPlaylistManager
     /// <inheritdoc />
     public JellyfinPlaylist? FindByName(User user, string name)
     {
-        var query = new InternalItemsQuery
-        {
-            IncludeItemTypes = [BaseItemKind.Playlist],
-            Name = name,
-            User = user,
-        };
-
+        var query = new InternalItemsQuery { IncludeItemTypes = [BaseItemKind.Playlist], Name = name, User = user, };
         return _libraryManager
             .GetItemList(query)
             .OfType<JellyfinPlaylist>()
@@ -163,7 +157,9 @@ public class DefaultPlaylistManager : IPlaylistManager
                 [playlistId, itemIds, userId])!;
         }
 
-        _logger.LogDebug("Incompatible Jellyfin version: no matching IPlaylistManager.AddItemToPlaylistAsync overload is available");
+        _logger.LogDebug("Incompatible Jellyfin version: " +
+                         "no matching IPlaylistManager.AddItemToPlaylistAsync overload is available");
+
         throw new PluginException("Incompatible Jellyfin version");
     }
 
