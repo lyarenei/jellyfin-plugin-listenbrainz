@@ -7,6 +7,7 @@ using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Playlists;
 using Microsoft.Extensions.Logging;
+using IJellyfinPlaylistManager = MediaBrowser.Controller.Playlists.IPlaylistManager;
 using IPlaylistManager = Jellyfin.Plugin.ListenBrainz.Interfaces.IPlaylistManager;
 using JellyfinPlaylist = MediaBrowser.Controller.Playlists.Playlist;
 
@@ -18,22 +19,25 @@ namespace Jellyfin.Plugin.ListenBrainz.Services;
 public class DefaultPlaylistManager : IPlaylistManager
 {
     private const string PlaylistTag = "ListenBrainz";
+    private static readonly Type _managerInt = typeof(IJellyfinPlaylistManager);
 
     // For Jellyfin 12.x
-    private static readonly MethodInfo? _addItemToPlaylistWithPosition = typeof(MediaBrowser.Controller.Playlists.IPlaylistManager)
-        .GetMethod(
-            "AddItemToPlaylistAsync",
-            [typeof(Guid), typeof(IReadOnlyCollection<Guid>), typeof(int?), typeof(Guid)]);
+    private static readonly MethodInfo? _addItemToPlaylistWithPosition =
+        _managerInt
+            .GetMethod(
+                "AddItemToPlaylistAsync",
+                [typeof(Guid), typeof(IReadOnlyCollection<Guid>), typeof(int?), typeof(Guid)]);
 
     // For Jellyfin 10.11.x
-    private static readonly MethodInfo? _addItemToPlaylistLegacy = typeof(MediaBrowser.Controller.Playlists.IPlaylistManager)
-        .GetMethod(
-            "AddItemToPlaylistAsync",
-            [typeof(Guid), typeof(IReadOnlyCollection<Guid>), typeof(Guid)]);
+    private static readonly MethodInfo? _addItemToPlaylistLegacy =
+        _managerInt
+            .GetMethod(
+                "AddItemToPlaylistAsync",
+                [typeof(Guid), typeof(IReadOnlyCollection<Guid>), typeof(Guid)]);
 
     private readonly ILogger _logger;
     private readonly ILibraryManager _libraryManager;
-    private readonly MediaBrowser.Controller.Playlists.IPlaylistManager _playlistManager;
+    private readonly IJellyfinPlaylistManager _playlistManager;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DefaultPlaylistManager"/> class.
@@ -44,7 +48,7 @@ public class DefaultPlaylistManager : IPlaylistManager
     public DefaultPlaylistManager(
         ILogger logger,
         ILibraryManager libraryManager,
-        MediaBrowser.Controller.Playlists.IPlaylistManager playlistManager)
+        IJellyfinPlaylistManager playlistManager)
     {
         _logger = logger;
         _libraryManager = libraryManager;
