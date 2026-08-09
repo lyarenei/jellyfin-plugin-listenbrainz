@@ -308,8 +308,17 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
             return false;
         }
 
-        // The mapping is current, but only skip if the Jellyfin playlist still exists.
-        return _playlistManager.FindAny(mapping.JellyfinPlaylistId) is not null;
+        // If playlist is not visible to the user it is effectively not synced - select for resync
+        if (_playlistManager.FindForUser(mapping.JellyfinPlaylistId, user.Id) is not null)
+        {
+            return true;
+        }
+
+        _logger.LogDebug(
+            "Mapped Jellyfin playlist {PlaylistId} is missing or not visible to the user, syncing it again",
+            mapping.JellyfinPlaylistId);
+
+        return false;
     }
 
     private JellyfinPlaylist? ResolveMappedPlaylist(User user, PlaylistSyncState state, string listenBrainzPlaylistId)

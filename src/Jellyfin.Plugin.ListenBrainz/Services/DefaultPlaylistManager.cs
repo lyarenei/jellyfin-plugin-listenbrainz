@@ -63,6 +63,12 @@ public class DefaultPlaylistManager : IPlaylistManager
     }
 
     /// <inheritdoc />
+    public JellyfinPlaylist? FindForUser(Guid playlistId, Guid userId)
+    {
+        return IsVisibleTo(playlistId, userId) ? FindAny(playlistId) : null;
+    }
+
+    /// <inheritdoc />
     public JellyfinPlaylist? FindByName(User user, string name)
     {
         var query = new InternalItemsQuery { IncludeItemTypes = [BaseItemKind.Playlist], Name = name, User = user, };
@@ -195,6 +201,11 @@ public class DefaultPlaylistManager : IPlaylistManager
         {
             await playlist.UpdateToRepositoryAsync(ItemUpdateType.MetadataEdit, cancellationToken);
         }
+    }
+
+    private bool IsVisibleTo(Guid playlistId, Guid userId)
+    {
+        return _playlistManager.GetPlaylistForUser(playlistId, userId) is not null;
     }
 
     private static bool HasListenBrainzTag(BaseItem playlist)
