@@ -19,10 +19,12 @@ public class UserConfig
         UserName = string.Empty;
         IsBackupEnabled = false;
         IsStrictModeEnabled = false;
-        IsWeeklyPlaylistsSyncEnabled = false;
+        IsGeneratedPlaylistsSyncEnabled = false;
         IsWeeklyJamsSyncEnabled = true;
         IsWeeklyExplorationSyncEnabled = true;
-        KeepWeeklyPlaylistsAfterRotation = false;
+        IsTopDiscoveriesSyncEnabled = true;
+        IsTopMissedRecordingsSyncEnabled = true;
+        KeepPlaylistsAfterRotation = false;
     }
 
     /// <summary>
@@ -69,9 +71,9 @@ public class UserConfig
     public bool IsPlaylistsSyncEnabled { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether ListenBrainz weekly playlist sync is enabled.
+    /// Gets or sets a value indicating whether ListenBrainz generated playlist sync is enabled.
     /// </summary>
-    public bool IsWeeklyPlaylistsSyncEnabled { get; set; }
+    public bool IsGeneratedPlaylistsSyncEnabled { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether Weekly Jams playlists should be synced.
@@ -84,9 +86,19 @@ public class UserConfig
     public bool IsWeeklyExplorationSyncEnabled { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether weekly playlists should be kept after rotation.
+    /// Gets or sets a value indicating whether Top Discoveries of the year playlists should be synced.
     /// </summary>
-    public bool KeepWeeklyPlaylistsAfterRotation { get; set; }
+    public bool IsTopDiscoveriesSyncEnabled { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether Top Missed Recordings of the year playlists should be synced.
+    /// </summary>
+    public bool IsTopMissedRecordingsSyncEnabled { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether playlists should be kept after rotation.
+    /// </summary>
+    public bool KeepPlaylistsAfterRotation { get; set; }
 
     /// <summary>
     /// Gets or sets a ListenBrainz username.

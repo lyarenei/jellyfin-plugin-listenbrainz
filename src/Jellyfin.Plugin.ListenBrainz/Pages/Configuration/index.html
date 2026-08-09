@@ -72,12 +72,12 @@
                             <div class="fieldDescription">Deprecated. Has no effect when weekly playlist sync is enabled.</div>
                         </div>
                         <div class="checkboxContainer">
-                            <label class="inputLabel inputLabelUnfocused" for="IsWeeklyPlaylistsSyncEnabled">
-                                <input is="emby-checkbox" type="checkbox" id="IsWeeklyPlaylistsSyncEnabled"
-                                       name="IsWeeklyPlaylistsSyncEnabled"/>
-                                <span>Enable weekly playlist sync</span>
+                            <label class="inputLabel inputLabelUnfocused" for="IsGeneratedPlaylistsSyncEnabled">
+                                <input is="emby-checkbox" type="checkbox" id="IsGeneratedPlaylistsSyncEnabled"
+                                       name="IsGeneratedPlaylistsSyncEnabled"/>
+                                <span>Enable generated playlist sync</span>
                             </label>
-                            <div class="fieldDescription">Sync ListenBrainz weekly rotation playlists for this user.</div>
+                            <div class="fieldDescription">Sync ListenBrainz generated playlists for this user.</div>
                         </div>
                         <div class="checkboxContainer weekly-playlist-option">
                             <label class="inputLabel inputLabelUnfocused" for="IsWeeklyJamsSyncEnabled">
@@ -95,12 +95,28 @@
                             <div class="fieldDescription">May produce very tiny playlists due to Jellyfin limitations.</div>
                         </div>
                         <div class="checkboxContainer weekly-playlist-option">
-                            <label class="inputLabel inputLabelUnfocused" for="KeepWeeklyPlaylistsAfterRotation">
-                                <input is="emby-checkbox" type="checkbox" id="KeepWeeklyPlaylistsAfterRotation"
-                                       name="KeepWeeklyPlaylistsAfterRotation"/>
-                                <span>Keep weekly playlists after rotation</span>
+                            <label class="inputLabel inputLabelUnfocused" for="KeepPlaylistsAfterRotation">
+                                <input is="emby-checkbox" type="checkbox" id="KeepPlaylistsAfterRotation"
+                                       name="KeepPlaylistsAfterRotation"/>
+                                <span>Keep playlists after rotation</span>
                             </label>
                             <div class="fieldDescription">Keep playlist clone in Jellyfin when the playlist goes out of rotation.</div>
+                        </div>
+                        <div class="checkboxContainer weekly-playlist-option">
+                            <label class="inputLabel inputLabelUnfocused" for="IsTopDiscoveriesSyncEnabled">
+                                <input is="emby-checkbox" type="checkbox" id="IsTopDiscoveriesSyncEnabled"
+                                       name="IsTopDiscoveriesSyncEnabled"/>
+                                <span>Sync Top Discoveries</span>
+                            </label>
+                            <div class="fieldDescription">Archive yearly "Top Discoveries" playlists.</div>
+                        </div>
+                        <div class="checkboxContainer weekly-playlist-option">
+                            <label class="inputLabel inputLabelUnfocused" for="IsTopMissedRecordingsSyncEnabled">
+                                <input is="emby-checkbox" type="checkbox" id="IsTopMissedRecordingsSyncEnabled"
+                                       name="IsTopMissedRecordingsSyncEnabled"/>
+                                <span>Sync Top Missed Recordings</span>
+                            </label>
+                            <div class="fieldDescription">Archive yearly "Top Missed Recordings" playlists. May produce very tiny playlists due to Jellyfin limitations.</div>
                         </div>
                         <div class="checkboxContainer">
                             <label class="inputLabel inputLabelUnfocused" for="IsUserBackupEnabled">

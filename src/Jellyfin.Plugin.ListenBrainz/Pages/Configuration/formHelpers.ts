@@ -11,10 +11,12 @@ function getUserConfigFormElements(view: HTMLElement) {
         listenSubmit: view.querySelector("#IsListenSubmitEnabled") as HTMLInputElement,
         playlistsSync: view.querySelector("#IsPlaylistsSyncEnabled") as HTMLInputElement,
         strictMode: view.querySelector("#IsStrictModeEnabled") as HTMLInputElement,
+        topDiscoveriesSync: view.querySelector("#IsTopDiscoveriesSyncEnabled") as HTMLInputElement,
+        topMissedRecordingsSync: view.querySelector("#IsTopMissedRecordingsSyncEnabled") as HTMLInputElement,
         weeklyExplorationSync: view.querySelector("#IsWeeklyExplorationSyncEnabled") as HTMLInputElement,
         weeklyJamsSync: view.querySelector("#IsWeeklyJamsSyncEnabled") as HTMLInputElement,
-        weeklyPlaylistsSync: view.querySelector("#IsWeeklyPlaylistsSyncEnabled") as HTMLInputElement,
-        weeklyPlaylistsRetention: view.querySelector("#KeepWeeklyPlaylistsAfterRotation") as HTMLInputElement,
+        generatedPlaylistsSync: view.querySelector("#IsGeneratedPlaylistsSyncEnabled") as HTMLInputElement,
+        playlistsRetention: view.querySelector("#KeepPlaylistsAfterRotation") as HTMLInputElement,
         userDropdown: view.querySelector("#JellyfinUser") as HTMLSelectElement,
     };
 }
@@ -27,10 +29,12 @@ export function fillUserConfigForm(view: HTMLElement, userConfig: PluginUserConf
     elements.listenSubmit.checked = userConfig.IsListenSubmitEnabled;
     elements.playlistsSync.checked = userConfig.IsPlaylistsSyncEnabled;
     elements.strictMode.checked = userConfig.IsStrictModeEnabled;
+    elements.topDiscoveriesSync.checked = userConfig.IsTopDiscoveriesSyncEnabled;
+    elements.topMissedRecordingsSync.checked = userConfig.IsTopMissedRecordingsSyncEnabled;
     elements.weeklyExplorationSync.checked = userConfig.IsWeeklyExplorationSyncEnabled;
     elements.weeklyJamsSync.checked = userConfig.IsWeeklyJamsSyncEnabled;
-    elements.weeklyPlaylistsSync.checked = userConfig.IsWeeklyPlaylistsSyncEnabled;
-    elements.weeklyPlaylistsRetention.checked = userConfig.KeepWeeklyPlaylistsAfterRotation;
+    elements.generatedPlaylistsSync.checked = userConfig.IsGeneratedPlaylistsSyncEnabled;
+    elements.playlistsRetention.checked = userConfig.KeepPlaylistsAfterRotation;
 }
 
 export function getUserConfigFormData(view: HTMLElement): PluginUserConfig {
@@ -42,11 +46,13 @@ export function getUserConfigFormData(view: HTMLElement): PluginUserConfig {
         IsListenSubmitEnabled: elements.listenSubmit.checked,
         IsPlaylistsSyncEnabled: elements.playlistsSync.checked,
         IsStrictModeEnabled: elements.strictMode.checked,
+        IsTopDiscoveriesSyncEnabled: elements.topDiscoveriesSync.checked,
+        IsTopMissedRecordingsSyncEnabled: elements.topMissedRecordingsSync.checked,
         IsWeeklyExplorationSyncEnabled: elements.weeklyExplorationSync.checked,
         IsWeeklyJamsSyncEnabled: elements.weeklyJamsSync.checked,
-        IsWeeklyPlaylistsSyncEnabled: elements.weeklyPlaylistsSync.checked,
+        IsGeneratedPlaylistsSyncEnabled: elements.generatedPlaylistsSync.checked,
         JellyfinUserId: elements.userDropdown.value,
-        KeepWeeklyPlaylistsAfterRotation: elements.weeklyPlaylistsRetention.checked,
+        KeepPlaylistsAfterRotation: elements.playlistsRetention.checked,
         UserName: "",
     };
 }

@@ -13,12 +13,12 @@ using JellyfinPlaylist = MediaBrowser.Controller.Playlists.Playlist;
 using Playlist = Jellyfin.Plugin.ListenBrainz.Api.Models.Playlist;
 using Utils = Jellyfin.Plugin.ListenBrainz.Common.Utils;
 
-namespace Jellyfin.Plugin.ListenBrainz.Tasks.SyncWeeklyPlaylists;
+namespace Jellyfin.Plugin.ListenBrainz.Tasks.SyncGeneratedPlaylists;
 
 /// <summary>
-/// Jellyfin task for syncing weekly rotation playlists from ListenBrainz.
+/// Jellyfin task for syncing generated playlists from ListenBrainz.
 /// </summary>
-public class SyncWeeklyPlaylistsTask : IScheduledTask
+public class SyncGeneratedPlaylistsTask : IScheduledTask
 {
     private readonly ILogger _logger;
     private readonly IListenBrainzService _listenBrainz;
@@ -29,7 +29,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
     private readonly IPlaylistManager _playlistManager;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="SyncWeeklyPlaylistsTask"/> class.
+    /// Initializes a new instance of the <see cref="SyncGeneratedPlaylistsTask"/> class.
     /// </summary>
     /// <param name="loggerFactory">Logger factory.</param>
     /// <param name="userManager">User manager.</param>
@@ -37,8 +37,8 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
     /// <param name="configService">Plugin configuration service.</param>
     /// <param name="stateService">Playlist sync state service.</param>
     /// <param name="trackMatcher">Playlist track matcher.</param>
-    /// <param name="playlistManager">Weekly playlist writer.</param>
-    public SyncWeeklyPlaylistsTask(
+    /// <param name="playlistManager">Playlist writer.</param>
+    public SyncGeneratedPlaylistsTask(
         ILoggerFactory loggerFactory,
         IUserManager userManager,
         IListenBrainzService listenBrainz,
@@ -47,7 +47,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
         IPlaylistTrackMatcher trackMatcher,
         IPlaylistManager playlistManager)
     {
-        _logger = loggerFactory.CreateLogger($"{Plugin.LoggerCategory}.SyncWeeklyPlaylistsTask");
+        _logger = loggerFactory.CreateLogger($"{Plugin.LoggerCategory}.SyncGeneratedPlaylistsTask");
         _listenBrainz = listenBrainz;
         _userManager = userManager;
         _configService = configService;
@@ -57,13 +57,13 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
     }
 
     /// <inheritdoc />
-    public string Name => "Sync weekly playlists from ListenBrainz";
+    public string Name => "Sync generated playlists from ListenBrainz";
 
     /// <inheritdoc />
-    public string Key => "SyncWeeklyPlaylists";
+    public string Key => "SyncGeneratedPlaylists";
 
     /// <inheritdoc />
-    public string Description => "Sync weekly ListenBrainz rotation playlists to Jellyfin";
+    public string Description => "Sync generated ListenBrainz playlists to Jellyfin";
 
     /// <inheritdoc />
     public string Category => "ListenBrainz";
@@ -85,17 +85,17 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
         using var logScope = BeginLogScope();
         var enabledUserConfigs = _configService
             .UserConfigs
-            .Where(uc => uc.IsWeeklyPlaylistsSyncEnabled)
+            .Where(uc => uc.IsGeneratedPlaylistsSyncEnabled)
             .ToList();
 
         if (enabledUserConfigs.Count == 0)
         {
-            _logger.LogInformation("No users have weekly playlist syncing enabled, nothing to sync");
+            _logger.LogInformation("No users have generated playlist syncing enabled, nothing to sync");
             progress.Report(100);
             return;
         }
 
-        _logger.LogInformation("Starting weekly playlist sync from ListenBrainz...");
+        _logger.LogInformation("Starting generated playlist sync from ListenBrainz...");
         var reporter = new SyncProgress(progress, enabledUserConfigs.Count);
 
         var state = await _stateService.ReadAsync(cancellationToken);
@@ -105,13 +105,13 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                _logger.LogInformation("Syncing weekly playlists for user {Username}", userConfig.UserName);
+                _logger.LogInformation("Syncing generated playlists for user {Username}", userConfig.UserName);
                 await HandleUserPlaylistSync(reporter, userConfig, state, cancellationToken);
             }
         }
         catch (OperationCanceledException)
         {
-            _logger.LogInformation("Weekly playlist sync task has been cancelled");
+            _logger.LogInformation("Generated playlist sync task has been cancelled");
             reporter.Finish();
         }
         finally
@@ -146,66 +146,75 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
                 playlists.Count,
                 userConfig.UserName);
 
-            var weeklyPlaylists = WeeklyRotationPolicy.PickWeeklyRotationPlaylists(playlists, userConfig).ToList();
+            var generatedPlaylists = PlaylistTypePolicy.SelectPlaylists(playlists, userConfig).ToList();
             _logger.LogInformation(
-                "Selected {Count} weekly rotation playlists for user {Username}",
-                weeklyPlaylists.Count,
+                "Selected {Count} generated playlists for user {Username}",
+                generatedPlaylists.Count,
                 userConfig.UserName);
 
-            if (weeklyPlaylists.Count == 0)
+            if (generatedPlaylists.Count == 0)
             {
                 reporter.CompleteUser();
                 return;
             }
 
             var candidates = _trackMatcher.GetCandidateAudioItems(user);
-            var failedTypes = new HashSet<WeeklyPlaylistType>();
-            foreach (var weeklyPlaylist in weeklyPlaylists)
+            var failedTypes = new HashSet<PlaylistType>();
+            foreach (var generatedPlaylist in generatedPlaylists)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
                 try
                 {
+                    if (IsAlreadySynced(user, state, generatedPlaylist.Playlist))
+                    {
+                        _logger.LogDebug(
+                            "Playlist {PlaylistId} is already up to date, skipping",
+                            generatedPlaylist.Playlist.PlaylistId);
+                        reporter.AdvancePlaylist(generatedPlaylists.Count);
+                        continue;
+                    }
+
                     _logger.LogDebug(
-                        "Processing weekly playlist {PlaylistId} of type {PlaylistType}",
-                        weeklyPlaylist.Playlist.PlaylistId,
-                        weeklyPlaylist.Type);
+                        "Processing generated playlist {PlaylistId} of type {PlaylistType}",
+                        generatedPlaylist.Playlist.PlaylistId,
+                        generatedPlaylist.Type);
 
                     var playlist = await _listenBrainz.GetPlaylistAsync(
                         userConfig,
-                        weeklyPlaylist.Playlist.PlaylistId,
+                        generatedPlaylist.Playlist.PlaylistId,
                         cancellationToken);
 
                     var synced = await SyncPlaylist(
                         user,
                         playlist,
-                        weeklyPlaylist.Type,
+                        generatedPlaylist.Type,
                         candidates,
                         state,
                         cancellationToken);
                     if (!synced)
                     {
-                        failedTypes.Add(weeklyPlaylist.Type);
+                        failedTypes.Add(generatedPlaylist.Type);
                     }
                 }
                 catch (Exception e) when (e is not OperationCanceledException)
                 {
-                    failedTypes.Add(weeklyPlaylist.Type);
+                    failedTypes.Add(generatedPlaylist.Type);
                     _logger.LogWarning(
-                        "Failed to sync weekly playlist {PlaylistId}: {Error}",
-                        weeklyPlaylist.Playlist.PlaylistId,
+                        "Failed to sync generated playlist {PlaylistId}: {Error}",
+                        generatedPlaylist.Playlist.PlaylistId,
                         e.Message);
                 }
 
-                reporter.AdvancePlaylist(weeklyPlaylists.Count);
+                reporter.AdvancePlaylist(generatedPlaylists.Count);
             }
 
-            PruneOutOfRotationPlaylists(user, userConfig, state, weeklyPlaylists, failedTypes, cancellationToken);
+            PruneOutOfRotationPlaylists(user, userConfig, state, generatedPlaylists, failedTypes, cancellationToken);
         }
         catch (PluginException e)
         {
             _logger.LogError(
-                "Failed to fetch weekly playlists for user {Username}: {Error}",
+                "Failed to fetch generated playlists for user {Username}: {Error}",
                 userConfig.UserName,
                 e.Message);
             reporter.CompleteUser();
@@ -215,12 +224,12 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
     private async Task<bool> SyncPlaylist(
         User user,
         Playlist playlist,
-        WeeklyPlaylistType playlistType,
+        PlaylistType playlistType,
         IReadOnlyList<BaseItem> candidates,
         PlaylistSyncState state,
         CancellationToken cancellationToken)
     {
-        _logger.LogDebug("Syncing weekly playlist: {Title}", playlist.Title);
+        _logger.LogDebug("Syncing generated playlist: {Title}", playlist.Title);
 
         var tracks = playlist.Tracks.ToList();
         if (tracks.Count == 0)
@@ -245,7 +254,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
         }
 
         _logger.LogInformation(
-            "Found {Count} (out of {TotalCount}) matching tracks for weekly playlist {Title}",
+            "Found {Count} (out of {TotalCount}) matching tracks for generated playlist {Title}",
             matchedTracks.Count,
             tracks.Count,
             playlist.Title);
@@ -253,7 +262,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
         if (matchedTracks.Count == 0)
         {
             _logger.LogWarning(
-                "No matching tracks for weekly playlist {Title}, skipping sync",
+                "No matching tracks for generated playlist {Title}, skipping sync",
                 playlist.Title);
             return false;
         }
@@ -282,13 +291,34 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
             jellyfinPlaylistId,
             playlist.Title,
             playlist.CreatedAt,
-            WeeklyRotationPolicy.CategoryFor(playlistType));
+            PlaylistTypePolicy.CategoryFor(playlistType));
 
         _logger.LogInformation(
-            "Successfully synced weekly playlist {Name} with {Count} tracks",
+            "Successfully synced generated playlist {Name} with {Count} tracks",
             playlist.Title,
             matchedTracks.Count);
         return true;
+    }
+
+    private bool IsAlreadySynced(User user, PlaylistSyncState state, Playlist listingPlaylist)
+    {
+        var mapping = state.FindMapping(user.Id, listingPlaylist.PlaylistId);
+        if (mapping is null || !PlaylistTypePolicy.IsUpToDate(mapping, listingPlaylist))
+        {
+            return false;
+        }
+
+        // If playlist is not visible to the user it is effectively not synced - select for resync
+        if (_playlistManager.FindForUser(mapping.JellyfinPlaylistId, user.Id) is not null)
+        {
+            return true;
+        }
+
+        _logger.LogDebug(
+            "Mapped Jellyfin playlist {PlaylistId} is missing or not visible to the user, syncing it again",
+            mapping.JellyfinPlaylistId);
+
+        return false;
     }
 
     private JellyfinPlaylist? ResolveMappedPlaylist(User user, PlaylistSyncState state, string listenBrainzPlaylistId)
@@ -299,7 +329,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
             return null;
         }
 
-        var playlist = _playlistManager.Find(mapping.JellyfinPlaylistId, user.Id);
+        var playlist = _playlistManager.FindAny(mapping.JellyfinPlaylistId);
         if (playlist is not null)
         {
             return playlist;
@@ -317,16 +347,16 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
         User user,
         UserConfig userConfig,
         PlaylistSyncState state,
-        IReadOnlyList<WeeklyPlaylistCandidate> rotationPlaylists,
-        IReadOnlySet<WeeklyPlaylistType> failedTypes,
+        IReadOnlyList<PlaylistCandidate> rotationPlaylists,
+        IReadOnlySet<PlaylistType> failedTypes,
         CancellationToken cancellationToken)
     {
-        var rotationIds = rotationPlaylists
+        var selectedPlaylistIds = rotationPlaylists
             .Select(p => p.Playlist.PlaylistId)
             .WhereNotNull()
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        var rotationTypes = rotationPlaylists
+        var syncedTypes = rotationPlaylists
             .Select(p => p.Type)
             .Where(t => !failedTypes.Contains(t))
             .ToHashSet();
@@ -334,27 +364,27 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
         var mappingsToRemove = state
             .Mappings
             .Where(m => m.JellyfinUserId == user.Id &&
-                        WeeklyRotationPolicy.ShouldPruneMapping(m, rotationIds, rotationTypes))
+                        PlaylistTypePolicy.ShouldPruneMapping(m, selectedPlaylistIds, syncedTypes))
             .ToList();
 
         foreach (var mapping in mappingsToRemove)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (userConfig.KeepWeeklyPlaylistsAfterRotation)
+            if (userConfig.KeepPlaylistsAfterRotation)
             {
                 _logger.LogDebug(
-                    "Keeping out-of-rotation weekly playlist {PlaylistId}, removing its mapping",
+                    "Keeping out-of-rotation generated playlist {PlaylistId}, removing its mapping",
                     mapping.ListenBrainzPlaylistId);
                 state.Mappings.Remove(mapping);
                 continue;
             }
 
-            var playlist = _playlistManager.Find(mapping.JellyfinPlaylistId, user.Id);
+            var playlist = _playlistManager.FindAny(mapping.JellyfinPlaylistId);
             if (playlist is not null)
             {
                 _logger.LogInformation(
-                    "Deleting weekly playlist {PlaylistName} because it is no longer in rotation",
+                    "Deleting generated playlist {PlaylistName} because it is no longer in rotation",
                     playlist.Name);
                 _playlistManager.Delete(playlist);
             }
@@ -365,7 +395,7 @@ public class SyncWeeklyPlaylistsTask : IScheduledTask
 
     private IDisposable? BeginLogScope()
     {
-        return _logger.BeginScope(new Dictionary<string, object> { { "EventId", "SyncWeeklyPlaylistsTask" } });
+        return _logger.BeginScope(new Dictionary<string, object> { { "EventId", "SyncGeneratedPlaylistsTask" } });
     }
 
     /// <summary>
