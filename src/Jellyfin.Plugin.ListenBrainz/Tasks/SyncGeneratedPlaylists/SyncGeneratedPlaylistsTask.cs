@@ -309,7 +309,7 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
         }
 
         // The mapping is current, but only skip if the Jellyfin playlist still exists.
-        return _playlistManager.Find(mapping.JellyfinPlaylistId, user.Id) is not null;
+        return _playlistManager.FindAny(mapping.JellyfinPlaylistId) is not null;
     }
 
     private JellyfinPlaylist? ResolveMappedPlaylist(User user, PlaylistSyncState state, string listenBrainzPlaylistId)
@@ -320,7 +320,7 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
             return null;
         }
 
-        var playlist = _playlistManager.Find(mapping.JellyfinPlaylistId, user.Id);
+        var playlist = _playlistManager.FindAny(mapping.JellyfinPlaylistId);
         if (playlist is not null)
         {
             return playlist;
@@ -371,7 +371,7 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
                 continue;
             }
 
-            var playlist = _playlistManager.Find(mapping.JellyfinPlaylistId, user.Id);
+            var playlist = _playlistManager.FindAny(mapping.JellyfinPlaylistId);
             if (playlist is not null)
             {
                 _logger.LogInformation(

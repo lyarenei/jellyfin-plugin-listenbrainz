@@ -10,12 +10,11 @@ namespace Jellyfin.Plugin.ListenBrainz.Interfaces;
 public interface IPlaylistManager
 {
     /// <summary>
-    /// Finds a Jellyfin playlist by ID for the given user.
+    /// Finds a Jellyfin playlist by ID, regardless of its ownership.
     /// </summary>
     /// <param name="playlistId">Jellyfin playlist ID.</param>
-    /// <param name="userId">Jellyfin user ID.</param>
     /// <returns>The playlist, or null if it does not exist.</returns>
-    JellyfinPlaylist? Find(Guid playlistId, Guid userId);
+    JellyfinPlaylist? FindAny(Guid playlistId);
 
     /// <summary>
     /// Finds a ListenBrainz-tagged Jellyfin playlist by name for the given user.

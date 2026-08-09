@@ -56,18 +56,10 @@ public class DefaultPlaylistManager : IPlaylistManager
     }
 
     /// <inheritdoc />
-    public JellyfinPlaylist? Find(Guid playlistId, Guid userId)
+    public JellyfinPlaylist? FindAny(Guid playlistId)
     {
-        // Prefer lookup with user ID scope
-        // Fall back to global search which bypasses ownership and caches
-        return _playlistManager.GetPlaylistForUser(playlistId, userId)
-               ?? _libraryManager
-                   .GetItemList(new InternalItemsQuery
-                   {
-                       IncludeItemTypes = [BaseItemKind.Playlist], ItemIds = [playlistId],
-                   })
-                   .OfType<JellyfinPlaylist>()
-                   .FirstOrDefault();
+        // Note: Prefer GetItemById instead of db queries (that return copies)
+        return _libraryManager.GetItemById(playlistId) as JellyfinPlaylist;
     }
 
     /// <inheritdoc />
@@ -114,7 +106,11 @@ public class DefaultPlaylistManager : IPlaylistManager
     {
         _logger.LogDebug("Updating playlist {Name} with {Count} items", playlist.Name, tracks.Count);
 
-        var entryIds = playlist
+        var target = FindAny(playlist.Id) ?? playlist;
+
+        await TagPlaylist(target, user.Id, cancellationToken);
+
+        var entryIds = target
             .GetLinkedChildrenInfos()
             .Select(i => i.Item1.ItemId)
             .Where(id => id is not null)
@@ -124,12 +120,11 @@ public class DefaultPlaylistManager : IPlaylistManager
         if (entryIds.Length > 0)
         {
             await _playlistManager.RemoveItemFromPlaylistAsync(
-                playlist.Id.ToString("N", CultureInfo.InvariantCulture),
+                target.Id.ToString("N", CultureInfo.InvariantCulture),
                 entryIds);
         }
 
-        await AddItemsToPlaylistAsync(playlist.Id, tracks.Select(i => i.Id).ToArray(), user.Id);
-        await TagPlaylist(playlist, user.Id, cancellationToken);
+        await AddItemsToPlaylistAsync(target.Id, tracks.Select(i => i.Id).ToArray(), user.Id);
     }
 
     /// <inheritdoc />
@@ -164,7 +159,7 @@ public class DefaultPlaylistManager : IPlaylistManager
 
     private async Task TagPlaylist(Guid playlistId, Guid userId, CancellationToken cancellationToken)
     {
-        var playlist = Find(playlistId, userId);
+        var playlist = FindAny(playlistId);
         if (playlist is null)
         {
             _logger.LogWarning("Could not tag playlist {PlaylistId}: playlist was not found", playlistId);
