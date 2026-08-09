@@ -318,6 +318,44 @@ public class DefaultListenBrainzService : IListenBrainzService
     }
 
     /// <inheritdoc />
+    public async Task<IEnumerable<Playlist>> GetUserPlaylistsAsync(UserConfig config, int count, CancellationToken cancellationToken)
+    {
+        var playlists = new List<Playlist>();
+        int offset = 0;
+        GetUserPlaylistsResponse response;
+        do
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var request = new GetUserPlaylistsRequest(config.UserName, count, offset)
+            {
+                ApiToken = config.PlaintextApiToken,
+                BaseUrl = _pluginConfig.ListenBrainzApiUrl,
+            };
+
+            try
+            {
+                response = await _apiClient.GetUserPlaylists(request, cancellationToken);
+            }
+            catch (Exception e)
+            {
+                _logger.LogDebug("Exception when getting user playlists: {Message}", e.Message);
+                throw new ServiceException("Getting user playlists failed", e);
+            }
+
+            if (response.IsNotOk)
+            {
+                throw new ServiceException("Getting user playlists failed");
+            }
+
+            playlists.AddRange(response.Playlists);
+            offset += response.Count;
+        }
+        while (offset < response.PlaylistCount);
+
+        return playlists;
+    }
+
+    /// <inheritdoc />
     public async Task<Playlist> GetPlaylistAsync(UserConfig config, string playlistId, CancellationToken cancellationToken)
     {
         var request = new GetPlaylistRequest(playlistId, false)

@@ -46,6 +46,11 @@ public static class Endpoints
     public const string CreatedForPlaylists = UserEndpointBase + "/{0}/playlists/createdfor";
 
     /// <summary>
+    /// Endpoint for playlists owned by a user.
+    /// </summary>
+    public const string UserPlaylists = UserEndpointBase + "/{0}/playlists";
+
+    /// <summary>
     /// Endpoint for playlist details.
     /// </summary>
     public const string PlaylistDetails = "playlist/{0}";

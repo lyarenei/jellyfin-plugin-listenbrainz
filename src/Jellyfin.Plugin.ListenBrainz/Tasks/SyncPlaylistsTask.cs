@@ -166,6 +166,19 @@ public class SyncPlaylistsTask : IScheduledTask
                     Limits.MaxItemsPerGet,
                     cancellationToken)
             ).ToList();
+
+            // The user's own playlists are only synced when syncing of all playlists is enabled.
+            if (_configService.IsAllPlaylistsSyncEnabled)
+            {
+                var ownPlaylists = await _listenBrainz.GetUserPlaylistsAsync(
+                    userConfig,
+                    Limits.MaxItemsPerGet,
+                    cancellationToken);
+
+                var knownPlaylistIds = playlists.Select(pl => pl.PlaylistId).ToHashSet();
+                playlists.AddRange(ownPlaylists.Where(pl => knownPlaylistIds.Add(pl.PlaylistId)));
+            }
+
             _logger.LogInformation("Found {Count} playlists for user {Username}", playlists.Count, userConfig.UserName);
 
             if (playlists.Count == 0)

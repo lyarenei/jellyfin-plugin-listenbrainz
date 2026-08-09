@@ -115,6 +115,15 @@ public interface IListenBrainzService
     public Task<IEnumerable<Playlist>> GetCreatedForPlaylistsAsync(UserConfig config, int count, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Get all playlists owned by the user.
+    /// </summary>
+    /// <param name="config">ListenBrainz user configuration.</param>
+    /// <param name="count">Number of playlists to fetch per request.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Collection of the user's own playlists (both public and private).</returns>
+    public Task<IEnumerable<Playlist>> GetUserPlaylistsAsync(UserConfig config, int count, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Get a single playlist by its identifier.
     /// </summary>
     /// <param name="config">ListenBrainz user configuration.</param>
