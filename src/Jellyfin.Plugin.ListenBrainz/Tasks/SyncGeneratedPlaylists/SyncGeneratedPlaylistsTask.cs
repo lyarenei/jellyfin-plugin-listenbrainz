@@ -309,7 +309,7 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
         }
 
         // If playlist is not visible to the user it is effectively not synced - select for resync
-        if (_playlistManager.FindForUser(mapping.JellyfinPlaylistId, user.Id) is not null)
+        if (_playlistManager.IsVisibleTo(mapping.JellyfinPlaylistId, user.Id))
         {
             return true;
         }
