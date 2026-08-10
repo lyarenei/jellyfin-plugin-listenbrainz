@@ -115,11 +115,9 @@ public class DefaultPlaylistManager : IPlaylistManager
     {
         _logger.LogDebug("Updating playlist {Name} with {Count} items", playlist.Name, tracks.Count);
 
-        var target = FindAny(playlist.Id) ?? playlist;
+        await TagPlaylist(playlist, user.Id, cancellationToken);
 
-        await TagPlaylist(target, user.Id, cancellationToken);
-
-        var entryIds = target
+        var entryIds = playlist
             .GetLinkedChildrenInfos()
             .Select(i => i.Item1.ItemId)
             .Where(id => id is not null)
@@ -129,11 +127,11 @@ public class DefaultPlaylistManager : IPlaylistManager
         if (entryIds.Length > 0)
         {
             await _playlistManager.RemoveItemFromPlaylistAsync(
-                target.Id.ToString("N", CultureInfo.InvariantCulture),
+                playlist.Id.ToString("N", CultureInfo.InvariantCulture),
                 entryIds);
         }
 
-        await AddItemsToPlaylistAsync(target.Id, tracks.Select(i => i.Id).ToArray(), user.Id);
+        await AddItemsToPlaylistAsync(playlist.Id, tracks.Select(i => i.Id).ToArray(), user.Id);
     }
 
     /// <inheritdoc />
