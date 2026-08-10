@@ -19,18 +19,18 @@ namespace Jellyfin.Plugin.ListenBrainz.Services;
 public class DefaultPlaylistManager : IPlaylistManager
 {
     private const string PlaylistTag = "ListenBrainz";
-    private static readonly Type _managerInt = typeof(IJellyfinPlaylistManager);
+    private static readonly Type _playlistManagerType = typeof(IJellyfinPlaylistManager);
 
     // For Jellyfin 12.x
     private static readonly MethodInfo? _addItemToPlaylistWithPosition =
-        _managerInt
+        _playlistManagerType
             .GetMethod(
                 "AddItemToPlaylistAsync",
                 [typeof(Guid), typeof(IReadOnlyCollection<Guid>), typeof(int?), typeof(Guid)]);
 
     // For Jellyfin 10.11.x
     private static readonly MethodInfo? _addItemToPlaylistLegacy =
-        _managerInt
+        _playlistManagerType
             .GetMethod(
                 "AddItemToPlaylistAsync",
                 [typeof(Guid), typeof(IReadOnlyCollection<Guid>), typeof(Guid)]);
