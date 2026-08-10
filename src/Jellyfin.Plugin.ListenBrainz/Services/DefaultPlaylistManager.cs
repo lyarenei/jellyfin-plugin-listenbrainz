@@ -158,10 +158,9 @@ public class DefaultPlaylistManager : IPlaylistManager
                 [playlistId, itemIds, userId])!;
         }
 
-        _logger.LogDebug("Incompatible Jellyfin version: " +
-                         "no matching IPlaylistManager.AddItemToPlaylistAsync overload is available");
-
-        throw new PluginException("Incompatible Jellyfin version");
+        throw new PluginException(
+            "Incompatible Jellyfin version: " +
+            "no matching IPlaylistManager.AddItemToPlaylistAsync overload is available");
     }
 
     private async Task TagPlaylist(Guid playlistId, Guid userId, CancellationToken cancellationToken)
