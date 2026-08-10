@@ -72,10 +72,13 @@ public class DefaultPlaylistManager : IPlaylistManager
     public JellyfinPlaylist? FindByName(User user, string name)
     {
         var query = new InternalItemsQuery { IncludeItemTypes = [BaseItemKind.Playlist], Name = name, User = user, };
-        return _libraryManager
+        var match = _libraryManager
             .GetItemList(query)
             .OfType<JellyfinPlaylist>()
             .FirstOrDefault(HasListenBrainzTag);
+
+        // The query returns copies, re-resolve so callers always get a live instance.
+        return match is null ? null : FindAny(match.Id);
     }
 
     /// <inheritdoc />
