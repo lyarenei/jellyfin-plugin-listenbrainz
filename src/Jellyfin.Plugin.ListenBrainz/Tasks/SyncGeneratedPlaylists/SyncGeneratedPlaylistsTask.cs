@@ -166,7 +166,8 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
 
                 try
                 {
-                    if (IsAlreadySynced(user, state, generatedPlaylist.Playlist))
+                    var target = ResolveTarget(user, state, generatedPlaylist.Playlist);
+                    if (target.IsUpToDate)
                     {
                         _logger.LogDebug(
                             "Playlist {PlaylistId} is already up to date, skipping",
@@ -190,6 +191,7 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
                         playlist,
                         generatedPlaylist.Type,
                         candidates,
+                        target.ExistingPlaylist,
                         state,
                         cancellationToken);
                     if (!synced)
@@ -226,6 +228,7 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
         Playlist playlist,
         PlaylistType playlistType,
         IReadOnlyList<BaseItem> candidates,
+        JellyfinPlaylist? mappedPlaylist,
         PlaylistSyncState state,
         CancellationToken cancellationToken)
     {
@@ -267,8 +270,7 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
             return false;
         }
 
-        var existingPlaylist = ResolveMappedPlaylist(user, state, playlist.PlaylistId) ??
-                               _playlistManager.FindByName(user, playlist.Title);
+        var existingPlaylist = mappedPlaylist ?? _playlistManager.FindByName(user, playlist.Title);
 
         Guid jellyfinPlaylistId;
         if (existingPlaylist is null)
@@ -300,47 +302,33 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
         return true;
     }
 
-    private bool IsAlreadySynced(User user, PlaylistSyncState state, Playlist listingPlaylist)
+    private SyncTarget ResolveTarget(User user, PlaylistSyncState state, Playlist listingPlaylist)
     {
         var mapping = state.FindMapping(user.Id, listingPlaylist.PlaylistId);
-        if (mapping is null || !PlaylistTypePolicy.IsUpToDate(mapping, listingPlaylist))
-        {
-            return false;
-        }
-
-        // If playlist is not visible to the user it is effectively not synced - select for resync
-        if (_playlistManager.IsVisibleTo(mapping.JellyfinPlaylistId, user.Id))
-        {
-            return true;
-        }
-
-        _logger.LogDebug(
-            "Mapped Jellyfin playlist {PlaylistId} is missing or not visible to the user, syncing it again",
-            mapping.JellyfinPlaylistId);
-
-        return false;
-    }
-
-    private JellyfinPlaylist? ResolveMappedPlaylist(User user, PlaylistSyncState state, string listenBrainzPlaylistId)
-    {
-        var mapping = state.FindMapping(user.Id, listenBrainzPlaylistId);
         if (mapping is null)
         {
-            return null;
+            return new SyncTarget(false, null);
+        }
+
+        // A playlist the user cannot see is effectively not synced.
+        // Syncing it again reclaims ownership and restores their access.
+        if (PlaylistTypePolicy.IsUpToDate(mapping, listingPlaylist) &&
+            _playlistManager.IsVisibleTo(mapping.JellyfinPlaylistId, user.Id))
+        {
+            return new SyncTarget(true, null);
         }
 
         var playlist = _playlistManager.FindAny(mapping.JellyfinPlaylistId);
-        if (playlist is not null)
+        if (playlist is null)
         {
-            return playlist;
+            _logger.LogInformation(
+                "Mapped Jellyfin playlist {PlaylistId} for ListenBrainz playlist {ListenBrainzPlaylistId} no longer exists",
+                mapping.JellyfinPlaylistId,
+                mapping.ListenBrainzPlaylistId);
+            state.Mappings.Remove(mapping);
         }
 
-        _logger.LogInformation(
-            "Mapped Jellyfin playlist {PlaylistId} for ListenBrainz playlist {ListenBrainzPlaylistId} no longer exists",
-            mapping.JellyfinPlaylistId,
-            mapping.ListenBrainzPlaylistId);
-        state.Mappings.Remove(mapping);
-        return null;
+        return new SyncTarget(false, playlist);
     }
 
     private void PruneOutOfRotationPlaylists(
@@ -397,6 +385,18 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
     {
         return _logger.BeginScope(new Dictionary<string, object> { { "EventId", "SyncGeneratedPlaylistsTask" } });
     }
+
+    /// <summary>
+    /// What the sync should do with a listed ListenBrainz playlist, resolved once per playlist.
+    /// </summary>
+    /// <param name="IsUpToDate">
+    /// Whether the playlist is already synced and visible to the user, so it can be skipped.
+    /// </param>
+    /// <param name="ExistingPlaylist">
+    /// The mapped Jellyfin playlist to write into, or null to look it up by name or create it.
+    /// Only meaningful when <see cref="IsUpToDate"/> is false.
+    /// </param>
+    private sealed record SyncTarget(bool IsUpToDate, JellyfinPlaylist? ExistingPlaylist);
 
     /// <summary>
     /// Tracks task progress as an evenly split share per user, advanced per processed playlist.
