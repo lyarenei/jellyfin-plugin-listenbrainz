@@ -7,11 +7,14 @@ namespace Jellyfin.Plugin.ListenBrainz.Tasks.SyncGeneratedPlaylists;
 /// and whether a user has it enabled.
 /// </summary>
 /// <param name="Type">The playlist type.</param>
-/// <param name="Retention">The retention strategy for the type.</param>
+/// <param name="KeepNewest">
+/// How many of the newest playlists of this type to keep. Capped types rotate, and playlists that
+/// fall out of the cap are pruned. Null keeps every playlist and never prunes.
+/// </param>
 /// <param name="SourcePatchPrefix">The ListenBrainz source patch identifying the type.</param>
 /// <param name="IsEnabled">Whether the type is enabled for a given user.</param>
 internal sealed record PlaylistTypeDescriptor(
     PlaylistType Type,
-    PlaylistRetention Retention,
+    int? KeepNewest,
     string SourcePatchPrefix,
     Func<UserConfig, bool> IsEnabled);
