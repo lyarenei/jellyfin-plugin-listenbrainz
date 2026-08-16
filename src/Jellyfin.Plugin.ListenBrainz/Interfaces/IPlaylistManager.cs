@@ -28,9 +28,9 @@ public interface IPlaylistManager
     /// <summary>
     /// Finds a ListenBrainz-tagged Jellyfin playlist by name for the given user.
     /// </summary>
-    /// <param name="user">The user the playlist belongs to.</param>
+    /// <param name="user">The user that must own the playlist.</param>
     /// <param name="name">The playlist name.</param>
-    /// <returns>The tagged playlist, or null if no match.</returns>
+    /// <returns>The tagged playlist owned by the user, or null if no match.</returns>
     JellyfinPlaylist? FindByName(User user, string name);
 
     /// <summary>

@@ -75,7 +75,7 @@ public class DefaultPlaylistManager : IPlaylistManager
         var match = _libraryManager
             .GetItemList(query)
             .OfType<JellyfinPlaylist>()
-            .FirstOrDefault(HasListenBrainzTag);
+            .FirstOrDefault(p => HasListenBrainzTag(p) && p.OwnerUserId == user.Id);
 
         // The query returns copies, re-resolve so callers always get a live instance.
         return match is null ? null : FindAny(match.Id);
@@ -102,7 +102,7 @@ public class DefaultPlaylistManager : IPlaylistManager
             throw new PluginException($"Created playlist ID '{createdPlaylist.Id}' is invalid");
         }
 
-        await TagPlaylist(playlistId, user.Id, cancellationToken);
+        await EnsureOwnedAndTagged(playlistId, user.Id, cancellationToken);
         return playlistId;
     }
 
@@ -115,7 +115,7 @@ public class DefaultPlaylistManager : IPlaylistManager
     {
         _logger.LogDebug("Updating playlist {Name} with {Count} items", playlist.Name, tracks.Count);
 
-        await TagPlaylist(playlist, user.Id, cancellationToken);
+        await EnsureOwnedAndTagged(playlist, user.Id, cancellationToken);
 
         var entryIds = playlist
             .GetLinkedChildrenInfos()
@@ -163,7 +163,7 @@ public class DefaultPlaylistManager : IPlaylistManager
             "no matching IPlaylistManager.AddItemToPlaylistAsync overload is available");
     }
 
-    private async Task TagPlaylist(Guid playlistId, Guid userId, CancellationToken cancellationToken)
+    private async Task EnsureOwnedAndTagged(Guid playlistId, Guid userId, CancellationToken cancellationToken)
     {
         var playlist = FindAny(playlistId);
         if (playlist is null)
@@ -172,14 +172,15 @@ public class DefaultPlaylistManager : IPlaylistManager
             return;
         }
 
-        await TagPlaylist(playlist, userId, cancellationToken);
+        await EnsureOwnedAndTagged(playlist, userId, cancellationToken);
     }
 
-    private async Task TagPlaylist(JellyfinPlaylist playlist, Guid userId, CancellationToken cancellationToken)
+    private async Task EnsureOwnedAndTagged(
+        JellyfinPlaylist playlist,
+        Guid userId,
+        CancellationToken cancellationToken)
     {
         var needsSave = false;
-
-        // Only playlist owner can tag it
         if (playlist.OwnerUserId != userId)
         {
             _logger.LogInformation(
