@@ -72,6 +72,32 @@ public sealed class DefaultPlaybackTrackingService : IPlaybackTrackingService, I
     }
 
     /// <inheritdoc />
+    public async Task<bool> UpdatePositionAsync(
+        string userId,
+        string itemId,
+        long positionTicks,
+        CancellationToken cancellationToken = default)
+    {
+        await _lock.WaitAsync(cancellationToken);
+        try
+        {
+            _items.TryGetValue(userId, out var userList);
+            var trackedItem = userList?.Find(i => i.ItemId == itemId);
+            if (trackedItem is null || !trackedItem.IsValid)
+            {
+                return false;
+            }
+
+            trackedItem.PositionTicks = positionTicks;
+            return true;
+        }
+        finally
+        {
+            _lock.Release();
+        }
+    }
+
+    /// <inheritdoc />
     public async Task<bool> RemoveItemAsync(
         string userId,
         TrackedItem item,

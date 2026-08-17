@@ -40,4 +40,10 @@ public class TrackedItem
     /// and should not be taken into account.
     /// </summary>
     public bool IsValid { get; set; }
+
+    /// <summary>
+    /// Gets or sets the last playback position reported for this item, in ticks.
+    /// This does not include time spent paused or buffering.
+    /// </summary>
+    public long PositionTicks { get; set; }
 }
