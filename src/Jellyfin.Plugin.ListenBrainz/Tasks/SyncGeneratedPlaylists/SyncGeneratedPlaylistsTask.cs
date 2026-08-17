@@ -335,16 +335,16 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
         User user,
         UserConfig userConfig,
         PlaylistSyncState state,
-        IReadOnlyList<PlaylistCandidate> rotationPlaylists,
+        IReadOnlyList<PlaylistCandidate> selectedPlaylists,
         IReadOnlySet<PlaylistType> failedTypes,
         CancellationToken cancellationToken)
     {
-        var selectedPlaylistIds = rotationPlaylists
+        var selectedPlaylistIds = selectedPlaylists
             .Select(p => p.Playlist.PlaylistId)
             .WhereNotNull()
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        var syncedTypes = rotationPlaylists
+        var syncedTypes = selectedPlaylists
             .Select(p => p.Type)
             .Where(t => !failedTypes.Contains(t))
             .ToHashSet();

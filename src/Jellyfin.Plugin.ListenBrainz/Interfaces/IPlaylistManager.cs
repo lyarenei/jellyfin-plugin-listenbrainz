@@ -5,7 +5,7 @@ using JellyfinPlaylist = MediaBrowser.Controller.Playlists.Playlist;
 namespace Jellyfin.Plugin.ListenBrainz.Interfaces;
 
 /// <summary>
-/// Manages the Jellyfin-side playlists produced by the ListenBrainz weekly sync.
+/// Manages the Jellyfin-side playlists produced by the ListenBrainz generated playlist sync.
 /// </summary>
 public interface IPlaylistManager
 {
