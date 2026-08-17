@@ -67,9 +67,11 @@
                             <label class="inputLabel inputLabelUnfocused" for="IsPlaylistsSyncEnabled">
                                 <input is="emby-checkbox" type="checkbox" id="IsPlaylistsSyncEnabled"
                                        name="IsPlaylistsSyncEnabled"/>
-                                <span>Enable playlist sync</span>
+                                <span>Enable playlist sync (deprecated)</span>
                             </label>
-                            <div class="fieldDescription">Deprecated. Has no effect when weekly playlist sync is enabled.</div>
+                            <div class="fieldDescription">Non-functional. Enable generated
+                                playlist sync below instead. Will be removed in a future version.
+                            </div>
                         </div>
                         <div class="checkboxContainer">
                             <label class="inputLabel inputLabelUnfocused" for="IsGeneratedPlaylistsSyncEnabled">
@@ -79,14 +81,14 @@
                             </label>
                             <div class="fieldDescription">Sync ListenBrainz generated playlists for this user.</div>
                         </div>
-                        <div class="checkboxContainer weekly-playlist-option">
+                        <div class="checkboxContainer generated-playlist-option">
                             <label class="inputLabel inputLabelUnfocused" for="IsWeeklyJamsSyncEnabled">
                                 <input is="emby-checkbox" type="checkbox" id="IsWeeklyJamsSyncEnabled"
                                        name="IsWeeklyJamsSyncEnabled"/>
                                 <span>Sync Weekly Jams</span>
                             </label>
                         </div>
-                        <div class="checkboxContainer weekly-playlist-option">
+                        <div class="checkboxContainer generated-playlist-option">
                             <label class="inputLabel inputLabelUnfocused" for="IsWeeklyExplorationSyncEnabled">
                                 <input is="emby-checkbox" type="checkbox" id="IsWeeklyExplorationSyncEnabled"
                                        name="IsWeeklyExplorationSyncEnabled"/>
@@ -94,7 +96,7 @@
                             </label>
                             <div class="fieldDescription">May produce very tiny playlists due to Jellyfin limitations.</div>
                         </div>
-                        <div class="checkboxContainer weekly-playlist-option">
+                        <div class="checkboxContainer generated-playlist-option">
                             <label class="inputLabel inputLabelUnfocused" for="KeepPlaylistsAfterRotation">
                                 <input is="emby-checkbox" type="checkbox" id="KeepPlaylistsAfterRotation"
                                        name="KeepPlaylistsAfterRotation"/>
@@ -102,7 +104,7 @@
                             </label>
                             <div class="fieldDescription">Keep playlist clone in Jellyfin when the playlist goes out of rotation.</div>
                         </div>
-                        <div class="checkboxContainer weekly-playlist-option">
+                        <div class="checkboxContainer generated-playlist-option">
                             <label class="inputLabel inputLabelUnfocused" for="IsTopDiscoveriesSyncEnabled">
                                 <input is="emby-checkbox" type="checkbox" id="IsTopDiscoveriesSyncEnabled"
                                        name="IsTopDiscoveriesSyncEnabled"/>
@@ -110,7 +112,7 @@
                             </label>
                             <div class="fieldDescription">Archive yearly "Top Discoveries" playlists.</div>
                         </div>
-                        <div class="checkboxContainer weekly-playlist-option">
+                        <div class="checkboxContainer generated-playlist-option">
                             <label class="inputLabel inputLabelUnfocused" for="IsTopMissedRecordingsSyncEnabled">
                                 <input is="emby-checkbox" type="checkbox" id="IsTopMissedRecordingsSyncEnabled"
                                        name="IsTopMissedRecordingsSyncEnabled"/>
@@ -184,10 +186,9 @@
                             <label class="inputLabel inputLabelUnfocused" for="IsAllPlaylistsSyncEnabled">
                                 <input is="emby-checkbox" type="checkbox" id="IsAllPlaylistsSyncEnabled"
                                        name="IsAllPlaylistsSyncEnabled"/>
-                                <span>Sync all playlists from ListenBrainz</span>
+                                <span>Sync all playlists from ListenBrainz (deprecated)</span>
                             </label>
-                            <div class="fieldDescription">Sync all playlists from ListenBrainz, including
-                                suggestion/recommendation playlists.
+                            <div class="fieldDescription">Non-functional, will be removed in a future version.
                             </div>
                         </div>
                         <div>

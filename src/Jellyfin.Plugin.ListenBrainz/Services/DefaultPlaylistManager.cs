@@ -19,18 +19,18 @@ namespace Jellyfin.Plugin.ListenBrainz.Services;
 public class DefaultPlaylistManager : IPlaylistManager
 {
     private const string PlaylistTag = "ListenBrainz";
-    private static readonly Type _managerInt = typeof(IJellyfinPlaylistManager);
+    private static readonly Type _playlistManagerType = typeof(IJellyfinPlaylistManager);
 
     // For Jellyfin 12.x
     private static readonly MethodInfo? _addItemToPlaylistWithPosition =
-        _managerInt
+        _playlistManagerType
             .GetMethod(
                 "AddItemToPlaylistAsync",
                 [typeof(Guid), typeof(IReadOnlyCollection<Guid>), typeof(int?), typeof(Guid)]);
 
     // For Jellyfin 10.11.x
     private static readonly MethodInfo? _addItemToPlaylistLegacy =
-        _managerInt
+        _playlistManagerType
             .GetMethod(
                 "AddItemToPlaylistAsync",
                 [typeof(Guid), typeof(IReadOnlyCollection<Guid>), typeof(Guid)]);
@@ -63,19 +63,22 @@ public class DefaultPlaylistManager : IPlaylistManager
     }
 
     /// <inheritdoc />
-    public JellyfinPlaylist? FindForUser(Guid playlistId, Guid userId)
+    public bool IsVisibleTo(Guid playlistId, Guid userId)
     {
-        return IsVisibleTo(playlistId, userId) ? FindAny(playlistId) : null;
+        return _playlistManager.GetPlaylistForUser(playlistId, userId) is not null;
     }
 
     /// <inheritdoc />
     public JellyfinPlaylist? FindByName(User user, string name)
     {
         var query = new InternalItemsQuery { IncludeItemTypes = [BaseItemKind.Playlist], Name = name, User = user, };
-        return _libraryManager
+        var match = _libraryManager
             .GetItemList(query)
             .OfType<JellyfinPlaylist>()
-            .FirstOrDefault(HasListenBrainzTag);
+            .FirstOrDefault(p => HasListenBrainzTag(p) && p.OwnerUserId == user.Id);
+
+        // The query returns copies, re-resolve so callers always get a live instance.
+        return match is null ? null : FindAny(match.Id);
     }
 
     /// <inheritdoc />
@@ -99,7 +102,7 @@ public class DefaultPlaylistManager : IPlaylistManager
             throw new PluginException($"Created playlist ID '{createdPlaylist.Id}' is invalid");
         }
 
-        await TagPlaylist(playlistId, user.Id, cancellationToken);
+        await EnsureOwnedAndTagged(playlistId, user.Id, cancellationToken);
         return playlistId;
     }
 
@@ -112,11 +115,9 @@ public class DefaultPlaylistManager : IPlaylistManager
     {
         _logger.LogDebug("Updating playlist {Name} with {Count} items", playlist.Name, tracks.Count);
 
-        var target = FindAny(playlist.Id) ?? playlist;
+        await EnsureOwnedAndTagged(playlist, user.Id, cancellationToken);
 
-        await TagPlaylist(target, user.Id, cancellationToken);
-
-        var entryIds = target
+        var entryIds = playlist
             .GetLinkedChildrenInfos()
             .Select(i => i.Item1.ItemId)
             .Where(id => id is not null)
@@ -126,11 +127,11 @@ public class DefaultPlaylistManager : IPlaylistManager
         if (entryIds.Length > 0)
         {
             await _playlistManager.RemoveItemFromPlaylistAsync(
-                target.Id.ToString("N", CultureInfo.InvariantCulture),
+                playlist.Id.ToString("N", CultureInfo.InvariantCulture),
                 entryIds);
         }
 
-        await AddItemsToPlaylistAsync(target.Id, tracks.Select(i => i.Id).ToArray(), user.Id);
+        await AddItemsToPlaylistAsync(playlist.Id, tracks.Select(i => i.Id).ToArray(), user.Id);
     }
 
     /// <inheritdoc />
@@ -157,13 +158,12 @@ public class DefaultPlaylistManager : IPlaylistManager
                 [playlistId, itemIds, userId])!;
         }
 
-        _logger.LogDebug("Incompatible Jellyfin version: " +
-                         "no matching IPlaylistManager.AddItemToPlaylistAsync overload is available");
-
-        throw new PluginException("Incompatible Jellyfin version");
+        throw new PluginException(
+            "Incompatible Jellyfin version: " +
+            "no matching IPlaylistManager.AddItemToPlaylistAsync overload is available");
     }
 
-    private async Task TagPlaylist(Guid playlistId, Guid userId, CancellationToken cancellationToken)
+    private async Task EnsureOwnedAndTagged(Guid playlistId, Guid userId, CancellationToken cancellationToken)
     {
         var playlist = FindAny(playlistId);
         if (playlist is null)
@@ -172,14 +172,15 @@ public class DefaultPlaylistManager : IPlaylistManager
             return;
         }
 
-        await TagPlaylist(playlist, userId, cancellationToken);
+        await EnsureOwnedAndTagged(playlist, userId, cancellationToken);
     }
 
-    private async Task TagPlaylist(JellyfinPlaylist playlist, Guid userId, CancellationToken cancellationToken)
+    private async Task EnsureOwnedAndTagged(
+        JellyfinPlaylist playlist,
+        Guid userId,
+        CancellationToken cancellationToken)
     {
         var needsSave = false;
-
-        // Only playlist owner can tag it
         if (playlist.OwnerUserId != userId)
         {
             _logger.LogInformation(
@@ -201,11 +202,6 @@ public class DefaultPlaylistManager : IPlaylistManager
         {
             await playlist.UpdateToRepositoryAsync(ItemUpdateType.MetadataEdit, cancellationToken);
         }
-    }
-
-    private bool IsVisibleTo(Guid playlistId, Guid userId)
-    {
-        return _playlistManager.GetPlaylistForUser(playlistId, userId) is not null;
     }
 
     private static bool HasListenBrainzTag(BaseItem playlist)

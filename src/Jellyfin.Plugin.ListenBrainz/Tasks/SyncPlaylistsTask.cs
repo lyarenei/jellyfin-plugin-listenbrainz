@@ -88,20 +88,20 @@ public class SyncPlaylistsTask : IScheduledTask
     public string Category => "ListenBrainz";
 
     /// <inheritdoc />
-    public IEnumerable<TaskTriggerInfo> GetDefaultTriggers() =>
-    [
-        new()
-        {
-            Type = TaskTriggerInfoType.WeeklyTrigger,
-            DayOfWeek = DayOfWeek.Monday,
-            TimeOfDayTicks = Utils.GetRandomMinute() * TimeSpan.TicksPerMinute,
-        },
-    ];
+    public IEnumerable<TaskTriggerInfo> GetDefaultTriggers() => [];
 
     /// <inheritdoc />
     public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
         using var logScope = BeginLogScope();
+        _logger.LogInformation(
+            "This task is deprecated and does nothing. " +
+            "Enable generated playlist sync in the user settings and use the " +
+            "'Sync generated playlists from ListenBrainz' task instead");
+
+        progress.Report(100);
+        return;
+
         if (_configService.UserConfigs.Count == 0)
         {
             _logger.LogInformation("No users have been configured, nothing to sync");

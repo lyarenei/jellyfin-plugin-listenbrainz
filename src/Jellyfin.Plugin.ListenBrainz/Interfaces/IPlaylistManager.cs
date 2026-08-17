@@ -5,32 +5,32 @@ using JellyfinPlaylist = MediaBrowser.Controller.Playlists.Playlist;
 namespace Jellyfin.Plugin.ListenBrainz.Interfaces;
 
 /// <summary>
-/// Manages the Jellyfin-side playlists produced by the ListenBrainz weekly sync.
+/// Manages the Jellyfin-side playlists produced by the ListenBrainz generated playlist sync.
 /// </summary>
 public interface IPlaylistManager
 {
     /// <summary>
     /// Finds a Jellyfin playlist by ID, regardless of its ownership.
-    /// Use <see cref="FindForUser"/> to also assert the playlist is usable by a user.
+    /// Use <see cref="IsVisibleTo"/> to also assert the playlist is usable by a user.
     /// </summary>
     /// <param name="playlistId">Jellyfin playlist ID.</param>
     /// <returns>The playlist, or null if it does not exist.</returns>
     JellyfinPlaylist? FindAny(Guid playlistId);
 
     /// <summary>
-    /// Finds a Jellyfin playlist by ID, but only if the given user can see it.
+    /// Determines whether a Jellyfin playlist exists and is visible to the given user.
     /// </summary>
     /// <param name="playlistId">Jellyfin playlist ID.</param>
     /// <param name="userId">Jellyfin user ID.</param>
-    /// <returns>The playlist, or null if it does not exist or is not visible to the user.</returns>
-    JellyfinPlaylist? FindForUser(Guid playlistId, Guid userId);
+    /// <returns>True if the playlist exists and the user can see it.</returns>
+    bool IsVisibleTo(Guid playlistId, Guid userId);
 
     /// <summary>
     /// Finds a ListenBrainz-tagged Jellyfin playlist by name for the given user.
     /// </summary>
-    /// <param name="user">The user the playlist belongs to.</param>
+    /// <param name="user">The user that must own the playlist.</param>
     /// <param name="name">The playlist name.</param>
-    /// <returns>The tagged playlist, or null if no match.</returns>
+    /// <returns>The tagged playlist owned by the user, or null if no match.</returns>
     JellyfinPlaylist? FindByName(User user, string name);
 
     /// <summary>

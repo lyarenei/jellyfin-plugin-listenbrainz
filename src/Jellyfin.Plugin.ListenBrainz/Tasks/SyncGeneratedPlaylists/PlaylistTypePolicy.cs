@@ -11,34 +11,30 @@ namespace Jellyfin.Plugin.ListenBrainz.Tasks.SyncGeneratedPlaylists;
 internal static class PlaylistTypePolicy
 {
     /// <summary>
-    /// Number of playlists kept per rotation type (current and previous).
-    /// </summary>
-    private const int RotationPlaylistCount = 2;
-
-    /// <summary>
     /// Descriptors for every known playlist type, keyed by <see cref="PlaylistType"/>.
+    /// Weekly types keep the current and previous playlist; yearly types keep every playlist.
     /// </summary>
     private static readonly IReadOnlyDictionary<PlaylistType, PlaylistTypeDescriptor> _descriptors =
         new PlaylistTypeDescriptor[]
         {
             new(
                 PlaylistType.Jams,
-                PlaylistRetention.Rotation,
+                KeepNewest: 2,
                 "weekly-jams",
                 uc => uc.IsWeeklyJamsSyncEnabled),
             new(
                 PlaylistType.Exploration,
-                PlaylistRetention.Rotation,
+                KeepNewest: 2,
                 "weekly-exploration",
                 uc => uc.IsWeeklyExplorationSyncEnabled),
             new(
                 PlaylistType.TopDiscoveries,
-                PlaylistRetention.Archive,
+                KeepNewest: null,
                 "top-discoveries-of",
                 uc => uc.IsTopDiscoveriesSyncEnabled),
             new(
                 PlaylistType.TopMissedRecordings,
-                PlaylistRetention.Archive,
+                KeepNewest: null,
                 "top-missed-recordings-of",
                 uc => uc.IsTopMissedRecordingsSyncEnabled),
         }.ToDictionary(d => d.Type);
@@ -65,9 +61,9 @@ internal static class PlaylistTypePolicy
     /// Picks the playlists to sync for the types a user has enabled.
     /// </summary>
     /// <remarks>
-    /// Rotation types keep the current and previous playlists (ListenBrainz does not provide a "current"
+    /// Capped types keep only their newest playlists (ListenBrainz does not provide a "current"
     /// alias, so the newest <see cref="Playlist.CreatedAt"/> is treated as the current one).
-    /// Archive types keep every playlist.
+    /// Uncapped types keep every playlist.
     /// </remarks>
     /// <param name="playlists">Playlists created for the user.</param>
     /// <param name="userConfig">User configuration.</param>
@@ -80,7 +76,7 @@ internal static class PlaylistTypePolicy
             .Select(GetPlaylistCandidate)
             .WhereNotNull()
             .Where(candidate => !string.IsNullOrWhiteSpace(candidate.Playlist.PlaylistId))
-            .Where(candidate => IsPlaylistTypeEnabled(userConfig, candidate.Type))
+            .Where(candidate => _descriptors[candidate.Type].IsEnabled(userConfig))
             .GroupBy(candidate => candidate.Type)
             .SelectMany(TakeForType)
             .OrderBy(candidate => candidate.Type) // Ensure stable order
@@ -105,7 +101,7 @@ internal static class PlaylistTypePolicy
     /// <param name="mapping">The persisted playlist mapping.</param>
     /// <param name="selectedPlaylistIds">ListenBrainz playlist IDs selected this run.</param>
     /// <param name="syncedTypes">Playlist types that were fully synced this run.</param>
-    /// <returns>True if the mapping is owned by a rotation type and no longer in rotation.</returns>
+    /// <returns>True if the mapping is owned by a capped type and no longer in the selection.</returns>
     internal static bool ShouldPruneMapping(
         PlaylistMapping mapping,
         HashSet<string> selectedPlaylistIds,
@@ -116,8 +112,8 @@ internal static class PlaylistTypePolicy
             return false;
         }
 
-        // Archive types are permanent and never pruned.
-        if (RetentionOf(type) != PlaylistRetention.Rotation)
+        // Uncapped types are permanent and never pruned.
+        if (_descriptors[type].KeepNewest is null)
         {
             return false;
         }
@@ -131,9 +127,7 @@ internal static class PlaylistTypePolicy
             .OrderByDescending(candidate => candidate.Playlist.CreatedAt)
             .ThenByDescending(candidate => candidate.Playlist.Identifier, StringComparer.OrdinalIgnoreCase);
 
-        return RetentionOf(group.Key) == PlaylistRetention.Rotation
-            ? ordered.Take(RotationPlaylistCount)
-            : ordered;
+        return _descriptors[group.Key].KeepNewest is int keep ? ordered.Take(keep) : ordered;
     }
 
     private static PlaylistCandidate? GetPlaylistCandidate(Playlist playlist)
@@ -142,21 +136,9 @@ internal static class PlaylistTypePolicy
         return type is null ? null : new PlaylistCandidate(playlist, type.Value);
     }
 
-    private static bool IsPlaylistTypeEnabled(UserConfig userConfig, PlaylistType playlistType)
-    {
-        return DescriptorForType(playlistType).IsEnabled(userConfig);
-    }
-
-    private static PlaylistRetention RetentionOf(PlaylistType type) => DescriptorForType(type).Retention;
-
     private static bool TryGetPlaylistType(string? category, out PlaylistType type)
     {
         return Enum.TryParse(category, ignoreCase: true, out type) && Enum.IsDefined(type);
-    }
-
-    private static PlaylistTypeDescriptor DescriptorForType(PlaylistType type)
-    {
-        return _descriptors[type];
     }
 
     private static PlaylistTypeDescriptor? DescriptorForPatch(string? sourcePatch)

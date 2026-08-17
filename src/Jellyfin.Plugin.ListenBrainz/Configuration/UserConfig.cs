@@ -21,9 +21,9 @@ public class UserConfig
         IsStrictModeEnabled = false;
         IsGeneratedPlaylistsSyncEnabled = false;
         IsWeeklyJamsSyncEnabled = true;
-        IsWeeklyExplorationSyncEnabled = true;
+        IsWeeklyExplorationSyncEnabled = false;
         IsTopDiscoveriesSyncEnabled = true;
-        IsTopMissedRecordingsSyncEnabled = true;
+        IsTopMissedRecordingsSyncEnabled = false;
         KeepPlaylistsAfterRotation = false;
     }
 
