@@ -147,6 +147,7 @@ public abstract class GenericHandler<TEventArgs>
         {
             Item = item,
             JellyfinUser = jellyfinUser,
+            PositionTicks = args.PlaybackPositionTicks,
         };
     }
 
@@ -212,7 +213,8 @@ public abstract class GenericHandler<TEventArgs>
 
         /// <summary>
         /// Gets the playback position in ticks.
-        /// Might be non-null only if event data are parsed from <see cref="PlaybackStopEventArgs"/>.
+        /// Might be non-null only if event data are parsed from <see cref="PlaybackStopEventArgs"/>
+        /// or <see cref="PlaybackProgressEventArgs"/>.
         /// </summary>
         public long? PositionTicks { get; init; }
 
