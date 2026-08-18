@@ -37,6 +37,11 @@ public abstract class GenericHandler<TEventArgs>
     /// <param name="args">Event arguments.</param>
     public void HandleEvent(object? sender, TEventArgs args)
     {
+        if (!ShouldHandle(args))
+        {
+            return;
+        }
+
         using var logScope = BeginLogScope();
         _logger.LogTrace("Handling event of type {EventType}", typeof(TEventArgs).Name);
         AsyncWrapper(sender, args).Forget();
@@ -48,6 +53,13 @@ public abstract class GenericHandler<TEventArgs>
     /// <param name="data">Event data.</param>
     /// <returns>Task handle.</returns>
     protected abstract Task DoHandleAsync(EventData data);
+
+    /// <summary>
+    /// Check whether the event is worth handling at all. Evaluated before parsing the event data.
+    /// </summary>
+    /// <param name="args">Event arguments.</param>
+    /// <returns>The event should be handled.</returns>
+    protected virtual bool ShouldHandle(TEventArgs args) => true;
 
     private async Task AsyncWrapper(object? sender, TEventArgs args)
     {
