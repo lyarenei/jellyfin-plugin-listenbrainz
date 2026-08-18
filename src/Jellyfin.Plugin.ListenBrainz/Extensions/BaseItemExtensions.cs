@@ -59,7 +59,6 @@ public static class BaseItemExtensions
         {
             UserId = userId,
             ItemId = item.Id.ToString(),
-            StartedAt = DateUtils.CurrentTimestamp,
             RemoveAfter = DateUtils.CurrentTimestamp + (5 * item.RuntimeSeconds()),
             IsValid = true
         };

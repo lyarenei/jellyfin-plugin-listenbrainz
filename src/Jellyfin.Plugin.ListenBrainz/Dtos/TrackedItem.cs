@@ -25,11 +25,6 @@ public class TrackedItem
     public string ItemId { get; init; }
 
     /// <summary>
-    /// Gets UNIX timestamp of when the tracking started.
-    /// </summary>
-    public long StartedAt { get; init; }
-
-    /// <summary>
     /// Gets UNIX timestamp indicating when the tracking for this item can be stopped.
     /// </summary>
     public long RemoveAfter { get; init; }
