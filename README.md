@@ -36,19 +36,18 @@ More details about the plugin features and how the plugin works can be found in 
 
 # Installation
 
-The plugin can be installed either via repository or [manually](#manual-build-and-installation).
-Additionally, all plugin releases are available on
-the [releases page][RELEASES].
+You can install the plugin from a repository or [build it yourself](#manual-build-and-installation). Every release
+is also available on the [releases page][RELEASES].
 
-## Install via repository
+## Install from a repository
 
 There are two repositories available for the plugin - stable and unstable. It is recommended to only use the stable
 repository.
 
-| Plugin build type    | Repo URL                                               |
-|----------------------|--------------------------------------------------------|
-| Stable               | `https://repo.xkrivo.net/jellyfin/manifest.json`       |
-| Unstable/development | `https://repo.xkrivo.net/jellyfin-dev/manifest.json`   |
+| Plugin build type    | Repository URL                                       |
+|----------------------|------------------------------------------------------|
+| Stable               | `https://repo.xkrivo.net/jellyfin/manifest.json`     |
+| Unstable/development | `https://repo.xkrivo.net/jellyfin-dev/manifest.json` |
 
 Unstable repository contains development versions of the plugin, which may not work correctly or be straight up broken.
 It should not be used, unless:
@@ -57,17 +56,14 @@ It should not be used, unless:
 
 ### Adding the repository
 
-Head over to Repositories tab in Jellyfin server settings > Plugins (advanced section), and add the repository
-there, using one the URLs above. Repository name does not matter, it has only an informational purpose for the server
-admin.
+In the Jellyfin server settings, open `Plugins` (advanced section) and then the `Repositories` tab, and add one of
+the URLs above. The name you give the repository is purely informational.
 
-After you add the repository, you should be able to see `ListenBrainz` plugin in the catalog under `General` category.
-Select the version you want to install and restart the server as asked. Continue with
-plugin [configuration](doc/configuration.md).
+The `ListenBrainz` plugin then shows up in the catalog under the `General` category. Install the version you want,
+restart the server when asked, and continue with the [configuration](doc/configuration.md).
 
-A major plugin version is always compatible with latest minor Jellyfin version, unless in some exceptional situations.
-Since Jellyfin treats semver minor version as a major one, the mapping between plugin versions and Jellyfin versions is
-as follows:
+Each major plugin version targets one Jellyfin version. Jellyfin bumps its minor version for breaking changes, so
+the two line up like this:
 
 | Plugin  | Jellyfin |
 |---------|----------|
