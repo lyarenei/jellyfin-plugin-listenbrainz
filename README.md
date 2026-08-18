@@ -80,18 +80,18 @@ The complete configuration documentation is available [here](doc/configuration.m
 
 ### Quickstart
 
-For plugin to be able to send listens, it needs user API token to be able to authenticate. Unfortunately, the server
-admin must configure the plugin for all users as there's no way to make user-configurable plugin. So the admin has an
-access to the ListenBrainz API tokens of all users on their server.
+The plugin needs an API token before it can send anything. Since Jellyfin has no support for per-user plugin
+settings, the server administrator configures the plugin on behalf of every user.
 
-Minimal user configuration:
+To set up a user:
 
-1. Open plugin settings
-2. Select the user you want to configure
-3. Paste the token to the API token field (you can get it from [the profile page](https://listenbrainz.org/profile/))
-4. (Optional) Click on `Verify` to check the validity of the API token
-5. Check `Enable submitting listens`
-6. Save configuration
+1. Open the plugin settings.
+2. Select the user on the `User Config` tab.
+3. Grab the API token from [the ListenBrainz profile page](https://listenbrainz.org/profile/).
+4. Paste it into the `ListenBrainz API token` field.
+5. (Optional) Click `Check` to verify the token.
+6. Tick `Enable submitting listens`.
+7. Save.
 
 ### Debug logging
 
