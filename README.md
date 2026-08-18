@@ -129,18 +129,17 @@ in general have an impact on the application performance.
 
 # Development
 
-This should be somewhat similar to standard .NET project development.
-So, clone the repo, open it in your favorite editor, restore dependencies, and you should be good to go.
-Debugging setup is documented in the [jellyfin plugin template][PLUGIN_DEBUGGING].
+This is a fairly ordinary .NET project — clone it, open it in your editor of choice, restore the dependencies, and
+you are ready to go. For the debugging setup, see the [Jellyfin plugin template][PLUGIN_DEBUGGING].
 
-The plugin pages are written in TypeScript, bundled with esbuild and embedded in the plugin DLL.
-Code quality is enforced with ESLint and Prettier (`npm run lint`, `npm run format:check`).
+The plugin pages are written in TypeScript, bundled with esbuild and embedded in the plugin DLL. ESLint and
+Prettier are used for static code analysis and formatting (`npm run lint`, `npm run format:check`).
 
 ## Manual build and installation
 
-.NET 9.0 and Node.js are required to build the plugin.
-To install the .NET SDK, check out the [.NET download page](https://dotnet.microsoft.com/download).
-To install Node.js, check out the [Node.js download page](https://nodejs.org).
+Building the plugin requires .NET 9.0 and Node.js. See the
+[.NET download page](https://dotnet.microsoft.com/download) and the [Node.js download page](https://nodejs.org)
+if you need to install them.
 
 Once the SDKs are installed, install the TypeScript dependencies first:
 
@@ -148,7 +147,7 @@ Once the SDKs are installed, install the TypeScript dependencies first:
 npm ci
 ```
 
-Then you should be able to compile the plugin in either debug or release configuration:
+Then build in either configuration:
 
 ```shell
 dotnet publish -c Debug
@@ -158,10 +157,9 @@ dotnet publish -c Debug
 dotnet publish -c Release
 ```
 
-The npm build is automatically run before the .NET build, it is not necessary to run it manually.
+The npm build runs automatically as part of the .NET build, so there is no need to trigger it manually.
 
-Once the build is completed, the compiled DLLs should be available at:
-`src/Jellyfin.Plugin.Listenbrainz/bin/<Debug|Release>/net9.0/`
+The compiled DLLs end up in `src/Jellyfin.Plugin.ListenBrainz/bin/<Debug|Release>/net9.0/`.
 
 To install the plugin for the first time, copy all **DLL** files starting with `Jellyfin.Plugin.ListenBrainz` to the
 plugin directory in your Jellyfin config directory (`${CONFIG_DIR}/plugins/ListenBrainz_1.0.0.0`).
