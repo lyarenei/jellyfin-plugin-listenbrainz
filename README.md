@@ -174,14 +174,14 @@ recompiled files.
 
 ## Making a plugin release
 
-1. Make sure you have updated [build file](build.yaml)
-2. Create a new release in the repository
-3. Check that the new version is available in the repository
+1. Make sure the [build file](build.yaml) is up to date.
+2. Create a new release in the repository.
+3. Check that the new version shows up in the repository.
 
 # Jellyfin?
 
-This repository only contains the source code for the ListenBrainz plugin for `Jellyfin Media Server`.
-If you somehow arrived here without knowing what Jellyfin is, check out the [project website](https://jellyfin.org).
+This repository only contains the source code of the ListenBrainz plugin for the `Jellyfin Media Server`. If you
+somehow ended up here without knowing what Jellyfin is, have a look at the [project website](https://jellyfin.org).
 
 # License
 
@@ -198,8 +198,6 @@ be also licenced under GPLv3 license. And so this plugin is also licensed under 
 
 
 [LISTENBRAINZ]: https://listenbrainz.org
-
-[VERSION_ISSUE]: https://github.com/jellyfin/jellyfin/issues/11331
 
 [RELEASES]: https://github.com/lyarenei/jellyfin-plugin-listenbrainz/releases
 
