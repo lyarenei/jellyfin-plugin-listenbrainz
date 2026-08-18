@@ -100,37 +100,32 @@ To set up a user:
 
 ### Debug logging
 
-Please always make sure to provide debug logs when reporting a plugin issue. To set up debug logging, you need to
-modify the logging configuration of the Jellyfin server. In addition to changing the logging level, it is also
-necessary to update the log template, to properly display logged data.
+Please always attach debug logs when you report a plugin issue. Getting them means changing the logging configuration of
+the Jellyfin server: both the log level and the log template, since the default template hides some of the data
+the plugin logs.
 
-To set up debug logging:
+Start by enabling debug logging as described [here][JELLYFIN_DEBUG]. The same file holds two `outputTemplate`
+entries, one for console output and one for file output. If you collect logs through the Jellyfin interface, add
+`{EventId}`, `{ClientRequestId}` and `{HttpRequestId}` to the **file** template:
 
-First, follow the steps described [here][JELLYFIN_DEBUG] to enable debug logging. Then, in the same file, you will see
-two log templates (`outputTemplate`). One template is for a console output, the other one is for a file output. If you
-are using the Jellyfin UI to collect the logs, then modify the **File** template by adding `{EventId}`
-, `{ClientRequestId}` and `{HttpRequestId}` fields.
+- `EventId` identifies the event being processed (playback start, playback stop, user data save).
+- `ClientRequestId` identifies the ListenBrainz API request being processed.
+- `HttpRequestId` identifies the individual HTTP request.
 
-- `EventId` identifies the event which is being processed (playback start/stop, user data save)
-- `ClientRequestId` identifies a ListenBrainz API request being processed
-- `HttpRequestId` identifies a specific HTTP request being processed
-
-The modified template should look like this:
+The result should look like this:
 
 ```diff
 - "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u3}] [{ThreadId}] {SourceContext}: {Message}{NewLine}{Exception}"
 + "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u3}] [{ThreadId}] {SourceContext} {EventId} {ClientRequestId} {HttpRequestId}: {Message}{NewLine}{Exception}"
 ```
 
-After modifying the template, restart Jellyfin server, and you should see extra whitespace (before the `:`) in the log
-like this: <code>... &#91;INF] &#91;1] Main&nbsp;&nbsp;&nbsp;: Jellyfin version: "10.8.13"</code>
-This is expected, as the three new fields you added earlier are only defined in this plugin, while the template affects
-all log messages. Unfortunately, Jellyfin does not seem to be using a logging extension which allows dynamic log
-templates.
+Restart the server afterwards. Other log lines will now have extra spaces before the `:`, like
+<code>... &#91;INF] &#91;1] Main&nbsp;&nbsp;&nbsp;: Jellyfin version: "10.11.0"</code> — that is expected, because
+only this plugin fills in the three new fields while the template applies to everything.
 
 Do not forget to revert these changes after you are done with capturing the logs. You can keep the template if you don't
-mind the additional IDs, but make sure you change the log level back to `Information` as debug logging can in general
-have an impact on the application performance.
+mind the additional IDs, but it is recommended to change the log level back to `Information` as debug logging can
+in general have an impact on the application performance.
 
 # Development
 
