@@ -18,6 +18,11 @@
 
 &mdash; <cite>[ListenBrainz][LISTENBRAINZ]</cite>
 
+---
+Please note that this plugin is not affiliated with ListenBrainz or Jellyfin projects.
+It is independently maintained and all issues with this plugin should be reported here instead of the respective project's communication channels.
+---
+
 ## Features
 
 - Send listens of the tracks you play
