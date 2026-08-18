@@ -1,4 +1,5 @@
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
+using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Session;
 using Microsoft.Extensions.Logging;
@@ -38,13 +39,14 @@ public class PlaybackProgressHandler : GenericHandler<PlaybackProgressEventArgs>
     }
 
     /// <inheritdoc />
+    protected override bool ShouldHandle(PlaybackProgressEventArgs args)
+    {
+        return _configService.IsAlternativeModeEnabled && args.Item is Audio;
+    }
+
+    /// <inheritdoc />
     protected override async Task DoHandleAsync(EventData data)
     {
-        if (!_configService.IsAlternativeModeEnabled)
-        {
-            return;
-        }
-
         if (data.PositionTicks is null)
         {
             _logger.LogTrace("Progress event for {ItemName} has no playback position, ignoring", data.Item.Name);
