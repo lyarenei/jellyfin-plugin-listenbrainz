@@ -1,119 +1,154 @@
-# How does the plugin work
+# How the plugin works
 
-Here is a general description of how particular plugin features work. The plugin configuration is documented separately
-and is available [here](configuration.md).
+This document describes what the plugin features actually do. The plugin configuration is available in the
+[configuration](configuration.md) document.
 
 ## Sending listens
 
-Sending listens is the main function of this plugin. In general, there are two types of a listen recognized by
-ListenBrainz (technically three, but the third one is just an extension). Each type is evaluated differently and the
-process is described below.
+Submitting listens is the main job of the plugin. ListenBrainz accepts two kinds of listen — a `now playing`
+listen and a normal one — the plugin sends both.
 
-### Sending 'now playing' listen
+### Sending a 'now playing' listen
 
-Sending `now playing` listen does not have any criteria and is completely optional. From the plugin perspective, the
-process begins by picking up a `PlaybackStart` event emitted by the server when informed of a playback start. After
-verifying that all required data are available for sending a listen, the plugin also checks if the user is configured
-and has enabled listen submission. Naturally, if everything is good, then the plugin fetches additional metadata from
-MusicBrainz (if enabled) and `now playing` listen is sent. As this listen type is not important that much, there is no
-error handling, besides some basic retrying handled automatically by the API client.
+A `now playing` listen has no conditions attached to it. The plugin sends one as soon as the server reports the
+start of a playback with a `PlaybackStart` event, provided that:
 
-### Sending general listen
+- the user has set an API token,
+- the user has listen submission enabled,
+- the track is in an allowed library, and
+- the track has at least an artist and a title.
 
-The process for sending a listen begins pretty much the same as for `now playing` listen. There are 2 important
-differences though. The first one is that there is an additional requirement - the playback time of a track must be
-either at least 4 minutes or a half of its runtime. The second one is related to the event triggering this process.
-Depending on the configuration, the plugin will either react on a `PlaybackStopped` or `UserDataSaved` event emitted by
-the server. The first one is emitted when the server is informed about a playback stop. The second one is emitted when
-any kind of user data for that particular track is being saved. The plugin specifically watches for events with a reason
-for `PlaybackFinished`. These two modes are documented in more
-detail [here](configuration.md#use-alternative-event for-recognizing-listens). After checking all other conditions, the
-plugin will send a listen for the specified track. In case of a failure, the listen is automatically saved into a listen
-cache to retry later.
+If the MusicBrainz integration is enabled, the additional metadata is fetched first and included in the listen.
+
+A failed `now playing` listen is never cached or retried by the plugin (these are ephemeral).
+
+### Sending a listen
+
+A normal listen has to meet the conditions listed above plus two more:
+
+- the playback time is at least 4 minutes, or at least 50% of the track runtime, and
+- the track has a recording MBID, if the user has strict mode enabled.
+
+Which event starts the process depends on the configuration — either `PlaybackStopped` or `UserDataSaved`. Both
+modes are described under
+[use alternative event for recognizing listens](configuration.md#use-alternative-event-for-recognizing-listens).
+
+From there the plugin:
+
+1. fetches the additional metadata from MusicBrainz, if the integration is enabled,
+2. writes the listen to a backup file, if backups are enabled,
+3. sends the listen to ListenBrainz, and
+4. sends the favorite status of the track, if favorite sync is enabled.
 
 ## Listen cache
 
-In case of listen submit failures, the listens are saved into a cache, so the data are not lost and the plugin can retry
-sending them in the future. The retry window is randomized on every server startup, with the window being no less than
-24 hours and no more than 25 hours. If you wish to try resubmitting the listens right away, you can do so by triggering
-the scheduled task in the server admin interface. Favorites are not synced during this process.
+Listens that cannot be sent are kept in a cache so they are not lost. The cache lives in the plugin data
+directory, at `<jellyfin config>/plugins/configurations/ListenBrainz/cache.json`.
 
-If a user does not have a valid configuration or has listen submitting disabled, no listens will be recorded in the
-cache for that user.
+The `Resubmit listens` task sends them again. It runs every 24 to 25 hours, with the exact interval picked at
+each server start, and you can also run it manually from the server administration. A listen leaves the cache only
+once ListenBrainz has accepted it. Favorites are not synchronized during this task.
+
+Nothing is cached for users without a valid configuration, or for users who have listen submission disabled.
 
 ## Syncing favorites
 
-In addition to listen submission, this plugin also offers favorite sync. Or, more exactly, marking favorite tracks in
-Jellyfin as `loved` in ListenBrainz (and vice-versa). Synchronizing favorite artists and albums are not supported as
-this is not supported by ListenBrainz. Similarly, `hated` listens in ListenBrainz are not synced to Jellyfin as there
-is no such concept in Jellyfin.
+The plugin marks favorite Jellyfin tracks as loved recordings in ListenBrainz, and loved ListenBrainz recordings
+as favorite Jellyfin tracks.
+
+Albums and artists are not supported, since ListenBrainz has no concept of a favorite album or artist. Hated
+recordings are not supported as well, since Jellyfin has no equivalent.
+
+Both directions need a recording MBID, taken from the Jellyfin metadata of the track or from MusicBrainz when the
+[MusicBrainz integration](configuration.md#fetch-additional-metadata-from-musicbrainz) is enabled.
 
 #### From Jellyfin to ListenBrainz
 
-Syncing always takes place right away after successfully submitting a listen. Please note it may take some time for the
-hearts to be updated in the ListenBrainz UI. Primarily, a recording MBID is used for the sync process, but if it's not
-available, the process falls back to using MSID.
-
-In the MSID case, you may see additional requests made for API token verification. This is to get a ListenBrainz
-username associated with the API token (the plugin did not store the username in earlier 3.x versions). If you wish to
-avoid this, go to plugin settings and save the user configuration, no changes are necessary. Upon saving, the plugin
-will try getting the username and save it in the configuration.
-
-When using MSID for the sync, the plugin tries to find the correct MSID at exponential intervals, up to 4 attempts
-(around 10 minutes). If the MSID is still not found, then the sync is cancelled.
+The favorite status is set right after the plugin submits a listen of that track. With
+[immediate favorite sync](configuration.md#immediate-favorite-sync) it is also sent the moment you change the
+status in Jellyfin. The ListenBrainz interface may take a while to catch up and show the change.
 
 #### From ListenBrainz to Jellyfin
 
-Currently, only a manual task is available at this moment. This is because of an absence of recording MBIDs which make
-matching MBIDs to tracks a very expensive operation (in terms of time) and so it is impractical to run this sync
-regularly.
+This direction only exists as the `Sync loved tracks` task, which can be run manually from the scheduled tasks in
+the server administration. It is not scheduled as most of the users will run it rarely and it can take a long time with
+large amounts of loved recordings on a very large libraries in Jellyfin.
 
-You can run the sync task from the Jellyfin administration menu (under scheduled tasks). The task pulls loved listens
-for all users which have favorite synchronization enabled. Keep in mind, that the task can take a long time to complete.
-Hopefully this will change at some point in the future.
-
-For reference, a library of approximately 4000 tracks takes around 70 minutes to complete. This is then multiplied by
-number of users which have favorite syncing enabled (assuming all users have access to all tracks on the server).
+The task collects the loved recordings of every user with favorite sync enabled, walks through all tracks in the
+allowed libraries that carry a recording MBID or a track MBID, and marks the loved ones as favorite. It never
+removes a favorite mark.
 
 ## Syncing playlists
 
-Every week, on Monday, ListenBrainz automatically generates several playlists for all users. If the user has enabled
-playlists sync in settings, the plugin automatically recreates these playlists in Jellyfin. Currently, the sync is
-one-way only - from ListenBrainz to Jellyfin.
+ListenBrainz generates playlists for each of its users, and the plugin copies them into Jellyfin for anyone with
+[generated playlist sync](configuration.md#enable-generated-playlist-sync) enabled. For now, only the direction from ListenBrainz to Jellyfin is supported.
 
-It is very much recommended to have recording MBIDs in your audio metadata for the best results. Otherwise, the plugin
-can only find the best possible match with plain text matching and the results will vary. Unlike other features in this
-plugin, the sync process does not use MusicBrainz fallback to get the recording ID through a track ID.
+As of now, four playlist types are supported:
 
-By default, only playlists "from the past" are synced. These include `Weekly jams` and `Top discoveries of <year>`.
+| Playlist type                     | ListenBrainz generates it | The plugin keeps             |
+|-----------------------------------|---------------------------|------------------------------|
+| Weekly jams                       | every Monday              | the current and the previous |
+| Weekly exploration                | every Monday              | the current and the previous |
+| Top discoveries of `<year>`       | once a year               | all of them                  |
+| Top missed recordings of `<year>` | once a year               | all of them                  |
 
-Syncing of all playlists created for the user (including collaborative ones) can be enabled in the plugin settings.
-Empty playlists are always ignored.
+The user can pick the types in the configuration. Everything else, including empty playlists, is ignored.
 
-A sync is triggered automatically every Monday. However, the time of the day is randomized on every server start - to
-spread out the load on ListenBrainz servers. If necessary, the sync task can be also run manually at any time from the
-Jellyfin admin UI (under scheduled tasks).
+The work is done by the `Sync generated playlists from ListenBrainz` task, which runs every Monday at a random
+minute within the first hour of the day. The minute is chosen at each server start to spread the load on the
+ListenBrainz servers. You can also run the task manually at any time.
 
-If there is an already existing playlist with the same name, it will be automatically deleted and recreated. The
-playlists created by the plugin will always have a `[LB]` prefix followed by the playlist name. If, you want to
-preserve a playlist, simply rename it - then the playlist will be ignored by the plugin. Keep in mind, that the original
-playlist will be recreated on next sync, as the plugin will assume that the playlist does not exist.
+### How the plugin creates the playlists
+
+A synchronized playlist keeps the name it has on ListenBrainz. The plugin tags it with `ListenBrainz` and makes
+the selected user its owner.
+
+Which Jellyfin playlist belongs to which ListenBrainz playlist is recorded in
+`<jellyfin config>/plugins/configurations/ListenBrainz/playlist-sync-state.json`.
+
+For each playlist in a run, one of three things happens:
+
+- ListenBrainz has not regenerated the playlist since the last sync, so the Jellyfin playlist is left alone.
+- The plugin has a record of the playlist, so the tracks in the matching Jellyfin playlist are replaced.
+- The plugin has no record, so it looks for a Jellyfin playlist with the same name and the `ListenBrainz` tag,
+  and either replaces the tracks in it or creates a new playlist.
+
+If not a single track of a playlist can be matched in the library, no Jellyfin playlist is created or changed.
+
+Once a weekly playlist rotates out of the selection, the plugin deletes the Jellyfin playlist along with its
+record. With [keep playlists after rotation](configuration.md#keep-playlists-after-rotation) the playlist stays
+and only the record is dropped, after which the plugin ignores that playlist.
 
 ### Track matching
 
-For each track in a ListenBrainz playlist, the plugin attempts to find a corresponding track in the Jellyfin library.
-Since ListenBrainz allows users to send listens without recording MBIDs, the playlists are not guaranteed to have
-recording MBIDs of all tracks that are in your Jellyfin library. For this reason, the plugin attempts to find the best
-possible match for each track in a multi-stage approach, from highest to lowest confidence:
+For every track in a ListenBrainz playlist, the plugin has to find the counterpart in the Jellyfin library. Since
+ListenBrainz accepts listens without a recording MBID, playlists may contain tracks that do not have it, so the
+plugin works through several methods in order, from the most to the least reliable:
 
-1. **Recording MBID** - Best case - exact match by MusicBrainz recording ID.
-2. **Album MBID + Title** - Match by MusicBrainz album ID (release MBID) and a case-insensitive track name.
-3. **Related recordings** - Match through related recordings (e.g. different versions or remasters of the same song).
-Requires MusicBrainz integration to be enabled.
-4. **Artist + Title** - Searches Jellyfin library for tracks with a matching title and checks if the track's artist
-credits contain the artist name.
-5. **Album name + Title** - Searches Jellyfin library by title and validates that the album name matches (case-insensitive).
+1. **Recording MBID** — the best case: a track with exactly this recording MBID.
+2. **Album MBID and title** — a track with the same album MBID and the same title, ignoring case.
+3. **Related recordings** — the related recordings from MusicBrainz, such as other versions of the same song,
+   matched against the recording MBIDs in the library. Needs the MusicBrainz integration.
+4. **Artist and title** — a library search for the title, keeping tracks whose artist appears in the artist
+   credit of the ListenBrainz track.
+5. **Album name and title** — a library search for the title, keeping tracks with the same album name, ignoring
+   case.
 
-If no match is found after all stages, then either:
-- The track is no longer in your Jellyfin library
-- ListenBrainz managed to include a track in the playlist without any connection to track in your Jellyfin library
+Searching by title alone is deliberately not attempted, as it produces far too many false matches.
+
+When every method comes up empty, the track is either missing from your library or present with too little
+metadata to recognize it.
+
+Recording MBIDs in your own metadata give by far the best results. Unlike the other features, this one will not
+fall back to MusicBrainz to fill in a recording MBID.
+
+## Scheduled tasks
+
+The plugin adds the following tasks to the server administration, all under the `ListenBrainz` category.
+
+| Task                                          | Default schedule     | Purpose                                                    |
+|-----------------------------------------------|----------------------|------------------------------------------------------------|
+| Resubmit listens                              | every 24 to 25 hours | Sends the listens sitting in the listen cache again.       |
+| Sync generated playlists from ListenBrainz    | every Monday         | Copies the generated ListenBrainz playlists into Jellyfin. |
+| Sync loved tracks                             | manual               | Marks loved ListenBrainz recordings as Jellyfin favorites. |
+| Sync playlists from ListenBrainz (deprecated) | manual               | Does nothing; removed in a later version.                  |
