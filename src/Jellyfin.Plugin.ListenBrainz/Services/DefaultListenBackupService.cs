@@ -16,6 +16,7 @@ public class DefaultListenBackupService : IListenBackupService, IDisposable
 {
     private readonly ILogger _logger;
     private readonly IPersistentJsonService<List<Listen>> _storage;
+    private readonly IPluginConfigService _pluginConfig;
     private readonly SemaphoreSlim _lock;
     private readonly string _backupBasePath;
     private bool _isDisposed;
@@ -26,15 +27,18 @@ public class DefaultListenBackupService : IListenBackupService, IDisposable
     /// <param name="logger">Logger instance.</param>
     /// <param name="backupBasePath">Path to base backup directory.</param>
     /// <param name="storage">Persistent storage.</param>
+    /// <param name="pluginConfig">Plugin configuration.</param>
     public DefaultListenBackupService(
         ILogger logger,
         string backupBasePath,
-        IPersistentJsonService<List<Listen>> storage)
+        IPersistentJsonService<List<Listen>> storage,
+        IPluginConfigService pluginConfig)
     {
         _logger = logger;
         _lock = new SemaphoreSlim(1, 1);
         _backupBasePath = backupBasePath;
         _storage = storage;
+        _pluginConfig = pluginConfig;
     }
 
     /// <summary>
@@ -114,7 +118,7 @@ public class DefaultListenBackupService : IListenBackupService, IDisposable
         }
 
         userListens ??= new List<Listen>();
-        userListens.Add(item.AsListen(timestamp, metadata));
+        userListens.Add(item.AsListen(timestamp, metadata, _pluginConfig.MbidDelimiters));
 
         try
         {

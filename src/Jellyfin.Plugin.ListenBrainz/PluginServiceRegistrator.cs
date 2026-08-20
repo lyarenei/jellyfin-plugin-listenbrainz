@@ -95,7 +95,7 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
             };
 
             var storage = new DefaultPersistentJsonService<List<Listen>>(serializerOptions: serializerOptions);
-            return new DefaultListenBackupService(GetLogger(sp, "ListensBackup"), config.BackupPath, storage);
+            return new DefaultListenBackupService(GetLogger(sp, "ListensBackup"), config.BackupPath, storage, config);
         });
 
         AddPluginService<PlaybackStartHandler>(serviceCollection, "PlaybackStartHandler");
