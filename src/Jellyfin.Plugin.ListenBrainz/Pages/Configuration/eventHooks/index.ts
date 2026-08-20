@@ -10,6 +10,7 @@ import {
 import {
     registerBackupPathBrowserButtonHook,
     registerResetAllowedLibrariesButtonHook,
+    registerResetMbidDelimitersButtonHook,
     registerResetListenBrainzApiUrlButtonHook,
     registerResetMusicBrainzApiUrlButtonHook,
 } from "./button";
@@ -20,6 +21,7 @@ export default function registerEventHooks(view: HTMLElement) {
 
     registerResetListenBrainzApiUrlButtonHook(view);
     registerResetMusicBrainzApiUrlButtonHook(view);
+    registerResetMbidDelimitersButtonHook(view);
     registerBackupPathBrowserButtonHook(view);
     registerResetAllowedLibrariesButtonHook(view);
 

@@ -23,3 +23,4 @@ export const userDefaults: PluginUserConfig = {
 
 export const defaultListenBrainzApiUrl = "https://api.listenbrainz.org";
 export const defaultMusicBrainzApiUrl = "https://musicbrainz.org";
+export const defaultMbidDelimiters = ";,/\u001F";

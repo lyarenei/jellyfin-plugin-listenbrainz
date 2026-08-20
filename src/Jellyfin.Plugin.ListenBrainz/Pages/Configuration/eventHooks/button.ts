@@ -1,4 +1,4 @@
-import { defaultListenBrainzApiUrl, defaultMusicBrainzApiUrl } from "../constants";
+import { defaultMbidDelimiters, defaultListenBrainzApiUrl, defaultMusicBrainzApiUrl } from "../constants";
 
 export function registerResetAllowedLibrariesButtonHook(view: HTMLElement) {
     const resetButton = view.querySelector("#ResetAllowedLibraries") as HTMLButtonElement;
@@ -23,6 +23,14 @@ export function registerResetMusicBrainzApiUrlButtonHook(view: HTMLElement) {
     resetButton.addEventListener("click", async () => {
         const apiUrlInput = view.querySelector("#MusicBrainzApiUrl") as HTMLInputElement;
         apiUrlInput.value = defaultMusicBrainzApiUrl;
+    });
+}
+
+export function registerResetMbidDelimitersButtonHook(view: HTMLElement) {
+    const resetButton = view.querySelector("#ResetMbidDelimiters") as HTMLButtonElement;
+    resetButton.addEventListener("click", async () => {
+        const delimitersInput = view.querySelector("#MbidDelimiters") as HTMLInputElement;
+        delimitersInput.value = defaultMbidDelimiters;
     });
 }
 
