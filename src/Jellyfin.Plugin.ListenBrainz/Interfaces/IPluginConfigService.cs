@@ -26,6 +26,11 @@ public interface IPluginConfigService
     public string MusicBrainzApiUrl { get; }
 
     /// <summary>
+    /// Gets configured delimiters used to split multiple MBIDs in metadata.
+    /// </summary>
+    public string MbidDelimiters { get; }
+
+    /// <summary>
     /// Gets a value indicating whether listen backup feature is enabled.
     /// </summary>
     bool IsBackupEnabled { get; }

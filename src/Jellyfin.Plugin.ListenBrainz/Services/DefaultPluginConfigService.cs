@@ -41,6 +41,12 @@ public class DefaultPluginConfigService : IPluginConfigService
     }
 
     /// <inheritdoc />
+    public string MbidDelimiters
+    {
+        get => Config.MbidDelimiters;
+    }
+
+    /// <inheritdoc />
     public bool IsBackupEnabled
     {
         get => Config.IsBackupEnabled;
