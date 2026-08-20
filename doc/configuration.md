@@ -153,7 +153,7 @@ the [MusicBrainz integration](#fetch-additional-metadata-from-musicbrainz) is en
 
 This setting no longer does anything and will be removed in a future version.
 
-##### MBID delimiters
+##### Custom MBID delimiters
 
 Some taggers store multiple (commonly artist) MBIDs in a single metadata field, separated by a character that isn't a
 comma or any other character that would be somewhat standardized. If you have configured your tagger to use some other
