@@ -41,7 +41,7 @@ public class PlaybackProgressHandler : GenericHandler<PlaybackProgressEventArgs>
     /// <inheritdoc />
     protected override bool ShouldHandle(PlaybackProgressEventArgs args)
     {
-        return _configService.IsAlternativeModeEnabled && args.Item is Audio;
+        return _configService.IsAlternativeModeEnabled && !args.IsAutomated && args.Item is Audio;
     }
 
     /// <inheritdoc />
