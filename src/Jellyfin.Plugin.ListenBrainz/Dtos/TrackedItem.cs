@@ -25,11 +25,6 @@ public class TrackedItem
     public string ItemId { get; init; }
 
     /// <summary>
-    /// Gets UNIX timestamp of when the tracking started.
-    /// </summary>
-    public long StartedAt { get; init; }
-
-    /// <summary>
     /// Gets UNIX timestamp indicating when the tracking for this item can be stopped.
     /// </summary>
     public long RemoveAfter { get; init; }
@@ -40,4 +35,10 @@ public class TrackedItem
     /// and should not be taken into account.
     /// </summary>
     public bool IsValid { get; set; }
+
+    /// <summary>
+    /// Gets or sets the last playback position reported for this item, in ticks.
+    /// This does not include time spent paused or buffering.
+    /// </summary>
+    public long PositionTicks { get; set; }
 }

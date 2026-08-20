@@ -1,7 +1,7 @@
 ---
 name: "ListenBrainz"
 guid: "59B20823-AAFE-454C-A393-17427F518631"
-version: "6.4.1.7"
+version: "6.4.2.3"
 targetAbi: "10.11.0.0"
 framework: "net9.0"
 overview: "Track your music habits with ListenBrainz."
@@ -20,3 +20,4 @@ changelog: >
     - Synced playlists now have ListenBrainz tag
     - Fix for stale data on plugin config page
     - Overhaul of syncing weekly/yearly ListenBrainz playlists
+    - Fix for playback time tracking in alternative mode

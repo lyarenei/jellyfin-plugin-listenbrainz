@@ -15,6 +15,7 @@ public sealed class PluginEventHandlerService : IHostedService
     private readonly ISessionManager _sessionManager;
     private readonly IUserDataManager _userDataManager;
     private readonly PlaybackStartHandler _playbackStartHandler;
+    private readonly PlaybackProgressHandler _playbackProgressHandler;
     private readonly PlaybackStopHandler _playbackStopHandler;
     private readonly UserDataSaveHandler _userDataSaveHandler;
     private bool _isRegistered;
@@ -26,6 +27,7 @@ public sealed class PluginEventHandlerService : IHostedService
     /// <param name="sessionManager">Session manager.</param>
     /// <param name="userDataManager">User data manager.</param>
     /// <param name="playbackStartHandler">Playback start handler.</param>
+    /// <param name="playbackProgressHandler">Playback progress handler.</param>
     /// <param name="playbackStopHandler">Playback stop handler.</param>
     /// <param name="userDataSaveHandler">User data save handler.</param>
     public PluginEventHandlerService(
@@ -33,6 +35,7 @@ public sealed class PluginEventHandlerService : IHostedService
         ISessionManager sessionManager,
         IUserDataManager userDataManager,
         PlaybackStartHandler playbackStartHandler,
+        PlaybackProgressHandler playbackProgressHandler,
         PlaybackStopHandler playbackStopHandler,
         UserDataSaveHandler userDataSaveHandler)
     {
@@ -40,6 +43,7 @@ public sealed class PluginEventHandlerService : IHostedService
         _sessionManager = sessionManager;
         _userDataManager = userDataManager;
         _playbackStartHandler = playbackStartHandler;
+        _playbackProgressHandler = playbackProgressHandler;
         _playbackStopHandler = playbackStopHandler;
         _userDataSaveHandler = userDataSaveHandler;
     }
@@ -54,6 +58,7 @@ public sealed class PluginEventHandlerService : IHostedService
         }
 
         _sessionManager.PlaybackStart += _playbackStartHandler.HandleEvent;
+        _sessionManager.PlaybackProgress += _playbackProgressHandler.HandleEvent;
         _sessionManager.PlaybackStopped += _playbackStopHandler.HandleEvent;
         _userDataManager.UserDataSaved += _userDataSaveHandler.HandleEvent;
 
@@ -72,6 +77,7 @@ public sealed class PluginEventHandlerService : IHostedService
         }
 
         _sessionManager.PlaybackStart -= _playbackStartHandler.HandleEvent;
+        _sessionManager.PlaybackProgress -= _playbackProgressHandler.HandleEvent;
         _sessionManager.PlaybackStopped -= _playbackStopHandler.HandleEvent;
         _userDataManager.UserDataSaved -= _userDataSaveHandler.HandleEvent;
 

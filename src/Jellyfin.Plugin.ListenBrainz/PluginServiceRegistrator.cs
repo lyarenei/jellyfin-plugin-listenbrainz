@@ -99,6 +99,7 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
         });
 
         AddPluginService<PlaybackStartHandler>(serviceCollection, "PlaybackStartHandler");
+        AddPluginService<PlaybackProgressHandler>(serviceCollection, "PlaybackProgressHandler");
         AddPluginService<PlaybackStopHandler>(serviceCollection, "PlaybackStopHandler");
         AddPluginService<UserDataSaveHandler>(serviceCollection, "UserDataSaveHandler");
 

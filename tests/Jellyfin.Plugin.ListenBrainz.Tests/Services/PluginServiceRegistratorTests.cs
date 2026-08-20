@@ -31,6 +31,7 @@ public class PluginServiceRegistratorTests
     [InlineData(typeof(IListensCachingService))]
     [InlineData(typeof(IListenBackupService))]
     [InlineData(typeof(PlaybackStartHandler))]
+    [InlineData(typeof(PlaybackProgressHandler))]
     [InlineData(typeof(PlaybackStopHandler))]
     [InlineData(typeof(UserDataSaveHandler))]
     public void RegisterServices_ResolvesRegisteredService(Type serviceType)

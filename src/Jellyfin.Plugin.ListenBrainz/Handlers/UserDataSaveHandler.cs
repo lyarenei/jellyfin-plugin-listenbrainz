@@ -250,10 +250,12 @@ public class UserDataSaveHandler : GenericHandler<UserDataSaveEventArgs>
             return false;
         }
 
-        var delta = DateUtils.CurrentTimestamp - trackedItem.StartedAt;
-        var deltaTicks = delta * TimeSpan.TicksPerSecond;
+        _logger.LogDebug(
+            "Last tracked playback position for this item is {PositionSeconds}s",
+            TimeSpan.FromTicks(trackedItem.PositionTicks).TotalSeconds);
+
         var runtime = item.RunTimeTicks ?? 0;
-        var isOk = _validationService.ValidateSubmitConditions(deltaTicks, runtime);
+        var isOk = _validationService.ValidateSubmitConditions(trackedItem.PositionTicks, runtime);
         await _playbackTracker.InvalidateItemAsync(userId, trackedItem, cancellationToken);
         return isOk;
     }

@@ -27,6 +27,20 @@ public interface IPlaybackTrackingService
     public Task<TrackedItem?> GetItemAsync(string userId, string itemId, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Update the last known playback position of a tracked item.
+    /// </summary>
+    /// <param name="userId">ID of user the item is being tracked for.</param>
+    /// <param name="itemId">ID of the tracked item.</param>
+    /// <param name="positionTicks">Playback position reported by the event.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>True if a valid tracked item was found and updated, false otherwise.</returns>
+    public Task<bool> UpdatePositionAsync(
+        string userId,
+        string itemId,
+        long positionTicks,
+        CancellationToken cancellationToken);
+
+    /// <summary>
     /// Remove specified tracked item for specified user.
     /// </summary>
     /// <param name="userId">ID of user the item is being tracked for.</param>
