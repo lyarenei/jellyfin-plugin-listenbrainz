@@ -42,14 +42,15 @@ public static class LibraryManagerExtensions
     /// </summary>
     /// <param name="libraryManager">Library manager instance.</param>
     /// <param name="listen">Stored listen to convert.</param>
+    /// <param name="mbidDelimiters">Delimiters used to split multiple MBIDs.</param>
     /// <returns>Listen corresponding to provided stored listen. Null if conversion failed.</returns>
-    public static Listen? ToListen(this ILibraryManager libraryManager, StoredListen listen)
+    public static Listen? ToListen(this ILibraryManager libraryManager, StoredListen listen, string? mbidDelimiters = null)
     {
         var baseItem = libraryManager.GetItemById(listen.Id);
         try
         {
             var audio = (Audio?)baseItem;
-            return audio?.AsListen(listen.ListenedAt, listen.Metadata);
+            return audio?.AsListen(listen.ListenedAt, listen.Metadata, mbidDelimiters);
         }
         catch (InvalidCastException)
         {
