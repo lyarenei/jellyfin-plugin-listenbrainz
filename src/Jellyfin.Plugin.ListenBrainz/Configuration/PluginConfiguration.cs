@@ -11,12 +11,19 @@ namespace Jellyfin.Plugin.ListenBrainz.Configuration;
 /// </summary>
 public class PluginConfiguration : BasePluginConfiguration
 {
+    /// <summary>
+    /// Default delimiters used to split multiple MBIDs in metadata.
+    /// Includes the unit separator control character (0x1F) used by some taggers.
+    /// </summary>
+    public const string DefaultMbidDelimitersValue = ";,/\u001F";
+
     private string? _musicBrainzUrlOverride;
     private string? _listenBrainzUrlOverride;
     private bool? _isMusicBrainzEnabledOverride;
     private bool? _isAlternativeModeEnabled;
     private bool? _isImmediateFavoriteSyncEnabled;
     private bool? _isAllPlaylistsSyncEnabled;
+    private string? _mbidDelimitersOverride;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PluginConfiguration"/> class.
@@ -57,6 +64,21 @@ public class PluginConfiguration : BasePluginConfiguration
     /// </summary>
     [XmlIgnore]
     public string DefaultMusicBrainzApiUrl => MusicBrainzApi.Resources.Api.BaseUrl;
+
+    /// <summary>
+    /// Gets or sets delimiters used to split multiple MBIDs in metadata.
+    /// </summary>
+    public string MbidDelimiters
+    {
+        get => _mbidDelimitersOverride ?? DefaultMbidDelimitersValue;
+        set => _mbidDelimitersOverride = value;
+    }
+
+    /// <summary>
+    /// Gets the default delimiters used to split multiple MBIDs in metadata.
+    /// </summary>
+    [XmlIgnore]
+    public string DefaultMbidDelimiters => DefaultMbidDelimitersValue;
 
     /// <summary>
     /// Gets or sets a value indicating whether MusicBrainz integration is enabled.
