@@ -1,4 +1,5 @@
 using Jellyfin.Plugin.ListenBrainz.Api.Models;
+using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
 using MediaBrowser.Controller.Entities.Audio;
 
@@ -34,9 +35,15 @@ public static class AudioExtensions
     /// <param name="item">Item to transform.</param>
     /// <param name="timestamp">Timestamp of the listen.</param>
     /// <param name="itemMetadata">Additional item metadata.</param>
+    /// <param name="mbidDelimiters">Delimiters used to split multiple MBIDs.</param>
     /// <returns>Listen instance with data from the item.</returns>
-    public static Listen AsListen(this Audio item, long? timestamp = null, AudioItemMetadata? itemMetadata = null)
+    public static Listen AsListen(
+        this Audio item,
+        long? timestamp = null,
+        AudioItemMetadata? itemMetadata = null,
+        string? mbidDelimiters = null)
     {
+        var delimiters = (mbidDelimiters ?? PluginConfiguration.DefaultMbidDelimiters).ToCharArray();
         string allArtists = string.Join(", ", item.Artists.TakeWhile(name => !string.IsNullOrEmpty(name)));
         return new Listen
         {
@@ -53,7 +60,7 @@ public static class AudioExtensions
                     SubmissionClient = Plugin.FullName,
                     SubmissionClientVersion = Plugin.Version,
                     ReleaseMbid = item.ProviderIds.GetValueOrDefault("MusicBrainzAlbum"),
-                    ArtistMbids = item.ProviderIds.GetValueOrDefault("MusicBrainzArtist")?.Split(';', '/', ',', (char)0x1F).Select(s => s.Trim()).ToArray(),
+                    ArtistMbids = item.ProviderIds.GetValueOrDefault("MusicBrainzArtist")?.Split(delimiters).Select(s => s.Trim()).ToArray(),
                     ReleaseGroupMbid = item.ProviderIds.GetValueOrDefault("MusicBrainzReleaseGroup"),
                     RecordingMbid = item.GetRecordingMbid() ?? itemMetadata?.RecordingMbid,
                     TrackMbid = item.GetTrackMbid(),
