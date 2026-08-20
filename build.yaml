@@ -1,7 +1,7 @@
 ---
 name: "ListenBrainz"
 guid: "59B20823-AAFE-454C-A393-17427F518631"
-version: "6.4.2.3"
+version: "6.5.0.1"
 targetAbi: "10.11.0.0"
 framework: "net9.0"
 overview: "Track your music habits with ListenBrainz."
@@ -17,7 +17,4 @@ artifacts:
   - "Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.dll"
 changelog: >
   This version contains the following changes:
-    - Synced playlists now have ListenBrainz tag
-    - Fix for stale data on plugin config page
-    - Overhaul of syncing weekly/yearly ListenBrainz playlists
-    - Fix for playback time tracking in alternative mode
+    - Allow configuration custom delimiters for MBIDs
