@@ -1,3 +1,4 @@
+import { defaultMbidDelimiters } from "./constants";
 import { getUniqueLibraryName } from "./utils";
 import { MediaLibrary, PluginConfiguration, PluginUserConfig } from "./types";
 
@@ -73,7 +74,8 @@ export function fillGeneralConfigForm(view: HTMLElement, pluginConfig: PluginCon
     const elements = getGeneralConfigFormElements(view);
     elements.allPlaylistsEnabled.checked = pluginConfig.IsAllPlaylistsSyncEnabled;
     elements.altModeEnabled.checked = pluginConfig.IsAlternativeModeEnabled;
-    elements.mbidDelimiters.value = pluginConfig.MbidDelimiters;
+    elements.mbidDelimiters.value =
+        pluginConfig.MbidDelimiters === defaultMbidDelimiters ? "" : pluginConfig.MbidDelimiters;
     elements.immediateFavorites.checked = pluginConfig.IsImmediateFavoriteSyncEnabled;
     elements.listenBrainzUrl.value = pluginConfig.ListenBrainzApiUrl;
 }

@@ -65,7 +65,7 @@ public class PluginConfiguration : BasePluginConfiguration
     public string MbidDelimiters
     {
         get => _mbidDelimitersOverride ?? DefaultMbidDelimiters;
-        set => _mbidDelimitersOverride = value;
+        set => _mbidDelimitersOverride = string.IsNullOrEmpty(value) ? null : value;
     }
 
     /// <summary>
