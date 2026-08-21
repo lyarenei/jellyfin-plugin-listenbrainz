@@ -17,6 +17,7 @@ public class PluginConfiguration : BasePluginConfiguration
     private bool? _isAlternativeModeEnabled;
     private bool? _isImmediateFavoriteSyncEnabled;
     private bool? _isAllPlaylistsSyncEnabled;
+    private string? _mbidDelimitersOverride;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PluginConfiguration"/> class.
@@ -57,6 +58,21 @@ public class PluginConfiguration : BasePluginConfiguration
     /// </summary>
     [XmlIgnore]
     public string DefaultMusicBrainzApiUrl => MusicBrainzApi.Resources.Api.BaseUrl;
+
+    /// <summary>
+    /// Gets or sets delimiters used to split multiple MBIDs in metadata.
+    /// </summary>
+    public string MbidDelimiters
+    {
+        get => _mbidDelimitersOverride ?? DefaultMbidDelimiters;
+        set => _mbidDelimitersOverride = string.IsNullOrEmpty(value) ? null : value;
+    }
+
+    /// <summary>
+    /// Gets the default delimiters used to split multiple MBIDs in metadata.
+    /// </summary>
+    [XmlIgnore]
+    public static string DefaultMbidDelimiters => ";,/\u001F";
 
     /// <summary>
     /// Gets or sets a value indicating whether MusicBrainz integration is enabled.

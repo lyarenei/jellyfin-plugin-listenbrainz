@@ -143,7 +143,7 @@ public class ResubmitListensTask : IScheduledTask
     {
         try
         {
-            return _libraryManager.ToListen(listen) is not null;
+            return _libraryManager.ToListen(listen, _pluginConfig.MbidDelimiters) is not null;
         }
         catch (Exception ex)
         {
@@ -198,7 +198,7 @@ public class ResubmitListensTask : IScheduledTask
                 continue;
             }
 
-            var listen = _libraryManager.ToListen(storedListen);
+            var listen = _libraryManager.ToListen(storedListen, _pluginConfig.MbidDelimiters);
             if (listen is null)
             {
                 _logger.LogDebug("Failed to recreate listen of item {ItemId}", storedListen.Id);

@@ -191,6 +191,18 @@
                             <div class="fieldDescription">Non-functional, will be removed in a future version.
                             </div>
                         </div>
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="MbidDelimiters">
+                                MBID delimiter override
+                            </label>
+                            <input id="MbidDelimiters" name="MbidDelimiters" type="text"
+                                   is="emby-input" class="input-field"/>
+                            <div class="fieldDescription">
+                                Override the default set of delimiters used to split multiple MBIDs
+                                stored in a single metadata field. Each character in this field is
+                                treated as a separate delimiter. Leave empty to use the default set.
+                            </div>
+                        </div>
                         <div>
                             <button is="emby-button" type="submit"
                                     class="raised button-submit block emby-button save-button">

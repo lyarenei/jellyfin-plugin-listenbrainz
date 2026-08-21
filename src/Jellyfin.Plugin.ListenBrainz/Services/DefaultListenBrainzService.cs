@@ -49,7 +49,7 @@ public class DefaultListenBrainzService : IListenBrainzService
         {
             ApiToken = config.PlaintextApiToken,
             ListenType = ListenType.PlayingNow,
-            Payload = [item.AsListen(itemMetadata: audioMetadata)],
+            Payload = [item.AsListen(itemMetadata: audioMetadata, mbidDelimiters: _pluginConfig.MbidDelimiters)],
             BaseUrl = _pluginConfig.ListenBrainzApiUrl,
         };
 
@@ -77,7 +77,7 @@ public class DefaultListenBrainzService : IListenBrainzService
         {
             ApiToken = config.PlaintextApiToken,
             ListenType = ListenType.Single,
-            Payload = [item.AsListen(listenedAt, metadata)],
+            Payload = [item.AsListen(listenedAt, metadata, _pluginConfig.MbidDelimiters)],
             BaseUrl = _pluginConfig.ListenBrainzApiUrl,
         };
 

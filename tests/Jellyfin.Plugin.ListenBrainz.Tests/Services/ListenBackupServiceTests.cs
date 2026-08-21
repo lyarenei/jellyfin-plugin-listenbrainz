@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.ListenBrainz.Api.Models;
 using Jellyfin.Plugin.ListenBrainz.Common;
+using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
@@ -30,6 +31,13 @@ public class ListenBackupServiceTests
         };
     }
 
+    private static IPluginConfigService GetPluginConfig()
+    {
+        var configMock = new Mock<IPluginConfigService>();
+        configMock.Setup(c => c.MbidDelimiters).Returns(PluginConfiguration.DefaultMbidDelimiters);
+        return configMock.Object;
+    }
+
     [Fact]
     public async Task Backup_CreatesFileWithListen()
     {
@@ -47,7 +55,8 @@ public class ListenBackupServiceTests
         var service = new DefaultListenBackupService(
             new NullLogger<DefaultListenBackupService>(),
             backupRoot,
-            storageMock.Object);
+            storageMock.Object,
+            GetPluginConfig());
 
         await service.Backup(userName, audio, null, timestamp, CancellationToken.None);
 
@@ -82,7 +91,8 @@ public class ListenBackupServiceTests
         var service = new DefaultListenBackupService(
             new NullLogger<DefaultListenBackupService>(),
             backupRoot,
-            storageMock.Object);
+            storageMock.Object,
+            GetPluginConfig());
 
         await service.Backup(userName, audio1, null, ts1, CancellationToken.None);
         await service.Backup(userName, audio2, null, ts2, CancellationToken.None);
@@ -117,7 +127,8 @@ public class ListenBackupServiceTests
         var service = new DefaultListenBackupService(
             new NullLogger<DefaultListenBackupService>(),
             backupRoot,
-            storageMock.Object);
+            storageMock.Object,
+            GetPluginConfig());
         var audio = GetAudio(Guid.NewGuid(), "song");
 
         await Assert.ThrowsAsync<ServiceException>(() =>

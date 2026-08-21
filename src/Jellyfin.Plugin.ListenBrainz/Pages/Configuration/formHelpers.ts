@@ -1,3 +1,4 @@
+import { defaultMbidDelimiters } from "./constants";
 import { getUniqueLibraryName } from "./utils";
 import { MediaLibrary, PluginConfiguration, PluginUserConfig } from "./types";
 
@@ -63,6 +64,7 @@ function getGeneralConfigFormElements(view: HTMLElement) {
     return {
         allPlaylistsEnabled: view.querySelector("#IsAllPlaylistsSyncEnabled") as HTMLInputElement,
         altModeEnabled: view.querySelector("#IsAlternativeModeEnabled") as HTMLInputElement,
+        mbidDelimiters: view.querySelector("#MbidDelimiters") as HTMLInputElement,
         immediateFavorites: view.querySelector("#IsImmediateFavoriteSyncEnabled") as HTMLInputElement,
         listenBrainzUrl: view.querySelector("#ListenBrainzApiUrl") as HTMLInputElement,
     };
@@ -72,6 +74,8 @@ export function fillGeneralConfigForm(view: HTMLElement, pluginConfig: PluginCon
     const elements = getGeneralConfigFormElements(view);
     elements.allPlaylistsEnabled.checked = pluginConfig.IsAllPlaylistsSyncEnabled;
     elements.altModeEnabled.checked = pluginConfig.IsAlternativeModeEnabled;
+    elements.mbidDelimiters.value =
+        pluginConfig.MbidDelimiters === defaultMbidDelimiters ? "" : pluginConfig.MbidDelimiters;
     elements.immediateFavorites.checked = pluginConfig.IsImmediateFavoriteSyncEnabled;
     elements.listenBrainzUrl.value = pluginConfig.ListenBrainzApiUrl;
 }
@@ -80,10 +84,15 @@ export function getGeneralConfigFormData(
     view: HTMLElement,
 ): Pick<
     PluginConfiguration,
-    "ListenBrainzApiUrl" | "IsAlternativeModeEnabled" | "IsImmediateFavoriteSyncEnabled" | "IsAllPlaylistsSyncEnabled"
+    | "ListenBrainzApiUrl"
+    | "IsAlternativeModeEnabled"
+    | "IsImmediateFavoriteSyncEnabled"
+    | "IsAllPlaylistsSyncEnabled"
+    | "MbidDelimiters"
 > {
     const elements = getGeneralConfigFormElements(view);
     return {
+        MbidDelimiters: elements.mbidDelimiters.value,
         IsAllPlaylistsSyncEnabled: elements.allPlaylistsEnabled.checked,
         IsAlternativeModeEnabled: elements.altModeEnabled.checked,
         IsImmediateFavoriteSyncEnabled: elements.immediateFavorites.checked,

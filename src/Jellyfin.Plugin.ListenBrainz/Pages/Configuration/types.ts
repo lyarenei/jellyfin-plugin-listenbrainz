@@ -17,6 +17,7 @@ export interface PluginConfiguration {
     IsMusicBrainzEnabled: boolean;
     LibraryConfigs: LibraryConfig[];
     ListenBrainzApiUrl: string;
+    MbidDelimiters: string;
     MusicBrainzApiUrl: string;
     UserConfigs: PluginUserConfig[];
 }

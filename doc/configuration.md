@@ -153,6 +153,13 @@ the [MusicBrainz integration](#fetch-additional-metadata-from-musicbrainz) is en
 
 This setting no longer does anything and will be removed in a future version.
 
+##### MBID delimiter override
+
+Some taggers store multiple (commonly artist) MBIDs in a single metadata field, separated by a character that isn't a
+comma or any other character that would be somewhat standardized. If you have configured your tagger to use some other
+separator, you can override the default delimiters here so the plugin parses the multiple MBIDs correctly. Leave empty
+to use the default delimiters: `;`, `,`, `/` and the unit separator control character (`0x1F`) that some taggers use.
+
 ## MusicBrainz
 
 ##### MusicBrainz API URL
