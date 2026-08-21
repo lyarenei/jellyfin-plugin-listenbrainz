@@ -26,14 +26,6 @@ export function registerResetMusicBrainzApiUrlButtonHook(view: HTMLElement) {
     });
 }
 
-export function registerResetMbidDelimitersButtonHook(view: HTMLElement) {
-    const resetButton = view.querySelector("#ResetMbidDelimiters") as HTMLButtonElement;
-    resetButton.addEventListener("click", async () => {
-        const delimitersInput = view.querySelector("#MbidDelimiters") as HTMLInputElement;
-        delimitersInput.value = "";
-    });
-}
-
 export function registerBackupPathBrowserButtonHook(view: HTMLElement) {
     const browseButton = view.querySelector("#SetBackupPath") as HTMLButtonElement;
     browseButton.addEventListener("click", async () => {
