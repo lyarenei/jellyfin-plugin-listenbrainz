@@ -17,4 +17,4 @@ artifacts:
   - "Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.dll"
 changelog: >
   This version contains the following changes:
-    - Allow configuration custom delimiters for MBIDs
+    - Allow configuration of custom delimiters for MBIDs
