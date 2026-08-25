@@ -20,6 +20,9 @@ namespace Jellyfin.Plugin.ListenBrainz.Api;
 public class BaseApiClient : IBaseApiClient, IDisposable
 {
     private const int RateLimitAttempts = 50;
+    private readonly string _clientName;
+    private readonly string _clientVersion;
+    private readonly string _contactUrl;
     private readonly IHttpClient _client;
     private readonly SemaphoreSlim _gateway;
     private readonly ILogger _logger;
@@ -39,11 +42,23 @@ public class BaseApiClient : IBaseApiClient, IDisposable
     /// <summary>
     /// Initializes a new instance of the <see cref="BaseApiClient"/> class.
     /// </summary>
+    /// <param name="clientName">Name of the client application.</param>
+    /// <param name="clientVersion">Version of the client application.</param>
+    /// <param name="contactUrl">Where the maintainer can be contacted.</param>
     /// <param name="client">Underlying HTTP client.</param>
     /// <param name="logger">Logger instance.</param>
     /// <param name="sleepService">Sleep service.</param>
-    public BaseApiClient(IHttpClient client, ILogger logger, ISleepService? sleepService)
+    public BaseApiClient(
+        string clientName,
+        string clientVersion,
+        string contactUrl,
+        IHttpClient client,
+        ILogger logger,
+        ISleepService? sleepService)
     {
+        _clientName = clientName;
+        _clientVersion = clientVersion;
+        _contactUrl = contactUrl;
         _client = client;
         _logger = logger;
         _sleepService = sleepService ?? new DefaultSleepService();

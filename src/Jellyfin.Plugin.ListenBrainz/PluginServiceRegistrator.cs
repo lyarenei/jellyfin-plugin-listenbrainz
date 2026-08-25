@@ -34,6 +34,8 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
         serviceCollection.AddSingleton<IPluginConfigService>(_ =>
             new DefaultPluginConfigService(() => Plugin.RequireInstance().Configuration));
 
+        var clientName = string.Join(string.Empty, Plugin.FullName.Split(' ').Select(s => s.Capitalize()));
+
         serviceCollection.AddSingleton<IListenBrainzApiClient>(sp =>
         {
             var clientLogger = GetLogger(sp, "HttpClient");
@@ -41,7 +43,13 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
 
             var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
             var httpClient = new UnderlyingClient(httpClientFactory, clientLogger, null);
-            var baseClient = new BaseApiClient(new HttpClientWrapper(httpClient), apiLogger, null);
+            var baseClient = new BaseApiClient(
+                clientName,
+                Plugin.Version,
+                Plugin.SourceUrl,
+                new HttpClientWrapper(httpClient),
+                apiLogger,
+                null);
             return new ListenBrainzApiClient(baseClient, apiLogger);
         });
 
@@ -49,7 +57,6 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
         {
             var logger = GetLogger(sp, "MusicBrainzApi");
             var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
-            var clientName = string.Join(string.Empty, Plugin.FullName.Split(' ').Select(s => s.Capitalize()));
             return new MusicBrainzApiClient(
                 clientName,
                 Plugin.Version,
