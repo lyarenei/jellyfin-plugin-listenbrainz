@@ -47,9 +47,16 @@ public class DefaultServiceFactory : IServiceFactory
         var apiLogger = _loggerFactory.CreateLogger(LoggerCategory + ".Api");
         var serviceLogger = _loggerFactory.CreateLogger(LoggerCategory);
 
+        var clientName = string.Join(string.Empty, Plugin.FullName.Split(' ').Select(s => s.Capitalize()));
         var httpClient = new UnderlyingClient(_httpClientFactory, httpLogger, null);
         var wrapper = new HttpClientWrapper(httpClient);
-        var baseClient = new BaseApiClient(wrapper, apiLogger, null);
+        var baseClient = new BaseApiClient(
+            clientName,
+            Plugin.Version,
+            Plugin.SourceUrl,
+            wrapper,
+            apiLogger,
+            null);
         var apiClient = new ListenBrainzApiClient(baseClient, apiLogger);
 
         var pluginConfig = GetPluginConfigService();

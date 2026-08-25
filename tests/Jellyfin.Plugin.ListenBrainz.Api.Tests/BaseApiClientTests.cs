@@ -30,7 +30,13 @@ public class BaseApiClientTests
 
         var logger = new Mock<ILogger>();
         var sleepService = new Mock<ISleepService>();
-        var client = new BaseApiClient(mockClient.Object, logger.Object, sleepService.Object);
+        var client = new BaseApiClient(
+            "TestClient",
+            "1.0.0",
+            "https://example.com",
+            mockClient.Object,
+            logger.Object,
+            sleepService.Object);
         var request = new ValidateTokenRequest("foobar");
 
         var action = async () => await client.SendPostRequest<ValidateTokenRequest, ValidateTokenResponse>(request, CancellationToken.None);

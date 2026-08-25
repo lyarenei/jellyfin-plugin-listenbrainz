@@ -24,8 +24,15 @@ public static class Utils
         ILogger logger,
         IHttpClientFactory clientFactory)
     {
+        var clientName = string.Join(string.Empty, Plugin.FullName.Split(' ').Select(s => s.Capitalize()));
         var httpClient = new UnderlyingClient(clientFactory, logger, null);
-        var baseClient = new BaseApiClient(new HttpClientWrapper(httpClient), logger, null);
+        var baseClient = new BaseApiClient(
+            clientName,
+            Plugin.Version,
+            Plugin.SourceUrl,
+            new HttpClientWrapper(httpClient),
+            logger,
+            null);
         var apiClient = new ListenBrainzApiClient(baseClient, logger);
         var pluginConfig = new DefaultPluginConfigService();
         return new ListenBrainzClient(logger, apiClient, pluginConfig);
