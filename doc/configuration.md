@@ -47,6 +47,10 @@ artist, and Jellyfin has no concept of a hated track.
 This setting no longer does anything and will be removed in a future version. Use
 [Enable generated playlist sync](#enable-generated-playlist-sync) instead.
 
+If you had this setting enabled, the plugin turns on [Enable generated playlist sync](#enable-generated-playlist-sync)
+for you on the first server start after the update and clears this setting. Users who already had the generated
+playlist sync enabled keep their playlist type selection.
+
 ##### Enable generated playlist sync
 
 Enable syncing of the playlists that ListenBrainz generates for the selected user into Jellyfin. Choose which types
@@ -152,6 +156,9 @@ the [MusicBrainz integration](#fetch-additional-metadata-from-musicbrainz) is en
 ##### Sync all playlists from ListenBrainz (deprecated)
 
 This setting no longer does anything and will be removed in a future version.
+
+If you had this setting enabled, all playlist types are enabled for the migrated users instead of the default
+selection, see [Enable playlist sync (deprecated)](#enable-playlist-sync-deprecated).
 
 ##### MBID delimiter override
 

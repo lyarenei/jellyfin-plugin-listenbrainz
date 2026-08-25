@@ -22,6 +22,10 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     public Plugin(IApplicationPaths paths, IXmlSerializer xmlSerializer) : base(paths, xmlSerializer)
     {
         Instance = this;
+        if (LegacyPlaylistSyncMigration.Apply(Configuration))
+        {
+            SaveConfiguration();
+        }
     }
 
     /// <summary>

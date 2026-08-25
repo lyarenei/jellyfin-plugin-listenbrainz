@@ -1,7 +1,7 @@
 ---
 name: "ListenBrainz"
 guid: "59B20823-AAFE-454C-A393-17427F518631"
-version: "6.5.1.1"
+version: "6.5.2.1"
 targetAbi: "10.11.0.0"
 framework: "net9.0"
 overview: "Track your music habits with ListenBrainz."
@@ -17,5 +17,4 @@ artifacts:
   - "Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.dll"
 changelog: >
   This version contains the following changes:
-    - Allow override of delimiters for multiple MBIDs in an artist metadata field
-    - Provide UA header for ListenBrainz API calls
+    - Migration of playlist sync settings
