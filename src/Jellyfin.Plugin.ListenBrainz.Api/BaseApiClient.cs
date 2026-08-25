@@ -111,6 +111,7 @@ public class BaseApiClient : IBaseApiClient, IDisposable
         };
 
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("token", request.ApiToken);
+        AddUserAgent(requestMessage);
         using (requestMessage) return await DoRequest<TResponse>(requestMessage, cancellationToken);
     }
 
@@ -128,10 +129,20 @@ public class BaseApiClient : IBaseApiClient, IDisposable
         };
 
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("token", request.ApiToken);
+        AddUserAgent(requestMessage);
         using (requestMessage) return await DoRequest<TResponse>(requestMessage, cancellationToken);
     }
 
     private static Uri BuildRequestUri(string baseUrl, string endpoint) => new($"{baseUrl}/{General.Version}/{endpoint}");
+
+    private void AddUserAgent(HttpRequestMessage requestMessage)
+    {
+        var productValue = new ProductInfoHeaderValue(_clientName, _clientVersion);
+        requestMessage.Headers.UserAgent.Add(productValue);
+
+        var commentValue = new ProductInfoHeaderValue($"( {_contactUrl} )");
+        requestMessage.Headers.UserAgent.Add(commentValue);
+    }
 
     private async Task<TResponse> DoRequest<TResponse>(HttpRequestMessage requestMessage, CancellationToken cancellationToken)
         where TResponse : IListenBrainzResponse
