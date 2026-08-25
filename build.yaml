@@ -17,5 +17,4 @@ artifacts:
   - "Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.dll"
 changelog: >
   This version contains the following changes:
-    - Allow override of delimiters for multiple MBIDs in an artist metadata field
-    - Provide UA header for ListenBrainz API calls
+    - Migration of playlist sync settings
