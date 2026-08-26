@@ -30,11 +30,6 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
         _lock = new SemaphoreSlim(1, 1);
     }
 
-    /// <summary>
-    /// Finalizes an instance of the <see cref="DefaultPersistentJsonService{T}"/> class.
-    /// </summary>
-    ~DefaultPersistentJsonService() => Dispose(false);
-
     /// <inheritdoc />
     public void Save(T data, string? filePath = null)
     {
@@ -154,26 +149,12 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
     /// <inheritdoc />
     public void Dispose()
     {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    /// <summary>
-    /// Dispose managed and unmanaged (own) resources.
-    /// </summary>
-    /// <param name="disposing">Dispose managed resources.</param>
-    private void Dispose(bool disposing)
-    {
         if (_isDisposed)
         {
             return;
         }
 
-        if (disposing)
-        {
-            _lock.Dispose();
-        }
-
+        _lock.Dispose();
         _isDisposed = true;
     }
 
