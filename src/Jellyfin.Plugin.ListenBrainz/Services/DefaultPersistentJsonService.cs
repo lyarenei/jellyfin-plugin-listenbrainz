@@ -10,10 +10,7 @@ namespace Jellyfin.Plugin.ListenBrainz.Services;
 /// <typeparam name="T">Data type.</typeparam>
 public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>, IDisposable
 {
-    private static readonly JsonSerializerOptions _defaultSerializerOptions = new()
-    {
-        WriteIndented = true,
-    };
+    private static readonly JsonSerializerOptions _defaultSerializerOptions = new() { WriteIndented = true, };
 
     private readonly string? _defaultFilePath;
     private readonly JsonSerializerOptions _serializerOptions;
