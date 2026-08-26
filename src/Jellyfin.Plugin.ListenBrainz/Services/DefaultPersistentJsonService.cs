@@ -59,6 +59,7 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
         }
         catch (Exception ex)
         {
+            DeleteFile(tempPath);
             throw new ServiceException("Saving JSON file failed", ex);
         }
         finally
@@ -88,6 +89,7 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
         }
         catch (Exception ex)
         {
+            DeleteFile(tempPath);
             throw new ServiceException("Saving JSON file failed", ex);
         }
         finally
@@ -193,6 +195,18 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
     {
         var path = ResolveFilePath(filePath);
         return path + ".tmp";
+    }
+
+    private static void DeleteFile(string filePath)
+    {
+        try
+        {
+            File.Delete(filePath);
+        }
+        catch (Exception)
+        {
+            // Failed delete is OK
+        }
     }
 
     private static void EnsureFileDirectory(string filePath)
