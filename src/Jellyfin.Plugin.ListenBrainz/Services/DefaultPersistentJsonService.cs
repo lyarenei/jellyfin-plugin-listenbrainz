@@ -42,12 +42,20 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
     public void Save(T data, string? filePath = null)
     {
         var path = ResolveFilePath(filePath);
+        var tempPath = ResolveTempFilePath(filePath);
+
         EnsureFileDirectory(path);
+
         _lock.Wait();
+
         try
         {
-            using var stream = File.Create(path);
-            JsonSerializer.Serialize(stream, data, _serializerOptions);
+            using (var stream = File.Create(tempPath))
+            {
+                JsonSerializer.Serialize(stream, data, _serializerOptions);
+            }
+
+            File.Move(tempPath, path, overwrite: true);
         }
         catch (Exception ex)
         {
@@ -63,12 +71,20 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
     public async Task SaveAsync(T data, string? filePath = null, CancellationToken cancellationToken = default)
     {
         var path = ResolveFilePath(filePath);
+        var tempPath = ResolveTempFilePath(filePath);
+
         EnsureFileDirectory(path);
+
         await _lock.WaitAsync(cancellationToken);
+
         try
         {
-            await using var stream = File.Create(path);
-            await JsonSerializer.SerializeAsync(stream, data, _serializerOptions, cancellationToken);
+            await using (var stream = File.Create(tempPath))
+            {
+                await JsonSerializer.SerializeAsync(stream, data, _serializerOptions, cancellationToken);
+            }
+
+            File.Move(tempPath, path, overwrite: true);
         }
         catch (Exception ex)
         {
@@ -171,6 +187,12 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
         }
 
         return path;
+    }
+
+    private string ResolveTempFilePath(string? filePath)
+    {
+        var path = ResolveFilePath(filePath);
+        return path + ".tmp";
     }
 
     private static void EnsureFileDirectory(string filePath)
