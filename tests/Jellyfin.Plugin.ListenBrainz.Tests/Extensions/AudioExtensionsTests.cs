@@ -53,6 +53,21 @@ public class AudioExtensionsTests
     }
 
     [Fact]
+    public void AsListen_SplitsArtistMbids_OnUnitSeparatorDelimiter_WithCustomDelimiters()
+    {
+        // The unit separator cannot be stored in the XML config, so it always applies
+        // on top of whatever delimiters are configured.
+        var unitSeparator = char.ConvertFromUtf32(0x1F);
+        var audio = GetAudio($"{ArtistMbid1}{unitSeparator}{ArtistMbid2}");
+
+        var listen = audio.AsListen(mbidDelimiters: "|");
+
+        Assert.Equal(
+            [ArtistMbid1, ArtistMbid2],
+            listen.TrackMetadata.AdditionalInfo!.ArtistMbids);
+    }
+
+    [Fact]
     public void AsListen_TrimsWhitespace_AfterSplitting()
     {
         var audio = GetAudio($"{ArtistMbid1} , {ArtistMbid2}");
