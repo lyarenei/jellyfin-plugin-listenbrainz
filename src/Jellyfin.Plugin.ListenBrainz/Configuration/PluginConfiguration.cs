@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
+using System.Xml;
 using System.Xml.Serialization;
 using MediaBrowser.Model.Plugins;
 
@@ -65,7 +66,11 @@ public class PluginConfiguration : BasePluginConfiguration
     public string MbidDelimiters
     {
         get => _mbidDelimitersOverride ?? DefaultMbidDelimiters;
-        set => _mbidDelimitersOverride = string.IsNullOrEmpty(value) ? null : value;
+        set
+        {
+            var sanitized = SanitizeForXml(value);
+            _mbidDelimitersOverride = string.IsNullOrEmpty(sanitized) ? null : sanitized;
+        }
     }
 
     /// <summary>
@@ -132,5 +137,15 @@ public class PluginConfiguration : BasePluginConfiguration
     {
         get => _isAllPlaylistsSyncEnabled ?? false;
         set => _isAllPlaylistsSyncEnabled = value;
+    }
+
+    private static string SanitizeForXml(string? value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            return string.Empty;
+        }
+
+        return new string(value.Where(XmlConvert.IsXmlChar).ToArray());
     }
 }
