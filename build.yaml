@@ -18,3 +18,4 @@ artifacts:
 changelog: >
   This version contains the following changes:
     - Fix plugin configration wipe after installing version 6.5.1.1 (or .2.1)
+    - Fix config loading for selected user on initial config page load
