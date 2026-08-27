@@ -17,4 +17,4 @@ artifacts:
   - "Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.dll"
 changelog: >
   This version contains the following changes:
-    - Migration of playlist sync settings
+    - Fix plugin configration wipe after installing version 6.5.1.1
