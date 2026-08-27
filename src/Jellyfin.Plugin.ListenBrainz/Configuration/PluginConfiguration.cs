@@ -77,7 +77,14 @@ public class PluginConfiguration : BasePluginConfiguration
     /// Gets the default delimiters used to split multiple MBIDs in metadata.
     /// </summary>
     [XmlIgnore]
-    public static string DefaultMbidDelimiters => ";,/\u001F";
+    public static string DefaultMbidDelimiters => ";,/";
+
+    /// <summary>
+    /// Gets delimiters which always split multiple MBIDs, on top of <see cref="MbidDelimiters"/>.
+    /// Cannot be part of the default set due to XML limitations.
+    /// </summary>
+    [XmlIgnore]
+    public static string ImplicitMbidDelimiters => "\u001F";
 
     /// <summary>
     /// Gets or sets a value indicating whether MusicBrainz integration is enabled.
