@@ -1,5 +1,4 @@
 import { ConfigApiClient } from "./apiClient";
-import { userDefaults } from "./constants";
 import {
     fillBackupConfigForm,
     fillGeneralConfigForm,
@@ -9,7 +8,7 @@ import {
 } from "./formHelpers";
 import registerEventHooks from "./eventHooks";
 import { initTabs } from "./tabs";
-import { getUniqueLibraryName } from "./utils";
+import { getUniqueLibraryName, getUserConfig } from "./utils";
 import { MediaLibrary } from "./types";
 
 /**
@@ -32,8 +31,10 @@ export async function setUpPluginConfigPage(view: HTMLElement): Promise<void> {
 export async function loadPluginConfigData(view: HTMLElement): Promise<void> {
     const pluginConfig = await ConfigApiClient.getPluginConfiguration();
     const jellyfinLibraries = await ConfigApiClient.getLibraries();
+    const userDropdown = view.querySelector("#JellyfinUser") as HTMLSelectElement;
+    const userConfig = getUserConfig(pluginConfig, userDropdown.value);
 
-    fillUserConfigForm(view, pluginConfig.UserConfigs[0] || userDefaults);
+    fillUserConfigForm(view, userConfig);
     fillGeneralConfigForm(view, pluginConfig);
     fillMusicBrainzConfigForm(view, pluginConfig);
     fillBackupConfigForm(view, pluginConfig);
