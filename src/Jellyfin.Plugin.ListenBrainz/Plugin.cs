@@ -22,10 +22,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     public Plugin(IApplicationPaths paths, IXmlSerializer xmlSerializer) : base(paths, xmlSerializer)
     {
         Instance = this;
-        if (LegacyPlaylistSyncMigration.Apply(Configuration))
-        {
-            SaveConfiguration();
-        }
+        ApplyLegacyPlaylistSyncMigration();
     }
 
     /// <summary>
@@ -99,6 +96,23 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
                     GetType().Namespace),
             },
         ];
+    }
+
+    private void ApplyLegacyPlaylistSyncMigration()
+    {
+        try
+        {
+            if (LegacyPlaylistSyncMigration.Apply(Configuration))
+            {
+                SaveConfiguration();
+            }
+        }
+        catch (Exception)
+        {
+            // In-memory config => does not touch the actual file
+            // TODO: consider current file backup before future migrations
+            Configuration = new PluginConfiguration();
+        }
     }
 
     /// <summary>

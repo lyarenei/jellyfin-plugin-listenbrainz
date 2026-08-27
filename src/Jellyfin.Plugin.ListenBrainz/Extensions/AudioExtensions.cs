@@ -43,7 +43,8 @@ public static class AudioExtensions
         AudioItemMetadata? itemMetadata = null,
         string? mbidDelimiters = null)
     {
-        var delimiters = (mbidDelimiters ?? PluginConfiguration.DefaultMbidDelimiters).ToCharArray();
+        var delimiters = ((mbidDelimiters ?? PluginConfiguration.DefaultMbidDelimiters) +
+                          PluginConfiguration.ImplicitMbidDelimiters).ToCharArray();
         string allArtists = string.Join(", ", item.Artists.TakeWhile(name => !string.IsNullOrEmpty(name)));
         return new Listen
         {
