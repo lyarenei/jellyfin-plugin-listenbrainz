@@ -31,6 +31,12 @@ public class PluginConfiguration : BasePluginConfiguration
     }
 
     /// <summary>
+    /// Gets or sets the version of this configuration.
+    /// Must default to 0 => earlier configs do not have a version.
+    /// </summary>
+    public int ConfigVersion { get; set; }
+
+    /// <summary>
     /// Gets or sets ListenBrainz API base URL.
     /// </summary>
     public string ListenBrainzApiUrl
