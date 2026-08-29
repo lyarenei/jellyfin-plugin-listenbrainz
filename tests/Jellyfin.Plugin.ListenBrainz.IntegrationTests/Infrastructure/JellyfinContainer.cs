@@ -31,11 +31,14 @@ internal sealed class JellyfinContainer : IAsyncDisposable
     public static async Task<JellyfinContainer> StartAsync(
         string buildContext,
         string jellyfinTag,
+        string imageVariant,
         CancellationToken cancellationToken = default)
     {
         await EnsurePodmanAvailableAsync(cancellationToken).ConfigureAwait(false);
 
-        var imageTag = $"jellyfin-listenbrainz-itest:{jellyfinTag}";
+        // The variant keeps images of servers with and without a baked-in plugin apart, so a run
+        // never picks up the image another kind of run left behind.
+        var imageTag = $"jellyfin-listenbrainz-itest:{jellyfinTag}-{imageVariant}";
         (await ProcessRunner.RunAsync(
             PodmanExecutable,
             [
@@ -177,6 +180,26 @@ internal sealed class JellyfinContainer : IAsyncDisposable
             }
 
             await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
+    /// Restarts the container and waits until the server is reachable again. The container keeps
+    /// its writable layer, so anything installed into the server survives.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    public async Task RestartAsync(CancellationToken cancellationToken = default)
+    {
+        (await ProcessRunner.RunAsync(PodmanExecutable, ["restart", _containerName], cancellationToken)
+            .ConfigureAwait(false))
+            .EnsureSuccess();
+
+        if (!await WaitUntilServingAsync(_serveProbeTimeout, cancellationToken).ConfigureAwait(false))
+        {
+            throw new InvalidOperationException(
+                $"{BaseAddress} did not serve again after a restart, container state: " +
+                await GetStateAsync(cancellationToken).ConfigureAwait(false));
         }
     }
 

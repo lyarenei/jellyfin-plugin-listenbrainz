@@ -11,7 +11,11 @@ internal sealed class JellyfinApiClient : IDisposable
     private const string DeviceName = "podman";
     private const string ClientVersion = "1.0.0";
 
+    private const string RepositoryName = "ListenBrainz integration tests";
+
     private static readonly TimeSpan _retryDelay = TimeSpan.FromSeconds(1);
+    private static readonly TimeSpan _repositoryPollDelay = TimeSpan.FromSeconds(5);
+    private static readonly TimeSpan _installPollDelay = TimeSpan.FromSeconds(1);
 
     private readonly HttpClient _client;
     private readonly string _deviceId = Guid.NewGuid().ToString("N");
@@ -107,6 +111,144 @@ internal sealed class JellyfinApiClient : IDisposable
 
         return await response.Content.ReadFromJsonAsync<List<PluginInfo>>(cancellationToken).ConfigureAwait(false)
                ?? throw new InvalidOperationException("The server returned an empty plugin list payload.");
+    }
+
+    /// <summary>
+    /// Points the server at a single plugin repository and installs the requested plugin version
+    /// from it, the way a user would from the dashboard. Returns once the server has downloaded
+    /// and registered the plugin; loading it still takes a restart.
+    /// </summary>
+    /// <param name="manifest">The plugin identity to install.</param>
+    /// <param name="source">The repository and version to install from.</param>
+    /// <param name="timeout">Budget for the whole installation.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    public async Task InstallFromRepositoryAsync(
+        PluginBuildManifest manifest,
+        PluginSource source,
+        TimeSpan timeout,
+        CancellationToken cancellationToken = default)
+    {
+        var deadline = DateTimeOffset.UtcNow + timeout;
+        var repositoryUrl = source.RepositoryUrl.ToString();
+
+        // The list is replaced rather than appended to: the default Jellyfin repository has
+        // nothing to contribute here and would be fetched on every package listing.
+        await PostAsync(
+            "Repositories",
+            new[] { new { Name = RepositoryName, Url = repositoryUrl, Enabled = true } },
+            deadline,
+            cancellationToken).ConfigureAwait(false);
+
+        await WaitForPublishedVersionAsync(manifest, source, deadline, cancellationToken).ConfigureAwait(false);
+
+        var query = $"?assemblyGuid={manifest.PluginId:D}" +
+                    $"&version={Uri.EscapeDataString(source.Version)}" +
+                    $"&repositoryUrl={Uri.EscapeDataString(repositoryUrl)}";
+
+        await PostAsync(
+            $"Packages/Installed/{Uri.EscapeDataString(manifest.Name)}{query}",
+            content: null,
+            deadline,
+            cancellationToken).ConfigureAwait(false);
+
+        await WaitForRegisteredPluginAsync(manifest, source, deadline, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Waits until the server serves authorized requests reliably, for use after a restart.
+    /// </summary>
+    /// <param name="timeout">How long to wait.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    public Task WaitUntilReadyAsync(TimeSpan timeout, CancellationToken cancellationToken = default) =>
+        WaitUntilSettledAsync(DateTimeOffset.UtcNow + timeout, cancellationToken);
+
+    /// <summary>
+    /// Lists the packages the configured repositories offer.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The available packages.</returns>
+    public async Task<IReadOnlyList<PackageInfo>> GetPackagesAsync(CancellationToken cancellationToken = default)
+    {
+        using var response = await _client.GetAsync("Packages", cancellationToken).ConfigureAwait(false);
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<List<PackageInfo>>(cancellationToken).ConfigureAwait(false)
+               ?? throw new InvalidOperationException("The server returned an empty package list payload.");
+    }
+
+    // The pipeline publishes to the repository right before the tests run, so a manifest that does
+    // not carry the version yet is worth waiting on rather than failing outright.
+    private async Task WaitForPublishedVersionAsync(
+        PluginBuildManifest manifest,
+        PluginSource source,
+        DateTimeOffset deadline,
+        CancellationToken cancellationToken)
+    {
+        var offered = "the server did not answer with a package list";
+
+        while (true)
+        {
+            try
+            {
+                var package = (await GetPackagesAsync(cancellationToken).ConfigureAwait(false))
+                    .FirstOrDefault(p => p.Guid == manifest.PluginId);
+
+                if (package is null)
+                {
+                    offered = "the repository does not list the plugin at all";
+                }
+                else if (package.Versions.Exists(v => string.Equals(v.Version, source.Version, StringComparison.OrdinalIgnoreCase)))
+                {
+                    return;
+                }
+                else
+                {
+                    offered = $"offered versions: {string.Join(", ", package.Versions.Select(v => v.Version))}";
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                offered = ex.Message;
+            }
+
+            if (DateTimeOffset.UtcNow >= deadline)
+            {
+                throw new TimeoutException(
+                    $"{source.RepositoryUrl} does not offer {manifest.Name} {source.Version} ({offered}).");
+            }
+
+            await Task.Delay(_repositoryPollDelay, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    // Installation is asynchronous: the request only queues it. The server registers the plugin
+    // once the package is downloaded and unpacked, which is what makes the install observable.
+    private async Task WaitForRegisteredPluginAsync(
+        PluginBuildManifest manifest,
+        PluginSource source,
+        DateTimeOffset deadline,
+        CancellationToken cancellationToken)
+    {
+        while (true)
+        {
+            var plugins = await GetPluginsAsync(cancellationToken).ConfigureAwait(false);
+            if (plugins.Any(p => p.Id == manifest.PluginId && p.Version == source.Version))
+            {
+                return;
+            }
+
+            if (DateTimeOffset.UtcNow >= deadline)
+            {
+                throw new TimeoutException(
+                    $"The server did not install {manifest.Name} {source.Version} from {source.RepositoryUrl} " +
+                    $"before the deadline. Reported plugins: " +
+                    $"{string.Join(", ", plugins.Select(p => $"{p.Name} {p.Version} ({p.Status})"))}.");
+            }
+
+            await Task.Delay(_installPollDelay, cancellationToken).ConfigureAwait(false);
+        }
     }
 
     public void Dispose() => _client.Dispose();

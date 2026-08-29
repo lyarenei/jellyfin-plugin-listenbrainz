@@ -1,0 +1,39 @@
+# $schema: https://json.schemastore.org/github-workflow
+name: 'Integration tests'
+
+on:
+  workflow_call:
+    inputs:
+      repo:
+        description: 'Plugin repository to install the plugin under test from.'
+        type: string
+        required: true
+      dotnet-version:
+        type: string
+        required: false
+        default: "9.0"
+      jellyfin-tag:
+        description: 'Tag of the jellyfin/jellyfin image to test against. Empty uses the default the test harness ships with.'
+        type: string
+        required: false
+        default: ""
+
+jobs:
+  integration-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # v4.0.1
+        with:
+          dotnet-version: "${{ inputs.dotnet-version }}"
+
+      - name: Run Integration Tests
+        # The plugin is not built here: the server installs it from the repository the pipeline
+        # has just published to, which is what the tests are there to verify.
+        env:
+          JELLYFIN_ITEST_PLUGIN_REPOSITORY: "https://repo.xkrivo.net/${{ inputs.repo }}/manifest.json"
+          JELLYFIN_ITEST_TAG: "${{ inputs.jellyfin-tag }}"
+        run: dotnet test tests/Jellyfin.Plugin.ListenBrainz.IntegrationTests --nologo

@@ -11,6 +11,27 @@ internal static class PluginPackager
         DefaultIgnoreCondition = JsonIgnoreCondition.Never,
     };
 
+    /// <summary>
+    /// Stages a build context with no plugin in it, for a server that installs the plugin from a
+    /// repository instead. The empty plugin directory keeps the Containerfile the same for both.
+    /// </summary>
+    /// <returns>Path to the build context.</returns>
+    public static string CreateEmptyBuildContext()
+    {
+        var context = Path.Combine(RepositoryLayout.ScratchDirectory, "context");
+        Recreate(context);
+        Directory.CreateDirectory(Path.Combine(context, "plugin"));
+
+        return context;
+    }
+
+    /// <summary>
+    /// Builds the plugin from the working tree and stages it in a build context, laid out the way
+    /// an installed plugin looks on disk.
+    /// </summary>
+    /// <param name="manifest">The plugin build manifest.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Path to the build context.</returns>
     public static async Task<string> CreateBuildContextAsync(
         PluginBuildManifest manifest,
         CancellationToken cancellationToken = default)

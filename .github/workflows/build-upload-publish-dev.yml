@@ -41,3 +41,10 @@ jobs:
       host: ${{ secrets.DEPLOY_HOST }}
       user: ${{ secrets.DEPLOY_USER }}
       key: ${{ secrets.DEPLOY_KEY }}
+
+  integration-test:
+    if: ${{ contains(github.repository, 'lyarenei/') }}
+    needs: update-manifest
+    uses: ./.github/workflows/integration-test.yml
+    with:
+      repo: ${{ vars.REPO_DEV }}
