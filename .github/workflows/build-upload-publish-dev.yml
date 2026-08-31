@@ -12,12 +12,40 @@ on:
   workflow_dispatch:
 
 jobs:
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      plugin-changed: ${{ steps.check.outputs.changed }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        with:
+          # The gate walks back to the commit that last changed the version.
+          fetch-depth: 0
+
+      - name: Check For Plugin Changes
+        id: check
+        run: |
+          if [ "${{ github.event_name }}" = 'pull_request' ]; then
+              # The checkout is the merge commit, so its first parent is the branch the pull
+              # request targets and HEAD^1..HEAD is exactly what the branch brings.
+              base='HEAD^1'
+          else
+              base=''
+          fi
+
+          .github/scripts/check-plugin-changes.sh "$base"
+
   test:
     uses: jellyfin/jellyfin-meta-plugins/.github/workflows/test.yaml@master
     with:
       dotnet-version: ${{ vars.DOTNET_9 }}
 
   build:
+    # Everything downstream of the build is skipped with it, so this gates the whole chain:
+    # publishing a package identical to the one in the repository has nothing to test.
+    if: ${{ needs.gate.outputs.plugin-changed == 'true' }}
+    needs: gate
     uses: ./.github/workflows/build.yml
 
   upload-repo:
