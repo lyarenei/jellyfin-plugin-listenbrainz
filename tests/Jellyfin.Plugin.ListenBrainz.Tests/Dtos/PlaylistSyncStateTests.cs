@@ -72,4 +72,10 @@ public class PlaylistSyncStateTests
         Assert.Single(state.EntriesFor(firstUser));
         Assert.Equal(secondUser, Assert.Single(state.EntriesFor(secondUser)).JellyfinUserId);
     }
+
+    [Fact]
+    public void NewState_CarriesCurrentVersion()
+    {
+        Assert.Equal(PlaylistSyncState.CurrentVersion, new PlaylistSyncState().Version);
+    }
 }

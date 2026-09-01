@@ -30,9 +30,10 @@ public class DefaultPlaylistSyncStateService : IPlaylistSyncStateService
     /// <inheritdoc />
     public async Task<PlaylistSyncState> ReadAsync(CancellationToken cancellationToken)
     {
+        PlaylistSyncState state;
         try
         {
-            return await _storage.ReadAsync(cancellationToken: cancellationToken);
+            state = await _storage.ReadAsync(cancellationToken: cancellationToken);
         }
         catch (ServiceException e) when (e.InnerException is FileNotFoundException or DirectoryNotFoundException)
         {
@@ -45,6 +46,17 @@ public class DefaultPlaylistSyncStateService : IPlaylistSyncStateService
             _logger.LogWarning("Playlist sync state is corrupt and will be rebuilt: {Error}", e.Message);
             return new PlaylistSyncState();
         }
+
+        if (state.Version != PlaylistSyncState.CurrentVersion)
+        {
+            _logger.LogInformation(
+                "Playlist sync state has version {Version}, expected {Expected}; rebuilding it",
+                state.Version,
+                PlaylistSyncState.CurrentVersion);
+            return new PlaylistSyncState();
+        }
+
+        return state;
     }
 
     /// <inheritdoc />

@@ -6,15 +6,30 @@ namespace Jellyfin.Plugin.ListenBrainz.Dtos;
 /// <summary>
 /// Persistent state for ListenBrainz playlist sync.
 /// </summary>
+/// <remarks>
+/// The state is derived from ListenBrainz and user settings, so it is discarded and rebuilt
+/// instead of migrated.
+/// </remarks>
 public class PlaylistSyncState
 {
+    /// <summary>
+    /// Schema version of the state written by this plugin version.
+    /// </summary>
+    public const int CurrentVersion = 1;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="PlaylistSyncState"/> class.
     /// </summary>
     public PlaylistSyncState()
     {
+        Version = CurrentVersion;
         Entries = [];
     }
+
+    /// <summary>
+    /// Gets or sets the schema version of this state.
+    /// </summary>
+    public int Version { get; set; }
 
     /// <summary>
     /// Gets or sets synced playlist entries.

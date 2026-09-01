@@ -62,6 +62,20 @@ public class PlaylistSyncStateServiceTests
     }
 
     [Fact]
+    public async Task ReadAsync_ReturnsEmptyState_WhenVersionDoesNotMatch()
+    {
+        var stored = new PlaylistSyncState { Version = PlaylistSyncState.CurrentVersion + 1 };
+        stored.Entries.Add(new PlaylistSyncEntry { ListenBrainzPlaylistId = "mbid" });
+
+        var service = ServiceReading(() => Task.FromResult(stored));
+
+        var state = await service.ReadAsync(CancellationToken.None);
+
+        Assert.Empty(state.Entries);
+        Assert.Equal(PlaylistSyncState.CurrentVersion, state.Version);
+    }
+
+    [Fact]
     public async Task ReadAsync_ReturnsStoredState()
     {
         var stored = new PlaylistSyncState();
