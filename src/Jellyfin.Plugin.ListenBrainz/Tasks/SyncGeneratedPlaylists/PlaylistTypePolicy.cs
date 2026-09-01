@@ -50,11 +50,11 @@ internal static class PlaylistTypePolicy
     }
 
     /// <summary>
-    /// Gets the persisted category discriminator for a playlist type.
+    /// Gets the persisted type discriminator for a playlist type.
     /// Inverse of <see cref="TryGetPlaylistType"/>.
     /// </summary>
     /// <param name="type">The playlist type.</param>
-    /// <returns>The category discriminator stored on a mapping.</returns>
+    /// <returns>The discriminator stored on an entry.</returns>
     internal static string CategoryFor(PlaylistType type) => type.ToString();
 
     /// <summary>
@@ -84,30 +84,29 @@ internal static class PlaylistTypePolicy
     }
 
     /// <summary>
-    /// Determines whether a persisted mapping is already up to date with the playlist from the listing,
-    /// i.e. the playlist has not been regenerated since it was last synced.
+    /// Determines whether a persisted entry still matches the listed playlist.
     /// </summary>
-    /// <param name="mapping">The persisted playlist mapping.</param>
-    /// <param name="playlist">The playlist metadata from the created-for listing.</param>
-    /// <returns>True if the mapping already reflects the current playlist.</returns>
-    internal static bool IsUpToDate(PlaylistMapping mapping, Playlist playlist)
+    /// <param name="entry">The persisted playlist sync entry.</param>
+    /// <param name="playlist">The playlist metadata from the listing.</param>
+    /// <returns>True if the playlist has not been regenerated since the last sync.</returns>
+    internal static bool IsUpToDate(PlaylistSyncEntry entry, Playlist playlist)
     {
-        return mapping.CreatedAt == playlist.CreatedAt;
+        return entry.CreatedAt == playlist.CreatedAt;
     }
 
     /// <summary>
-    /// Determines whether a persisted mapping should be pruned given the current selection.
+    /// Determines whether a persisted entry should be pruned given the current selection.
     /// </summary>
-    /// <param name="mapping">The persisted playlist mapping.</param>
+    /// <param name="entry">The persisted playlist sync entry.</param>
     /// <param name="selectedPlaylistIds">ListenBrainz playlist IDs selected this run.</param>
     /// <param name="syncedTypes">Playlist types that were fully synced this run.</param>
-    /// <returns>True if the mapping is owned by a capped type and no longer in the selection.</returns>
-    internal static bool ShouldPruneMapping(
-        PlaylistMapping mapping,
+    /// <returns>True if the entry belongs to a capped type and is no longer in the selection.</returns>
+    internal static bool ShouldPruneEntry(
+        PlaylistSyncEntry entry,
         HashSet<string> selectedPlaylistIds,
         HashSet<PlaylistType> syncedTypes)
     {
-        if (!TryGetPlaylistType(mapping.Category, out var type))
+        if (!TryGetPlaylistType(entry.GeneratedType, out var type))
         {
             return false;
         }
@@ -118,7 +117,7 @@ internal static class PlaylistTypePolicy
             return false;
         }
 
-        return syncedTypes.Contains(type) && !selectedPlaylistIds.Contains(mapping.ListenBrainzPlaylistId);
+        return syncedTypes.Contains(type) && !selectedPlaylistIds.Contains(entry.ListenBrainzPlaylistId);
     }
 
     private static IEnumerable<PlaylistCandidate> TakeForType(IGrouping<PlaylistType, PlaylistCandidate> group)

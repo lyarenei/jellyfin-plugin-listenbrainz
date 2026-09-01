@@ -13,62 +13,65 @@ public class PlaylistSyncState
     /// </summary>
     public PlaylistSyncState()
     {
-        Mappings = [];
+        Entries = [];
     }
 
     /// <summary>
-    /// Gets or sets synced playlist mappings.
+    /// Gets or sets synced playlist entries.
     /// </summary>
     [SuppressMessage("Warning", "CA2227", Justification = "Needed for deserialization")]
-    public Collection<PlaylistMapping> Mappings { get; set; }
+    public Collection<PlaylistSyncEntry> Entries { get; set; }
 
     /// <summary>
-    /// Finds the mapping for a given user and ListenBrainz playlist.
+    /// Finds the entry for a given user and ListenBrainz playlist.
     /// </summary>
     /// <param name="userId">Jellyfin user ID.</param>
     /// <param name="listenBrainzPlaylistId">ListenBrainz playlist ID (MBID).</param>
-    /// <returns>The playlist mapping. Null if not found.</returns>
-    public PlaylistMapping? FindMapping(Guid userId, string listenBrainzPlaylistId)
+    /// <returns>The entry, or null if not found.</returns>
+    public PlaylistSyncEntry? FindEntry(Guid userId, string listenBrainzPlaylistId)
     {
-        return Mappings.FirstOrDefault(m =>
-            m.JellyfinUserId == userId &&
-            m.ListenBrainzPlaylistId.Equals(listenBrainzPlaylistId, StringComparison.OrdinalIgnoreCase));
+        return Entries.FirstOrDefault(e =>
+            e.JellyfinUserId == userId &&
+            e.ListenBrainzPlaylistId.Equals(listenBrainzPlaylistId, StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>
-    /// Creates or updates the mapping for a ListenBrainz playlist for a given user.
+    /// Creates or updates the entry for a ListenBrainz playlist for a given user.
     /// </summary>
     /// <param name="userId">Jellyfin user ID.</param>
     /// <param name="listenBrainzPlaylistId">ListenBrainz playlist ID (MBID).</param>
     /// <param name="jellyfinPlaylistId">Jellyfin playlist ID.</param>
     /// <param name="title">ListenBrainz playlist title at sync time.</param>
     /// <param name="createdAt">ListenBrainz playlist creation date.</param>
-    /// <param name="category">Playlist category discriminator.</param>
-    /// <returns>The playlist mapping.</returns>
-    public PlaylistMapping Upsert(
+    /// <param name="origin">Where the playlist came from.</param>
+    /// <param name="generatedType">Generated playlist type, if the origin is a generated playlist.</param>
+    /// <returns>The playlist entry.</returns>
+    public PlaylistSyncEntry Upsert(
         Guid userId,
         string listenBrainzPlaylistId,
         Guid jellyfinPlaylistId,
         string title,
         DateTime createdAt,
-        string? category)
+        PlaylistOrigin origin,
+        string? generatedType)
     {
-        var mapping = FindMapping(userId, listenBrainzPlaylistId);
-        if (mapping is null)
+        var entry = FindEntry(userId, listenBrainzPlaylistId);
+        if (entry is null)
         {
-            mapping = new PlaylistMapping
+            entry = new PlaylistSyncEntry
             {
                 JellyfinUserId = userId,
                 ListenBrainzPlaylistId = listenBrainzPlaylistId,
             };
-            Mappings.Add(mapping);
+            Entries.Add(entry);
         }
 
-        mapping.JellyfinPlaylistId = jellyfinPlaylistId;
-        mapping.Title = title;
-        mapping.CreatedAt = createdAt;
-        mapping.Category = category;
-        mapping.LastSyncedAt = DateTime.UtcNow;
-        return mapping;
+        entry.JellyfinPlaylistId = jellyfinPlaylistId;
+        entry.Title = title;
+        entry.CreatedAt = createdAt;
+        entry.Origin = origin;
+        entry.GeneratedType = generatedType;
+        entry.LastSyncedAt = DateTime.UtcNow;
+        return entry;
     }
 }

@@ -7,7 +7,7 @@ namespace Jellyfin.Plugin.ListenBrainz.Tests.Dtos;
 public class PlaylistSyncStateTests
 {
     [Fact]
-    public void Upsert_CreatesThenUpdatesSameMapping()
+    public void Upsert_CreatesThenUpdatesSameEntry()
     {
         var state = new PlaylistSyncState();
         var userId = Guid.NewGuid();
@@ -15,27 +15,43 @@ public class PlaylistSyncStateTests
         var secondJfId = Guid.NewGuid();
         var createdAt = DateTime.UtcNow;
 
-        var created = state.Upsert(userId, "lb-1", firstJfId, "Weekly Jams", createdAt, "Jams");
-        Assert.Single(state.Mappings);
+        var created = state.Upsert(
+            userId, "lb-1", firstJfId, "Weekly Jams", createdAt, PlaylistOrigin.Generated, "Jams");
+        Assert.Single(state.Entries);
         Assert.Equal(firstJfId, created.JellyfinPlaylistId);
 
-        var updated = state.Upsert(userId, "lb-1", secondJfId, "Weekly Jams (new)", createdAt, "Jams");
+        var updated = state.Upsert(
+            userId, "lb-1", secondJfId, "Weekly Jams (new)", createdAt, PlaylistOrigin.Generated, "Jams");
 
-        Assert.Single(state.Mappings);
+        Assert.Single(state.Entries);
         Assert.Same(created, updated);
         Assert.Equal(secondJfId, updated.JellyfinPlaylistId);
         Assert.Equal("Weekly Jams (new)", updated.Title);
     }
 
     [Fact]
-    public void FindMapping_MatchesByUserAndId_CaseInsensitive()
+    public void Upsert_RecordsOriginAndGeneratedType()
     {
         var state = new PlaylistSyncState();
         var userId = Guid.NewGuid();
-        state.Upsert(userId, "LB-ABC", Guid.NewGuid(), "title", DateTime.UtcNow, "Jams");
 
-        Assert.NotNull(state.FindMapping(userId, "lb-abc"));
-        Assert.Null(state.FindMapping(Guid.NewGuid(), "LB-ABC"));
-        Assert.Null(state.FindMapping(userId, "other"));
+        var entry = state.Upsert(
+            userId, "lb-1", Guid.NewGuid(), "Weekly Jams", DateTime.UtcNow, PlaylistOrigin.Generated, "Jams");
+
+        Assert.Equal(PlaylistOrigin.Generated, entry.Origin);
+        Assert.Equal("Jams", entry.GeneratedType);
+    }
+
+    [Fact]
+    public void FindEntry_MatchesByUserAndId_CaseInsensitive()
+    {
+        var state = new PlaylistSyncState();
+        var userId = Guid.NewGuid();
+        state.Upsert(
+            userId, "LB-ABC", Guid.NewGuid(), "title", DateTime.UtcNow, PlaylistOrigin.Generated, "Jams");
+
+        Assert.NotNull(state.FindEntry(userId, "lb-abc"));
+        Assert.Null(state.FindEntry(Guid.NewGuid(), "LB-ABC"));
+        Assert.Null(state.FindEntry(userId, "other"));
     }
 }

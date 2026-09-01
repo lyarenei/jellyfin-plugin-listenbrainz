@@ -112,38 +112,54 @@ public class GeneratedPlaylistsTests
         Assert.All(selected, c => Assert.Equal(PlaylistType.TopDiscoveries, c.Type));
     }
 
+    private static PlaylistSyncEntry MakeEntry(
+        string mbid,
+        string? generatedType,
+        PlaylistOrigin origin = PlaylistOrigin.Generated)
+    {
+        return new PlaylistSyncEntry
+        {
+            ListenBrainzPlaylistId = mbid,
+            Origin = origin,
+            GeneratedType = generatedType,
+        };
+    }
+
+    private static HashSet<string> Selected(params string[] ids)
+    {
+        return new HashSet<string>(ids, StringComparer.OrdinalIgnoreCase);
+    }
+
     [Fact]
     public void IsUpToDate_SameCreatedAt_ReturnsTrue()
     {
         var createdAt = DateTime.UtcNow;
-        var mapping = new PlaylistMapping { ListenBrainzPlaylistId = "jams-1", CreatedAt = createdAt };
+        var entry = new PlaylistSyncEntry { ListenBrainzPlaylistId = "jams-1", CreatedAt = createdAt };
         var playlist = MakePlaylist("weekly-jams", "jams-1", createdAt);
 
-        Assert.True(PlaylistTypePolicy.IsUpToDate(mapping, playlist));
+        Assert.True(PlaylistTypePolicy.IsUpToDate(entry, playlist));
     }
 
     [Fact]
     public void IsUpToDate_DifferentCreatedAt_ReturnsFalse()
     {
-        var mapping = new PlaylistMapping { ListenBrainzPlaylistId = "jams-1", CreatedAt = DateTime.UtcNow.AddDays(-7) };
+        var entry = new PlaylistSyncEntry
+        {
+            ListenBrainzPlaylistId = "jams-1",
+            CreatedAt = DateTime.UtcNow.AddDays(-7),
+        };
         var playlist = MakePlaylist("weekly-jams", "jams-1", DateTime.UtcNow);
 
-        Assert.False(PlaylistTypePolicy.IsUpToDate(mapping, playlist));
+        Assert.False(PlaylistTypePolicy.IsUpToDate(entry, playlist));
     }
 
     [Fact]
     public void Prune_OutOfRotationSameFamily_IsPruned()
     {
-        var mapping = new PlaylistMapping
-        {
-            ListenBrainzPlaylistId = "old-jams",
-            Category = "Jams",
-        };
-
-        var result = PlaylistTypePolicy.ShouldPruneMapping(
-            mapping,
-            selectedPlaylistIds: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "current-jams", "previous-jams" },
-            syncedTypes: new HashSet<PlaylistType> { PlaylistType.Jams });
+        var result = PlaylistTypePolicy.ShouldPruneEntry(
+            MakeEntry("old-jams", "Jams"),
+            selectedPlaylistIds: Selected("current-jams", "previous-jams"),
+            syncedTypes: [PlaylistType.Jams]);
 
         Assert.True(result);
     }
@@ -151,16 +167,10 @@ public class GeneratedPlaylistsTests
     [Fact]
     public void Prune_StillInRotation_IsKept()
     {
-        var mapping = new PlaylistMapping
-        {
-            ListenBrainzPlaylistId = "current-jams",
-            Category = "Jams",
-        };
-
-        var result = PlaylistTypePolicy.ShouldPruneMapping(
-            mapping,
-            selectedPlaylistIds: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "current-jams", "previous-jams" },
-            syncedTypes: new HashSet<PlaylistType> { PlaylistType.Jams });
+        var result = PlaylistTypePolicy.ShouldPruneEntry(
+            MakeEntry("current-jams", "Jams"),
+            selectedPlaylistIds: Selected("current-jams", "previous-jams"),
+            syncedTypes: [PlaylistType.Jams]);
 
         Assert.False(result);
     }
@@ -168,35 +178,21 @@ public class GeneratedPlaylistsTests
     [Fact]
     public void Prune_DisabledFamily_IsKept()
     {
-        var mapping = new PlaylistMapping
-        {
-            ListenBrainzPlaylistId = "old-exploration",
-            Category = "Exploration",
-        };
-
-        var result = PlaylistTypePolicy.ShouldPruneMapping(
-            mapping,
-            selectedPlaylistIds: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "current-jams" },
-            syncedTypes: new HashSet<PlaylistType> { PlaylistType.Jams });
+        var result = PlaylistTypePolicy.ShouldPruneEntry(
+            MakeEntry("old-exploration", "Exploration"),
+            selectedPlaylistIds: Selected("current-jams"),
+            syncedTypes: [PlaylistType.Jams]);
 
         Assert.False(result);
     }
 
     [Fact]
-    public void Prune_ArchiveMapping_IsNeverPruned()
+    public void Prune_UncappedType_IsNeverPruned()
     {
-        var mapping = new PlaylistMapping
-        {
-            ListenBrainzPlaylistId = "disc-2022",
-            Category = "TopDiscoveries",
-        };
-
-        // The type was synced and this playlist is not among the selected ids, yet archive
-        // playlists are permanent and must never be pruned.
-        var result = PlaylistTypePolicy.ShouldPruneMapping(
-            mapping,
-            selectedPlaylistIds: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "disc-2024" },
-            syncedTypes: new HashSet<PlaylistType> { PlaylistType.TopDiscoveries });
+        var result = PlaylistTypePolicy.ShouldPruneEntry(
+            MakeEntry("disc-2022", "TopDiscoveries"),
+            selectedPlaylistIds: Selected("disc-2024"),
+            syncedTypes: [PlaylistType.TopDiscoveries]);
 
         Assert.False(result);
     }
@@ -205,19 +201,13 @@ public class GeneratedPlaylistsTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("SomeOtherTaskCategory")]
-    public void Prune_ForeignOrNullCategory_IsNeverPruned(string? category)
+    public void Prune_ForeignOrNullType_IsNeverPruned(string? generatedType)
     {
-        // The store is shared across sync tasks; the generated task must leave mappings it does not own.
-        var mapping = new PlaylistMapping
-        {
-            ListenBrainzPlaylistId = "not-a-generated-playlist",
-            Category = category,
-        };
-
-        var result = PlaylistTypePolicy.ShouldPruneMapping(
-            mapping,
-            selectedPlaylistIds: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "current-jams" },
-            syncedTypes: new HashSet<PlaylistType> { PlaylistType.Jams });
+        // The state is shared across sync tasks; entries of other tasks must be left alone.
+        var result = PlaylistTypePolicy.ShouldPruneEntry(
+            MakeEntry("not-a-generated-playlist", generatedType),
+            selectedPlaylistIds: Selected("current-jams"),
+            syncedTypes: [PlaylistType.Jams]);
 
         Assert.False(result);
     }

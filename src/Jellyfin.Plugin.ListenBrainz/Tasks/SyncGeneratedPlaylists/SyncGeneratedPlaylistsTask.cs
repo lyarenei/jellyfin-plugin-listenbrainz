@@ -293,6 +293,7 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
             jellyfinPlaylistId,
             playlist.Title,
             playlist.CreatedAt,
+            PlaylistOrigin.Generated,
             PlaylistTypePolicy.CategoryFor(playlistType));
 
         _logger.LogInformation(
@@ -304,28 +305,28 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
 
     private SyncTarget ResolveTarget(User user, PlaylistSyncState state, Playlist listingPlaylist)
     {
-        var mapping = state.FindMapping(user.Id, listingPlaylist.PlaylistId);
-        if (mapping is null)
+        var entry = state.FindEntry(user.Id, listingPlaylist.PlaylistId);
+        if (entry is null)
         {
             return new SyncTarget(false, null);
         }
 
         // A playlist the user cannot see is effectively not synced.
         // Syncing it again reclaims ownership and restores their access.
-        if (PlaylistTypePolicy.IsUpToDate(mapping, listingPlaylist) &&
-            _playlistManager.IsVisibleTo(mapping.JellyfinPlaylistId, user.Id))
+        if (PlaylistTypePolicy.IsUpToDate(entry, listingPlaylist) &&
+            _playlistManager.IsVisibleTo(entry.JellyfinPlaylistId, user.Id))
         {
             return new SyncTarget(true, null);
         }
 
-        var playlist = _playlistManager.FindAny(mapping.JellyfinPlaylistId);
+        var playlist = _playlistManager.FindAny(entry.JellyfinPlaylistId);
         if (playlist is null)
         {
             _logger.LogInformation(
                 "Mapped Jellyfin playlist {PlaylistId} for ListenBrainz playlist {ListenBrainzPlaylistId} no longer exists",
-                mapping.JellyfinPlaylistId,
-                mapping.ListenBrainzPlaylistId);
-            state.Mappings.Remove(mapping);
+                entry.JellyfinPlaylistId,
+                entry.ListenBrainzPlaylistId);
+            state.Entries.Remove(entry);
         }
 
         return new SyncTarget(false, playlist);
@@ -349,26 +350,26 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
             .Where(t => !failedTypes.Contains(t))
             .ToHashSet();
 
-        var mappingsToRemove = state
-            .Mappings
-            .Where(m => m.JellyfinUserId == user.Id &&
-                        PlaylistTypePolicy.ShouldPruneMapping(m, selectedPlaylistIds, syncedTypes))
+        var entriesToRemove = state
+            .Entries
+            .Where(e => e.JellyfinUserId == user.Id &&
+                        PlaylistTypePolicy.ShouldPruneEntry(e, selectedPlaylistIds, syncedTypes))
             .ToList();
 
-        foreach (var mapping in mappingsToRemove)
+        foreach (var entry in entriesToRemove)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (userConfig.KeepPlaylistsAfterRotation)
             {
                 _logger.LogDebug(
-                    "Keeping out-of-rotation generated playlist {PlaylistId}, removing its mapping",
-                    mapping.ListenBrainzPlaylistId);
-                state.Mappings.Remove(mapping);
+                    "Keeping out-of-rotation generated playlist {PlaylistId}, removing its entry",
+                    entry.ListenBrainzPlaylistId);
+                state.Entries.Remove(entry);
                 continue;
             }
 
-            var playlist = _playlistManager.FindAny(mapping.JellyfinPlaylistId);
+            var playlist = _playlistManager.FindAny(entry.JellyfinPlaylistId);
             if (playlist is not null)
             {
                 _logger.LogInformation(
@@ -377,7 +378,7 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
                 _playlistManager.Delete(playlist);
             }
 
-            state.Mappings.Remove(mapping);
+            state.Entries.Remove(entry);
         }
     }
 

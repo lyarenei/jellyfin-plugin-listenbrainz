@@ -26,7 +26,7 @@ public class PlaylistSyncStateServiceTests
         var state = await service.ReadAsync(CancellationToken.None);
 
         Assert.NotNull(state);
-        Assert.Empty(state.Mappings);
+        Assert.Empty(state.Entries);
     }
 
     [Fact]
@@ -46,10 +46,11 @@ public class PlaylistSyncStateServiceTests
     public async Task ReadAsync_ReturnsStoredState()
     {
         var stored = new PlaylistSyncState();
-        stored.Mappings.Add(new PlaylistMapping
+        stored.Entries.Add(new PlaylistSyncEntry
         {
             ListenBrainzPlaylistId = "mbid",
-            Category = "Jams",
+            Origin = PlaylistOrigin.Generated,
+            GeneratedType = "Jams",
         });
 
         var storage = new Mock<IPersistentJsonService<PlaylistSyncState>>();
@@ -61,8 +62,8 @@ public class PlaylistSyncStateServiceTests
 
         var state = await service.ReadAsync(CancellationToken.None);
 
-        Assert.Single(state.Mappings);
-        Assert.Equal("mbid", state.Mappings[0].ListenBrainzPlaylistId);
+        Assert.Single(state.Entries);
+        Assert.Equal("mbid", state.Entries[0].ListenBrainzPlaylistId);
     }
 
     [Fact]
