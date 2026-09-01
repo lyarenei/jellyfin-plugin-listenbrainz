@@ -50,12 +50,21 @@ internal static class PlaylistTypePolicy
     }
 
     /// <summary>
-    /// Gets the persisted type discriminator for a playlist type.
-    /// Inverse of <see cref="TryGetPlaylistType"/>.
+    /// Gets the persisted discriminator of a playlist type. Inverse of <see cref="ParsePlaylistType"/>.
     /// </summary>
     /// <param name="type">The playlist type.</param>
     /// <returns>The discriminator stored on an entry.</returns>
     internal static string CategoryFor(PlaylistType type) => type.ToString();
+
+    /// <summary>
+    /// Gets the playlist type of a persisted discriminator. Inverse of <see cref="CategoryFor"/>.
+    /// </summary>
+    /// <param name="generatedType">The persisted discriminator.</param>
+    /// <returns>The playlist type, or null if the discriminator is not a known type.</returns>
+    internal static PlaylistType? ParsePlaylistType(string? generatedType)
+    {
+        return TryGetPlaylistType(generatedType, out var type) ? type : null;
+    }
 
     /// <summary>
     /// Picks the playlists to sync for the types a user has enabled.

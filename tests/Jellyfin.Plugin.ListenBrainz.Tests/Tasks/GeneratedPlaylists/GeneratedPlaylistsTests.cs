@@ -236,4 +236,22 @@ public class GeneratedPlaylistsTests
 
         Assert.False(result);
     }
+
+    [Fact]
+    public void ParsePlaylistType_RoundTripsCategoryFor()
+    {
+        foreach (var type in Enum.GetValues<PlaylistType>())
+        {
+            Assert.Equal(type, PlaylistTypePolicy.ParsePlaylistType(PlaylistTypePolicy.CategoryFor(type)));
+        }
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("NotAType")]
+    public void ParsePlaylistType_UnknownDiscriminator_ReturnsNull(string? generatedType)
+    {
+        Assert.Null(PlaylistTypePolicy.ParsePlaylistType(generatedType));
+    }
 }
