@@ -337,7 +337,7 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
         UserConfig userConfig,
         PlaylistSyncState state,
         IReadOnlyList<PlaylistCandidate> selectedPlaylists,
-        IReadOnlySet<PlaylistType> failedTypes,
+        HashSet<PlaylistType> failedTypes,
         CancellationToken cancellationToken)
     {
         var selectedPlaylistIds = selectedPlaylists
