@@ -176,6 +176,18 @@ public class GeneratedPlaylistsTests
     }
 
     [Fact]
+    public void Prune_TypeThatFailedToSync_IsKept()
+    {
+        // Pruning the previous playlist would leave the user with nothing for this type.
+        var result = PlaylistTypePolicy.ShouldPruneEntry(
+            MakeEntry("old-jams", "Jams"),
+            selectedPlaylistIds: Selected("current-jams"),
+            syncedTypes: []);
+
+        Assert.False(result);
+    }
+
+    [Fact]
     public void Prune_DisabledFamily_IsKept()
     {
         var result = PlaylistTypePolicy.ShouldPruneEntry(

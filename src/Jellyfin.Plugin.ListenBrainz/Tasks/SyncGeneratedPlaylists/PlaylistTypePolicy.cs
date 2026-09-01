@@ -123,6 +123,7 @@ internal static class PlaylistTypePolicy
             return false;
         }
 
+        // Prune only after a clean sync, otherwise the user could be left with nothing.
         return syncedTypes.Contains(type) && !selectedPlaylistIds.Contains(entry.ListenBrainzPlaylistId);
     }
 
