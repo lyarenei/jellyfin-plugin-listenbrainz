@@ -106,6 +106,12 @@ internal static class PlaylistTypePolicy
         HashSet<string> selectedPlaylistIds,
         HashSet<PlaylistType> syncedTypes)
     {
+        // The store is shared across sync tasks; leave entries this task does not own.
+        if (entry.Origin != PlaylistOrigin.Generated)
+        {
+            return false;
+        }
+
         if (!TryGetPlaylistType(entry.GeneratedType, out var type))
         {
             return false;

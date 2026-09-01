@@ -211,4 +211,17 @@ public class GeneratedPlaylistsTests
 
         Assert.False(result);
     }
+
+    [Theory]
+    [InlineData(PlaylistOrigin.UserCreated)]
+    [InlineData(PlaylistOrigin.Collaborative)]
+    public void Prune_NonGeneratedOrigin_IsNeverPruned(PlaylistOrigin origin)
+    {
+        var result = PlaylistTypePolicy.ShouldPruneEntry(
+            MakeEntry("user-playlist", "Jams", origin),
+            selectedPlaylistIds: Selected("current-jams"),
+            syncedTypes: [PlaylistType.Jams]);
+
+        Assert.False(result);
+    }
 }
