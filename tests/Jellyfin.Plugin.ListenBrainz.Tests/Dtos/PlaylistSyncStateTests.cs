@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Xunit;
 
@@ -53,5 +54,22 @@ public class PlaylistSyncStateTests
         Assert.NotNull(state.FindEntry(userId, "lb-abc"));
         Assert.Null(state.FindEntry(Guid.NewGuid(), "LB-ABC"));
         Assert.Null(state.FindEntry(userId, "other"));
+    }
+
+    [Fact]
+    public void EntriesFor_ScopesEntriesToTheUser()
+    {
+        var state = new PlaylistSyncState();
+        var firstUser = Guid.NewGuid();
+        var secondUser = Guid.NewGuid();
+
+        state.Upsert(
+            firstUser, "lb-1", Guid.NewGuid(), "title", DateTime.UtcNow, PlaylistOrigin.Generated, "Jams");
+        state.Upsert(
+            secondUser, "lb-1", Guid.NewGuid(), "title", DateTime.UtcNow, PlaylistOrigin.Generated, "Jams");
+
+        Assert.Equal(2, state.Entries.Count);
+        Assert.Single(state.EntriesFor(firstUser));
+        Assert.Equal(secondUser, Assert.Single(state.EntriesFor(secondUser)).JellyfinUserId);
     }
 }

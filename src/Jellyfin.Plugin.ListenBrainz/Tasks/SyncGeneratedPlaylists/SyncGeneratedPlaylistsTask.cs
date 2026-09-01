@@ -351,9 +351,8 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
             .ToHashSet();
 
         var entriesToRemove = state
-            .Entries
-            .Where(e => e.JellyfinUserId == user.Id &&
-                        PlaylistTypePolicy.ShouldPruneEntry(e, selectedPlaylistIds, syncedTypes))
+            .EntriesFor(user.Id)
+            .Where(e => PlaylistTypePolicy.ShouldPruneEntry(e, selectedPlaylistIds, syncedTypes))
             .ToList();
 
         foreach (var entry in entriesToRemove)

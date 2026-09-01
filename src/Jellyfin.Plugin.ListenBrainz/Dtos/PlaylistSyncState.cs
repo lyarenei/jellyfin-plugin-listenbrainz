@@ -36,6 +36,16 @@ public class PlaylistSyncState
     }
 
     /// <summary>
+    /// Gets all entries belonging to a user.
+    /// </summary>
+    /// <param name="userId">Jellyfin user ID.</param>
+    /// <returns>The user's entries.</returns>
+    public IEnumerable<PlaylistSyncEntry> EntriesFor(Guid userId)
+    {
+        return Entries.Where(e => e.JellyfinUserId == userId);
+    }
+
+    /// <summary>
     /// Creates or updates the entry for a ListenBrainz playlist for a given user.
     /// </summary>
     /// <param name="userId">Jellyfin user ID.</param>
