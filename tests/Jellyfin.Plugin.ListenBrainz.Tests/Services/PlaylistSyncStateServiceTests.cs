@@ -1,4 +1,6 @@
+using System;
 using System.IO;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
@@ -13,15 +15,35 @@ namespace Jellyfin.Plugin.ListenBrainz.Tests.Services;
 
 public class PlaylistSyncStateServiceTests
 {
-    [Fact]
-    public async Task ReadAsync_ReturnsEmptyState_WhenStateFileDoesNotExist()
+    private static DefaultPlaylistSyncStateService ServiceReading(Func<Task<PlaylistSyncState>> read)
     {
         var storage = new Mock<IPersistentJsonService<PlaylistSyncState>>();
         storage
             .Setup(s => s.ReadAsync(It.IsAny<string?>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new ServiceException("missing file", new FileNotFoundException()));
+            .Returns(read);
 
-        var service = new DefaultPlaylistSyncStateService(NullLogger.Instance, storage.Object);
+        return new DefaultPlaylistSyncStateService(NullLogger.Instance, storage.Object);
+    }
+
+    [Fact]
+    public async Task ReadAsync_ReturnsEmptyState_WhenStateFileDoesNotExist()
+    {
+        var service = ServiceReading(() =>
+            Task.FromException<PlaylistSyncState>(
+                new ServiceException("missing file", new FileNotFoundException())));
+
+        var state = await service.ReadAsync(CancellationToken.None);
+
+        Assert.NotNull(state);
+        Assert.Empty(state.Entries);
+    }
+
+    [Fact]
+    public async Task ReadAsync_ReturnsEmptyState_WhenStateFileIsCorrupt()
+    {
+        var service = ServiceReading(() =>
+            Task.FromException<PlaylistSyncState>(
+                new ServiceException("corrupt file", new JsonException("unexpected token"))));
 
         var state = await service.ReadAsync(CancellationToken.None);
 
@@ -32,12 +54,9 @@ public class PlaylistSyncStateServiceTests
     [Fact]
     public async Task ReadAsync_Throws_WhenStateFileIsUnreadable()
     {
-        var storage = new Mock<IPersistentJsonService<PlaylistSyncState>>();
-        storage
-            .Setup(s => s.ReadAsync(It.IsAny<string?>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new ServiceException("corrupt file", new IOException()));
-
-        var service = new DefaultPlaylistSyncStateService(NullLogger.Instance, storage.Object);
+        var service = ServiceReading(() =>
+            Task.FromException<PlaylistSyncState>(
+                new ServiceException("unreadable file", new IOException())));
 
         await Assert.ThrowsAsync<ServiceException>(() => service.ReadAsync(CancellationToken.None));
     }
@@ -53,12 +72,7 @@ public class PlaylistSyncStateServiceTests
             GeneratedType = "Jams",
         });
 
-        var storage = new Mock<IPersistentJsonService<PlaylistSyncState>>();
-        storage
-            .Setup(s => s.ReadAsync(It.IsAny<string?>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(stored);
-
-        var service = new DefaultPlaylistSyncStateService(NullLogger.Instance, storage.Object);
+        var service = ServiceReading(() => Task.FromResult(stored));
 
         var state = await service.ReadAsync(CancellationToken.None);
 
