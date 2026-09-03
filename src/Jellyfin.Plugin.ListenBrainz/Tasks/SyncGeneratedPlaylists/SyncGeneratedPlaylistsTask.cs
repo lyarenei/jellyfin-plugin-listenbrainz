@@ -312,7 +312,6 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
         }
 
         // A playlist the user cannot see is effectively not synced.
-        // Syncing it again reclaims ownership and restores their access.
         if (PlaylistTypePolicy.IsUpToDate(entry, listingPlaylist) &&
             _playlistManager.IsVisibleTo(entry.JellyfinPlaylistId, user.Id))
         {
@@ -387,19 +386,16 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
     }
 
     /// <summary>
-    /// What the sync should do with a listed ListenBrainz playlist, resolved once per playlist.
+    /// What the sync should do with a listed ListenBrainz playlist.
     /// </summary>
-    /// <param name="IsUpToDate">
-    /// Whether the playlist is already synced and visible to the user, so it can be skipped.
-    /// </param>
+    /// <param name="IsUpToDate">Whether the playlist can be skipped.</param>
     /// <param name="ExistingPlaylist">
     /// The mapped Jellyfin playlist to write into, or null to look it up by name or create it.
-    /// Only meaningful when <see cref="IsUpToDate"/> is false.
     /// </param>
     private sealed record SyncTarget(bool IsUpToDate, JellyfinPlaylist? ExistingPlaylist);
 
     /// <summary>
-    /// Tracks task progress as an evenly split share per user, advanced per processed playlist.
+    /// Tracks task progress as an evenly split share per user.
     /// </summary>
     private sealed class SyncProgress
     {
@@ -413,28 +409,18 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
             _userShare = 100.0 / userCount;
         }
 
-        /// <summary>
-        /// Advances by one playlist's portion of the current user's share.
-        /// </summary>
-        /// <param name="totalPlaylists">Number of playlists being processed for the current user.</param>
         public void AdvancePlaylist(int totalPlaylists)
         {
             _reported += _userShare / totalPlaylists;
             _progress.Report(_reported);
         }
 
-        /// <summary>
-        /// Marks the current user as fully processed.
-        /// </summary>
         public void CompleteUser()
         {
             _reported += _userShare;
             _progress.Report(_reported);
         }
 
-        /// <summary>
-        /// Reports completion of the whole task.
-        /// </summary>
         public void Finish() => _progress.Report(100);
     }
 }

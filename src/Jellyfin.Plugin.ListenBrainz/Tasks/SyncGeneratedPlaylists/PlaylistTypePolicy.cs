@@ -11,8 +11,7 @@ namespace Jellyfin.Plugin.ListenBrainz.Tasks.SyncGeneratedPlaylists;
 internal static class PlaylistTypePolicy
 {
     /// <summary>
-    /// Descriptors for every known playlist type, keyed by <see cref="PlaylistType"/>.
-    /// Weekly types keep the current and previous playlist; yearly types keep every playlist.
+    /// Descriptors of all known playlist types. A null keep limit means the type is never pruned.
     /// </summary>
     private static readonly IReadOnlyDictionary<PlaylistType, PlaylistTypeDescriptor> _descriptors =
         new PlaylistTypeDescriptor[]
@@ -70,9 +69,8 @@ internal static class PlaylistTypePolicy
     /// Picks the playlists to sync for the types a user has enabled.
     /// </summary>
     /// <remarks>
-    /// Capped types keep only their newest playlists (ListenBrainz does not provide a "current"
-    /// alias, so the newest <see cref="Playlist.CreatedAt"/> is treated as the current one).
-    /// Uncapped types keep every playlist.
+    /// ListenBrainz does not mark the current playlist, so the newest
+    /// <see cref="Playlist.CreatedAt"/> is treated as the current one.
     /// </remarks>
     /// <param name="playlists">Playlists created for the user.</param>
     /// <param name="userConfig">User configuration.</param>
@@ -126,7 +124,6 @@ internal static class PlaylistTypePolicy
             return false;
         }
 
-        // Uncapped types are permanent and never pruned.
         if (_descriptors[type].KeepNewest is null)
         {
             return false;
@@ -168,7 +165,6 @@ internal static class PlaylistTypePolicy
 
     private static bool MatchesPatch(string prefix, string sourcePatch)
     {
-        // Match exactly or as a prefix
         return sourcePatch.Equals(prefix, StringComparison.Ordinal) ||
                sourcePatch.StartsWith(prefix + "-", StringComparison.Ordinal);
     }

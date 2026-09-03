@@ -49,7 +49,7 @@ public class GeneratedPlaylistsTests
     }
 
     [Fact]
-    public void Selection_KeepsTwoNewestPerFamily()
+    public void Selection_KeepsTwoNewestPerType()
     {
         var now = DateTime.UtcNow;
         var playlists = new[]
@@ -73,7 +73,7 @@ public class GeneratedPlaylistsTests
     }
 
     [Fact]
-    public void Selection_ExcludesDisabledFamilies()
+    public void Selection_ExcludesDisabledTypes()
     {
         var now = DateTime.UtcNow;
         var playlists = new[]
@@ -93,7 +93,7 @@ public class GeneratedPlaylistsTests
     }
 
     [Fact]
-    public void Selection_ArchiveKeepsAllYears()
+    public void Selection_UncappedTypeKeepsAllPlaylists()
     {
         var now = DateTime.UtcNow;
         var playlists = new[]
@@ -107,7 +107,6 @@ public class GeneratedPlaylistsTests
             .SelectPlaylists(playlists, new UserConfig())
             .ToList();
 
-        // Archive types are not capped like rotation types; every year is kept.
         Assert.Equal(3, selected.Count);
         Assert.All(selected, c => Assert.Equal(PlaylistType.TopDiscoveries, c.Type));
     }
@@ -154,7 +153,7 @@ public class GeneratedPlaylistsTests
     }
 
     [Fact]
-    public void Prune_OutOfRotationSameFamily_IsPruned()
+    public void Prune_OutOfRotationSameType_IsPruned()
     {
         var result = PlaylistTypePolicy.ShouldPruneEntry(
             MakeEntry("old-jams", "Jams"),
@@ -188,7 +187,7 @@ public class GeneratedPlaylistsTests
     }
 
     [Fact]
-    public void Prune_DisabledFamily_IsKept()
+    public void Prune_DisabledType_IsKept()
     {
         var result = PlaylistTypePolicy.ShouldPruneEntry(
             MakeEntry("old-exploration", "Exploration"),
