@@ -1,11 +1,13 @@
 using System.Globalization;
 using System.Reflection;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
+using Jellyfin.Plugin.ListenBrainz.Configuration.Migrations;
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
+using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.ListenBrainz;
 
@@ -16,16 +18,20 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="Plugin"/> class.
+    /// Also handles plugin config migrations to prevent silent overwrites by the config loader at
+    /// <see cref="MediaBrowser.Common.Plugins.BasePlugin{TConfigurationType}.LoadConfiguration"/>.
     /// </summary>
     /// <param name="paths">Application paths.</param>
     /// <param name="xmlSerializer">XML serializer.</param>
-    public Plugin(IApplicationPaths paths, IXmlSerializer xmlSerializer) : base(paths, xmlSerializer)
+    /// <param name="loggerFactory">Logger factory.</param>
+    public Plugin(IApplicationPaths paths, IXmlSerializer xmlSerializer, ILoggerFactory loggerFactory)
+        : base(paths, xmlSerializer)
     {
         Instance = this;
-        if (LegacyPlaylistSyncMigration.Apply(Configuration))
-        {
-            SaveConfiguration();
-        }
+
+        var logger = loggerFactory.CreateLogger($"{LoggerCategory}.ConfigMigration");
+        var migrator = new PluginConfigMigrator(ConfigurationFilePath, xmlSerializer, logger);
+        Configuration = migrator.LoadAndMigrate(SaveConfiguration);
     }
 
     /// <summary>
