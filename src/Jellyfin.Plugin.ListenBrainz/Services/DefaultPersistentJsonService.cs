@@ -42,11 +42,8 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
 
         try
         {
-            using (var stream = File.Create(tempPath))
-            {
-                JsonSerializer.Serialize(stream, data, _serializerOptions);
-            }
-
+            using var stream = File.Create(tempPath);
+            JsonSerializer.Serialize(stream, data, _serializerOptions);
             File.Move(tempPath, path, overwrite: true);
         }
         catch (Exception ex)
@@ -72,11 +69,8 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
 
         try
         {
-            await using (var stream = File.Create(tempPath))
-            {
-                await JsonSerializer.SerializeAsync(stream, data, _serializerOptions, cancellationToken);
-            }
-
+            await using var stream = File.Create(tempPath);
+            await JsonSerializer.SerializeAsync(stream, data, _serializerOptions, cancellationToken);
             File.Move(tempPath, path, overwrite: true);
         }
         catch (Exception ex)
