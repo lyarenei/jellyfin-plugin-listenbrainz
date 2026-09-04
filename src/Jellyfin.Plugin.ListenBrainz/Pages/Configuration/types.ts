@@ -11,6 +11,7 @@ export interface MediaLibrary {
 
 export interface PluginConfiguration {
     BackupPath: string;
+    ConfigVersion: number;
     IsAllPlaylistsSyncEnabled: boolean;
     IsAlternativeModeEnabled: boolean;
     IsImmediateFavoriteSyncEnabled: boolean;
