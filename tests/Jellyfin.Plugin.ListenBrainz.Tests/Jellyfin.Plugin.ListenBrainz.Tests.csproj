@@ -25,4 +25,11 @@
       <ProjectReference Include="..\..\src\Jellyfin.Plugin.ListenBrainz\Jellyfin.Plugin.ListenBrainz.csproj" />
     </ItemGroup>
 
+    <!-- Read by UserDefaultsParityTests - check drift between TS and C# settings. -->
+    <ItemGroup>
+      <None Include="..\..\src\Jellyfin.Plugin.ListenBrainz\Pages\Configuration\constants.ts"
+            Link="ConfigPage\constants.ts"
+            CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
 </Project>

@@ -1,25 +1,28 @@
-namespace Jellyfin.Plugin.ListenBrainz.Configuration;
+namespace Jellyfin.Plugin.ListenBrainz.Configuration.Migrations;
 
 /// <summary>
 /// Migration of the deprecated playlist sync settings to the new playlist sync settings.
 /// </summary>
-internal static class LegacyPlaylistSyncMigration
+internal sealed class LegacyPlaylistSyncMigration : IConfigMigration
 {
-    internal static bool Apply(PluginConfiguration config)
+    /// <inheritdoc />
+    public int TargetVersion => 1;
+
+    /// <inheritdoc />
+    public string Name => "Legacy playlist sync settings";
+
+    /// <inheritdoc />
+    public bool Apply(PluginConfiguration config)
     {
         var syncAllPlaylists = config.IsAllPlaylistsSyncEnabled;
         var userConfigs = config.UserConfigs.Where(uc => uc.IsPlaylistsSyncEnabled).ToList();
-        if (userConfigs.Count == 0 && !syncAllPlaylists)
-        {
-            return false;
-        }
-
         foreach (var userConfig in userConfigs)
         {
             // Old, deprecated setting => set to false
             userConfig.IsPlaylistsSyncEnabled = false;
 
             // If already using new settings => ignore
+            // Special case here as the migration system was introduced after this has been released
             if (userConfig.IsGeneratedPlaylistsSyncEnabled)
             {
                 continue;
@@ -38,6 +41,7 @@ internal static class LegacyPlaylistSyncMigration
 
         // Disable deprecated setting
         config.IsAllPlaylistsSyncEnabled = false;
+
         return true;
     }
 }
