@@ -47,7 +47,16 @@ internal sealed class PluginConfigMigrator
         {
             _logger.LogInformation("No plugin configuration file found, creating a new one");
             var newConfig = new PluginConfiguration { ConfigVersion = LatestVersion };
-            saveConfig(newConfig);
+
+            try
+            {
+                saveConfig(newConfig);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Failed to create plugin configuration file at {ConfigFilePath},", _configFilePath);
+            }
+
             return newConfig;
         }
 
