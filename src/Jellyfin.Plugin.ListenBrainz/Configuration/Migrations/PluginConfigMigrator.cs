@@ -176,7 +176,10 @@ internal sealed class PluginConfigMigrator
         }
         catch (Exception e)
         {
-            _logger.LogWarning(e, "Failed to delete plugin configuration backup file at {BackupFilePath}", _backupFilePath);
+            _logger.LogWarning(
+                e,
+                "Failed to delete plugin configuration backup file at {BackupFilePath}",
+                _backupFilePath);
         }
     }
 
