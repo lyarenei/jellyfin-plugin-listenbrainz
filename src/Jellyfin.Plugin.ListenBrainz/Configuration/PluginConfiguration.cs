@@ -1,8 +1,8 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
-using System.Xml;
 using System.Xml.Serialization;
+using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 using MediaBrowser.Model.Plugins;
 
 namespace Jellyfin.Plugin.ListenBrainz.Configuration;
@@ -20,6 +20,8 @@ public class PluginConfiguration : BasePluginConfiguration
     private bool? _isAllPlaylistsSyncEnabled;
     private string? _mbidDelimitersOverride;
 
+    private string _backupPath = string.Empty;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="PluginConfiguration"/> class.
     /// </summary>
@@ -27,7 +29,6 @@ public class PluginConfiguration : BasePluginConfiguration
     {
         UserConfigs = new Collection<UserConfig>();
         LibraryConfigs = new Collection<LibraryConfig>();
-        BackupPath = string.Empty;
     }
 
     /// <summary>
@@ -42,7 +43,7 @@ public class PluginConfiguration : BasePluginConfiguration
     public string ListenBrainzApiUrl
     {
         get => _listenBrainzUrlOverride ?? Api.Resources.General.BaseUrl;
-        set => _listenBrainzUrlOverride = value;
+        set => _listenBrainzUrlOverride = value.SanitizeForXml();
     }
 
     /// <summary>
@@ -57,7 +58,7 @@ public class PluginConfiguration : BasePluginConfiguration
     public string MusicBrainzApiUrl
     {
         get => _musicBrainzUrlOverride ?? MusicBrainzApi.Resources.Api.BaseUrl;
-        set => _musicBrainzUrlOverride = value;
+        set => _musicBrainzUrlOverride = value.SanitizeForXml();
     }
 
     /// <summary>
@@ -74,7 +75,7 @@ public class PluginConfiguration : BasePluginConfiguration
         get => _mbidDelimitersOverride ?? DefaultMbidDelimiters;
         set
         {
-            var sanitized = SanitizeForXml(value);
+            var sanitized = value.SanitizeForXml();
             _mbidDelimitersOverride = string.IsNullOrEmpty(sanitized) ? null : sanitized;
         }
     }
@@ -134,7 +135,11 @@ public class PluginConfiguration : BasePluginConfiguration
     /// <summary>
     /// Gets or sets backup path.
     /// </summary>
-    public string BackupPath { get; set; }
+    public string BackupPath
+    {
+        get => _backupPath;
+        set => _backupPath = value.SanitizeForXml();
+    }
 
     /// <summary>
     /// Gets a value indicating whether backup feature is enabled.
@@ -150,15 +155,5 @@ public class PluginConfiguration : BasePluginConfiguration
     {
         get => _isAllPlaylistsSyncEnabled ?? false;
         set => _isAllPlaylistsSyncEnabled = value;
-    }
-
-    private static string SanitizeForXml(string? value)
-    {
-        if (string.IsNullOrEmpty(value))
-        {
-            return string.Empty;
-        }
-
-        return new string(value.Where(XmlConvert.IsXmlChar).ToArray());
     }
 }
