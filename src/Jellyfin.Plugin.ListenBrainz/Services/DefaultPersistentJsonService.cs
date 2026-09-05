@@ -10,10 +10,7 @@ namespace Jellyfin.Plugin.ListenBrainz.Services;
 /// <typeparam name="T">Data type.</typeparam>
 public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>, IDisposable
 {
-    private static readonly JsonSerializerOptions _defaultSerializerOptions = new()
-    {
-        WriteIndented = true,
-    };
+    private static readonly JsonSerializerOptions _defaultSerializerOptions = new() { WriteIndented = true, };
 
     private readonly string? _defaultFilePath;
     private readonly JsonSerializerOptions _serializerOptions;
@@ -33,24 +30,25 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
         _lock = new SemaphoreSlim(1, 1);
     }
 
-    /// <summary>
-    /// Finalizes an instance of the <see cref="DefaultPersistentJsonService{T}"/> class.
-    /// </summary>
-    ~DefaultPersistentJsonService() => Dispose(false);
-
     /// <inheritdoc />
     public void Save(T data, string? filePath = null)
     {
         var path = ResolveFilePath(filePath);
+        var tempPath = ResolveTempFilePath(filePath);
+
         EnsureFileDirectory(path);
+
         _lock.Wait();
+
         try
         {
-            using var stream = File.Create(path);
+            using var stream = File.Create(tempPath);
             JsonSerializer.Serialize(stream, data, _serializerOptions);
+            File.Move(tempPath, path, overwrite: true);
         }
         catch (Exception ex)
         {
+            DeleteFile(tempPath);
             throw new ServiceException("Saving JSON file failed", ex);
         }
         finally
@@ -63,15 +61,21 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
     public async Task SaveAsync(T data, string? filePath = null, CancellationToken cancellationToken = default)
     {
         var path = ResolveFilePath(filePath);
+        var tempPath = ResolveTempFilePath(filePath);
+
         EnsureFileDirectory(path);
+
         await _lock.WaitAsync(cancellationToken);
+
         try
         {
-            await using var stream = File.Create(path);
+            await using var stream = File.Create(tempPath);
             await JsonSerializer.SerializeAsync(stream, data, _serializerOptions, cancellationToken);
+            File.Move(tempPath, path, overwrite: true);
         }
         catch (Exception ex)
         {
+            DeleteFile(tempPath);
             throw new ServiceException("Saving JSON file failed", ex);
         }
         finally
@@ -139,26 +143,12 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
     /// <inheritdoc />
     public void Dispose()
     {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    /// <summary>
-    /// Dispose managed and unmanaged (own) resources.
-    /// </summary>
-    /// <param name="disposing">Dispose managed resources.</param>
-    private void Dispose(bool disposing)
-    {
         if (_isDisposed)
         {
             return;
         }
 
-        if (disposing)
-        {
-            _lock.Dispose();
-        }
-
+        _lock.Dispose();
         _isDisposed = true;
     }
 
@@ -171,6 +161,24 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
         }
 
         return path;
+    }
+
+    private string ResolveTempFilePath(string? filePath)
+    {
+        var path = ResolveFilePath(filePath);
+        return path + ".tmp";
+    }
+
+    private static void DeleteFile(string filePath)
+    {
+        try
+        {
+            File.Delete(filePath);
+        }
+        catch (Exception)
+        {
+            // Failed delete is OK
+        }
     }
 
     private static void EnsureFileDirectory(string filePath)

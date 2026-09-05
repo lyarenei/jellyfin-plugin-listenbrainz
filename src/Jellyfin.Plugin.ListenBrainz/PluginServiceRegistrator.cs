@@ -77,23 +77,22 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
 
         serviceCollection.AddSingleton<IPlaybackTrackingService, DefaultPlaybackTrackingService>();
 
-        serviceCollection.AddSingleton<IPlaylistSyncStateService>(sp =>
+        // --- Persistence services
+
+        serviceCollection.AddSingleton<IPersistentJsonService<PlaylistSyncState>>(_ =>
         {
             var statePath = Path.Join(Plugin.GetDataPath(), "playlist-sync-state.json");
-            var storage = new DefaultPersistentJsonService<PlaylistSyncState>(statePath);
-            return new DefaultPlaylistSyncStateService(GetLogger(sp, "PlaylistSyncState"), storage);
+            return new DefaultPersistentJsonService<PlaylistSyncState>(statePath);
         });
 
-        serviceCollection.AddSingleton<IListensCachingService>(sp =>
+        serviceCollection.AddSingleton<IPersistentJsonService<ListenCacheData>>(_ =>
         {
             var cachePath = Path.Join(Plugin.GetDataPath(), "cache.json");
-            var storage = new DefaultPersistentJsonService<ListenCacheData>(cachePath);
-            return new DefaultListensCachingService(GetLogger(sp, "ListensCache"), storage);
+            return new DefaultPersistentJsonService<ListenCacheData>(cachePath);
         });
 
-        serviceCollection.AddSingleton<IListenBackupService>(sp =>
+        serviceCollection.AddSingleton<IPersistentJsonService<List<Listen>>>(_ =>
         {
-            var config = sp.GetRequiredService<IPluginConfigService>();
             var serializerOptions = new JsonSerializerOptions
             {
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
@@ -101,8 +100,31 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
                 WriteIndented = true,
             };
 
-            var storage = new DefaultPersistentJsonService<List<Listen>>(serializerOptions: serializerOptions);
-            return new DefaultListenBackupService(GetLogger(sp, "ListensBackup"), config.BackupPath, storage, config);
+            return new DefaultPersistentJsonService<List<Listen>>(serializerOptions: serializerOptions);
+        });
+
+        // ---
+
+        serviceCollection.AddSingleton<IPlaylistSyncStateService>(sp =>
+        {
+            var logger = GetLogger(sp, "PlaylistSyncState");
+            var storage = sp.GetRequiredService<IPersistentJsonService<PlaylistSyncState>>();
+            return new DefaultPlaylistSyncStateService(logger, storage);
+        });
+
+        serviceCollection.AddSingleton<IListensCachingService>(sp =>
+        {
+            var logger = GetLogger(sp, "ListensCache");
+            var storage = sp.GetRequiredService<IPersistentJsonService<ListenCacheData>>();
+            return new DefaultListensCachingService(logger, storage);
+        });
+
+        serviceCollection.AddSingleton<IListenBackupService>(sp =>
+        {
+            var config = sp.GetRequiredService<IPluginConfigService>();
+            var logger = GetLogger(sp, "ListensBackup");
+            var storage = sp.GetRequiredService<IPersistentJsonService<List<Listen>>>();
+            return new DefaultListenBackupService(logger, config.BackupPath, storage, config);
         });
 
         AddPluginService<PlaybackStartHandler>(serviceCollection, "PlaybackStartHandler");
