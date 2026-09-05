@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Xml.Serialization;
+using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 
 namespace Jellyfin.Plugin.ListenBrainz.Configuration;
 
@@ -9,6 +10,9 @@ namespace Jellyfin.Plugin.ListenBrainz.Configuration;
 /// </summary>
 public class UserConfig
 {
+    private string _apiToken = string.Empty;
+    private string _userName = string.Empty;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="UserConfig"/> class.
     /// </summary>
@@ -35,7 +39,11 @@ public class UserConfig
     /// <summary>
     /// Gets or sets ListenBrainz API token.
     /// </summary>
-    public string ApiToken { get; set; }
+    public string ApiToken
+    {
+        get => _apiToken;
+        set => _apiToken = value.SanitizeForXml();
+    }
 
     /// <summary>
     /// Gets or sets ListenBrainz API token in plaintext.
@@ -103,7 +111,11 @@ public class UserConfig
     /// <summary>
     /// Gets or sets a ListenBrainz username.
     /// </summary>
-    public string UserName { get; set; }
+    public string UserName
+    {
+        get => _userName;
+        set => _userName = value.SanitizeForXml();
+    }
 
     /// <summary>
     /// Gets or sets a value indicating whether listens should be backed up.
