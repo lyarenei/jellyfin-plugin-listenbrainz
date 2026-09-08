@@ -1,19 +1,13 @@
-using System;
-using System.Net.Http;
 using Jellyfin.Plugin.ListenBrainz.Api.Interfaces;
-using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Handlers;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.MusicBrainzApi.Interfaces;
-using MediaBrowser.Common.Configuration;
+using Jellyfin.Plugin.ListenBrainz.Tests.TestKit;
 using MediaBrowser.Controller;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Session;
-using MediaBrowser.Model.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Moq;
-using Xunit;
 
 namespace Jellyfin.Plugin.ListenBrainz.Tests.Services;
 
@@ -36,6 +30,7 @@ public class PluginServiceRegistratorTests
     [InlineData(typeof(UserDataSaveHandler))]
     public void RegisterServices_ResolvesRegisteredService(Type serviceType)
     {
+        using var plugin = new MockPlugin();
         using var provider = BuildProvider();
 
         var service = provider.GetService(serviceType);
@@ -46,6 +41,7 @@ public class PluginServiceRegistratorTests
     [Fact]
     public void RegisterServices_RegistersEventHandlerService()
     {
+        using var plugin = new MockPlugin();
         using var provider = BuildProvider();
 
         var hostedServices = provider.GetServices<IHostedService>();
@@ -55,17 +51,15 @@ public class PluginServiceRegistratorTests
 
     private static ServiceProvider BuildProvider()
     {
-        MockPlugin.Init(new Mock<IApplicationPaths>(), new Mock<IXmlSerializer>(), new PluginConfiguration());
-
         var services = new ServiceCollection();
         services.AddLogging();
-        services.AddSingleton(new Mock<IHttpClientFactory>().Object);
-        services.AddSingleton(new Mock<ILibraryManager>().Object);
-        services.AddSingleton(new Mock<IUserManager>().Object);
-        services.AddSingleton(new Mock<IUserDataManager>().Object);
-        services.AddSingleton(new Mock<ISessionManager>().Object);
+        services.AddSingleton(Mock.Of<IHttpClientFactory>());
+        services.AddSingleton(Mock.Of<ILibraryManager>());
+        services.AddSingleton(Mock.Of<IUserManager>());
+        services.AddSingleton(Mock.Of<IUserDataManager>());
+        services.AddSingleton(Mock.Of<ISessionManager>());
 
-        new PluginServiceRegistrator().RegisterServices(services, new Mock<IServerApplicationHost>().Object);
+        new PluginServiceRegistrator().RegisterServices(services, Mock.Of<IServerApplicationHost>());
 
         return services.BuildServiceProvider();
     }
