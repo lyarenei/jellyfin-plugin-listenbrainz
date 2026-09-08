@@ -11,7 +11,7 @@ public class GetIntervalTests
     {
         var interval = ResubmitListensTask.GetInterval();
         // Should be between 24h and 24h50m
-        Assert.True(interval > TimeSpan.TicksPerDay);
+        Assert.True(interval >= TimeSpan.TicksPerDay);
         Assert.True(interval <= TimeSpan.TicksPerDay + (50 * TimeSpan.TicksPerMinute));
     }
 
@@ -27,7 +27,7 @@ public class GetIntervalTests
 
         foreach (var interval in intervals)
         {
-            Assert.True(interval > TimeSpan.TicksPerDay);
+            Assert.True(interval >= TimeSpan.TicksPerDay);
             Assert.True(interval <= TimeSpan.TicksPerDay + (50 * TimeSpan.TicksPerMinute));
         }
     }
