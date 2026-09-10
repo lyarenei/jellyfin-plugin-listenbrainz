@@ -47,7 +47,16 @@ internal sealed class PluginConfigMigrator
         {
             _logger.LogInformation("No plugin configuration file found, creating a new one");
             var newConfig = new PluginConfiguration { ConfigVersion = LatestVersion };
-            saveConfig(newConfig);
+
+            try
+            {
+                saveConfig(newConfig);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Failed to create plugin configuration file at {ConfigFilePath},", _configFilePath);
+            }
+
             return newConfig;
         }
 
@@ -176,7 +185,10 @@ internal sealed class PluginConfigMigrator
         }
         catch (Exception e)
         {
-            _logger.LogWarning(e, "Failed to delete plugin configuration backup file at {BackupFilePath}", _backupFilePath);
+            _logger.LogWarning(
+                e,
+                "Failed to delete plugin configuration backup file at {BackupFilePath}",
+                _backupFilePath);
         }
     }
 
