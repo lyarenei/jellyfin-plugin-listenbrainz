@@ -1,9 +1,12 @@
 namespace Jellyfin.Plugin.ListenBrainz.Tests.TestKit;
 
 /// <summary>
-/// Groups every test which constructs a <see cref="Plugin"/> so such tests are run sequentially to prevent issues.
+/// Groups every test which constructs a <see cref="Plugin"/>.
 /// </summary>
-[CollectionDefinition(Name)]
+/// <remarks>
+/// This forces to run the tests sequentially/in isolation because the Plugin instance is a singleton.
+/// </remarks>
+[CollectionDefinition(Name, DisableParallelization = true)]
 public sealed class PluginInstanceCollection
 {
     /// <summary>
