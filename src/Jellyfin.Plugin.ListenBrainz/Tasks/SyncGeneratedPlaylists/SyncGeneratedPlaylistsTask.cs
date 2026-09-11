@@ -213,7 +213,7 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
 
             PruneOutOfRotationPlaylists(user, userConfig, state, generatedPlaylists, failedTypes, cancellationToken);
         }
-        catch (PluginException e)
+        catch (Exception e) when (e is ServiceException or PluginException)
         {
             _logger.LogError(
                 "Failed to fetch generated playlists for user {Username}: {Error}",
