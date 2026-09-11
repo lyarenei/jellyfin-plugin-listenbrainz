@@ -41,5 +41,9 @@ public sealed class MockPlugin : IDisposable
     public Plugin Plugin { get; }
 
     /// <inheritdoc />
-    public void Dispose() => _configDir.Dispose();
+    public void Dispose()
+    {
+        Plugin.Instance = null;
+        _configDir.Dispose();
+    }
 }
