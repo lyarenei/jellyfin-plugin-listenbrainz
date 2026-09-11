@@ -11,6 +11,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace Jellyfin.Plugin.ListenBrainz.Tests.Services;
 
+[Collection(PluginInstanceCollection.Name)]
 public class PluginServiceRegistratorTests
 {
     [Theory]
