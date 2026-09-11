@@ -37,7 +37,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// <summary>
     /// Gets the current plugin instance.
     /// </summary>
-    public static Plugin? Instance { get; private set; }
+    public static Plugin? Instance { get; internal set; }
 
     /// <inheritdoc />
     public override string Name => "ListenBrainz";

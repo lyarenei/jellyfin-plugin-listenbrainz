@@ -1,15 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.Services;
-using MediaBrowser.Controller.Entities.Audio;
+using Jellyfin.Plugin.ListenBrainz.Tests.TestKit;
 using Microsoft.Extensions.Logging.Abstractions;
-using Moq;
-using Xunit;
 
 namespace Jellyfin.Plugin.ListenBrainz.Tests.Services;
 
@@ -17,15 +10,6 @@ using ListenCacheData = Dictionary<Guid, List<StoredListen>>;
 
 public class ListensCachingServiceTests
 {
-    private static Audio GetAudio()
-    {
-        return new Audio
-        {
-            Name = "track",
-            Artists = ["artist"],
-        };
-    }
-
     private static DefaultListensCachingService GetService(
         IPersistentJsonService<ListenCacheData>? storage = null,
         bool restore = true)
@@ -65,7 +49,7 @@ public class ListensCachingServiceTests
     {
         var service = GetService(null, false);
         var userId = Guid.NewGuid();
-        var audio = GetAudio();
+        var audio = TestData.Audio();
 
         service.AddListen(userId, audio, null, 123);
 
@@ -80,7 +64,7 @@ public class ListensCachingServiceTests
     {
         var service = GetService(null, false);
         var userId = Guid.NewGuid();
-        var audio = GetAudio();
+        var audio = TestData.Audio();
 
         await service.AddListenAsync(userId, audio, null, 123);
 
@@ -94,7 +78,7 @@ public class ListensCachingServiceTests
     {
         var service = GetService(null, false);
         var userId = Guid.NewGuid();
-        var audio = GetAudio();
+        var audio = TestData.Audio();
         var storedListen = new StoredListen
         {
             Id = audio.Id,
@@ -112,8 +96,8 @@ public class ListensCachingServiceTests
     {
         var service = GetService(null, false);
         var userId = Guid.NewGuid();
-        var audio1 = GetAudio();
-        var audio2 = GetAudio();
+        var audio1 = TestData.Audio();
+        var audio2 = TestData.Audio();
         var storedListens = new List<StoredListen>
         {
             new()
@@ -138,7 +122,7 @@ public class ListensCachingServiceTests
         var storageMock = new Mock<IPersistentJsonService<ListenCacheData>>();
         var service = GetService(storageMock.Object, restore: false);
         var userId = Guid.NewGuid();
-        var audio = GetAudio();
+        var audio = TestData.Audio();
 
         await service.AddListenAsync(userId, audio, null, 123);
         await service.SaveAsync();
