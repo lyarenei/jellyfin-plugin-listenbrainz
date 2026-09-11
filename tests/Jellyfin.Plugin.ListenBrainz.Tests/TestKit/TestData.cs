@@ -70,7 +70,6 @@ public static class TestData
         UserName = userName,
         IsListenSubmitEnabled = true,
         IsStrictModeEnabled = isStrictModeEnabled,
-        ApiToken = "some-token",
         PlaintextApiToken = "some-token",
     };
 }
