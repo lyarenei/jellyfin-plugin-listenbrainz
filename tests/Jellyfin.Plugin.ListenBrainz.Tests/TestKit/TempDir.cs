@@ -26,5 +26,15 @@ public sealed class TempDir : IDisposable
     public string File(string name) => System.IO.Path.Combine(Path, name);
 
     /// <inheritdoc />
-    public void Dispose() => _dir.Delete(recursive: true);
+    public void Dispose()
+    {
+        try
+        {
+            _dir.Delete(recursive: true);
+        }
+        catch (IOException)
+        {
+            // Failure does not matter; just to not have false-negative test because of this.
+        }
+    }
 }
