@@ -86,7 +86,7 @@ public class ClientTests
         var factoryMock = new Mock<IHttpClientFactory>();
         factoryMock
             .Setup(f => f.CreateClient(It.IsAny<string>()))
-            .Returns(new System.Net.Http.HttpClient(handlerMock.Object));
+            .Returns(() => new System.Net.Http.HttpClient(handlerMock.Object));
 
         return new TestClient(factoryMock.Object, Mock.Of<ILogger>(), Mock.Of<ISleepService>());
     }
