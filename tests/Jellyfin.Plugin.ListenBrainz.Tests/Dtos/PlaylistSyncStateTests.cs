@@ -7,6 +7,19 @@ namespace Jellyfin.Plugin.ListenBrainz.Tests.Dtos;
 
 public class PlaylistSyncStateTests
 {
+    private static DiscoveredPlaylist Discovered(
+        string mbid,
+        string title = "Weekly Jams",
+        DateTime? createdAt = null)
+    {
+        return new DiscoveredPlaylist(
+            mbid,
+            PlaylistOrigin.Generated,
+            "Jams",
+            title,
+            createdAt ?? DateTime.UtcNow);
+    }
+
     [Fact]
     public void UpsertDiscovered_CreatesThenRefreshesSameEntry()
     {
@@ -58,6 +71,37 @@ public class PlaylistSyncStateTests
 
         Assert.Equal(jellyfinPlaylistId, entry.JellyfinPlaylistId);
         Assert.NotNull(entry.LastSyncedAt);
+    }
+
+    [Fact]
+    public void ApplyDiscovery_RefreshesMetadataOfKnownPlaylist()
+    {
+        var state = new PlaylistSyncState();
+        var userId = Guid.NewGuid();
+        var regeneratedAt = DateTime.UtcNow;
+
+        var entry = state.ApplyDiscovery(userId, [Discovered("lb-1", createdAt: DateTime.UtcNow.AddDays(-7))]).Single();
+        PlaylistSyncState.RecordSync(entry, Guid.NewGuid());
+
+        state.ApplyDiscovery(userId, [Discovered("lb-1", title: "Renamed", createdAt: regeneratedAt)]);
+
+        Assert.Equal("Renamed", entry.Title);
+        Assert.Equal(regeneratedAt, entry.CreatedAt);
+    }
+
+    [Fact]
+    public void ApplyDiscovery_ScopesEntriesToTheUser()
+    {
+        var state = new PlaylistSyncState();
+        var firstUser = Guid.NewGuid();
+        var secondUser = Guid.NewGuid();
+
+        state.ApplyDiscovery(firstUser, [Discovered("lb-1")]);
+        state.ApplyDiscovery(secondUser, [Discovered("lb-1")]);
+
+        Assert.Equal(2, state.Entries.Count);
+        Assert.Single(state.EntriesFor(firstUser));
+        Assert.Single(state.EntriesFor(secondUser));
     }
 
     [Fact]

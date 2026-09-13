@@ -97,6 +97,25 @@ public class PlaylistSyncState
     }
 
     /// <summary>
+    /// Merges results from playlist discovery for a user into the playlist sync states.
+    /// </summary>
+    /// <param name="userId">Jellyfin user ID.</param>
+    /// <param name="discovered">The playlists discovered for the user.</param>
+    /// <returns>The user's entries, in discovery order.</returns>
+    public IReadOnlyList<PlaylistSyncEntry> ApplyDiscovery(Guid userId, IEnumerable<DiscoveredPlaylist> discovered)
+    {
+        return discovered
+            .Select(playlist => UpsertDiscovered(
+                userId,
+                playlist.ListenBrainzPlaylistId,
+                playlist.Origin,
+                playlist.GeneratedType,
+                playlist.Title,
+                playlist.CreatedAt))
+            .ToList();
+    }
+
+    /// <summary>
     /// Records a successful sync on an entry.
     /// </summary>
     /// <param name="entry">The synced entry.</param>
