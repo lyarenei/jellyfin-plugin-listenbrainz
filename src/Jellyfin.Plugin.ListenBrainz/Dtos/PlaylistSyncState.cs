@@ -92,6 +92,7 @@ public class PlaylistSyncState
         entry.GeneratedType = generatedType;
         entry.Title = title;
         entry.CreatedAt = createdAt;
+        entry.LastSeenAt = DateTime.UtcNow;
         return entry;
     }
 

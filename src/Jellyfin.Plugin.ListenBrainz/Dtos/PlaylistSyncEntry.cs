@@ -47,6 +47,11 @@ public class PlaylistSyncEntry
     public DateTime CreatedAt { get; set; }
 
     /// <summary>
+    /// Gets or sets when the playlist was last seen on ListenBrainz.
+    /// </summary>
+    public DateTime LastSeenAt { get; set; }
+
+    /// <summary>
     /// Gets or sets the Jellyfin playlist ID. Null if the playlist has not been synced yet.
     /// </summary>
     public Guid? JellyfinPlaylistId { get; set; }
