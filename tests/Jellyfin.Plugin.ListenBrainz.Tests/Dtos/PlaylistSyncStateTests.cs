@@ -71,6 +71,7 @@ public class PlaylistSyncStateTests
 
         Assert.Equal(jellyfinPlaylistId, entry.JellyfinPlaylistId);
         Assert.NotNull(entry.LastSyncedAt);
+        Assert.Equal(createdAt, entry.SyncedCreatedAt);
     }
 
     [Fact]
@@ -78,15 +79,19 @@ public class PlaylistSyncStateTests
     {
         var state = new PlaylistSyncState();
         var userId = Guid.NewGuid();
+        var firstCreatedAt = DateTime.UtcNow.AddDays(-7);
         var regeneratedAt = DateTime.UtcNow;
 
-        var entry = state.ApplyDiscovery(userId, [Discovered("lb-1", createdAt: DateTime.UtcNow.AddDays(-7))]).Single();
+        var entry = state.ApplyDiscovery(userId, [Discovered("lb-1", createdAt: firstCreatedAt)]).Single();
         PlaylistSyncState.RecordSync(entry, Guid.NewGuid());
 
         state.ApplyDiscovery(userId, [Discovered("lb-1", title: "Renamed", createdAt: regeneratedAt)]);
 
         Assert.Equal("Renamed", entry.Title);
         Assert.Equal(regeneratedAt, entry.CreatedAt);
+
+        // The synced version is still the old one, which is what marks the entry for a resync.
+        Assert.Equal(firstCreatedAt, entry.SyncedCreatedAt);
     }
 
     [Fact]
@@ -114,6 +119,7 @@ public class PlaylistSyncStateTests
 
         Assert.Null(entry.JellyfinPlaylistId);
         Assert.Null(entry.LastSyncedAt);
+        Assert.Null(entry.SyncedCreatedAt);
     }
 
     [Fact]

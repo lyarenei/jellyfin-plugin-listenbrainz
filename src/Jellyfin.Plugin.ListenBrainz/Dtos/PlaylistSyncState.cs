@@ -124,6 +124,7 @@ public class PlaylistSyncState
     {
         entry.JellyfinPlaylistId = jellyfinPlaylistId;
         entry.LastSyncedAt = DateTime.UtcNow;
+        entry.SyncedCreatedAt = entry.CreatedAt;
     }
 
     /// <summary>
@@ -134,5 +135,6 @@ public class PlaylistSyncState
     {
         entry.JellyfinPlaylistId = null;
         entry.LastSyncedAt = null;
+        entry.SyncedCreatedAt = null;
     }
 }
