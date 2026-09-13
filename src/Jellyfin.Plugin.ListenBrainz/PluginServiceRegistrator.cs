@@ -74,6 +74,9 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
         AddPluginService<IFavoriteSyncService, DefaultFavoriteSyncService>(serviceCollection, "FavoriteSync");
         AddPluginService<IPlaylistTrackMatcher, DefaultPlaylistTrackMatcher>(serviceCollection, "PlaylistTrackMatcher");
         AddPluginService<IPlaylistManager, DefaultPlaylistManager>(serviceCollection, "PlaylistManager");
+        AddPluginService<IPlaylistDiscoveryService, DefaultPlaylistDiscoveryService>(
+            serviceCollection,
+            "PlaylistDiscovery");
 
         serviceCollection.AddSingleton<IPlaybackTrackingService, DefaultPlaybackTrackingService>();
 
