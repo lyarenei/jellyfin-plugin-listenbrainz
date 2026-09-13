@@ -31,7 +31,7 @@ public class PlaylistSyncState
     public int Version { get; set; }
 
     /// <summary>
-    /// Gets or sets synced playlist entries.
+    /// Gets or sets the playlists to be synced.
     /// </summary>
     [SuppressMessage("Warning", "CA2227", Justification = "Needed for deserialization")]
     public Collection<PlaylistSyncEntry> Entries { get; set; }
@@ -60,24 +60,22 @@ public class PlaylistSyncState
     }
 
     /// <summary>
-    /// Creates or updates the entry for a ListenBrainz playlist for a given user.
+    /// Adds a discovered playlist, or refreshes an already known one.
     /// </summary>
     /// <param name="userId">Jellyfin user ID.</param>
     /// <param name="listenBrainzPlaylistId">ListenBrainz playlist ID (MBID).</param>
-    /// <param name="jellyfinPlaylistId">Jellyfin playlist ID.</param>
-    /// <param name="title">ListenBrainz playlist title at sync time.</param>
-    /// <param name="createdAt">ListenBrainz playlist creation date.</param>
     /// <param name="origin">Where the playlist came from.</param>
     /// <param name="generatedType">Generated playlist type, if the origin is a generated playlist.</param>
-    /// <returns>The playlist entry.</returns>
-    public PlaylistSyncEntry Upsert(
+    /// <param name="title">ListenBrainz playlist title.</param>
+    /// <param name="createdAt">ListenBrainz playlist creation date.</param>
+    /// <returns>The added or refreshed entry.</returns>
+    public PlaylistSyncEntry UpsertDiscovered(
         Guid userId,
         string listenBrainzPlaylistId,
-        Guid jellyfinPlaylistId,
-        string title,
-        DateTime createdAt,
         PlaylistOrigin origin,
-        string? generatedType)
+        string? generatedType,
+        string title,
+        DateTime createdAt)
     {
         var entry = FindEntry(userId, listenBrainzPlaylistId);
         if (entry is null)
@@ -90,12 +88,21 @@ public class PlaylistSyncState
             Entries.Add(entry);
         }
 
-        entry.JellyfinPlaylistId = jellyfinPlaylistId;
-        entry.Title = title;
-        entry.CreatedAt = createdAt;
         entry.Origin = origin;
         entry.GeneratedType = generatedType;
-        entry.LastSyncedAt = DateTime.UtcNow;
+        entry.Title = title;
+        entry.CreatedAt = createdAt;
         return entry;
+    }
+
+    /// <summary>
+    /// Records a successful sync on an entry.
+    /// </summary>
+    /// <param name="entry">The synced entry.</param>
+    /// <param name="jellyfinPlaylistId">The ID of the corresponding Jellyfin playlist.</param>
+    public static void RecordSync(PlaylistSyncEntry entry, Guid jellyfinPlaylistId)
+    {
+        entry.JellyfinPlaylistId = jellyfinPlaylistId;
+        entry.LastSyncedAt = DateTime.UtcNow;
     }
 }

@@ -8,39 +8,55 @@ namespace Jellyfin.Plugin.ListenBrainz.Tests.Dtos;
 public class PlaylistSyncStateTests
 {
     [Fact]
-    public void Upsert_CreatesThenUpdatesSameEntry()
+    public void UpsertDiscovered_CreatesThenRefreshesSameEntry()
     {
         var state = new PlaylistSyncState();
         var userId = Guid.NewGuid();
-        var firstJfId = Guid.NewGuid();
-        var secondJfId = Guid.NewGuid();
         var createdAt = DateTime.UtcNow;
 
-        var created = state.Upsert(
-            userId, "lb-1", firstJfId, "Weekly Jams", createdAt, PlaylistOrigin.Generated, "Jams");
+        var created = state.UpsertDiscovered(
+            userId, "lb-1", PlaylistOrigin.Generated, "Jams", "Weekly Jams", createdAt);
         Assert.Single(state.Entries);
-        Assert.Equal(firstJfId, created.JellyfinPlaylistId);
 
-        var updated = state.Upsert(
-            userId, "lb-1", secondJfId, "Weekly Jams (new)", createdAt, PlaylistOrigin.Generated, "Jams");
+        var updated = state.UpsertDiscovered(
+            userId, "lb-1", PlaylistOrigin.Generated, "Jams", "Weekly Jams (new)", createdAt);
 
         Assert.Single(state.Entries);
         Assert.Same(created, updated);
-        Assert.Equal(secondJfId, updated.JellyfinPlaylistId);
         Assert.Equal("Weekly Jams (new)", updated.Title);
     }
 
     [Fact]
-    public void Upsert_RecordsOriginAndGeneratedType()
+    public void UpsertDiscovered_RecordsOriginAndGeneratedType()
     {
         var state = new PlaylistSyncState();
         var userId = Guid.NewGuid();
 
-        var entry = state.Upsert(
-            userId, "lb-1", Guid.NewGuid(), "Weekly Jams", DateTime.UtcNow, PlaylistOrigin.Generated, "Jams");
+        var entry = state.UpsertDiscovered(
+            userId, "lb-1", PlaylistOrigin.Generated, "Jams", "Weekly Jams", DateTime.UtcNow);
 
         Assert.Equal(PlaylistOrigin.Generated, entry.Origin);
         Assert.Equal("Jams", entry.GeneratedType);
+    }
+
+    [Fact]
+    public void UpsertDiscovered_KeepsSyncResultOfKnownPlaylist()
+    {
+        // A new discovery pass must not look like the playlist has never been synced,
+        // that would force a resync of everything on every run.
+        var state = new PlaylistSyncState();
+        var userId = Guid.NewGuid();
+        var jellyfinPlaylistId = Guid.NewGuid();
+        var createdAt = DateTime.UtcNow;
+
+        var entry = state.UpsertDiscovered(
+            userId, "lb-1", PlaylistOrigin.Generated, "Jams", "Weekly Jams", createdAt);
+        PlaylistSyncState.RecordSync(entry, jellyfinPlaylistId);
+
+        state.UpsertDiscovered(
+            userId, "lb-1", PlaylistOrigin.Generated, "Jams", "Weekly Jams", createdAt);
+
+        Assert.Equal(jellyfinPlaylistId, entry.JellyfinPlaylistId);
     }
 
     [Fact]
@@ -48,8 +64,8 @@ public class PlaylistSyncStateTests
     {
         var state = new PlaylistSyncState();
         var userId = Guid.NewGuid();
-        state.Upsert(
-            userId, "LB-ABC", Guid.NewGuid(), "title", DateTime.UtcNow, PlaylistOrigin.Generated, "Jams");
+        state.UpsertDiscovered(
+            userId, "LB-ABC", PlaylistOrigin.Generated, "Jams", "title", DateTime.UtcNow);
 
         Assert.NotNull(state.FindEntry(userId, "lb-abc"));
         Assert.Null(state.FindEntry(Guid.NewGuid(), "LB-ABC"));
@@ -63,10 +79,10 @@ public class PlaylistSyncStateTests
         var firstUser = Guid.NewGuid();
         var secondUser = Guid.NewGuid();
 
-        state.Upsert(
-            firstUser, "lb-1", Guid.NewGuid(), "title", DateTime.UtcNow, PlaylistOrigin.Generated, "Jams");
-        state.Upsert(
-            secondUser, "lb-1", Guid.NewGuid(), "title", DateTime.UtcNow, PlaylistOrigin.Generated, "Jams");
+        state.UpsertDiscovered(
+            firstUser, "lb-1", PlaylistOrigin.Generated, "Jams", "title", DateTime.UtcNow);
+        state.UpsertDiscovered(
+            secondUser, "lb-1", PlaylistOrigin.Generated, "Jams", "title", DateTime.UtcNow);
 
         Assert.Equal(2, state.Entries.Count);
         Assert.Single(state.EntriesFor(firstUser));

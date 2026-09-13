@@ -287,14 +287,15 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
             await _playlistManager.ReplaceTracksAsync(user, existingPlaylist, matchedTracks, cancellationToken);
         }
 
-        state.Upsert(
+        var entry = state.UpsertDiscovered(
             user.Id,
             playlist.PlaylistId,
-            jellyfinPlaylistId,
-            playlist.Title,
-            playlist.CreatedAt,
             PlaylistOrigin.Generated,
-            PlaylistTypePolicy.CategoryFor(playlistType));
+            PlaylistTypePolicy.CategoryFor(playlistType),
+            playlist.Title,
+            playlist.CreatedAt);
+
+        PlaylistSyncState.RecordSync(entry, jellyfinPlaylistId);
 
         _logger.LogInformation(
             "Successfully synced generated playlist {Name} with {Count} tracks",
