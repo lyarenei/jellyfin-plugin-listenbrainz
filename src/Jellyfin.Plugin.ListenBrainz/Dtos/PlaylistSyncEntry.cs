@@ -47,12 +47,12 @@ public class PlaylistSyncEntry
     public DateTime CreatedAt { get; set; }
 
     /// <summary>
-    /// Gets or sets the Jellyfin playlist ID.
+    /// Gets or sets the Jellyfin playlist ID. Null if the playlist has not been synced yet.
     /// </summary>
-    public Guid JellyfinPlaylistId { get; set; }
+    public Guid? JellyfinPlaylistId { get; set; }
 
     /// <summary>
-    /// Gets or sets the last successful sync date.
+    /// Gets or sets the last successful sync date. Null if the playlist has never synced.
     /// </summary>
-    public DateTime LastSyncedAt { get; set; }
+    public DateTime? LastSyncedAt { get; set; }
 }

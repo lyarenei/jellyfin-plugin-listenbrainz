@@ -307,26 +307,26 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
     private SyncTarget ResolveTarget(User user, PlaylistSyncState state, Playlist listingPlaylist)
     {
         var entry = state.FindEntry(user.Id, listingPlaylist.PlaylistId);
-        if (entry is null)
+        if (entry?.JellyfinPlaylistId is not Guid jellyfinPlaylistId)
         {
             return new SyncTarget(false, null);
         }
 
         // A playlist the user cannot see is effectively not synced.
         if (PlaylistTypePolicy.IsUpToDate(entry, listingPlaylist) &&
-            _playlistManager.IsVisibleTo(entry.JellyfinPlaylistId, user.Id))
+            _playlistManager.IsVisibleTo(jellyfinPlaylistId, user.Id))
         {
             return new SyncTarget(true, null);
         }
 
-        var playlist = _playlistManager.FindAny(entry.JellyfinPlaylistId);
+        var playlist = _playlistManager.FindAny(jellyfinPlaylistId);
         if (playlist is null)
         {
             _logger.LogInformation(
                 "Mapped Jellyfin playlist {PlaylistId} for ListenBrainz playlist {ListenBrainzPlaylistId} no longer exists",
-                entry.JellyfinPlaylistId,
+                jellyfinPlaylistId,
                 entry.ListenBrainzPlaylistId);
-            state.Entries.Remove(entry);
+            PlaylistSyncState.ClearSyncResult(entry);
         }
 
         return new SyncTarget(false, playlist);
@@ -368,7 +368,10 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
                 continue;
             }
 
-            var playlist = _playlistManager.FindAny(entry.JellyfinPlaylistId);
+            var playlist = entry.JellyfinPlaylistId is Guid playlistId
+                ? _playlistManager.FindAny(playlistId)
+                : null;
+
             if (playlist is not null)
             {
                 _logger.LogInformation(

@@ -105,4 +105,14 @@ public class PlaylistSyncState
         entry.JellyfinPlaylistId = jellyfinPlaylistId;
         entry.LastSyncedAt = DateTime.UtcNow;
     }
+
+    /// <summary>
+    /// Clears the sync result of an entry, marking it as never synced.
+    /// </summary>
+    /// <param name="entry">The entry to clear.</param>
+    public static void ClearSyncResult(PlaylistSyncEntry entry)
+    {
+        entry.JellyfinPlaylistId = null;
+        entry.LastSyncedAt = null;
+    }
 }

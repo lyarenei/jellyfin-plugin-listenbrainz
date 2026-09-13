@@ -57,6 +57,19 @@ public class PlaylistSyncStateTests
             userId, "lb-1", PlaylistOrigin.Generated, "Jams", "Weekly Jams", createdAt);
 
         Assert.Equal(jellyfinPlaylistId, entry.JellyfinPlaylistId);
+        Assert.NotNull(entry.LastSyncedAt);
+    }
+
+    [Fact]
+    public void ClearSyncResult_MarksEntryAsNeverSynced()
+    {
+        var entry = new PlaylistSyncEntry { CreatedAt = DateTime.UtcNow };
+        PlaylistSyncState.RecordSync(entry, Guid.NewGuid());
+
+        PlaylistSyncState.ClearSyncResult(entry);
+
+        Assert.Null(entry.JellyfinPlaylistId);
+        Assert.Null(entry.LastSyncedAt);
     }
 
     [Fact]
