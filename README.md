@@ -69,17 +69,21 @@ the URLs above. The name you give the repository is purely informational.
 The `ListenBrainz` plugin then shows up in the catalog under the `General` category. Install the version you want,
 restart the server when asked, and continue with the [configuration](doc/configuration.md).
 
-Each major plugin version targets one Jellyfin version. Jellyfin bumps its minor version for breaking changes, so
-the two line up like this:
+Historically, Jellyfin team bumped its minor version even for breaking changes, so the plugin version compatibility
+lines up like this:
 
-| Plugin  | Jellyfin |
-|---------|----------|
-| 1.x.y.z | 10.7.a   |
-| 2.x.y.z | 10.8.a   |
-| 3.x.y.z | 10.8.a   |
-| 4.x.y.z | 10.9.a   |
-| 5.x.y.z | 10.10.a  |
-| 6.x.y.z | 10.11.a  |
+| Plugin  | Jellyfin      |
+|---------|---------------|
+| 1.x.y.z | 10.7.a        |
+| 2.x.y.z | 10.8.a        |
+| 3.x.y.z | 10.8.a        |
+| 4.x.y.z | 10.9.a        |
+| 5.x.y.z | 10.10.a       |
+| 6.x.y.z | 10.11.a, 12.a |
+
+Since Jellyfin 12 has barely changed plugin API from 10.11 (in the areas that this plugin uses) and the Jellyfin team
+announced that the plugin API would be more stable from now on, the plugin will keep the major version until there is a
+breaking change, warranting bumping the major version again.
 
 ## Configuration
 
