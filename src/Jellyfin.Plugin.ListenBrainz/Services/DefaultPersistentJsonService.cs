@@ -106,7 +106,9 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
 
         if (data is null)
         {
-            throw new ServiceException("Failed to deserialize data from JSON file");
+            throw new ServiceException(
+                "Failed to deserialize data from JSON file",
+                new JsonException("Deserialized data is null"));
         }
 
         return data;
@@ -134,7 +136,9 @@ public sealed class DefaultPersistentJsonService<T> : IPersistentJsonService<T>,
 
         if (data is null)
         {
-            throw new ServiceException("Failed to deserialize data from JSON file");
+            throw new ServiceException(
+                "Failed to deserialize data from JSON file",
+                new JsonException("Deserialized data is null"));
         }
 
         return data;

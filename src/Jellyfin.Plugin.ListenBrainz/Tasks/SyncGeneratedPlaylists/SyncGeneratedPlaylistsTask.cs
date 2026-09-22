@@ -213,7 +213,7 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
 
             PruneOutOfRotationPlaylists(user, userConfig, state, generatedPlaylists, failedTypes, cancellationToken);
         }
-        catch (PluginException e)
+        catch (Exception e) when (e is ServiceException or PluginException)
         {
             _logger.LogError(
                 "Failed to fetch generated playlists for user {Username}: {Error}",
@@ -293,6 +293,7 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
             jellyfinPlaylistId,
             playlist.Title,
             playlist.CreatedAt,
+            PlaylistOrigin.Generated,
             PlaylistTypePolicy.CategoryFor(playlistType));
 
         _logger.LogInformation(
@@ -304,28 +305,27 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
 
     private SyncTarget ResolveTarget(User user, PlaylistSyncState state, Playlist listingPlaylist)
     {
-        var mapping = state.FindMapping(user.Id, listingPlaylist.PlaylistId);
-        if (mapping is null)
+        var entry = state.FindEntry(user.Id, listingPlaylist.PlaylistId);
+        if (entry is null)
         {
             return new SyncTarget(false, null);
         }
 
         // A playlist the user cannot see is effectively not synced.
-        // Syncing it again reclaims ownership and restores their access.
-        if (PlaylistTypePolicy.IsUpToDate(mapping, listingPlaylist) &&
-            _playlistManager.IsVisibleTo(mapping.JellyfinPlaylistId, user.Id))
+        if (PlaylistTypePolicy.IsUpToDate(entry, listingPlaylist) &&
+            _playlistManager.IsVisibleTo(entry.JellyfinPlaylistId, user.Id))
         {
             return new SyncTarget(true, null);
         }
 
-        var playlist = _playlistManager.FindAny(mapping.JellyfinPlaylistId);
+        var playlist = _playlistManager.FindAny(entry.JellyfinPlaylistId);
         if (playlist is null)
         {
             _logger.LogInformation(
                 "Mapped Jellyfin playlist {PlaylistId} for ListenBrainz playlist {ListenBrainzPlaylistId} no longer exists",
-                mapping.JellyfinPlaylistId,
-                mapping.ListenBrainzPlaylistId);
-            state.Mappings.Remove(mapping);
+                entry.JellyfinPlaylistId,
+                entry.ListenBrainzPlaylistId);
+            state.Entries.Remove(entry);
         }
 
         return new SyncTarget(false, playlist);
@@ -336,7 +336,7 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
         UserConfig userConfig,
         PlaylistSyncState state,
         IReadOnlyList<PlaylistCandidate> selectedPlaylists,
-        IReadOnlySet<PlaylistType> failedTypes,
+        HashSet<PlaylistType> failedTypes,
         CancellationToken cancellationToken)
     {
         var selectedPlaylistIds = selectedPlaylists
@@ -349,26 +349,25 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
             .Where(t => !failedTypes.Contains(t))
             .ToHashSet();
 
-        var mappingsToRemove = state
-            .Mappings
-            .Where(m => m.JellyfinUserId == user.Id &&
-                        PlaylistTypePolicy.ShouldPruneMapping(m, selectedPlaylistIds, syncedTypes))
+        var entriesToRemove = state
+            .EntriesFor(user.Id)
+            .Where(e => PlaylistTypePolicy.ShouldPruneEntry(e, selectedPlaylistIds, syncedTypes))
             .ToList();
 
-        foreach (var mapping in mappingsToRemove)
+        foreach (var entry in entriesToRemove)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (userConfig.KeepPlaylistsAfterRotation)
             {
                 _logger.LogDebug(
-                    "Keeping out-of-rotation generated playlist {PlaylistId}, removing its mapping",
-                    mapping.ListenBrainzPlaylistId);
-                state.Mappings.Remove(mapping);
+                    "Keeping out-of-rotation generated playlist {PlaylistId}, removing its entry",
+                    entry.ListenBrainzPlaylistId);
+                state.Entries.Remove(entry);
                 continue;
             }
 
-            var playlist = _playlistManager.FindAny(mapping.JellyfinPlaylistId);
+            var playlist = _playlistManager.FindAny(entry.JellyfinPlaylistId);
             if (playlist is not null)
             {
                 _logger.LogInformation(
@@ -377,7 +376,7 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
                 _playlistManager.Delete(playlist);
             }
 
-            state.Mappings.Remove(mapping);
+            state.Entries.Remove(entry);
         }
     }
 
@@ -387,19 +386,16 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
     }
 
     /// <summary>
-    /// What the sync should do with a listed ListenBrainz playlist, resolved once per playlist.
+    /// What the sync should do with a listed ListenBrainz playlist.
     /// </summary>
-    /// <param name="IsUpToDate">
-    /// Whether the playlist is already synced and visible to the user, so it can be skipped.
-    /// </param>
+    /// <param name="IsUpToDate">Whether the playlist can be skipped.</param>
     /// <param name="ExistingPlaylist">
     /// The mapped Jellyfin playlist to write into, or null to look it up by name or create it.
-    /// Only meaningful when <see cref="IsUpToDate"/> is false.
     /// </param>
     private sealed record SyncTarget(bool IsUpToDate, JellyfinPlaylist? ExistingPlaylist);
 
     /// <summary>
-    /// Tracks task progress as an evenly split share per user, advanced per processed playlist.
+    /// Tracks task progress as an evenly split share per user.
     /// </summary>
     private sealed class SyncProgress
     {
@@ -413,28 +409,18 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
             _userShare = 100.0 / userCount;
         }
 
-        /// <summary>
-        /// Advances by one playlist's portion of the current user's share.
-        /// </summary>
-        /// <param name="totalPlaylists">Number of playlists being processed for the current user.</param>
         public void AdvancePlaylist(int totalPlaylists)
         {
             _reported += _userShare / totalPlaylists;
             _progress.Report(_reported);
         }
 
-        /// <summary>
-        /// Marks the current user as fully processed.
-        /// </summary>
         public void CompleteUser()
         {
             _reported += _userShare;
             _progress.Report(_reported);
         }
 
-        /// <summary>
-        /// Reports completion of the whole task.
-        /// </summary>
         public void Finish() => _progress.Report(100);
     }
 }

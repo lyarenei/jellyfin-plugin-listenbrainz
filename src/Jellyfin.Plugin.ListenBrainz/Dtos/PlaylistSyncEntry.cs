@@ -1,38 +1,44 @@
 namespace Jellyfin.Plugin.ListenBrainz.Dtos;
 
 /// <summary>
-/// Mapping between a ListenBrainz playlist and a Jellyfin playlist.
+/// A ListenBrainz playlist synced to Jellyfin.
 /// </summary>
-public class PlaylistMapping
+public class PlaylistSyncEntry
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="PlaylistMapping"/> class.
+    /// Initializes a new instance of the <see cref="PlaylistSyncEntry"/> class.
     /// </summary>
-    public PlaylistMapping()
+    public PlaylistSyncEntry()
     {
         ListenBrainzPlaylistId = string.Empty;
         Title = string.Empty;
     }
 
     /// <summary>
-    /// Gets or sets the Jellyfin user ID.
+    /// Gets or sets the Jellyfin user ID this entry belongs to.
     /// </summary>
     public Guid JellyfinUserId { get; set; }
 
     /// <summary>
-    /// Gets or sets the ListenBrainz playlist ID.
+    /// Gets or sets the ListenBrainz playlist ID (MBID).
     /// </summary>
     public string ListenBrainzPlaylistId { get; set; }
+
+    /// <summary>
+    /// Gets or sets where the playlist came from.
+    /// </summary>
+    public PlaylistOrigin Origin { get; set; }
+
+    /// <summary>
+    /// Gets or sets the generated playlist type.
+    /// Set only if <see cref="Origin"/> is <see cref="PlaylistOrigin.Generated"/>.
+    /// </summary>
+    public string? GeneratedType { get; set; }
 
     /// <summary>
     /// Gets or sets the Jellyfin playlist ID.
     /// </summary>
     public Guid JellyfinPlaylistId { get; set; }
-
-    /// <summary>
-    /// Gets or sets an optional task-specific category discriminator.
-    /// </summary>
-    public string? Category { get; set; }
 
     /// <summary>
     /// Gets or sets the ListenBrainz playlist title at last sync.
@@ -41,6 +47,7 @@ public class PlaylistMapping
 
     /// <summary>
     /// Gets or sets the ListenBrainz playlist creation date.
+    /// A change means the playlist was regenerated.
     /// </summary>
     public DateTime CreatedAt { get; set; }
 

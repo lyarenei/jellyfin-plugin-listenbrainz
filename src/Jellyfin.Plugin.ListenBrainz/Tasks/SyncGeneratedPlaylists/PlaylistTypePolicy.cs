@@ -11,8 +11,7 @@ namespace Jellyfin.Plugin.ListenBrainz.Tasks.SyncGeneratedPlaylists;
 internal static class PlaylistTypePolicy
 {
     /// <summary>
-    /// Descriptors for every known playlist type, keyed by <see cref="PlaylistType"/>.
-    /// Weekly types keep the current and previous playlist; yearly types keep every playlist.
+    /// Descriptors of all known playlist types. A null keep limit means the type is never pruned.
     /// </summary>
     private static readonly IReadOnlyDictionary<PlaylistType, PlaylistTypeDescriptor> _descriptors =
         new PlaylistTypeDescriptor[]
@@ -50,20 +49,28 @@ internal static class PlaylistTypePolicy
     }
 
     /// <summary>
-    /// Gets the persisted category discriminator for a playlist type.
-    /// Inverse of <see cref="TryGetPlaylistType"/>.
+    /// Gets the persisted discriminator of a playlist type. Inverse of <see cref="ParsePlaylistType"/>.
     /// </summary>
     /// <param name="type">The playlist type.</param>
-    /// <returns>The category discriminator stored on a mapping.</returns>
+    /// <returns>The discriminator stored on an entry.</returns>
     internal static string CategoryFor(PlaylistType type) => type.ToString();
+
+    /// <summary>
+    /// Gets the playlist type of a persisted discriminator. Inverse of <see cref="CategoryFor"/>.
+    /// </summary>
+    /// <param name="generatedType">The persisted discriminator.</param>
+    /// <returns>The playlist type, or null if the discriminator is not a known type.</returns>
+    internal static PlaylistType? ParsePlaylistType(string? generatedType)
+    {
+        return TryGetPlaylistType(generatedType, out var type) ? type : null;
+    }
 
     /// <summary>
     /// Picks the playlists to sync for the types a user has enabled.
     /// </summary>
     /// <remarks>
-    /// Capped types keep only their newest playlists (ListenBrainz does not provide a "current"
-    /// alias, so the newest <see cref="Playlist.CreatedAt"/> is treated as the current one).
-    /// Uncapped types keep every playlist.
+    /// ListenBrainz does not mark the current playlist, so the newest
+    /// <see cref="Playlist.CreatedAt"/> is treated as the current one.
     /// </remarks>
     /// <param name="playlists">Playlists created for the user.</param>
     /// <param name="userConfig">User configuration.</param>
@@ -84,41 +91,46 @@ internal static class PlaylistTypePolicy
     }
 
     /// <summary>
-    /// Determines whether a persisted mapping is already up to date with the playlist from the listing,
-    /// i.e. the playlist has not been regenerated since it was last synced.
+    /// Determines whether a persisted entry still matches the listed playlist.
     /// </summary>
-    /// <param name="mapping">The persisted playlist mapping.</param>
-    /// <param name="playlist">The playlist metadata from the created-for listing.</param>
-    /// <returns>True if the mapping already reflects the current playlist.</returns>
-    internal static bool IsUpToDate(PlaylistMapping mapping, Playlist playlist)
+    /// <param name="entry">The persisted playlist sync entry.</param>
+    /// <param name="playlist">The playlist metadata from the listing.</param>
+    /// <returns>True if the playlist has not been regenerated since the last sync.</returns>
+    internal static bool IsUpToDate(PlaylistSyncEntry entry, Playlist playlist)
     {
-        return mapping.CreatedAt == playlist.CreatedAt;
+        return entry.CreatedAt == playlist.CreatedAt;
     }
 
     /// <summary>
-    /// Determines whether a persisted mapping should be pruned given the current selection.
+    /// Determines whether a persisted entry should be pruned given the current selection.
     /// </summary>
-    /// <param name="mapping">The persisted playlist mapping.</param>
+    /// <param name="entry">The persisted playlist sync entry.</param>
     /// <param name="selectedPlaylistIds">ListenBrainz playlist IDs selected this run.</param>
     /// <param name="syncedTypes">Playlist types that were fully synced this run.</param>
-    /// <returns>True if the mapping is owned by a capped type and no longer in the selection.</returns>
-    internal static bool ShouldPruneMapping(
-        PlaylistMapping mapping,
+    /// <returns>True if the entry belongs to a capped type and is no longer in the selection.</returns>
+    internal static bool ShouldPruneEntry(
+        PlaylistSyncEntry entry,
         HashSet<string> selectedPlaylistIds,
         HashSet<PlaylistType> syncedTypes)
     {
-        if (!TryGetPlaylistType(mapping.Category, out var type))
+        // The store is shared across sync tasks; leave entries this task does not own.
+        if (entry.Origin != PlaylistOrigin.Generated)
         {
             return false;
         }
 
-        // Uncapped types are permanent and never pruned.
+        if (!TryGetPlaylistType(entry.GeneratedType, out var type))
+        {
+            return false;
+        }
+
         if (_descriptors[type].KeepNewest is null)
         {
             return false;
         }
 
-        return syncedTypes.Contains(type) && !selectedPlaylistIds.Contains(mapping.ListenBrainzPlaylistId);
+        // Prune only after a clean sync, otherwise the user could be left with nothing.
+        return syncedTypes.Contains(type) && !selectedPlaylistIds.Contains(entry.ListenBrainzPlaylistId);
     }
 
     private static IEnumerable<PlaylistCandidate> TakeForType(IGrouping<PlaylistType, PlaylistCandidate> group)
@@ -153,7 +165,6 @@ internal static class PlaylistTypePolicy
 
     private static bool MatchesPatch(string prefix, string sourcePatch)
     {
-        // Match exactly or as a prefix
         return sourcePatch.Equals(prefix, StringComparison.Ordinal) ||
                sourcePatch.StartsWith(prefix + "-", StringComparison.Ordinal);
     }
