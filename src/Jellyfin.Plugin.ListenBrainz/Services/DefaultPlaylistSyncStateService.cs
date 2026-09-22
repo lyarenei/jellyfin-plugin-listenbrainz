@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
@@ -29,20 +30,39 @@ public class DefaultPlaylistSyncStateService : IPlaylistSyncStateService
     /// <inheritdoc />
     public async Task<PlaylistSyncState> ReadAsync(CancellationToken cancellationToken)
     {
+        PlaylistSyncState state;
         try
         {
-            return await _storage.ReadAsync(cancellationToken: cancellationToken);
+            state = await _storage.ReadAsync(cancellationToken: cancellationToken);
         }
         catch (ServiceException e) when (e.InnerException is FileNotFoundException or DirectoryNotFoundException)
         {
             _logger.LogInformation("No playlist sync state found, starting fresh: {Error}", e.Message);
             return new PlaylistSyncState();
         }
+        catch (ServiceException e) when (e.InnerException is JsonException)
+        {
+            // The state is derived, so discarding it costs a resync and nothing else.
+            _logger.LogWarning("Playlist sync state is corrupt and will be rebuilt: {Error}", e.Message);
+            return new PlaylistSyncState();
+        }
+
+        if (state.Version != PlaylistSyncState.CurrentVersion)
+        {
+            _logger.LogInformation(
+                "Playlist sync state has version {Version}, expected {Expected}; rebuilding it",
+                state.Version,
+                PlaylistSyncState.CurrentVersion);
+            return new PlaylistSyncState();
+        }
+
+        return state;
     }
 
     /// <inheritdoc />
     public async Task SaveAsync(PlaylistSyncState state, CancellationToken cancellationToken)
     {
+        state.Version = PlaylistSyncState.CurrentVersion;
         await _storage.SaveAsync(state, cancellationToken: cancellationToken);
     }
 }
