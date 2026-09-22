@@ -6,17 +6,22 @@ namespace Jellyfin.Plugin.ListenBrainz.Dtos;
 public enum PlaylistOrigin
 {
     /// <summary>
+    /// Origin is not known.
+    /// </summary>
+    Unknown = 0,
+
+    /// <summary>
     /// Playlist generated for the user by ListenBrainz. Its ID rotates on every regeneration.
     /// </summary>
-    Generated = 0,
+    Generated = 1,
 
     /// <summary>
     /// Playlist created by the user.
     /// </summary>
-    UserCreated = 1,
+    UserCreated = 2,
 
     /// <summary>
     /// Playlist the user collaborates on.
     /// </summary>
-    Collaborative = 2,
+    Collaborative = 3,
 }

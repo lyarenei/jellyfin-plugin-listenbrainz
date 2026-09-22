@@ -224,6 +224,7 @@ public class GeneratedPlaylistsTests
     }
 
     [Theory]
+    [InlineData(PlaylistOrigin.Unknown)]
     [InlineData(PlaylistOrigin.UserCreated)]
     [InlineData(PlaylistOrigin.Collaborative)]
     public void Prune_NonGeneratedOrigin_IsNeverPruned(PlaylistOrigin origin)
