@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
 using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Services;
@@ -63,6 +64,30 @@ public sealed class PersistentJsonServiceTests : IDisposable
         using var service = NewService();
 
         await Assert.ThrowsAsync<ServiceException>(() => service.ReadAsync());
+    }
+
+    [Fact]
+    public async Task ReadAsync_ThrowsWithJsonCause_WhenFileHoldsNull()
+    {
+        using var service = NewService();
+        Directory.CreateDirectory(Path.GetDirectoryName(StatePath)!);
+        await File.WriteAllTextAsync(StatePath, "null");
+
+        var exception = await Assert.ThrowsAsync<ServiceException>(() => service.ReadAsync());
+
+        Assert.IsType<JsonException>(exception.InnerException);
+    }
+
+    [Fact]
+    public void Read_ThrowsWithJsonCause_WhenFileHoldsNull()
+    {
+        using var service = NewService();
+        Directory.CreateDirectory(Path.GetDirectoryName(StatePath)!);
+        File.WriteAllText(StatePath, "null");
+
+        var exception = Assert.Throws<ServiceException>(() => service.Read());
+
+        Assert.IsType<JsonException>(exception.InnerException);
     }
 
     // The state file is in a directory which does not exist yet => force create.
