@@ -22,7 +22,6 @@ public class PlaylistSyncState
     /// </summary>
     public PlaylistSyncState()
     {
-        Version = CurrentVersion;
         Entries = [];
     }
 

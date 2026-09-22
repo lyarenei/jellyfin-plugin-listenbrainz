@@ -62,6 +62,7 @@ public class DefaultPlaylistSyncStateService : IPlaylistSyncStateService
     /// <inheritdoc />
     public async Task SaveAsync(PlaylistSyncState state, CancellationToken cancellationToken)
     {
+        state.Version = PlaylistSyncState.CurrentVersion;
         await _storage.SaveAsync(state, cancellationToken: cancellationToken);
     }
 }

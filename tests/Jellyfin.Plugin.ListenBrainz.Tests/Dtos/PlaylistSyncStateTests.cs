@@ -74,8 +74,8 @@ public class PlaylistSyncStateTests
     }
 
     [Fact]
-    public void NewState_CarriesCurrentVersion()
+    public void NewState_CarriesNoVersion()
     {
-        Assert.Equal(PlaylistSyncState.CurrentVersion, new PlaylistSyncState().Version);
+        Assert.Equal(0, new PlaylistSyncState().Version);
     }
 }

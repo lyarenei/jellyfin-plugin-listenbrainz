@@ -72,13 +72,25 @@ public class PlaylistSyncStateServiceTests
         var state = await service.ReadAsync(CancellationToken.None);
 
         Assert.Empty(state.Entries);
-        Assert.Equal(PlaylistSyncState.CurrentVersion, state.Version);
+    }
+
+    [Fact]
+    public async Task ReadAsync_ReturnsEmptyState_WhenStateFilePredatesVersioning()
+    {
+        var stored = new PlaylistSyncState();
+        stored.Entries.Add(new PlaylistSyncEntry { ListenBrainzPlaylistId = "mbid" });
+
+        var service = ServiceReading(() => Task.FromResult(stored));
+
+        var state = await service.ReadAsync(CancellationToken.None);
+
+        Assert.Empty(state.Entries);
     }
 
     [Fact]
     public async Task ReadAsync_ReturnsStoredState()
     {
-        var stored = new PlaylistSyncState();
+        var stored = new PlaylistSyncState { Version = PlaylistSyncState.CurrentVersion };
         stored.Entries.Add(new PlaylistSyncEntry
         {
             ListenBrainzPlaylistId = "mbid",
@@ -106,5 +118,17 @@ public class PlaylistSyncStateServiceTests
         storage.Verify(
             s => s.SaveAsync(state, It.IsAny<string?>(), It.IsAny<CancellationToken>()),
             Times.Once);
+    }
+
+    [Fact]
+    public async Task SaveAsync_StampsCurrentVersion()
+    {
+        var storage = new Mock<IPersistentJsonService<PlaylistSyncState>>();
+        var service = new DefaultPlaylistSyncStateService(NullLogger.Instance, storage.Object);
+        var state = new PlaylistSyncState();
+
+        await service.SaveAsync(state, CancellationToken.None);
+
+        Assert.Equal(PlaylistSyncState.CurrentVersion, state.Version);
     }
 }
