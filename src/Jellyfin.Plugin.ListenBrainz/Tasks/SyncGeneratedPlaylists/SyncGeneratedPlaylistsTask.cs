@@ -160,6 +160,7 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
             }
             catch (Exception e) when (e is not OperationCanceledException)
             {
+                PlaylistSyncState.RecordFailure(entry, e.Message);
                 _logger.LogWarning(
                     "Failed to sync generated playlist {PlaylistId}: {Error}",
                     entry.ListenBrainzPlaylistId,
@@ -259,6 +260,7 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
 
         if (matchedTracks.Count == 0)
         {
+            PlaylistSyncState.RecordFailure(entry, "No matching tracks found in the library");
             _logger.LogWarning(
                 "No matching tracks for generated playlist {Title}, skipping sync",
                 playlist.Title);

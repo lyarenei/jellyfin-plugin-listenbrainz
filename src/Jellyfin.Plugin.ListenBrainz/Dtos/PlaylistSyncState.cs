@@ -122,9 +122,25 @@ public class PlaylistSyncState
     /// <param name="jellyfinPlaylistId">The ID of the corresponding Jellyfin playlist.</param>
     public static void RecordSync(PlaylistSyncEntry entry, Guid jellyfinPlaylistId)
     {
+        var now = DateTime.UtcNow;
         entry.JellyfinPlaylistId = jellyfinPlaylistId;
-        entry.LastSyncedAt = DateTime.UtcNow;
+        entry.LastSyncedAt = now;
+        entry.LastAttemptedAt = now;
         entry.SyncedCreatedAt = entry.CreatedAt;
+        entry.FailureReason = null;
+    }
+
+    /// <summary>
+    /// Records a failed sync attempt on an entry, keeping the previous successful sync intact.
+    /// </summary>
+    /// <param name="entry">The entry which failed to sync.</param>
+    /// <param name="error">Why the attempt failed.</param>
+    public static void RecordFailure(PlaylistSyncEntry entry, string error)
+    {
+        ArgumentNullException.ThrowIfNull(entry);
+
+        entry.LastAttemptedAt = DateTime.UtcNow;
+        entry.FailureReason = error;
     }
 
     /// <summary>

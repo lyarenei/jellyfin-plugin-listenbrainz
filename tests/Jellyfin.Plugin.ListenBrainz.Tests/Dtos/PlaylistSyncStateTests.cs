@@ -110,6 +110,35 @@ public class PlaylistSyncStateTests
     }
 
     [Fact]
+    public void RecordSync_ClearsPreviousError()
+    {
+        var entry = new PlaylistSyncEntry { CreatedAt = DateTime.UtcNow };
+        PlaylistSyncState.RecordFailure(entry, "no matching tracks");
+        Assert.NotNull(entry.FailureReason);
+
+        PlaylistSyncState.RecordSync(entry, Guid.NewGuid());
+
+        Assert.Null(entry.FailureReason);
+        Assert.NotNull(entry.LastAttemptedAt);
+    }
+
+    [Fact]
+    public void RecordFailure_KeepsPreviousSuccessfulSync()
+    {
+        // A failed attempt must not discard a playlist the user still has.
+        var jellyfinPlaylistId = Guid.NewGuid();
+        var entry = new PlaylistSyncEntry { CreatedAt = DateTime.UtcNow };
+        PlaylistSyncState.RecordSync(entry, jellyfinPlaylistId);
+        var syncedAt = entry.LastSyncedAt;
+
+        PlaylistSyncState.RecordFailure(entry, "listenbrainz unreachable");
+
+        Assert.Equal(jellyfinPlaylistId, entry.JellyfinPlaylistId);
+        Assert.Equal(syncedAt, entry.LastSyncedAt);
+        Assert.Equal("listenbrainz unreachable", entry.FailureReason);
+    }
+
+    [Fact]
     public void ClearSyncResult_MarksEntryAsNeverSynced()
     {
         var entry = new PlaylistSyncEntry { CreatedAt = DateTime.UtcNow };

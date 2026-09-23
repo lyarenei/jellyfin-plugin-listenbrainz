@@ -65,4 +65,14 @@ public class PlaylistSyncEntry
     /// Gets or sets the last successful sync date. Null if the playlist has never synced.
     /// </summary>
     public DateTime? LastSyncedAt { get; set; }
+
+    /// <summary>
+    /// Gets or sets when a sync was last attempted.
+    /// </summary>
+    public DateTime? LastAttemptedAt { get; set; }
+
+    /// <summary>
+    /// Gets or sets why the last sync attempt failed. Null if the last attempt succeeded.
+    /// </summary>
+    public string? FailureReason { get; set; }
 }
