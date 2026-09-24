@@ -36,12 +36,7 @@ public class PlaylistSyncEntry
     public string? GeneratedType { get; set; }
 
     /// <summary>
-    /// Gets or sets the Jellyfin playlist ID.
-    /// </summary>
-    public Guid JellyfinPlaylistId { get; set; }
-
-    /// <summary>
-    /// Gets or sets the ListenBrainz playlist title at last sync.
+    /// Gets or sets the ListenBrainz playlist title as of the last discovery.
     /// </summary>
     public string Title { get; set; }
 
@@ -52,7 +47,32 @@ public class PlaylistSyncEntry
     public DateTime CreatedAt { get; set; }
 
     /// <summary>
-    /// Gets or sets the last sync date.
+    /// Gets or sets corresponding Jellyfin playlist creation date.
     /// </summary>
-    public DateTime LastSyncedAt { get; set; }
+    public DateTime? SyncedCreatedAt { get; set; }
+
+    /// <summary>
+    /// Gets or sets when the playlist was last seen on ListenBrainz.
+    /// </summary>
+    public DateTime LastSeenAt { get; set; }
+
+    /// <summary>
+    /// Gets or sets the Jellyfin playlist ID. Null if the playlist has not been synced yet.
+    /// </summary>
+    public Guid? JellyfinPlaylistId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the last successful sync date. Null if the playlist has never synced.
+    /// </summary>
+    public DateTime? LastSyncedAt { get; set; }
+
+    /// <summary>
+    /// Gets or sets when a sync was last attempted.
+    /// </summary>
+    public DateTime? LastAttemptedAt { get; set; }
+
+    /// <summary>
+    /// Gets or sets why the last sync attempt failed. Null if the last attempt succeeded.
+    /// </summary>
+    public string? FailureReason { get; set; }
 }
