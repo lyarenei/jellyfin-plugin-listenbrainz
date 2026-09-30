@@ -91,14 +91,13 @@ internal static class PlaylistTypePolicy
     }
 
     /// <summary>
-    /// Determines whether a persisted entry still matches the listed playlist.
+    /// Determines whether the Jellyfin playlist of an entry is up to date.
     /// </summary>
-    /// <param name="entry">The persisted playlist sync entry.</param>
-    /// <param name="playlist">The playlist metadata from the listing.</param>
-    /// <returns>True if the playlist has not been regenerated since the last sync.</returns>
-    internal static bool IsUpToDate(PlaylistSyncEntry entry, Playlist playlist)
+    /// <param name="entry">The playlist sync entry.</param>
+    /// <returns>Playlist is up to date.</returns>
+    internal static bool IsUpToDate(PlaylistSyncEntry entry)
     {
-        return entry.CreatedAt == playlist.CreatedAt;
+        return entry.SyncedCreatedAt == entry.CreatedAt;
     }
 
     /// <summary>
