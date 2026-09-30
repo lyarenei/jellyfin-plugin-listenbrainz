@@ -130,26 +130,38 @@ public class GeneratedPlaylistsTests
     }
 
     [Fact]
-    public void IsUpToDate_SameCreatedAt_ReturnsTrue()
+    public void IsUpToDate_SyncedCurrentVersion_ReturnsTrue()
     {
         var createdAt = DateTime.UtcNow;
-        var entry = new PlaylistSyncEntry { ListenBrainzPlaylistId = "jams-1", CreatedAt = createdAt };
-        var playlist = MakePlaylist("weekly-jams", "jams-1", createdAt);
+        var entry = new PlaylistSyncEntry
+        {
+            ListenBrainzPlaylistId = "jams-1",
+            CreatedAt = createdAt,
+            SyncedCreatedAt = createdAt,
+        };
 
-        Assert.True(PlaylistTypePolicy.IsUpToDate(entry, playlist));
+        Assert.True(PlaylistTypePolicy.IsUpToDate(entry));
     }
 
     [Fact]
-    public void IsUpToDate_DifferentCreatedAt_ReturnsFalse()
+    public void IsUpToDate_PlaylistRegeneratedSinceSync_ReturnsFalse()
     {
         var entry = new PlaylistSyncEntry
         {
             ListenBrainzPlaylistId = "jams-1",
-            CreatedAt = DateTime.UtcNow.AddDays(-7),
+            CreatedAt = DateTime.UtcNow,
+            SyncedCreatedAt = DateTime.UtcNow.AddDays(-7),
         };
-        var playlist = MakePlaylist("weekly-jams", "jams-1", DateTime.UtcNow);
 
-        Assert.False(PlaylistTypePolicy.IsUpToDate(entry, playlist));
+        Assert.False(PlaylistTypePolicy.IsUpToDate(entry));
+    }
+
+    [Fact]
+    public void IsUpToDate_NeverSynced_ReturnsFalse()
+    {
+        var entry = new PlaylistSyncEntry { ListenBrainzPlaylistId = "jams-1", CreatedAt = DateTime.UtcNow };
+
+        Assert.False(PlaylistTypePolicy.IsUpToDate(entry));
     }
 
     [Fact]

@@ -1,8 +1,5 @@
-using System.Collections.ObjectModel;
-using Jellyfin.Plugin.ListenBrainz.Api.Models;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
-using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using Jellyfin.Plugin.ListenBrainz.Tasks.SyncGeneratedPlaylists;
 using Jellyfin.Plugin.ListenBrainz.Tests.TestKit;
@@ -34,19 +31,19 @@ public class SyncGeneratedPlaylistsTaskTests : ServiceTest<SyncGeneratedPlaylist
 
     private Mock<IUserManager> UserManager => MockOf<IUserManager>();
 
-    private Mock<IListenBrainzService> ListenBrainz => MockOf<IListenBrainzService>();
+    private Mock<IPlaylistDiscoveryService> Discovery => MockOf<IPlaylistDiscoveryService>();
 
     private Mock<IPlaylistSyncStateService> StateService => MockOf<IPlaylistSyncStateService>();
 
     [Fact]
-    public async Task ExecuteAsync_SyncsRemainingUsers_WhenListingFailsForOneUser()
+    public async Task ExecuteAsync_SyncsRemainingUsers_WhenDiscoveryFailsForOneUser()
     {
-        GivenListingFails(_firstUser);
+        GivenDiscoveryFails(_firstUser);
         GivenNoPlaylists(_secondUser);
 
         await TestedService.ExecuteAsync(Mock.Of<IProgress<double>>(), CancellationToken.None);
 
-        VerifyListingRequested(_secondUser);
+        VerifyDiscoveryRequested(_secondUser);
     }
 
     private static UserConfig EnabledUserConfig()
@@ -56,16 +53,14 @@ public class SyncGeneratedPlaylistsTaskTests : ServiceTest<SyncGeneratedPlaylist
         return config;
     }
 
-    private void GivenListingFails(UserConfig config) => ListenBrainz
-        .Setup(m => m.GetCreatedForPlaylistsAsync(config, It.IsAny<int>(), It.IsAny<CancellationToken>()))
-        .ThrowsAsync(new ServiceException("Getting 'created for' playlists failed"));
+    private void GivenDiscoveryFails(UserConfig config) => Discovery
+        .Setup(m => m.DiscoverAsync(config, It.IsAny<CancellationToken>()))
+        .ReturnsAsync(PlaylistDiscoveryResult.Failed);
 
-    private void GivenNoPlaylists(UserConfig config) => ListenBrainz
-        .Setup(m => m.GetCreatedForPlaylistsAsync(config, It.IsAny<int>(), It.IsAny<CancellationToken>()))
-        .ReturnsAsync([]);
+    private void GivenNoPlaylists(UserConfig config) => Discovery
+        .Setup(m => m.DiscoverAsync(config, It.IsAny<CancellationToken>()))
+        .ReturnsAsync(new PlaylistDiscoveryResult([], true));
 
-    private void VerifyListingRequested(UserConfig config) => ListenBrainz
-        .Verify(
-            m => m.GetCreatedForPlaylistsAsync(config, It.IsAny<int>(), It.IsAny<CancellationToken>()),
-            Times.Once);
+    private void VerifyDiscoveryRequested(UserConfig config) => Discovery
+        .Verify(m => m.DiscoverAsync(config, It.IsAny<CancellationToken>()), Times.Once);
 }
