@@ -281,6 +281,15 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
         else
         {
             jellyfinPlaylistId = existingPlaylist.Id;
+            if (HasSameTracks(existingPlaylist, matchedTracks))
+            {
+                _logger.LogDebug(
+                    "Generated playlist {Title} already contains all matched tracks",
+                    playlist.Title);
+                PlaylistSyncState.RecordSync(entry, jellyfinPlaylistId);
+                return true;
+            }
+
             await _playlistManager.ReplaceTracksAsync(user, existingPlaylist, matchedTracks, cancellationToken);
         }
 
@@ -335,6 +344,13 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
         }
 
         return DateTime.UtcNow - lastSyncedAt > TimeSpan.FromDays(intervalDays);
+    }
+
+    private bool HasSameTracks(JellyfinPlaylist playlist, IReadOnlyList<BaseItem> tracks)
+    {
+        return _playlistManager
+            .GetTrackIds(playlist)
+            .SequenceEqual(tracks.Select(t => t.Id));
     }
 
     private void PruneOutOfRotationPlaylists(
