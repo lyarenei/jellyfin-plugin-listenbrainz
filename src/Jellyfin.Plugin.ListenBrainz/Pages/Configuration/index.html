@@ -203,6 +203,17 @@
                                 treated as a separate delimiter. Leave empty to use the default set.
                             </div>
                         </div>
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="PlaylistRematchIntervalDays">
+                                Playlist re-match interval (days)
+                            </label>
+                            <input id="PlaylistRematchIntervalDays" name="PlaylistRematchIntervalDays"
+                                   type="number" min="0" step="1" is="emby-input" class="input-field"/>
+                            <div class="fieldDescription">
+                                How often a synced playlist is matched against your library again, even
+                                if the playlist itself has not changed on ListenBrainz. Disabled if set to 0.
+                            </div>
+                        </div>
                         <div>
                             <button is="emby-button" type="submit"
                                     class="raised button-submit block emby-button save-button">

@@ -51,6 +51,12 @@ public interface IPluginConfigService
     bool IsAllPlaylistsSyncEnabled { get; }
 
     /// <summary>
+    /// Gets how many days may pass before a synced playlist is matched against the library again,
+    /// even if the playlist itself has not changed on ListenBrainz. Disabled if set to 0.
+    /// </summary>
+    int PlaylistRematchIntervalDays { get; }
+
+    /// <summary>
     /// Gets library configurations.
     /// </summary>
     Collection<LibraryConfig> LibraryConfigs { get; }

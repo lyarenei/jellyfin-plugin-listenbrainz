@@ -68,6 +68,9 @@ public class DefaultPluginConfigService : IPluginConfigService
     public bool IsAllPlaylistsSyncEnabled => Config.IsAllPlaylistsSyncEnabled;
 
     /// <inheritdoc />
+    public int PlaylistRematchIntervalDays => Config.PlaylistRematchIntervalDays;
+
+    /// <inheritdoc />
     public Collection<LibraryConfig> LibraryConfigs
     {
         get => Config.LibraryConfigs;

@@ -20,6 +20,7 @@ export interface PluginConfiguration {
     ListenBrainzApiUrl: string;
     MbidDelimiters: string;
     MusicBrainzApiUrl: string;
+    PlaylistRematchIntervalDays: number;
     UserConfigs: PluginUserConfig[];
 }
 
