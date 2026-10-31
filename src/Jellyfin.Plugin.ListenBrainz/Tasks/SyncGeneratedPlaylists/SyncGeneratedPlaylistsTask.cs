@@ -302,6 +302,7 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
 
         // A playlist the user cannot see is effectively not synced.
         if (PlaylistTypePolicy.IsUpToDate(entry) &&
+            !ShouldRematch(entry) &&
             _playlistManager.IsVisibleTo(jellyfinPlaylistId, user.Id))
         {
             return new SyncTarget(true, null);
@@ -318,6 +319,22 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
         }
 
         return new SyncTarget(false, playlist);
+    }
+
+    private bool ShouldRematch(PlaylistSyncEntry entry)
+    {
+        var intervalDays = _configService.PlaylistRematchIntervalDays;
+        if (intervalDays <= 0)
+        {
+            return false;
+        }
+
+        if (entry.LastSyncedAt is not DateTime lastSyncedAt)
+        {
+            return true;
+        }
+
+        return DateTime.UtcNow - lastSyncedAt > TimeSpan.FromDays(intervalDays);
     }
 
     private void PruneOutOfRotationPlaylists(
