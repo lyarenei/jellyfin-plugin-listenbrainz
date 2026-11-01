@@ -74,7 +74,8 @@ jobs:
 
   integration-test:
     if: ${{ contains(github.repository, 'lyarenei/') }}
-    needs: update-manifest
+    needs: [build, update-manifest]
     uses: ./.github/workflows/integration-test.yml
     with:
       repo: ${{ vars.REPO_DEV }}
+      version: ${{ needs.build.outputs.version }}
