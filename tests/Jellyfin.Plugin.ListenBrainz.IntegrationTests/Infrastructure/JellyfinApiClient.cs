@@ -12,6 +12,7 @@ internal sealed class JellyfinApiClient : IDisposable
     private const string ClientVersion = "1.0.0";
 
     private const string RepositoryName = "ListenBrainz integration tests";
+    private const string PluginUpdateTaskKey = "PluginUpdates";
 
     private static readonly TimeSpan _retryDelay = TimeSpan.FromSeconds(1);
     private static readonly TimeSpan _repositoryPollDelay = TimeSpan.FromSeconds(5);
@@ -177,6 +178,32 @@ internal sealed class JellyfinApiClient : IDisposable
             cancellationToken).ConfigureAwait(false);
 
         await WaitForRegisteredPluginAsync(manifest, source, deadline, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Removes all triggers of the plugin update task, so the server never updates plugins on its own.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    public async Task DisablePluginUpdatesAsync(CancellationToken cancellationToken = default)
+    {
+        using var tasksResponse = await _client.GetAsync("ScheduledTasks", cancellationToken).ConfigureAwait(false);
+        tasksResponse.EnsureSuccessStatusCode();
+
+        using var tasks = JsonDocument.Parse(
+            await tasksResponse.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
+
+        var taskId = tasks.RootElement.EnumerateArray()
+            .Single(task => task.GetProperty("Key").GetString() == PluginUpdateTaskKey)
+            .GetProperty("Id")
+            .GetString();
+
+        using var response = await _client.PostAsJsonAsync(
+            $"ScheduledTasks/{taskId}/Triggers",
+            Array.Empty<object>(),
+            cancellationToken).ConfigureAwait(false);
+
+        response.EnsureSuccessStatusCode();
     }
 
     /// <summary>

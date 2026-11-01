@@ -69,6 +69,10 @@ public sealed class JellyfinServerFixture : IAsyncLifetime
             {
                 await client.InstallFromRepositoryAsync(Manifest, Source, _installTimeout).ConfigureAwait(false);
 
+                // Otherwise the server updates the plugin on the next start if the repository
+                // offers a newer version by then.
+                await client.DisablePluginUpdatesAsync().ConfigureAwait(false);
+
                 // A freshly installed plugin is only loaded on the next start. The restarted
                 // container can be published on another host port, hence the new client.
                 await _container.RestartAsync().ConfigureAwait(false);
