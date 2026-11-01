@@ -20,8 +20,8 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
-          # The gate walks back to the commit that last changed the version.
-          fetch-depth: 0
+          # The gate compares the merge commit against its first parent.
+          fetch-depth: 2
 
       - name: Check For Plugin Changes
         id: check
@@ -42,8 +42,7 @@ jobs:
       dotnet-version: ${{ vars.DOTNET_9 }}
 
   build:
-    # Everything downstream of the build is skipped with it, so this gates the whole chain:
-    # publishing a package identical to the one in the repository has nothing to test.
+    # Everything downstream of the build is skipped with it, so this gates the whole chain.
     if: ${{ needs.gate.outputs.plugin-changed == 'true' }}
     needs: gate
     uses: ./.github/workflows/build.yml
