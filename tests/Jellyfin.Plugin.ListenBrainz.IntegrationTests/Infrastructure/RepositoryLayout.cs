@@ -27,15 +27,6 @@ internal static class RepositoryLayout
         "Jellyfin.Plugin.ListenBrainz.csproj");
 
     /// <summary>
-    /// Gets the path to the Containerfile used to build the test server image.
-    /// </summary>
-    public static string Containerfile => Path.Combine(
-        Root,
-        "tests",
-        "Jellyfin.Plugin.ListenBrainz.IntegrationTests",
-        "Containerfile");
-
-    /// <summary>
     /// Gets a scratch directory for harness artifacts. It lives under obj/ so it is git-ignored
     /// and gets cleaned up along with the rest of the build output.
     /// </summary>

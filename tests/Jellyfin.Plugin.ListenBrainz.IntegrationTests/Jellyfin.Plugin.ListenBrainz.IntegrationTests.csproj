@@ -5,8 +5,4 @@
         <PackageReference Include="YamlDotNet" Version="16.3.0" />
     </ItemGroup>
 
-    <ItemGroup>
-        <None Update="Containerfile" CopyToOutputDirectory="Never" />
-    </ItemGroup>
-
 </Project>
