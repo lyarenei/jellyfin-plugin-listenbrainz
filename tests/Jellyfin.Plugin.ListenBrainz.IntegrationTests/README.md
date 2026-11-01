@@ -77,9 +77,12 @@ Dev and main workflows run these tests through `.github/workflows/integration-te
 published to the respective repository. Dev workflow installs the plugin from the development/unstable repository while
 the main workflow installs the plugin from the stable repository.
 
-In pull requests, these tests are gated to reduce the usage of CI time.`.github/scripts/check-plugin-changes.sh` checks
-if the `build` job should run, and `integration-test` job is skipped along with it. If there are no changes to the
-plugin sources (aka a version bump), then the tests are not run.
+Every dev build gets a unique version: the last part of the version from `build.yaml` is replaced with a number derived
+from the workflow run. The tests then install exactly that version. Releases use the version from `build.yaml` as is.
+
+In pull requests, these tests are gated to reduce the usage of CI time. `.github/scripts/check-plugin-changes.sh` checks
+if the `build` job should run, and `integration-test` job is skipped along with it. If nothing that ends up in the
+published plugin changed, then the tests are not run.
 
 The script can be also run against any branch:
 
