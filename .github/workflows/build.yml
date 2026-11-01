@@ -12,10 +12,21 @@ on:
         type: string
         required: false
         default: "net9.0"
+      build-number:
+        description: 'Replaces the last part of the version, when set.'
+        type: string
+        required: false
+        default: ""
+    outputs:
+      version:
+        description: 'Version of the built plugin.'
+        value: ${{ jobs.build.outputs.version }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
@@ -44,11 +55,23 @@ jobs:
       - name: Build TypeScript
         run: npm run build
 
+      - name: Resolve Plugin Version
+        id: version
+        run: |
+          version=$(awk '/^version:/ { gsub(/"/, "", $2); print $2; exit }' build.yaml)
+          if [ -n "${{ inputs.build-number }}" ]; then
+              # Jellyfin versions have at most four parts, so the last one is replaced.
+              version="$(echo "$version" | cut -d. -f1-3).${{ inputs.build-number }}"
+          fi
+
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+
       - name: Build Jellyfin Plugin
         uses: oddstr13/jellyfin-plugin-repository-manager@9497a0a499416cc572ed2e07a391d9f943a37b4d # v1.1.1
         id: jprm
         with:
           dotnet-target: "${{ inputs.dotnet-target }}"
+          version: "${{ steps.version.outputs.version }}"
 
       - name: Upload Artifact
         uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
