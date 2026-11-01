@@ -107,6 +107,17 @@ public class DefaultPlaylistManager : IPlaylistManager
     }
 
     /// <inheritdoc />
+    public IReadOnlyList<Guid> GetTrackIds(JellyfinPlaylist playlist)
+    {
+        return playlist
+            .GetLinkedChildrenInfos()
+            .Select(i => i.Item1.ItemId)
+            .Where(id => id is not null)
+            .Select(id => id!.Value)
+            .ToList();
+    }
+
+    /// <inheritdoc />
     public async Task ReplaceTracksAsync(
         User user,
         JellyfinPlaylist playlist,
@@ -117,11 +128,8 @@ public class DefaultPlaylistManager : IPlaylistManager
 
         await EnsureOwnedAndTagged(playlist, user.Id, cancellationToken);
 
-        var entryIds = playlist
-            .GetLinkedChildrenInfos()
-            .Select(i => i.Item1.ItemId)
-            .Where(id => id is not null)
-            .Select(id => id!.Value.ToString("N", CultureInfo.InvariantCulture))
+        var entryIds = GetTrackIds(playlist)
+            .Select(id => id.ToString("N", CultureInfo.InvariantCulture))
             .ToArray();
 
         if (entryIds.Length > 0)

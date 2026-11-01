@@ -281,6 +281,15 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
         else
         {
             jellyfinPlaylistId = existingPlaylist.Id;
+            if (HasSameTracks(existingPlaylist, matchedTracks))
+            {
+                _logger.LogDebug(
+                    "Generated playlist {Title} already contains all matched tracks",
+                    playlist.Title);
+                PlaylistSyncState.RecordSync(entry, jellyfinPlaylistId);
+                return true;
+            }
+
             await _playlistManager.ReplaceTracksAsync(user, existingPlaylist, matchedTracks, cancellationToken);
         }
 
@@ -302,6 +311,7 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
 
         // A playlist the user cannot see is effectively not synced.
         if (PlaylistTypePolicy.IsUpToDate(entry) &&
+            !ShouldRematch(entry) &&
             _playlistManager.IsVisibleTo(jellyfinPlaylistId, user.Id))
         {
             return new SyncTarget(true, null);
@@ -318,6 +328,29 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
         }
 
         return new SyncTarget(false, playlist);
+    }
+
+    private bool ShouldRematch(PlaylistSyncEntry entry)
+    {
+        var intervalDays = _configService.PlaylistRematchIntervalDays;
+        if (intervalDays <= 0)
+        {
+            return false;
+        }
+
+        if (entry.LastSyncedAt is not DateTime lastSyncedAt)
+        {
+            return true;
+        }
+
+        return DateTime.UtcNow - lastSyncedAt > TimeSpan.FromDays(intervalDays);
+    }
+
+    private bool HasSameTracks(JellyfinPlaylist playlist, IReadOnlyList<BaseItem> tracks)
+    {
+        return _playlistManager
+            .GetTrackIds(playlist)
+            .SequenceEqual(tracks.Select(t => t.Id));
     }
 
     private void PruneOutOfRotationPlaylists(
