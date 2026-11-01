@@ -12,13 +12,42 @@ on:
   workflow_dispatch:
 
 jobs:
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      plugin-changed: ${{ steps.check.outputs.changed }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        with:
+          # The gate compares the merge commit against its first parent.
+          fetch-depth: 2
+
+      - name: Check For Plugin Changes
+        id: check
+        run: |
+          if [ "${{ github.event_name }}" = 'pull_request' ]; then
+              # The checkout is the merge commit, so its first parent is the branch the pull
+              # request targets and HEAD^1..HEAD is exactly what the branch brings.
+              base='HEAD^1'
+          else
+              base=''
+          fi
+
+          .github/scripts/check-plugin-changes.sh "$base"
+
   test:
     uses: jellyfin/jellyfin-meta-plugins/.github/workflows/test.yaml@master
     with:
       dotnet-version: ${{ vars.DOTNET_9 }}
 
   build:
+    # Everything downstream of the build is skipped with it, so this gates the whole chain.
+    if: ${{ needs.gate.outputs.plugin-changed == 'true' }}
+    needs: gate
     uses: ./.github/workflows/build.yml
+    with:
+      build-number: ${{ github.run_number }}${{ github.run_attempt }}
 
   upload-repo:
     if: ${{ contains(github.repository, 'lyarenei/') }}
@@ -41,3 +70,11 @@ jobs:
       host: ${{ secrets.DEPLOY_HOST }}
       user: ${{ secrets.DEPLOY_USER }}
       key: ${{ secrets.DEPLOY_KEY }}
+
+  integration-test:
+    if: ${{ contains(github.repository, 'lyarenei/') }}
+    needs: [build, update-manifest]
+    uses: ./.github/workflows/integration-test.yml
+    with:
+      repo: ${{ vars.REPO_DEV }}
+      version: ${{ needs.build.outputs.version }}

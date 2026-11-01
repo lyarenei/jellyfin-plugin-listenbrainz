@@ -1,14 +1,8 @@
-using System;
 using System.Net;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 using Jellyfin.Plugin.ListenBrainz.Http.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Http.Interfaces;
 using Microsoft.Extensions.Logging;
-using Moq;
 using Moq.Protected;
-using Xunit;
 
 namespace Jellyfin.Plugin.ListenBrainz.Http.Tests;
 
@@ -29,30 +23,14 @@ public class ClientTests
     [Fact]
     public async Task Client_SendRequest_OK()
     {
-        var mockFactory = new Mock<IHttpClientFactory>();
-        var mockHandler = new Mock<HttpMessageHandler>();
-        mockHandler
-            .Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>()
-            )
-            .ReturnsAsync(new HttpResponseMessage
-            {
-                StatusCode = HttpStatusCode.OK,
-                Content = new StringContent("OK")
-            });
+        var client = ClientResponding(new HttpResponseMessage
+        {
+            StatusCode = HttpStatusCode.OK,
+            Content = new StringContent("OK"),
+        });
 
-        var httpClient = new System.Net.Http.HttpClient(mockHandler.Object);
-        mockFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(httpClient);
+        var result = await client.ExposedSendRequest(Request());
 
-        var logger = new Mock<ILogger>();
-        var sleepService = new Mock<ISleepService>();
-        var client = new TestClient(mockFactory.Object, logger.Object, sleepService.Object);
-        var request = new HttpRequestMessage(HttpMethod.Post, RequestUri);
-
-        var result = await client.ExposedSendRequest(request);
         Assert.NotNull(result);
         Assert.NotEmpty(await result.Content.ReadAsStringAsync());
     }
@@ -60,78 +38,56 @@ public class ClientTests
     [Fact]
     public async Task Client_SendRequest_InvalidResponse()
     {
-        var mockFactory = new Mock<IHttpClientFactory>();
-        var mockHandler = new Mock<HttpMessageHandler>();
-        mockHandler
-            .Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>()
-            )
-            .ThrowsAsync(new Exception());
+        var client = ClientThrowing(new Exception());
 
-        var httpClient = new System.Net.Http.HttpClient(mockHandler.Object);
-        mockFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(httpClient);
-
-        var logger = new Mock<ILogger>();
-        var sleepService = new Mock<ISleepService>();
-        var client = new TestClient(mockFactory.Object, logger.Object, sleepService.Object);
-        var request = new HttpRequestMessage(HttpMethod.Post, RequestUri);
-
-        await Assert.ThrowsAsync<InvalidResponseException>(() => client.ExposedSendRequest(request));
+        await Assert.ThrowsAsync<InvalidResponseException>(() => client.ExposedSendRequest(Request()));
     }
 
     [Fact]
     public async Task Client_SendRequest_RetryException()
     {
-        var mockFactory = new Mock<IHttpClientFactory>();
-        var mockHandler = new Mock<HttpMessageHandler>();
-        mockHandler
-            .Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>()
-            )
-            .ReturnsAsync(new HttpResponseMessage
-            {
-                StatusCode = HttpStatusCode.ServiceUnavailable
-            });
+        var client = ClientResponding(new HttpResponseMessage { StatusCode = HttpStatusCode.ServiceUnavailable });
 
-        var httpClient = new System.Net.Http.HttpClient(mockHandler.Object);
-        mockFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(httpClient);
-
-        var logger = new Mock<ILogger>();
-        var sleepService = new Mock<ISleepService>();
-        var client = new TestClient(mockFactory.Object, logger.Object, sleepService.Object);
-        var request = new HttpRequestMessage(HttpMethod.Post, RequestUri);
-
-        await Assert.ThrowsAsync<RetryException>(() => client.ExposedSendRequest(request));
+        await Assert.ThrowsAsync<RetryException>(() => client.ExposedSendRequest(Request()));
     }
 
     [Fact]
     public async Task Client_SendRequest_CancellationException_Propagates()
     {
-        var mockFactory = new Mock<IHttpClientFactory>();
-        var mockHandler = new Mock<HttpMessageHandler>();
-        mockHandler
+        var client = ClientThrowing(new TaskCanceledException());
+
+        await Assert.ThrowsAsync<TaskCanceledException>(() => client.ExposedSendRequest(Request()));
+    }
+
+    private static HttpRequestMessage Request() => new(HttpMethod.Post, RequestUri);
+
+    /// <summary>
+    /// Builds a client that always returns the specified response.
+    /// </summary>
+    private static TestClient ClientResponding(HttpResponseMessage response) =>
+        ClientWith(handler => handler.ReturnsAsync(response));
+
+    /// <summary>
+    /// Builds a client that always throws the specified exception.
+    /// </summary>
+    private static TestClient ClientThrowing(Exception exception) =>
+        ClientWith(handler => handler.ThrowsAsync(exception));
+
+    private static TestClient ClientWith(Action<Moq.Language.Flow.ISetup<HttpMessageHandler, Task<HttpResponseMessage>>> respond)
+    {
+        var handlerMock = new Mock<HttpMessageHandler>();
+        respond(handlerMock
             .Protected()
             .Setup<Task<HttpResponseMessage>>(
                 "SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>()
-            )
-            .ThrowsAsync(new TaskCanceledException());
+                ItExpr.IsAny<CancellationToken>()));
 
-        var httpClient = new System.Net.Http.HttpClient(mockHandler.Object);
-        mockFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(httpClient);
+        var factoryMock = new Mock<IHttpClientFactory>();
+        factoryMock
+            .Setup(f => f.CreateClient(It.IsAny<string>()))
+            .Returns(() => new System.Net.Http.HttpClient(handlerMock.Object));
 
-        var logger = new Mock<ILogger>();
-        var sleepService = new Mock<ISleepService>();
-        var client = new TestClient(mockFactory.Object, logger.Object, sleepService.Object);
-        var request = new HttpRequestMessage(HttpMethod.Post, RequestUri);
-
-        await Assert.ThrowsAsync<TaskCanceledException>(() => client.ExposedSendRequest(request));
+        return new TestClient(factoryMock.Object, Mock.Of<ILogger>(), Mock.Of<ISleepService>());
     }
 }

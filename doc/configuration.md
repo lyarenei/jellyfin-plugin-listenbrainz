@@ -230,3 +230,13 @@ The libraries the plugin submits listens from; tracks in any other library are i
 several libraries is submitted as long as at least one of them is allowed.
 
 By default all music libraries are allowed.
+
+## Configuration file migrations
+
+The plugin implements a single config migration process - to gracefully handle new feature releases as well as failure
+recovery. Migration always runs on server startup. During migration, a backup copy of the config file is automatically
+created (and removed as well if the migration succeeds). If the migration fails, then automatic recovery is attempted
+from the backup file.
+
+If the configuration file cannot be read at all, the plugin keeps a copy of it as`.corrupted.bak` and starts with
+default settings. The original file stays untouched until configuration is modified in the web UI.

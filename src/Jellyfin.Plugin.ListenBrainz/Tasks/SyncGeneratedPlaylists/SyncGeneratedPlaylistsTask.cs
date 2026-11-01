@@ -1,9 +1,6 @@
 using Jellyfin.Database.Implementations.Entities;
-using Jellyfin.Plugin.ListenBrainz.Api.Resources;
-using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 using Jellyfin.Plugin.ListenBrainz.Configuration;
 using Jellyfin.Plugin.ListenBrainz.Dtos;
-using Jellyfin.Plugin.ListenBrainz.Exceptions;
 using Jellyfin.Plugin.ListenBrainz.Interfaces;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
@@ -18,13 +15,18 @@ namespace Jellyfin.Plugin.ListenBrainz.Tasks.SyncGeneratedPlaylists;
 /// <summary>
 /// Jellyfin task for syncing generated playlists from ListenBrainz.
 /// </summary>
+/// <remarks>
+/// The task runs in two stages. Discovery finds the playlists to sync, the sync stage then writes
+/// only those which need writing.
+/// </remarks>
 public class SyncGeneratedPlaylistsTask : IScheduledTask
 {
     private readonly ILogger _logger;
-    private readonly IListenBrainzService _listenBrainz;
     private readonly IUserManager _userManager;
     private readonly IPluginConfigService _configService;
+    private readonly IPlaylistDiscoveryService _discoveryService;
     private readonly IPlaylistSyncStateService _stateService;
+    private readonly IListenBrainzService _listenBrainz;
     private readonly IPlaylistTrackMatcher _trackMatcher;
     private readonly IPlaylistManager _playlistManager;
 
@@ -33,25 +35,28 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
     /// </summary>
     /// <param name="loggerFactory">Logger factory.</param>
     /// <param name="userManager">User manager.</param>
-    /// <param name="listenBrainz">ListenBrainz service.</param>
     /// <param name="configService">Plugin configuration service.</param>
+    /// <param name="discoveryService">Playlist discovery service.</param>
     /// <param name="stateService">Playlist sync state service.</param>
+    /// <param name="listenBrainz">ListenBrainz service.</param>
     /// <param name="trackMatcher">Playlist track matcher.</param>
     /// <param name="playlistManager">Playlist writer.</param>
     public SyncGeneratedPlaylistsTask(
         ILoggerFactory loggerFactory,
         IUserManager userManager,
-        IListenBrainzService listenBrainz,
         IPluginConfigService configService,
+        IPlaylistDiscoveryService discoveryService,
         IPlaylistSyncStateService stateService,
+        IListenBrainzService listenBrainz,
         IPlaylistTrackMatcher trackMatcher,
         IPlaylistManager playlistManager)
     {
         _logger = loggerFactory.CreateLogger($"{Plugin.LoggerCategory}.SyncGeneratedPlaylistsTask");
-        _listenBrainz = listenBrainz;
         _userManager = userManager;
         _configService = configService;
+        _discoveryService = discoveryService;
         _stateService = stateService;
+        _listenBrainz = listenBrainz;
         _trackMatcher = trackMatcher;
         _playlistManager = playlistManager;
     }
@@ -134,102 +139,93 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
             return;
         }
 
-        try
+        var discovery = await _discoveryService.DiscoverAsync(userConfig, cancellationToken);
+        var discoveredEntries = state.ApplyDiscovery(user.Id, discovery.Playlists);
+        if (discoveredEntries.Count == 0)
         {
-            var playlists = (await _listenBrainz.GetCreatedForPlaylistsAsync(
-                userConfig,
-                Limits.MaxItemsPerGet,
-                cancellationToken)).ToList();
-
-            _logger.LogInformation(
-                "Found {Count} playlists created for user {Username}",
-                playlists.Count,
-                userConfig.UserName);
-
-            var generatedPlaylists = PlaylistTypePolicy.SelectPlaylists(playlists, userConfig).ToList();
-            _logger.LogInformation(
-                "Selected {Count} generated playlists for user {Username}",
-                generatedPlaylists.Count,
-                userConfig.UserName);
-
-            if (generatedPlaylists.Count == 0)
-            {
-                reporter.CompleteUser();
-                return;
-            }
-
-            var candidates = _trackMatcher.GetCandidateAudioItems(user);
-            var failedTypes = new HashSet<PlaylistType>();
-            foreach (var generatedPlaylist in generatedPlaylists)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                try
-                {
-                    var target = ResolveTarget(user, state, generatedPlaylist.Playlist);
-                    if (target.IsUpToDate)
-                    {
-                        _logger.LogDebug(
-                            "Playlist {PlaylistId} is already up to date, skipping",
-                            generatedPlaylist.Playlist.PlaylistId);
-                        reporter.AdvancePlaylist(generatedPlaylists.Count);
-                        continue;
-                    }
-
-                    _logger.LogDebug(
-                        "Processing generated playlist {PlaylistId} of type {PlaylistType}",
-                        generatedPlaylist.Playlist.PlaylistId,
-                        generatedPlaylist.Type);
-
-                    var playlist = await _listenBrainz.GetPlaylistAsync(
-                        userConfig,
-                        generatedPlaylist.Playlist.PlaylistId,
-                        cancellationToken);
-
-                    var synced = await SyncPlaylist(
-                        user,
-                        playlist,
-                        generatedPlaylist.Type,
-                        candidates,
-                        target.ExistingPlaylist,
-                        state,
-                        cancellationToken);
-                    if (!synced)
-                    {
-                        failedTypes.Add(generatedPlaylist.Type);
-                    }
-                }
-                catch (Exception e) when (e is not OperationCanceledException)
-                {
-                    failedTypes.Add(generatedPlaylist.Type);
-                    _logger.LogWarning(
-                        "Failed to sync generated playlist {PlaylistId}: {Error}",
-                        generatedPlaylist.Playlist.PlaylistId,
-                        e.Message);
-                }
-
-                reporter.AdvancePlaylist(generatedPlaylists.Count);
-            }
-
-            PruneOutOfRotationPlaylists(user, userConfig, state, generatedPlaylists, failedTypes, cancellationToken);
-        }
-        catch (PluginException e)
-        {
-            _logger.LogError(
-                "Failed to fetch generated playlists for user {Username}: {Error}",
-                userConfig.UserName,
-                e.Message);
             reporter.CompleteUser();
+            return;
         }
+
+        var candidates = _trackMatcher.GetCandidateAudioItems(user);
+        var failedTypes = new HashSet<PlaylistType>();
+        foreach (var entry in discoveredEntries)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var succeeded = false;
+            try
+            {
+                succeeded = await SyncEntry(user, userConfig, entry, candidates, cancellationToken);
+            }
+            catch (Exception e) when (e is not OperationCanceledException)
+            {
+                PlaylistSyncState.RecordFailure(entry, e.Message);
+                _logger.LogWarning(
+                    "Failed to sync generated playlist {PlaylistId}: {Error}",
+                    entry.ListenBrainzPlaylistId,
+                    e.Message);
+            }
+
+            if (!succeeded)
+            {
+                AddFailedType(failedTypes, entry);
+            }
+
+            reporter.AdvancePlaylist(discoveredEntries.Count);
+        }
+
+        // An incomplete discovery is no evidence of a playlist going out of rotation.
+        if (!discovery.IsComplete)
+        {
+            _logger.LogInformation(
+                "Discovery for user {Username} was incomplete, skipping playlist cleanup",
+                userConfig.UserName);
+            return;
+        }
+
+        PruneOutOfRotationPlaylists(user, userConfig, state, discovery, failedTypes, cancellationToken);
+    }
+
+    /// <summary>
+    /// Brings a single discovered playlist up to date.
+    /// </summary>
+    /// <returns>True if the playlist is up to date after this run, false if it needs a resync.</returns>
+    private async Task<bool> SyncEntry(
+        User user,
+        UserConfig userConfig,
+        PlaylistSyncEntry entry,
+        IReadOnlyList<BaseItem> candidates,
+        CancellationToken cancellationToken)
+    {
+        var target = ResolveTarget(user, entry);
+        if (target.IsUpToDate)
+        {
+            _logger.LogDebug(
+                "Playlist {PlaylistId} is already up to date, skipping",
+                entry.ListenBrainzPlaylistId);
+            return true;
+        }
+
+        _logger.LogDebug(
+            "Processing generated playlist {PlaylistId} of type {PlaylistType}",
+            entry.ListenBrainzPlaylistId,
+            entry.GeneratedType);
+
+        var playlist = await _listenBrainz.GetPlaylistAsync(
+            userConfig,
+            entry.ListenBrainzPlaylistId,
+            cancellationToken);
+
+        return await SyncPlaylist(user, playlist, entry, candidates, target.ExistingPlaylist, cancellationToken);
     }
 
     private async Task<bool> SyncPlaylist(
         User user,
         Playlist playlist,
-        PlaylistType playlistType,
+        PlaylistSyncEntry entry,
         IReadOnlyList<BaseItem> candidates,
         JellyfinPlaylist? mappedPlaylist,
-        PlaylistSyncState state,
         CancellationToken cancellationToken)
     {
         _logger.LogDebug("Syncing generated playlist: {Title}", playlist.Title);
@@ -264,6 +260,7 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
 
         if (matchedTracks.Count == 0)
         {
+            PlaylistSyncState.RecordFailure(entry, "No matching tracks found in the library");
             _logger.LogWarning(
                 "No matching tracks for generated playlist {Title}, skipping sync",
                 playlist.Title);
@@ -284,16 +281,19 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
         else
         {
             jellyfinPlaylistId = existingPlaylist.Id;
+            if (HasSameTracks(existingPlaylist, matchedTracks))
+            {
+                _logger.LogDebug(
+                    "Generated playlist {Title} already contains all matched tracks",
+                    playlist.Title);
+                PlaylistSyncState.RecordSync(entry, jellyfinPlaylistId);
+                return true;
+            }
+
             await _playlistManager.ReplaceTracksAsync(user, existingPlaylist, matchedTracks, cancellationToken);
         }
 
-        state.Upsert(
-            user.Id,
-            playlist.PlaylistId,
-            jellyfinPlaylistId,
-            playlist.Title,
-            playlist.CreatedAt,
-            PlaylistTypePolicy.CategoryFor(playlistType));
+        PlaylistSyncState.RecordSync(entry, jellyfinPlaylistId);
 
         _logger.LogInformation(
             "Successfully synced generated playlist {Name} with {Count} tracks",
@@ -302,73 +302,99 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
         return true;
     }
 
-    private SyncTarget ResolveTarget(User user, PlaylistSyncState state, Playlist listingPlaylist)
+    private SyncTarget ResolveTarget(User user, PlaylistSyncEntry entry)
     {
-        var mapping = state.FindMapping(user.Id, listingPlaylist.PlaylistId);
-        if (mapping is null)
+        if (entry.JellyfinPlaylistId is not Guid jellyfinPlaylistId)
         {
             return new SyncTarget(false, null);
         }
 
         // A playlist the user cannot see is effectively not synced.
-        // Syncing it again reclaims ownership and restores their access.
-        if (PlaylistTypePolicy.IsUpToDate(mapping, listingPlaylist) &&
-            _playlistManager.IsVisibleTo(mapping.JellyfinPlaylistId, user.Id))
+        if (PlaylistTypePolicy.IsUpToDate(entry) &&
+            !ShouldRematch(entry) &&
+            _playlistManager.IsVisibleTo(jellyfinPlaylistId, user.Id))
         {
             return new SyncTarget(true, null);
         }
 
-        var playlist = _playlistManager.FindAny(mapping.JellyfinPlaylistId);
+        var playlist = _playlistManager.FindAny(jellyfinPlaylistId);
         if (playlist is null)
         {
             _logger.LogInformation(
                 "Mapped Jellyfin playlist {PlaylistId} for ListenBrainz playlist {ListenBrainzPlaylistId} no longer exists",
-                mapping.JellyfinPlaylistId,
-                mapping.ListenBrainzPlaylistId);
-            state.Mappings.Remove(mapping);
+                jellyfinPlaylistId,
+                entry.ListenBrainzPlaylistId);
+            PlaylistSyncState.ClearSyncResult(entry);
         }
 
         return new SyncTarget(false, playlist);
+    }
+
+    private bool ShouldRematch(PlaylistSyncEntry entry)
+    {
+        var intervalDays = _configService.PlaylistRematchIntervalDays;
+        if (intervalDays <= 0)
+        {
+            return false;
+        }
+
+        if (entry.LastSyncedAt is not DateTime lastSyncedAt)
+        {
+            return true;
+        }
+
+        return DateTime.UtcNow - lastSyncedAt > TimeSpan.FromDays(intervalDays);
+    }
+
+    private bool HasSameTracks(JellyfinPlaylist playlist, IReadOnlyList<BaseItem> tracks)
+    {
+        return _playlistManager
+            .GetTrackIds(playlist)
+            .SequenceEqual(tracks.Select(t => t.Id));
     }
 
     private void PruneOutOfRotationPlaylists(
         User user,
         UserConfig userConfig,
         PlaylistSyncState state,
-        IReadOnlyList<PlaylistCandidate> selectedPlaylists,
-        IReadOnlySet<PlaylistType> failedTypes,
+        PlaylistDiscoveryResult discovery,
+        HashSet<PlaylistType> failedTypes,
         CancellationToken cancellationToken)
     {
-        var selectedPlaylistIds = selectedPlaylists
-            .Select(p => p.Playlist.PlaylistId)
-            .WhereNotNull()
+        var selectedPlaylistIds = discovery
+            .Playlists
+            .Select(p => p.ListenBrainzPlaylistId)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        var syncedTypes = selectedPlaylists
-            .Select(p => p.Type)
-            .Where(t => !failedTypes.Contains(t))
+        var syncedTypes = discovery
+            .Playlists
+            .Select(p => PlaylistTypePolicy.ParsePlaylistType(p.GeneratedType))
+            .Where(t => t is not null && !failedTypes.Contains(t.Value))
+            .Select(t => t!.Value)
             .ToHashSet();
 
-        var mappingsToRemove = state
-            .Mappings
-            .Where(m => m.JellyfinUserId == user.Id &&
-                        PlaylistTypePolicy.ShouldPruneMapping(m, selectedPlaylistIds, syncedTypes))
+        var entriesToRemove = state
+            .EntriesFor(user.Id)
+            .Where(e => PlaylistTypePolicy.ShouldPruneEntry(e, selectedPlaylistIds, syncedTypes))
             .ToList();
 
-        foreach (var mapping in mappingsToRemove)
+        foreach (var entry in entriesToRemove)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (userConfig.KeepPlaylistsAfterRotation)
             {
                 _logger.LogDebug(
-                    "Keeping out-of-rotation generated playlist {PlaylistId}, removing its mapping",
-                    mapping.ListenBrainzPlaylistId);
-                state.Mappings.Remove(mapping);
+                    "Keeping out-of-rotation generated playlist {PlaylistId}, removing its entry",
+                    entry.ListenBrainzPlaylistId);
+                state.Entries.Remove(entry);
                 continue;
             }
 
-            var playlist = _playlistManager.FindAny(mapping.JellyfinPlaylistId);
+            var playlist = entry.JellyfinPlaylistId is Guid playlistId
+                ? _playlistManager.FindAny(playlistId)
+                : null;
+
             if (playlist is not null)
             {
                 _logger.LogInformation(
@@ -377,7 +403,16 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
                 _playlistManager.Delete(playlist);
             }
 
-            state.Mappings.Remove(mapping);
+            state.Entries.Remove(entry);
+        }
+    }
+
+    private static void AddFailedType(HashSet<PlaylistType> failedTypes, PlaylistSyncEntry entry)
+    {
+        var type = PlaylistTypePolicy.ParsePlaylistType(entry.GeneratedType);
+        if (type is not null)
+        {
+            failedTypes.Add(type.Value);
         }
     }
 
@@ -387,19 +422,16 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
     }
 
     /// <summary>
-    /// What the sync should do with a listed ListenBrainz playlist, resolved once per playlist.
+    /// What the sync should do with a discovered ListenBrainz playlist.
     /// </summary>
-    /// <param name="IsUpToDate">
-    /// Whether the playlist is already synced and visible to the user, so it can be skipped.
-    /// </param>
+    /// <param name="IsUpToDate">Whether the playlist can be skipped.</param>
     /// <param name="ExistingPlaylist">
     /// The mapped Jellyfin playlist to write into, or null to look it up by name or create it.
-    /// Only meaningful when <see cref="IsUpToDate"/> is false.
     /// </param>
     private sealed record SyncTarget(bool IsUpToDate, JellyfinPlaylist? ExistingPlaylist);
 
     /// <summary>
-    /// Tracks task progress as an evenly split share per user, advanced per processed playlist.
+    /// Tracks task progress as an evenly split share per user.
     /// </summary>
     private sealed class SyncProgress
     {
@@ -413,28 +445,18 @@ public class SyncGeneratedPlaylistsTask : IScheduledTask
             _userShare = 100.0 / userCount;
         }
 
-        /// <summary>
-        /// Advances by one playlist's portion of the current user's share.
-        /// </summary>
-        /// <param name="totalPlaylists">Number of playlists being processed for the current user.</param>
         public void AdvancePlaylist(int totalPlaylists)
         {
             _reported += _userShare / totalPlaylists;
             _progress.Report(_reported);
         }
 
-        /// <summary>
-        /// Marks the current user as fully processed.
-        /// </summary>
         public void CompleteUser()
         {
             _reported += _userShare;
             _progress.Report(_reported);
         }
 
-        /// <summary>
-        /// Reports completion of the whole task.
-        /// </summary>
         public void Finish() => _progress.Report(100);
     }
 }

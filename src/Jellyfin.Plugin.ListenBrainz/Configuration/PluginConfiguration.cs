@@ -1,8 +1,8 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
-using System.Xml;
 using System.Xml.Serialization;
+using Jellyfin.Plugin.ListenBrainz.Common.Extensions;
 using MediaBrowser.Model.Plugins;
 
 namespace Jellyfin.Plugin.ListenBrainz.Configuration;
@@ -19,6 +19,9 @@ public class PluginConfiguration : BasePluginConfiguration
     private bool? _isImmediateFavoriteSyncEnabled;
     private bool? _isAllPlaylistsSyncEnabled;
     private string? _mbidDelimitersOverride;
+    private int? _playlistRematchIntervalDaysOverride;
+
+    private string _backupPath = string.Empty;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PluginConfiguration"/> class.
@@ -27,8 +30,13 @@ public class PluginConfiguration : BasePluginConfiguration
     {
         UserConfigs = new Collection<UserConfig>();
         LibraryConfigs = new Collection<LibraryConfig>();
-        BackupPath = string.Empty;
     }
+
+    /// <summary>
+    /// Gets or sets the version of this configuration.
+    /// Must default to 0 => earlier configs do not have a version.
+    /// </summary>
+    public int ConfigVersion { get; set; }
 
     /// <summary>
     /// Gets or sets ListenBrainz API base URL.
@@ -36,7 +44,7 @@ public class PluginConfiguration : BasePluginConfiguration
     public string ListenBrainzApiUrl
     {
         get => _listenBrainzUrlOverride ?? Api.Resources.General.BaseUrl;
-        set => _listenBrainzUrlOverride = value;
+        set => _listenBrainzUrlOverride = value.SanitizeForXml();
     }
 
     /// <summary>
@@ -51,7 +59,7 @@ public class PluginConfiguration : BasePluginConfiguration
     public string MusicBrainzApiUrl
     {
         get => _musicBrainzUrlOverride ?? MusicBrainzApi.Resources.Api.BaseUrl;
-        set => _musicBrainzUrlOverride = value;
+        set => _musicBrainzUrlOverride = value.SanitizeForXml();
     }
 
     /// <summary>
@@ -68,7 +76,7 @@ public class PluginConfiguration : BasePluginConfiguration
         get => _mbidDelimitersOverride ?? DefaultMbidDelimiters;
         set
         {
-            var sanitized = SanitizeForXml(value);
+            var sanitized = value.SanitizeForXml();
             _mbidDelimitersOverride = string.IsNullOrEmpty(sanitized) ? null : sanitized;
         }
     }
@@ -128,7 +136,11 @@ public class PluginConfiguration : BasePluginConfiguration
     /// <summary>
     /// Gets or sets backup path.
     /// </summary>
-    public string BackupPath { get; set; }
+    public string BackupPath
+    {
+        get => _backupPath;
+        set => _backupPath = value.SanitizeForXml();
+    }
 
     /// <summary>
     /// Gets a value indicating whether backup feature is enabled.
@@ -146,13 +158,19 @@ public class PluginConfiguration : BasePluginConfiguration
         set => _isAllPlaylistsSyncEnabled = value;
     }
 
-    private static string SanitizeForXml(string? value)
+    /// <summary>
+    /// Gets or sets how many days may pass before a synced playlist is matched against the library
+    /// again, even if the playlist itself has not changed on ListenBrainz. Disabled if set to 0.
+    /// </summary>
+    public int PlaylistRematchIntervalDays
     {
-        if (string.IsNullOrEmpty(value))
-        {
-            return string.Empty;
-        }
-
-        return new string(value.Where(XmlConvert.IsXmlChar).ToArray());
+        get => _playlistRematchIntervalDaysOverride ?? DefaultPlaylistRematchIntervalDays;
+        set => _playlistRematchIntervalDaysOverride = value;
     }
+
+    /// <summary>
+    /// Gets the default playlist re-match interval, in days.
+    /// </summary>
+    [XmlIgnore]
+    private static int DefaultPlaylistRematchIntervalDays => 14;
 }

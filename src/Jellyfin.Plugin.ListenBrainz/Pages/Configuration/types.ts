@@ -11,6 +11,7 @@ export interface MediaLibrary {
 
 export interface PluginConfiguration {
     BackupPath: string;
+    ConfigVersion: number;
     IsAllPlaylistsSyncEnabled: boolean;
     IsAlternativeModeEnabled: boolean;
     IsImmediateFavoriteSyncEnabled: boolean;
@@ -19,6 +20,7 @@ export interface PluginConfiguration {
     ListenBrainzApiUrl: string;
     MbidDelimiters: string;
     MusicBrainzApiUrl: string;
+    PlaylistRematchIntervalDays: number;
     UserConfigs: PluginUserConfig[];
 }
 
