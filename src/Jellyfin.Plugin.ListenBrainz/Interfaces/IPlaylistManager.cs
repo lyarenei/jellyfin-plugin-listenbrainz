@@ -48,6 +48,13 @@ public interface IPlaylistManager
         CancellationToken cancellationToken);
 
     /// <summary>
+    /// Gets the IDs of the tracks currently in a playlist, in playlist order.
+    /// </summary>
+    /// <param name="playlist">The playlist to read.</param>
+    /// <returns>The track IDs.</returns>
+    IReadOnlyList<Guid> GetTrackIds(JellyfinPlaylist playlist);
+
+    /// <summary>
     /// Replaces all tracks of an existing playlist.
     /// </summary>
     /// <param name="user">The user the playlist belongs to.</param>

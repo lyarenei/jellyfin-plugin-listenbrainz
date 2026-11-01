@@ -19,6 +19,7 @@ public class PluginConfiguration : BasePluginConfiguration
     private bool? _isImmediateFavoriteSyncEnabled;
     private bool? _isAllPlaylistsSyncEnabled;
     private string? _mbidDelimitersOverride;
+    private int? _playlistRematchIntervalDaysOverride;
 
     private string _backupPath = string.Empty;
 
@@ -156,4 +157,20 @@ public class PluginConfiguration : BasePluginConfiguration
         get => _isAllPlaylistsSyncEnabled ?? false;
         set => _isAllPlaylistsSyncEnabled = value;
     }
+
+    /// <summary>
+    /// Gets or sets how many days may pass before a synced playlist is matched against the library
+    /// again, even if the playlist itself has not changed on ListenBrainz. Disabled if set to 0.
+    /// </summary>
+    public int PlaylistRematchIntervalDays
+    {
+        get => _playlistRematchIntervalDaysOverride ?? DefaultPlaylistRematchIntervalDays;
+        set => _playlistRematchIntervalDaysOverride = value;
+    }
+
+    /// <summary>
+    /// Gets the default playlist re-match interval, in days.
+    /// </summary>
+    [XmlIgnore]
+    private static int DefaultPlaylistRematchIntervalDays => 14;
 }

@@ -1,4 +1,4 @@
-import { defaultMbidDelimiters } from "./constants";
+import { defaultMbidDelimiters, defaultPlaylistRematchIntervalDays } from "./constants";
 import { getUniqueLibraryName } from "./utils";
 import { MediaLibrary, PluginConfiguration, PluginUserConfig } from "./types";
 
@@ -67,6 +67,7 @@ function getGeneralConfigFormElements(view: HTMLElement) {
         mbidDelimiters: view.querySelector("#MbidDelimiters") as HTMLInputElement,
         immediateFavorites: view.querySelector("#IsImmediateFavoriteSyncEnabled") as HTMLInputElement,
         listenBrainzUrl: view.querySelector("#ListenBrainzApiUrl") as HTMLInputElement,
+        playlistRematchInterval: view.querySelector("#PlaylistRematchIntervalDays") as HTMLInputElement,
     };
 }
 
@@ -78,6 +79,7 @@ export function fillGeneralConfigForm(view: HTMLElement, pluginConfig: PluginCon
         pluginConfig.MbidDelimiters === defaultMbidDelimiters ? "" : pluginConfig.MbidDelimiters;
     elements.immediateFavorites.checked = pluginConfig.IsImmediateFavoriteSyncEnabled;
     elements.listenBrainzUrl.value = pluginConfig.ListenBrainzApiUrl;
+    elements.playlistRematchInterval.value = String(pluginConfig.PlaylistRematchIntervalDays);
 }
 
 export function getGeneralConfigFormData(
@@ -89,14 +91,19 @@ export function getGeneralConfigFormData(
     | "IsImmediateFavoriteSyncEnabled"
     | "IsAllPlaylistsSyncEnabled"
     | "MbidDelimiters"
+    | "PlaylistRematchIntervalDays"
 > {
     const elements = getGeneralConfigFormElements(view);
+    const rematchInterval = parseInt(elements.playlistRematchInterval.value, 10);
     return {
         MbidDelimiters: elements.mbidDelimiters.value,
         IsAllPlaylistsSyncEnabled: elements.allPlaylistsEnabled.checked,
         IsAlternativeModeEnabled: elements.altModeEnabled.checked,
         IsImmediateFavoriteSyncEnabled: elements.immediateFavorites.checked,
         ListenBrainzApiUrl: elements.listenBrainzUrl.value,
+        PlaylistRematchIntervalDays: isNaN(rematchInterval)
+            ? defaultPlaylistRematchIntervalDays
+            : rematchInterval,
     };
 }
 
