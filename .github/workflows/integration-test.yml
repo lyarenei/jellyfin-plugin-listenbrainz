@@ -8,6 +8,10 @@ on:
         description: 'Plugin repository to install the plugin under test from.'
         type: string
         required: true
+      version:
+        description: 'Version of the plugin under test.'
+        type: string
+        required: true
       dotnet-version:
         type: string
         required: false
@@ -35,5 +39,6 @@ jobs:
         # has just published to, which is what the tests are there to verify.
         env:
           JELLYFIN_ITEST_PLUGIN_REPOSITORY: "https://repo.xkrivo.net/${{ inputs.repo }}/manifest.json"
+          JELLYFIN_ITEST_PLUGIN_VERSION: "${{ inputs.version }}"
           JELLYFIN_ITEST_TAG: "${{ inputs.jellyfin-tag }}"
         run: dotnet test tests/Jellyfin.Plugin.ListenBrainz.IntegrationTests --nologo
