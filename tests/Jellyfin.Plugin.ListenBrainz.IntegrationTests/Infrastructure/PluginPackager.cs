@@ -5,6 +5,11 @@ namespace Jellyfin.Plugin.ListenBrainz.IntegrationTests.Infrastructure;
 
 internal static class PluginPackager
 {
+    /// <summary>
+    /// The name of the Containerfile in a build context.
+    /// </summary>
+    public const string ContainerfileName = "Containerfile";
+
     private static readonly JsonSerializerOptions _metaJsonOptions = new()
     {
         WriteIndented = true,
@@ -16,14 +21,7 @@ internal static class PluginPackager
     /// repository instead. The empty plugin directory keeps the Containerfile the same for both.
     /// </summary>
     /// <returns>Path to the build context.</returns>
-    public static string CreateEmptyBuildContext()
-    {
-        var context = Path.Combine(RepositoryLayout.ScratchDirectory, "context");
-        Recreate(context);
-        Directory.CreateDirectory(Path.Combine(context, "plugin"));
-
-        return context;
-    }
+    public static string CreateEmptyBuildContext() => CreateContext();
 
     /// <summary>
     /// Builds the plugin from the working tree and stages it in a build context, laid out the way
@@ -36,14 +34,12 @@ internal static class PluginPackager
         PluginBuildManifest manifest,
         CancellationToken cancellationToken = default)
     {
-        var scratch = RepositoryLayout.ScratchDirectory;
-        var buildOutput = Path.Combine(scratch, "plugin-build");
-        var context = Path.Combine(scratch, "context");
-        var installDirectory = Path.Combine(context, "plugin", manifest.InstallDirectoryName);
+        var buildOutput = Path.Combine(RepositoryLayout.ScratchDirectory, "plugin-build");
 
         // Both are wiped: a stale assembly would satisfy the artifact check below unnoticed.
         Recreate(buildOutput);
-        Recreate(context);
+        var context = CreateContext();
+        var installDirectory = Path.Combine(context, "plugin", manifest.InstallDirectoryName);
         Directory.CreateDirectory(installDirectory);
 
         // Jellyfin reconciles the assembly version against meta.json, so it has to be stamped on both.
@@ -107,6 +103,16 @@ internal static class PluginPackager
         };
 
         return JsonSerializer.Serialize(meta, _metaJsonOptions);
+    }
+
+    private static string CreateContext()
+    {
+        var context = Path.Combine(RepositoryLayout.ScratchDirectory, "context");
+        Recreate(context);
+        Directory.CreateDirectory(Path.Combine(context, "plugin"));
+        File.Copy(RepositoryLayout.Containerfile, Path.Combine(context, ContainerfileName));
+
+        return context;
     }
 
     private static void Recreate(string directory)

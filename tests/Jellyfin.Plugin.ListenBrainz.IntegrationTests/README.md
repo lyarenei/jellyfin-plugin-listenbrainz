@@ -1,7 +1,7 @@
 # Integration tests
 
-Tests that run a real Jellyfin server in a podman container with the plugin installed. The instance is controlled with
-HTTP API.
+Tests that run a real Jellyfin server in a container with the plugin installed. The container is managed by
+[Testcontainers](https://dotnet.testcontainers.org/) and the instance is controlled with HTTP API.
 
 The plugin can be installed into the container in two ways:
 
@@ -15,8 +15,8 @@ plugin repository manifest.
 ## Requirements
 
 - .NET SDK (the one used to build the plugin)
-- podman, running (`podman machine start` on macOS/Windows)
-    - docker will probably work as well, but not tested
+- Docker or podman, running (`podman machine start` on macOS/Windows)
+    - podman has to expose a Docker compatible socket, which podman machine does by default
 - The official Jellyfin docker image - `docker.io/jellyfin/jellyfin`
 
 ## Running
@@ -64,14 +64,12 @@ To view live logs from the container:
 JELLYFIN_ITEST_KEEP_CONTAINER=1 dotnet test tests/Jellyfin.Plugin.ListenBrainz.IntegrationTests
 podman ps --filter name=jellyfin-listenbrainz-itest
 podman logs <container>
+podman rm --force <container>
 ```
 
-Server admin credentials: `integration-admin` / `integration-password`.
+Kept containers are not cleaned up automatically, so these have to be removed manually.
 
-Note: podman can publish a port, serve a connection on it and then drop the forward while an unrelated container is
-being removed. A workaround for the integration test suite is to pick a host port outside the range podman recycles,
-wait for a few successful responses before running the tests. If the workaround fails, the container is automatically
-restarted.
+Server admin credentials: `integration-admin` / `integration-password`.
 
 ## In CI
 

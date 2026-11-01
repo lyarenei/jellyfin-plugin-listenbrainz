@@ -4,7 +4,7 @@ using Xunit;
 namespace Jellyfin.Plugin.ListenBrainz.IntegrationTests;
 
 /// <summary>
-/// Brings up a Jellyfin server in podman with the plugin installed, completes the setup wizard
+/// Brings up a Jellyfin server in a container with the plugin installed, completes the setup wizard
 /// and authenticates. The plugin either comes from the working tree, baked into the image, or is
 /// installed by the server from a plugin repository; see <see cref="PluginSource"/>. Shared by
 /// every test in <see cref="JellyfinServerCollection"/>, so the server is started once per run.
@@ -72,11 +72,12 @@ public sealed class JellyfinServerFixture : IAsyncLifetime
             {
                 await client.InstallFromRepositoryAsync(Manifest, Source, _installTimeout).ConfigureAwait(false);
 
-                // A freshly installed plugin is only loaded on the next start. Restarting the
-                // container rather than the server keeps the process supervised by podman, and
-                // the container keeps its writable layer, so the install survives.
+                // A freshly installed plugin is only loaded on the next start. The restarted
+                // container can be published on another host port, hence the new client.
                 await _container.RestartAsync().ConfigureAwait(false);
-                await client.WaitUntilReadyAsync(_setUpTimeout).ConfigureAwait(false);
+                client.Dispose();
+                client = new JellyfinApiClient(_container.BaseAddress);
+                await client.SignInAsync(AdminUserName, AdminPassword, _setUpTimeout).ConfigureAwait(false);
             }
         }
         catch (Exception ex)

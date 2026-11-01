@@ -8,7 +8,7 @@ namespace Jellyfin.Plugin.ListenBrainz.IntegrationTests.Infrastructure;
 internal sealed class JellyfinApiClient : IDisposable
 {
     private const string ClientName = "ListenBrainzIntegrationTests";
-    private const string DeviceName = "podman";
+    private const string DeviceName = "integration-tests";
     private const string ClientVersion = "1.0.0";
 
     private const string RepositoryName = "ListenBrainz integration tests";
@@ -60,8 +60,32 @@ internal sealed class JellyfinApiClient : IDisposable
 
         await PostAsync("Startup/Complete", content: null, deadline, cancellationToken).ConfigureAwait(false);
 
-        SetAuthorization(await AuthenticateAsync(userName, password, deadline, cancellationToken).ConfigureAwait(false));
+        await SignInAsync(userName, password, deadline, cancellationToken).ConfigureAwait(false);
+    }
 
+    /// <summary>
+    /// Authenticates against an already set up server and waits until it serves authorized
+    /// requests reliably.
+    /// </summary>
+    /// <param name="userName">User name.</param>
+    /// <param name="password">Password.</param>
+    /// <param name="timeout">How long to wait.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    public Task SignInAsync(
+        string userName,
+        string password,
+        TimeSpan timeout,
+        CancellationToken cancellationToken = default) =>
+        SignInAsync(userName, password, DateTimeOffset.UtcNow + timeout, cancellationToken);
+
+    private async Task SignInAsync(
+        string userName,
+        string password,
+        DateTimeOffset deadline,
+        CancellationToken cancellationToken)
+    {
+        SetAuthorization(await AuthenticateAsync(userName, password, deadline, cancellationToken).ConfigureAwait(false));
         await WaitUntilSettledAsync(deadline, cancellationToken).ConfigureAwait(false);
     }
 
@@ -154,15 +178,6 @@ internal sealed class JellyfinApiClient : IDisposable
 
         await WaitForRegisteredPluginAsync(manifest, source, deadline, cancellationToken).ConfigureAwait(false);
     }
-
-    /// <summary>
-    /// Waits until the server serves authorized requests reliably, for use after a restart.
-    /// </summary>
-    /// <param name="timeout">How long to wait.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    public Task WaitUntilReadyAsync(TimeSpan timeout, CancellationToken cancellationToken = default) =>
-        WaitUntilSettledAsync(DateTimeOffset.UtcNow + timeout, cancellationToken);
 
     /// <summary>
     /// Lists the packages the configured repositories offer.
