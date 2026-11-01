@@ -5,7 +5,7 @@ namespace Jellyfin.Plugin.ListenBrainz.IntegrationTests;
 
 /// <summary>
 /// Brings up a Jellyfin server in a container with the plugin installed, completes the setup wizard
-/// and authenticates. The plugin either comes from the working tree, baked into the image, or is
+/// and authenticates. The plugin either comes from the working tree, copied in before start, or is
 /// installed by the server from a plugin repository; see <see cref="PluginSource"/>. Shared by
 /// every test in <see cref="JellyfinServerCollection"/>, so the server is started once per run.
 /// </summary>
@@ -54,14 +54,11 @@ public sealed class JellyfinServerFixture : IAsyncLifetime
     /// <inheritdoc />
     public async Task InitializeAsync()
     {
-        var buildContext = Source.Kind == PluginSourceKind.Repository
-            ? PluginPackager.CreateEmptyBuildContext()
-            : await PluginPackager.CreateBuildContextAsync(Manifest).ConfigureAwait(false);
+        var pluginsDirectory = Source.Kind == PluginSourceKind.Local
+            ? await PluginPackager.BuildAsync(Manifest).ConfigureAwait(false)
+            : null;
 
-        _container = await JellyfinContainer.StartAsync(
-            buildContext,
-            JellyfinTag,
-            Source.Kind.ToString().ToLowerInvariant()).ConfigureAwait(false);
+        _container = await JellyfinContainer.StartAsync(JellyfinTag, pluginsDirectory).ConfigureAwait(false);
 
         var client = new JellyfinApiClient(_container.BaseAddress);
         try

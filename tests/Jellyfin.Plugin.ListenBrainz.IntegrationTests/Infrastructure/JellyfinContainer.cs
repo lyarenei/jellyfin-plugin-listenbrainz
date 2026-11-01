@@ -8,8 +8,10 @@ namespace Jellyfin.Plugin.ListenBrainz.IntegrationTests.Infrastructure;
 /// </summary>
 internal sealed class JellyfinContainer : IAsyncDisposable
 {
-    private const string ImageName = "jellyfin-listenbrainz-itest";
+    private const string ContainerNamePrefix = "jellyfin-listenbrainz-itest";
     private const int ServerPort = 8096;
+    private const string DataDirectory = "/jellyfin-test/data";
+    private const string CacheDirectory = "/jellyfin-test/cache";
 
     private readonly IContainer _container;
 
@@ -27,37 +29,38 @@ internal sealed class JellyfinContainer : IAsyncDisposable
         Environment.GetEnvironmentVariable("JELLYFIN_ITEST_KEEP_CONTAINER") is "1" or "true";
 
     /// <summary>
-    /// Builds the server image from the build context and starts a container from it.
+    /// Starts a Jellyfin server container.
     /// </summary>
-    /// <param name="buildContext">Directory with the Containerfile and the plugin to bake in.</param>
-    /// <param name="jellyfinTag">Tag of the Jellyfin image to build on.</param>
-    /// <param name="imageVariant">Suffix keeping images with and without a baked-in plugin apart.</param>
+    /// <param name="jellyfinTag">Tag of the Jellyfin image to run.</param>
+    /// <param name="pluginsDirectory">Plugins to install before the server starts, if any.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The started container.</returns>
     public static async Task<JellyfinContainer> StartAsync(
-        string buildContext,
         string jellyfinTag,
-        string imageVariant,
+        string? pluginsDirectory,
         CancellationToken cancellationToken = default)
     {
-        var image = new ImageFromDockerfileBuilder()
-            .WithDockerfileDirectory(buildContext)
-            .WithDockerfile(PluginPackager.ContainerfileName)
-            .WithName($"{ImageName}:{jellyfinTag}-{imageVariant}")
-            .WithBuildArgument("JELLYFIN_TAG", jellyfinTag)
-            .Build();
-
-        await image.CreateAsync(cancellationToken).ConfigureAwait(false);
-
-        var container = new ContainerBuilder(image)
-            .WithName($"{ImageName}-{Guid.NewGuid():N}")
+        // The image declares /config and /cache as volumes, which would outlive the container.
+        // Relocating the state into a plain path keeps it in the container's writable layer.
+        var builder = new ContainerBuilder($"docker.io/jellyfin/jellyfin:{jellyfinTag}")
+            .WithName($"{ContainerNamePrefix}-{Guid.NewGuid():N}")
+            .WithEnvironment("JELLYFIN_DATA_DIR", DataDirectory)
+            .WithEnvironment("JELLYFIN_CONFIG_DIR", $"{DataDirectory}/config")
+            .WithEnvironment("JELLYFIN_LOG_DIR", $"{DataDirectory}/log")
+            .WithEnvironment("JELLYFIN_CACHE_DIR", CacheDirectory)
+            .WithEnvironment("XDG_CACHE_HOME", CacheDirectory)
             .WithPortBinding(ServerPort, assignRandomHostPort: true)
             .WithWaitStrategy(Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(request => request
                 .ForPort(ServerPort)
                 .ForPath("/System/Info/Public")))
-            .WithCleanUp(!KeepContainer)
-            .Build();
+            .WithCleanUp(!KeepContainer);
 
+        if (pluginsDirectory is not null)
+        {
+            builder = builder.WithResourceMapping(new DirectoryInfo(pluginsDirectory), $"{DataDirectory}/plugins/");
+        }
+
+        var container = builder.Build();
         await container.StartAsync(cancellationToken).ConfigureAwait(false);
         return new JellyfinContainer(container);
     }

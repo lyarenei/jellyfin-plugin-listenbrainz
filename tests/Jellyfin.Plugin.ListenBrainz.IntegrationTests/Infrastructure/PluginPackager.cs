@@ -5,11 +5,6 @@ namespace Jellyfin.Plugin.ListenBrainz.IntegrationTests.Infrastructure;
 
 internal static class PluginPackager
 {
-    /// <summary>
-    /// The name of the Containerfile in a build context.
-    /// </summary>
-    public const string ContainerfileName = "Containerfile";
-
     private static readonly JsonSerializerOptions _metaJsonOptions = new()
     {
         WriteIndented = true,
@@ -17,29 +12,23 @@ internal static class PluginPackager
     };
 
     /// <summary>
-    /// Stages a build context with no plugin in it, for a server that installs the plugin from a
-    /// repository instead. The empty plugin directory keeps the Containerfile the same for both.
-    /// </summary>
-    /// <returns>Path to the build context.</returns>
-    public static string CreateEmptyBuildContext() => CreateContext();
-
-    /// <summary>
-    /// Builds the plugin from the working tree and stages it in a build context, laid out the way
-    /// an installed plugin looks on disk.
+    /// Builds the plugin from the working tree and stages it in a plugins directory, laid out the
+    /// way an installed plugin looks on disk.
     /// </summary>
     /// <param name="manifest">The plugin build manifest.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>Path to the build context.</returns>
-    public static async Task<string> CreateBuildContextAsync(
+    /// <returns>Path to the plugins directory.</returns>
+    public static async Task<string> BuildAsync(
         PluginBuildManifest manifest,
         CancellationToken cancellationToken = default)
     {
         var buildOutput = Path.Combine(RepositoryLayout.ScratchDirectory, "plugin-build");
+        var pluginsDirectory = Path.Combine(RepositoryLayout.ScratchDirectory, "plugins");
+        var installDirectory = Path.Combine(pluginsDirectory, manifest.InstallDirectoryName);
 
         // Both are wiped: a stale assembly would satisfy the artifact check below unnoticed.
         Recreate(buildOutput);
-        var context = CreateContext();
-        var installDirectory = Path.Combine(context, "plugin", manifest.InstallDirectoryName);
+        Recreate(pluginsDirectory);
         Directory.CreateDirectory(installDirectory);
 
         // Jellyfin reconciles the assembly version against meta.json, so it has to be stamped on both.
@@ -78,7 +67,7 @@ internal static class PluginPackager
             BuildMetaJson(manifest),
             cancellationToken).ConfigureAwait(false);
 
-        return context;
+        return pluginsDirectory;
     }
 
     private static string BuildMetaJson(PluginBuildManifest manifest)
@@ -103,16 +92,6 @@ internal static class PluginPackager
         };
 
         return JsonSerializer.Serialize(meta, _metaJsonOptions);
-    }
-
-    private static string CreateContext()
-    {
-        var context = Path.Combine(RepositoryLayout.ScratchDirectory, "context");
-        Recreate(context);
-        Directory.CreateDirectory(Path.Combine(context, "plugin"));
-        File.Copy(RepositoryLayout.Containerfile, Path.Combine(context, ContainerfileName));
-
-        return context;
     }
 
     private static void Recreate(string directory)
