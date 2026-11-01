@@ -47,6 +47,8 @@ jobs:
     if: ${{ needs.gate.outputs.plugin-changed == 'true' }}
     needs: gate
     uses: ./.github/workflows/build.yml
+    with:
+      build-number: ${{ github.run_number }}${{ github.run_attempt }}
 
   upload-repo:
     if: ${{ contains(github.repository, 'lyarenei/') }}
