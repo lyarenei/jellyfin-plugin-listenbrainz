@@ -34,7 +34,7 @@ public sealed class PluginInstallationTests
         }
 
         Assert.Equal(_server.Manifest.Name, plugin.Name);
-        Assert.Equal(_server.Manifest.Version, plugin.Version);
+        Assert.Equal(_server.Source.Version, plugin.Version);
         Assert.Equal("Active", plugin.Status);
     }
 
@@ -54,6 +54,6 @@ public sealed class PluginInstallationTests
     {
         var log = await _server.GetServerLogAsync();
 
-        Assert.Contains($"Loaded plugin: {_server.Manifest.Name} {_server.Manifest.Version}", log, StringComparison.Ordinal);
+        Assert.Contains($"Loaded plugin: {_server.Manifest.Name} {_server.Source.Version}", log, StringComparison.Ordinal);
     }
 }
