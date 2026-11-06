@@ -23,7 +23,7 @@ public class GetPlaylistRequest : IListenBrainzRequest
         _playlistId = playlistId;
         _endpointFormat = CompositeFormat.Parse(Endpoints.PlaylistDetails);
         BaseUrl = General.BaseUrl;
-        QueryDict = new() { { "fetchMetadata", fetchMetadata.ToString(CultureInfo.InvariantCulture) } };
+        QueryDict = new() { { "fetch_metadata", fetchMetadata ? "true" : "false" } };
     }
 
     /// <inheritdoc />
